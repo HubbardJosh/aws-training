@@ -20,7 +20,7 @@ import {
   UserProgress,
   QuizAttempt,
 } from "../types";
-import { loadProgress, saveProgress } from "../utils/storage";
+import { loadProgress, saveProgress, touchStreak } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
 
 type Route = RouteProp<RootStackParamList, "Quiz">;
@@ -131,15 +131,14 @@ export default function QuizScreen() {
         };
       });
 
-      const updated: UserProgress = {
+      const updated: UserProgress = touchStreak({
         ...progress,
         quizHistory: [attempt, ...progress.quizHistory].slice(0, 50),
         domainScores: updatedDomainScores,
         totalQuestionsAnswered:
           progress.totalQuestionsAnswered + questions.length,
         totalCorrect: progress.totalCorrect + correct,
-        lastStudied: new Date().toISOString(),
-      };
+      });
       await saveProgress(updated);
     }
   }, [selectedOptions, answers, currentIndex, questions, domain, elapsed]);

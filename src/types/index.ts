@@ -30,6 +30,12 @@ export interface QuizQuestion {
   tags: string[];
 }
 
+export interface GuideProgress {
+  viewedAt: string;
+  sectionsRead: number[];
+  completed: boolean;
+}
+
 export interface UserProgress {
   studiedCards: Record<string, "known" | "learning" | "unseen">;
   quizHistory: QuizAttempt[];
@@ -38,6 +44,7 @@ export interface UserProgress {
   totalCorrect: number;
   streakDays: number;
   lastStudied: string | null;
+  guideProgress: Record<string, GuideProgress>;
 }
 
 export interface DomainScore {

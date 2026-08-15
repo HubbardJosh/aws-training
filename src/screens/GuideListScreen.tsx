@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
 import { allGuides } from "../data/guides";
 import { RootStackParamList } from "../navigation";
+import { loadProgress } from "../utils/storage";
+import { UserProgress } from "../types";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,6 +26,14 @@ export default function GuideListScreen() {
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState("");
   const [domain, setDomain] = useState<DomainFilter>("all");
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+
+  // Reload progress each time screen comes into focus so read indicators update
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress().then(setProgress);
+    }, []),
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -120,10 +130,14 @@ export default function GuideListScreen() {
         {/* Guide cards */}
         {filtered.map((guide) => {
           const meta = DOMAIN_META[guide.domain];
+          const gp = progress?.guideProgress[guide.id];
+          const sectionsRead = gp?.sectionsRead.length ?? 0;
+          const isCompleted = gp?.completed ?? false;
+          const isViewed = !!gp;
           return (
             <TouchableOpacity
               key={guide.id}
-              style={styles.card}
+              style={[styles.card, isCompleted && styles.cardCompleted]}
               onPress={() =>
                 navigation.navigate("GuideDetail", { id: guide.id })
               }
@@ -148,11 +162,26 @@ export default function GuideListScreen() {
                     {guide.tagline}
                   </Text>
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textMuted}
-                />
+                {isCompleted ? (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={20}
+                    color={colors.correct}
+                  />
+                ) : isViewed ? (
+                  <Ionicons
+                    name="ellipse"
+                    size={10}
+                    color={colors.primary}
+                    style={{ marginRight: 3 }}
+                  />
+                ) : (
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={colors.textMuted}
+                  />
+                )}
               </View>
               <View style={styles.cardFooter}>
                 <View
@@ -165,10 +194,21 @@ export default function GuideListScreen() {
                     {meta.label}
                   </Text>
                 </View>
-                <Text style={styles.sectionCount}>
-                  {guide.sections.length} sections · {guide.keyFacts.length} key
-                  facts
-                </Text>
+                {isViewed ? (
+                  <Text
+                    style={[
+                      styles.sectionCount,
+                      { color: isCompleted ? colors.correct : colors.primary },
+                    ]}
+                  >
+                    {sectionsRead}/{guide.sections.length} sections read
+                  </Text>
+                ) : (
+                  <Text style={styles.sectionCount}>
+                    {guide.sections.length} sections · {guide.keyFacts.length}{" "}
+                    key facts
+                  </Text>
+                )}
               </View>
             </TouchableOpacity>
           );
@@ -245,6 +285,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  cardCompleted: {
+    borderColor: colors.correct + "44",
   },
   cardHeader: {
     flexDirection: "row",

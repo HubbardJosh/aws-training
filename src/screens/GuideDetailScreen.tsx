@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,14 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
 import { allGuides } from "../data/guides";
 import { RootStackParamList } from "../navigation";
+import {
+  loadProgress,
+  saveProgress,
+  touchGuide,
+  markSectionRead,
+  getGuideProgress,
+} from "../utils/storage";
+import { UserProgress } from "../types";
 
 type RouteT = RouteProp<RootStackParamList, "GuideDetail">;
 
@@ -23,6 +31,41 @@ export default function GuideDetailScreen() {
   const guide = allGuides.find((g) => g.id === route.params.id);
   const [activeTab, setActiveTab] = useState<Tab>("content");
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const progressRef = useRef<UserProgress | null>(null);
+
+  // Load progress and mark guide as viewed on mount
+  useEffect(() => {
+    if (!guide) return;
+    loadProgress().then((p) => {
+      const updated = touchGuide(p, guide.id, guide.sections.length);
+      progressRef.current = updated;
+      setProgress(updated);
+      saveProgress(updated);
+    });
+  }, [guide?.id]);
+
+  const handleSectionToggle = useCallback(
+    async (i: number) => {
+      if (!guide) return;
+      const next = expandedSection === i ? null : i;
+      setExpandedSection(next);
+
+      // Mark the section as read when opened
+      if (next !== null && progressRef.current) {
+        const updated = markSectionRead(
+          progressRef.current,
+          guide.id,
+          next,
+          guide.sections.length,
+        );
+        progressRef.current = updated;
+        setProgress(updated);
+        await saveProgress(updated);
+      }
+    },
+    [expandedSection, guide],
+  );
 
   if (!guide) {
     return (
@@ -33,6 +76,9 @@ export default function GuideDetailScreen() {
   }
 
   const meta = DOMAIN_META[guide.domain];
+  const gp = progress ? getGuideProgress(progress, guide.id) : null;
+  const sectionsRead = gp?.sectionsRead.length ?? 0;
+  const isCompleted = gp?.completed ?? false;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -45,14 +91,31 @@ export default function GuideDetailScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {guide.service}
-          </Text>
-          <View
-            style={[styles.domainBadge, { backgroundColor: meta.color + "22" }]}
-          >
-            <Text style={[styles.domainText, { color: meta.color }]}>
-              {meta.label}
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              {guide.service}
+            </Text>
+            {isCompleted && (
+              <Ionicons
+                name="checkmark-circle"
+                size={18}
+                color={colors.correct}
+              />
+            )}
+          </View>
+          <View style={styles.headerBadges}>
+            <View
+              style={[
+                styles.domainBadge,
+                { backgroundColor: meta.color + "22" },
+              ]}
+            >
+              <Text style={[styles.domainText, { color: meta.color }]}>
+                {meta.label}
+              </Text>
+            </View>
+            <Text style={styles.progressText}>
+              {sectionsRead}/{guide.sections.length} sections read
             </Text>
           </View>
         </View>
@@ -102,40 +165,55 @@ export default function GuideDetailScreen() {
 
         {/* Content tab: accordion sections */}
         {activeTab === "content" &&
-          guide.sections.map((section, i) => (
-            <View key={i} style={styles.sectionCard}>
-              <TouchableOpacity
-                style={styles.sectionHeader}
-                onPress={() =>
-                  setExpandedSection(expandedSection === i ? null : i)
-                }
-                activeOpacity={0.7}
-              >
-                <View
-                  style={[
-                    styles.sectionNum,
-                    { backgroundColor: meta.color + "22" },
-                  ]}
+          guide.sections.map((section, i) => {
+            const sectionRead = gp?.sectionsRead.includes(i) ?? false;
+            return (
+              <View key={i} style={styles.sectionCard}>
+                <TouchableOpacity
+                  style={styles.sectionHeader}
+                  onPress={() => handleSectionToggle(i)}
+                  activeOpacity={0.7}
                 >
-                  <Text style={[styles.sectionNumText, { color: meta.color }]}>
-                    {i + 1}
-                  </Text>
-                </View>
-                <Text style={styles.sectionHeading}>{section.heading}</Text>
-                <Ionicons
-                  name={expandedSection === i ? "chevron-up" : "chevron-down"}
-                  size={16}
-                  color={colors.textMuted}
-                />
-              </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.sectionNum,
+                      {
+                        backgroundColor: sectionRead
+                          ? colors.correct + "22"
+                          : meta.color + "22",
+                      },
+                    ]}
+                  >
+                    {sectionRead ? (
+                      <Ionicons
+                        name="checkmark"
+                        size={14}
+                        color={colors.correct}
+                      />
+                    ) : (
+                      <Text
+                        style={[styles.sectionNumText, { color: meta.color }]}
+                      >
+                        {i + 1}
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={styles.sectionHeading}>{section.heading}</Text>
+                  <Ionicons
+                    name={expandedSection === i ? "chevron-up" : "chevron-down"}
+                    size={16}
+                    color={colors.textMuted}
+                  />
+                </TouchableOpacity>
 
-              {expandedSection === i && (
-                <View style={styles.sectionBody}>
-                  <MarkdownBody text={section.body} />
-                </View>
-              )}
-            </View>
-          ))}
+                {expandedSection === i && (
+                  <View style={styles.sectionBody}>
+                    <MarkdownBody text={section.body} />
+                  </View>
+                )}
+              </View>
+            );
+          })}
 
         {/* Key Facts tab */}
         {activeTab === "facts" && (
@@ -368,10 +446,21 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   headerInfo: { flex: 1, gap: 4 },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
   headerTitle: {
     fontSize: fontSize.lg,
     fontWeight: "800",
     color: colors.textPrimary,
+    flexShrink: 1,
+  },
+  headerBadges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   domainBadge: {
     alignSelf: "flex-start",
@@ -380,6 +469,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   domainText: { fontSize: fontSize.xs, fontWeight: "600" },
+  progressText: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+  },
 
   tabRow: {
     flexDirection: "row",

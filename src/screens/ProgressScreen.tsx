@@ -16,9 +16,12 @@ import {
   resetProgress,
   getDomainAccuracy,
   getOverallAccuracy,
+  getGuidesCompleted,
+  getGuidesViewed,
 } from "../utils/storage";
 import { UserProgress, Domain, QuizAttempt } from "../types";
 import { flashcards } from "../data/flashcards";
+import { allGuides } from "../data/guides";
 
 const DOMAINS: Domain[] = [
   "development",
@@ -66,6 +69,9 @@ export default function ProgressScreen() {
   const unseenCards = totalCards - knownCards - learningCards;
 
   const recentHistory = progress.quizHistory.slice(0, 10);
+  const guidesCompleted = getGuidesCompleted(progress);
+  const guidesViewed = getGuidesViewed(progress);
+  const totalGuides = allGuides.length;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -145,6 +151,55 @@ export default function ProgressScreen() {
           <Text style={styles.masteryTotal}>
             {knownCards} of {totalCards} cards mastered (
             {Math.round((knownCards / totalCards) * 100)}%)
+          </Text>
+        </View>
+
+        {/* Guide progress */}
+        <Text style={styles.sectionTitle}>Guide Progress</Text>
+        <View style={styles.masteryCard}>
+          <View style={styles.masteryBar}>
+            <View
+              style={[
+                styles.masterySegment,
+                { flex: guidesCompleted, backgroundColor: colors.correct },
+              ]}
+            />
+            <View
+              style={[
+                styles.masterySegment,
+                {
+                  flex: Math.max(guidesViewed - guidesCompleted, 0),
+                  backgroundColor: colors.warning,
+                },
+              ]}
+            />
+            <View
+              style={[
+                styles.masterySegment,
+                {
+                  flex: Math.max(totalGuides - guidesViewed, 0.01),
+                  backgroundColor: colors.border,
+                },
+              ]}
+            />
+          </View>
+          <View style={styles.masteryLegend}>
+            <LegendDot
+              color={colors.correct}
+              label={`Completed (${guidesCompleted})`}
+            />
+            <LegendDot
+              color={colors.warning}
+              label={`In progress (${guidesViewed - guidesCompleted})`}
+            />
+            <LegendDot
+              color={colors.border}
+              label={`Unread (${totalGuides - guidesViewed})`}
+            />
+          </View>
+          <Text style={styles.masteryTotal}>
+            {guidesCompleted} of {totalGuides} guides completed (
+            {Math.round((guidesCompleted / totalGuides) * 100)}%)
           </Text>
         </View>
 
@@ -294,6 +349,12 @@ export default function ProgressScreen() {
             color={colors.warning}
             value={knownCards + learningCards}
             label="Cards Studied"
+          />
+          <MiniStat
+            icon="library"
+            color={colors.accent}
+            value={guidesCompleted}
+            label="Guides Done"
           />
         </View>
 
