@@ -26,6 +26,7 @@ export interface QuizQuestion {
   options: string[];
   correctIndices: number[];
   explanation: string;
+  optionExplanations?: string[];
   service: string;
   tags: string[];
 }

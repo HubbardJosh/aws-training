@@ -430,7 +430,46 @@ export default function QuizScreen() {
                 {isCorrect ? "Correct!" : "Incorrect"}
               </Text>
             </View>
-            <Text style={styles.explanationText}>{currentQ.explanation}</Text>
+
+            {/* Per-option "why wrong" breakdown when answer is incorrect */}
+            {!isCorrect &&
+              currentQ.optionExplanations &&
+              selectedOptions
+                .filter((idx) => !currentQ.correctIndices.includes(idx))
+                .map((idx) => (
+                  <View key={idx} style={styles.wrongReasonBox}>
+                    <View style={styles.wrongReasonHeader}>
+                      <Ionicons
+                        name="close-circle"
+                        size={14}
+                        color={colors.incorrect}
+                      />
+                      <Text style={styles.wrongReasonLabel} numberOfLines={1}>
+                        {currentQ.options[idx]}
+                      </Text>
+                    </View>
+                    <Text style={styles.wrongReasonText}>
+                      {currentQ.optionExplanations![idx]}
+                    </Text>
+                  </View>
+                ))}
+
+            <View style={styles.correctReasonBox}>
+              <View style={styles.explanationSubHeader}>
+                <Ionicons
+                  name="bulb-outline"
+                  size={15}
+                  color={colors.correct}
+                />
+                <Text style={styles.explanationSubTitle}>
+                  {isCorrect
+                    ? "Why this is correct"
+                    : "Why the correct answer is right"}
+                </Text>
+              </View>
+              <Text style={styles.explanationText}>{currentQ.explanation}</Text>
+            </View>
+
             <View style={styles.tagRow}>
               {currentQ.tags.map((tag) => (
                 <View key={tag} style={styles.tag}>
@@ -628,6 +667,51 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   explanationTitle: { fontSize: fontSize.md, fontWeight: "800" },
+
+  wrongReasonBox: {
+    backgroundColor: colors.incorrect + "11",
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.incorrect + "33",
+    padding: spacing.sm,
+    gap: 4,
+  },
+  wrongReasonHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  wrongReasonLabel: {
+    flex: 1,
+    fontSize: fontSize.xs,
+    fontWeight: "700",
+    color: colors.incorrect,
+  },
+  wrongReasonText: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    lineHeight: 18,
+  },
+
+  correctReasonBox: {
+    backgroundColor: colors.correct + "0D",
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.correct + "33",
+    padding: spacing.sm,
+    gap: 6,
+  },
+  explanationSubHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  explanationSubTitle: {
+    fontSize: fontSize.xs,
+    fontWeight: "700",
+    color: colors.correct,
+  },
+
   explanationText: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
