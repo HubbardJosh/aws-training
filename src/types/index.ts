@@ -1,8 +1,5 @@
 export type Domain =
-  | "development"
-  | "security"
-  | "deployment"
-  | "troubleshooting";
+  "development" | "security" | "deployment" | "troubleshooting";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -37,6 +34,13 @@ export interface GuideProgress {
   completed: boolean;
 }
 
+export interface WeakTopic {
+  service: string;
+  wrongCount: number;
+  lastMissed: string;
+  needsReview: boolean;
+}
+
 export interface UserProgress {
   studiedCards: Record<string, "known" | "learning" | "unseen">;
   quizHistory: QuizAttempt[];
@@ -46,6 +50,7 @@ export interface UserProgress {
   streakDays: number;
   lastStudied: string | null;
   guideProgress: Record<string, GuideProgress>;
+  weakTopics: Record<string, WeakTopic>;
 }
 
 export interface DomainScore {

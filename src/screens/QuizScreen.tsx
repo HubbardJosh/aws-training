@@ -20,7 +20,12 @@ import {
   UserProgress,
   QuizAttempt,
 } from "../types";
-import { loadProgress, saveProgress, touchStreak } from "../utils/storage";
+import {
+  loadProgress,
+  saveProgress,
+  touchStreak,
+  recordWrongAnswers,
+} from "../utils/storage";
 import { RootStackParamList } from "../navigation";
 
 type Route = RouteProp<RootStackParamList, "Quiz">;
@@ -38,7 +43,7 @@ function shuffle<T>(arr: T[]): T[] {
 export default function QuizScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
-  const { domain, difficulty, count } = route.params;
+  const { domain, difficulty, count, service } = route.params;
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,7 +60,8 @@ export default function QuizScreen() {
       const domainMatch = domain === "all" || q.domain === (domain as Domain);
       const diffMatch =
         difficulty === "all" || q.difficulty === (difficulty as Difficulty);
-      return domainMatch && diffMatch;
+      const serviceMatch = !service || q.service === service;
+      return domainMatch && diffMatch && serviceMatch;
     });
     const selected = shuffle(filtered).slice(0, count);
     setQuestions(selected);
@@ -119,6 +125,7 @@ export default function QuizScreen() {
       };
 
       const updatedDomainScores = { ...progress.domainScores };
+      const wrongServices: string[] = [];
       questions.forEach((q, i) => {
         const ans = finalAnswers[i];
         if (!ans) return;
@@ -129,10 +136,12 @@ export default function QuizScreen() {
           attempted: updatedDomainScores[q.domain].attempted + 1,
           correct: updatedDomainScores[q.domain].correct + (isCorrect ? 1 : 0),
         };
+        if (!isCorrect) wrongServices.push(q.service);
       });
 
+      const withWeak = recordWrongAnswers(progress, wrongServices);
       const updated: UserProgress = touchStreak({
-        ...progress,
+        ...withWeak,
         quizHistory: [attempt, ...progress.quizHistory].slice(0, 50),
         domainScores: updatedDomainScores,
         totalQuestionsAnswered:

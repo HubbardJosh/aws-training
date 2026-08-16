@@ -18,7 +18,7 @@ import GuideDetailScreen from "../screens/GuideDetailScreen";
 export type RootStackParamList = {
   Tabs: undefined;
   FlashCard: { domain: string; difficulty: string };
-  Quiz: { domain: string; difficulty: string; count: number };
+  Quiz: { domain: string; difficulty: string; count: number; service?: string };
   QuizResult: { sessionId: string };
   GuideDetail: { id: string };
 };

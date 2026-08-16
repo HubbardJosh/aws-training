@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
 import {
   loadProgress,
@@ -18,10 +20,15 @@ import {
   getOverallAccuracy,
   getGuidesCompleted,
   getGuidesViewed,
+  toggleNeedsReview,
+  getSortedWeakTopics,
 } from "../utils/storage";
-import { UserProgress, Domain, QuizAttempt } from "../types";
+import { UserProgress, Domain, QuizAttempt, WeakTopic } from "../types";
 import { flashcards } from "../data/flashcards";
 import { allGuides } from "../data/guides";
+import { RootStackParamList } from "../navigation";
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const DOMAINS: Domain[] = [
   "development",
@@ -31,6 +38,7 @@ const DOMAINS: Domain[] = [
 ];
 
 export default function ProgressScreen() {
+  const navigation = useNavigation<Nav>();
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
   useEffect(() => {
@@ -56,9 +64,17 @@ export default function ProgressScreen() {
     );
   };
 
+  const handleToggleReview = async (service: string) => {
+    if (!progress) return;
+    const updated = toggleNeedsReview(progress, service);
+    setProgress(updated);
+    await saveProgress(updated);
+  };
+
   if (!progress) return null;
 
   const overallAccuracy = getOverallAccuracy(progress);
+  const weakTopics = getSortedWeakTopics(progress);
   const knownCards = Object.values(progress.studiedCards).filter(
     (s) => s === "known",
   ).length;
@@ -306,6 +322,37 @@ export default function ProgressScreen() {
           );
         })}
 
+        {/* Weak Topics */}
+        <Text style={styles.sectionTitle}>Weak Topics</Text>
+        {weakTopics.length === 0 ? (
+          <View style={styles.emptyHistory}>
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={36}
+              color={colors.textMuted}
+            />
+            <Text style={styles.emptyHistoryText}>
+              No weak topics yet — take a quiz to get started
+            </Text>
+          </View>
+        ) : (
+          weakTopics.map((topic) => (
+            <WeakTopicRow
+              key={topic.service}
+              topic={topic}
+              onToggleReview={() => handleToggleReview(topic.service)}
+              onPractice={() =>
+                navigation.navigate("Quiz", {
+                  domain: "all",
+                  difficulty: "all",
+                  count: 10,
+                  service: topic.service,
+                })
+              }
+            />
+          ))
+        )}
+
         {/* Quiz history */}
         <Text style={styles.sectionTitle}>Recent Quiz History</Text>
         {recentHistory.length === 0 ? (
@@ -392,6 +439,62 @@ function LegendDot({ color, label }: { color: string; label: string }) {
     <View style={styles.legendDot}>
       <View style={[styles.dot, { backgroundColor: color }]} />
       <Text style={styles.legendLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function WeakTopicRow({
+  topic,
+  onToggleReview,
+  onPractice,
+}: {
+  topic: WeakTopic;
+  onToggleReview: () => void;
+  onPractice: () => void;
+}) {
+  const lastMissed = new Date(topic.lastMissed).toLocaleDateString();
+  return (
+    <View
+      style={[
+        styles.weakTopicRow,
+        topic.needsReview && styles.weakTopicRowFlagged,
+      ]}
+    >
+      <View style={styles.weakTopicLeft}>
+        <View style={styles.weakTopicHeader}>
+          <Text style={styles.weakTopicService}>{topic.service}</Text>
+          {topic.needsReview && (
+            <View style={styles.reviewBadge}>
+              <Ionicons name="flag" size={10} color={colors.warning} />
+              <Text style={styles.reviewBadgeText}>Needs Review</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.weakTopicMeta}>
+          {topic.wrongCount} wrong answer{topic.wrongCount !== 1 ? "s" : ""} ·
+          last missed {lastMissed}
+        </Text>
+      </View>
+      <View style={styles.weakTopicActions}>
+        <TouchableOpacity
+          style={[
+            styles.weakTopicBtn,
+            topic.needsReview
+              ? styles.weakTopicBtnActive
+              : styles.weakTopicBtnInactive,
+          ]}
+          onPress={onToggleReview}
+        >
+          <Ionicons
+            name={topic.needsReview ? "flag" : "flag-outline"}
+            size={14}
+            color={topic.needsReview ? colors.warning : colors.textMuted}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.practiceBtn} onPress={onPractice}>
+          <Text style={styles.practiceBtnText}>Practice</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -604,6 +707,81 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     minWidth: 36,
     textAlign: "right",
+  },
+
+  weakTopicRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
+  },
+  weakTopicRowFlagged: {
+    borderColor: colors.warning + "55",
+    backgroundColor: colors.warning + "08",
+  },
+  weakTopicLeft: { flex: 1, gap: 3 },
+  weakTopicHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    flexWrap: "wrap",
+  },
+  weakTopicService: {
+    fontSize: fontSize.sm,
+    fontWeight: "700",
+    color: colors.textPrimary,
+  },
+  reviewBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: colors.warning + "22",
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  reviewBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: colors.warning,
+  },
+  weakTopicMeta: { fontSize: fontSize.xs, color: colors.textSecondary },
+  weakTopicActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  weakTopicBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  weakTopicBtnActive: {
+    borderColor: colors.warning + "55",
+    backgroundColor: colors.warning + "15",
+  },
+  weakTopicBtnInactive: {
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  practiceBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  practiceBtnText: {
+    fontSize: fontSize.xs,
+    fontWeight: "700",
+    color: colors.secondary,
   },
 
   emptyHistory: {

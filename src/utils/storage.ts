@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { UserProgress, Domain, GuideProgress } from "../types";
+import { UserProgress, Domain, GuideProgress, WeakTopic } from "../types";
 
 const STORAGE_KEY = "aws_training_progress";
 
@@ -17,6 +17,7 @@ const defaultProgress: UserProgress = {
   streakDays: 0,
   lastStudied: null,
   guideProgress: {},
+  weakTopics: {},
 };
 
 export async function loadProgress(): Promise<UserProgress> {
@@ -33,6 +34,7 @@ export async function loadProgress(): Promise<UserProgress> {
         ...parsed.domainScores,
       },
       guideProgress: parsed.guideProgress ?? {},
+      weakTopics: parsed.weakTopics ?? {},
     };
   } catch {
     return defaultProgress;
@@ -143,6 +145,51 @@ function withStreak(progress: UserProgress, now: string): UserProgress {
 /** Call this whenever the user does any study activity (flashcards, quizzes). */
 export function touchStreak(progress: UserProgress): UserProgress {
   return withStreak(progress, new Date().toISOString());
+}
+
+/**
+ * Increment wrong-answer counts for the given services.
+ * services is an array of service names from incorrect quiz questions.
+ */
+export function recordWrongAnswers(
+  progress: UserProgress,
+  services: string[],
+): UserProgress {
+  const now = new Date().toISOString();
+  const updated = { ...progress.weakTopics };
+  for (const service of services) {
+    const existing = updated[service];
+    updated[service] = {
+      service,
+      wrongCount: (existing?.wrongCount ?? 0) + 1,
+      lastMissed: now,
+      needsReview: existing?.needsReview ?? false,
+    };
+  }
+  return { ...progress, weakTopics: updated };
+}
+
+/** Toggle the needsReview flag for a service. */
+export function toggleNeedsReview(
+  progress: UserProgress,
+  service: string,
+): UserProgress {
+  const existing = progress.weakTopics[service];
+  if (!existing) return progress;
+  return {
+    ...progress,
+    weakTopics: {
+      ...progress.weakTopics,
+      [service]: { ...existing, needsReview: !existing.needsReview },
+    },
+  };
+}
+
+/** Return weak topics sorted by wrongCount descending. */
+export function getSortedWeakTopics(progress: UserProgress): WeakTopic[] {
+  return Object.values(progress.weakTopics).sort(
+    (a, b) => b.wrongCount - a.wrongCount,
+  );
 }
 
 export function getGuidesCompleted(progress: UserProgress): number {
