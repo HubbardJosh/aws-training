@@ -374,6 +374,8 @@ function InlineText({ text }: { text: string }) {
 
 const mdStyles = StyleSheet.create({
   para: {
+    flex: 1,
+    flexWrap: "wrap",
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     lineHeight: 22,
@@ -411,6 +413,7 @@ const mdStyles = StyleSheet.create({
   },
   bulletRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
     gap: spacing.sm,
     paddingLeft: spacing.xs,
   },
