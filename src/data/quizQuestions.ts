@@ -3174,4 +3174,2074 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     tags: ["elasticache", "redis", "evictions", "memory", "scaling"],
   },
+
+  // --- NEW: Amazon SQS ---
+  {
+    id: "qq-121",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon SQS",
+    question:
+      "A Lambda function processes SQS messages in batches of 10. Some messages occasionally fail processing while others in the same batch succeed. How should the developer ensure only failed messages are retried?",
+    options: [
+      "Return a list of failed message IDs using the ReportBatchItemFailures response type",
+      "Catch exceptions and delete successful messages manually before throwing",
+      "Set the batch size to 1 so each message is processed independently",
+      "Configure a DLQ on the SQS queue with maxReceiveCount of 1",
+    ],
+    correctIndices: [0],
+    explanation:
+      "ReportBatchItemFailures lets Lambda return a partial success response identifying which message IDs failed. SQS retries only those failed messages; successfully processed messages are deleted. Without this, any failure causes the entire batch to return to the queue.",
+    optionExplanations: [
+      "Correct. FunctionResponseTypes: [ReportBatchItemFailures] enables partial batch success — Lambda returns a batchItemFailures list and SQS only retries those specific messages.",
+      "Incorrect. Manually deleting messages is error-prone and requires extra API calls. ReportBatchItemFailures is the built-in mechanism for this use case.",
+      "Incorrect. A batch size of 1 works but eliminates the throughput benefits of batching and significantly increases cost and Lambda invocation count.",
+      "Incorrect. A DLQ with maxReceiveCount of 1 would move messages to the DLQ after a single failure, preventing any retry at all.",
+    ],
+    tags: ["sqs", "lambda", "batch", "error-handling"],
+  },
+
+  // --- NEW: Amazon Kinesis ---
+  {
+    id: "qq-122",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon Kinesis",
+    question:
+      "A Kinesis Data Stream has 4 shards. A Lambda consumer is experiencing high latency because multiple functions are reading from the same shards. What feature allows multiple consumers to read from the same shard simultaneously without competing?",
+    options: [
+      "Enhanced Fan-Out with dedicated throughput per consumer",
+      "Increase the shard count to match the number of consumers",
+      "Use GetRecords with a higher Limit parameter",
+      "Switch to Kinesis Data Firehose for automatic fan-out",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Enhanced Fan-Out gives each registered consumer its own 2 MB/s read throughput per shard via HTTP/2 push, rather than sharing the shard's standard 2 MB/s across all consumers using GetRecords polling. Multiple EFO consumers can read the same shard simultaneously without competing.",
+    optionExplanations: [
+      "Correct. Enhanced Fan-Out registers a consumer and provides dedicated 2 MB/s per shard throughput per consumer using SubscribeToShard (HTTP/2 push), eliminating read contention between consumers.",
+      "Incorrect. Increasing shards scales write throughput and parallelism, but does not allow multiple consumers to read the same shard without competing unless Enhanced Fan-Out is used.",
+      "Incorrect. A higher Limit just requests more records per GetRecords call — it doesn't provide dedicated throughput or allow simultaneous reads without contention.",
+      "Incorrect. Firehose is a delivery service to S3/Redshift/OpenSearch — it doesn't solve the fan-out problem for Lambda consumers processing stream records.",
+    ],
+    tags: ["kinesis", "enhanced-fan-out", "consumers", "throughput"],
+  },
+
+  // --- NEW: Amazon API Gateway ---
+  {
+    id: "qq-123",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon API Gateway",
+    question:
+      "A team wants to gradually shift traffic to a new Lambda function version without updating the API Gateway stage. What is the BEST approach?",
+    options: [
+      "Use a Lambda alias with a weighted routing configuration between two versions",
+      "Create a new API Gateway stage pointing to the new Lambda version",
+      "Use API Gateway canary deployments to split traffic at the stage level",
+      "Deploy a new API Gateway API and use Route 53 weighted routing",
+    ],
+    correctIndices: [0],
+    explanation:
+      "A Lambda alias supports traffic shifting — you can route a percentage of invocations to a new version while the rest go to the stable version. The API Gateway integration points to the alias ARN, so no API Gateway changes are needed. API Gateway canary deployments split traffic between stage configurations, not Lambda versions.",
+    optionExplanations: [
+      "Correct. Lambda alias weighted routing (e.g. 90% to v1, 10% to v2) lets you gradually shift traffic between versions. The API Gateway integration uses the alias ARN and requires no changes.",
+      "Incorrect. Creating a new stage requires updating clients or DNS and doesn't provide gradual traffic shifting within a single endpoint.",
+      "Incorrect. API Gateway canary deployments split traffic between two stage configurations (e.g. different stage variables or throttle settings), not between Lambda function versions directly.",
+      "Incorrect. Deploying a separate API and using Route 53 weighted routing works but is far more complex and operationally heavy than Lambda alias traffic shifting.",
+    ],
+    tags: ["api-gateway", "lambda", "canary", "traffic-shifting", "deployment"],
+  },
+
+  // --- NEW: Amazon CloudWatch ---
+  {
+    id: "qq-124",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon CloudWatch",
+    question:
+      "A developer wants to count the number of ERROR log lines emitted by a Lambda function and trigger an alarm when the count exceeds 10 in 5 minutes. What is the correct sequence of steps?",
+    options: [
+      "Create a metric filter on the log group to extract a metric, then create an alarm on that metric",
+      "Enable Lambda detailed monitoring, then create an alarm on the Errors metric",
+      "Use CloudWatch Logs Insights to query errors, then set an alarm on query results",
+      "Create a CloudWatch Synthetics canary that invokes the function and checks for errors",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Metric filters parse log events matching a pattern and increment a custom CloudWatch metric. You then create an alarm on that metric. Lambda's built-in Errors metric counts invocation errors (unhandled exceptions), not log-level ERROR strings — so a metric filter is needed for log-based counting.",
+    optionExplanations: [
+      "Correct. A metric filter on the CloudWatch log group matches lines containing 'ERROR', publishes a count to a custom metric, and an alarm watches that metric over a 5-minute period.",
+      "Incorrect. Lambda's built-in Errors metric counts function invocations that threw an unhandled exception — it does not count ERROR strings written to logs by the application.",
+      "Incorrect. Logs Insights is for ad-hoc interactive queries — it does not continuously emit metrics or support alarms on query results.",
+      "Incorrect. Synthetics canaries test endpoints and APIs from the outside — they don't inspect internal log output for error strings.",
+    ],
+    tags: ["cloudwatch", "metric-filters", "logs", "alarms", "lambda"],
+  },
+
+  // --- NEW: Amazon ElastiCache ---
+  {
+    id: "qq-125",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon ElastiCache",
+    question:
+      "A developer is caching database query results in ElastiCache Redis. After a cache miss, the application fetches from RDS and writes the result to Redis. What caching pattern is this, and what is its main risk?",
+    options: [
+      "Lazy loading (cache-aside); the risk is serving stale data if the database is updated without invalidating the cache",
+      "Write-through; the risk is write latency on every database update",
+      "Write-behind; the risk is data loss if the cache fails before writing to the database",
+      "Read-through; the risk is cache stampede on the first read of a key",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Lazy loading (cache-aside) only populates the cache on a miss — the application checks cache first, and on miss reads from DB and writes to cache. The main risk is stale data: if the underlying DB record changes, the cache still holds the old value until TTL expires or explicit invalidation occurs.",
+    optionExplanations: [
+      "Correct. This is the lazy loading / cache-aside pattern. Data is only written to cache after a miss. Stale reads are the primary risk — updates to the DB don't automatically update the cache.",
+      "Incorrect. Write-through writes to both cache and DB on every write operation, keeping them in sync. The described pattern only writes to cache on a read miss, not on writes.",
+      "Incorrect. Write-behind (write-back) writes to cache first and asynchronously persists to the DB later. The described pattern writes to the DB first (on miss) and then populates the cache.",
+      "Incorrect. Read-through is similar but the cache itself fetches from the DB on a miss rather than the application doing it. The application in this scenario explicitly fetches from RDS and writes to Redis.",
+    ],
+    tags: ["elasticache", "caching", "lazy-loading", "patterns"],
+  },
+
+  // --- NEW: Amazon SNS ---
+  {
+    id: "qq-126",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon SNS",
+    question:
+      "A developer needs different downstream services to receive only the SNS messages relevant to them, without creating separate topics per service. What feature enables this?",
+    options: [
+      "Subscription filter policies based on message attributes",
+      "SNS message routing rules attached to the topic",
+      "SQS queue policies that filter messages on receipt",
+      "Lambda authorizers that inspect and route SNS messages",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Subscription filter policies are JSON documents attached to individual subscriptions. They match against MessageAttributes on the published message and deliver only matching messages to that subscriber. Each subscriber can have a different filter, enabling content-based routing from a single topic.",
+    optionExplanations: [
+      "Correct. Filter policies are set per-subscription, not per-topic. SNS evaluates MessageAttributes against each subscription's filter policy and only delivers matching messages.",
+      "Incorrect. SNS does not have topic-level routing rules. Filtering is done at the subscription level via filter policies.",
+      "Incorrect. SQS queue policies control who can send to the queue — they don't filter messages based on content after delivery.",
+      "Incorrect. Lambda authorizers are an API Gateway concept for request authorization — they have no role in SNS message routing.",
+    ],
+    tags: ["sns", "filtering", "subscriptions", "message-attributes"],
+  },
+  {
+    id: "qq-127",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon SNS",
+    question:
+      "A mobile application uses SNS to send push notifications to iOS devices. After an app update, notifications stop being delivered. CloudWatch shows SNS is publishing successfully. What should the developer check FIRST?",
+    options: [
+      "Whether the APNS certificate or token credentials on the SNS platform application have expired",
+      "Whether the SNS topic has the correct IAM permissions to invoke APNS",
+      "Whether the mobile devices have re-subscribed to the SNS topic after the app update",
+      "Whether the SNS topic type needs to be changed from Standard to FIFO",
+    ],
+    correctIndices: [0],
+    explanation:
+      "SNS mobile push uses platform application endpoints backed by APNS credentials (certificate or token-based auth). If the certificate expires or the token key is revoked, SNS will report success at the topic level but APNS will reject the delivery. This is the most common cause of push notifications silently failing after an app update.",
+    optionExplanations: [
+      "Correct. SNS communicates with APNS using credentials stored in the platform application. Expired certificates or rotated/revoked token credentials cause APNS to reject deliveries silently from SNS's perspective — SNS reports the publish as successful but the notification never reaches the device.",
+      "Incorrect. SNS calls APNS as an AWS service using its own infrastructure — it doesn't use an IAM role to authenticate with APNS. APNS authentication uses Apple-issued certificates or tokens stored in the platform application.",
+      "Incorrect. Device endpoint ARNs are registered per-device and persist across app updates. Devices don't need to re-subscribe unless the endpoint is explicitly deleted or disabled.",
+      "Incorrect. FIFO topics only support SQS FIFO subscribers — they cannot be used for mobile push. Changing topic type would not fix delivery issues and is not possible without recreating the topic.",
+    ],
+    tags: ["sns", "mobile-push", "apns", "troubleshooting"],
+  },
+
+  // --- NEW: Amazon Cognito ---
+  {
+    id: "qq-128",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon Cognito",
+    question:
+      "A developer wants to customize the attributes added to a JWT before it is issued to a user after sign-in. Which Cognito Lambda trigger should they use?",
+    options: [
+      "Pre Token Generation trigger",
+      "Post Authentication trigger",
+      "Pre Authentication trigger",
+      "Post Confirmation trigger",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The Pre Token Generation trigger fires just before Cognito issues tokens and allows the Lambda function to add, suppress, or override claims in the ID token and access token. Post Authentication fires after sign-in but cannot modify tokens. Pre Authentication fires before credential validation.",
+    optionExplanations: [
+      "Correct. Pre Token Generation is invoked before Cognito issues the ID and access tokens, giving the Lambda function the opportunity to add custom claims, suppress existing claims, or override group membership in the token payload.",
+      "Incorrect. Post Authentication fires after a successful sign-in and can be used for logging or triggering side effects, but it cannot modify the tokens that will be issued.",
+      "Incorrect. Pre Authentication fires before Cognito validates credentials and can be used to allow or deny sign-in attempts, but it runs too early in the flow to modify token contents.",
+      "Incorrect. Post Confirmation fires after a user confirms their account (e.g. via email verification) — it is not involved in the token issuance flow during sign-in.",
+    ],
+    tags: ["cognito", "lambda-triggers", "jwt", "tokens"],
+  },
+  {
+    id: "qq-129",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon Cognito",
+    question:
+      "A web app authenticates users with a Cognito User Pool. The app needs to call an S3 API directly from the browser using the authenticated user's identity. What is the correct approach?",
+    options: [
+      "Exchange the User Pool token for temporary AWS credentials using a Cognito Identity Pool",
+      "Attach an IAM user policy to each Cognito user granting S3 access",
+      "Use the Cognito User Pool access token directly to sign S3 API requests",
+      "Configure S3 to accept Cognito JWT tokens as authorization headers",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cognito Identity Pools (Federated Identities) exchange a User Pool token (or other identity provider token) for temporary AWS credentials via STS. The browser then uses those credentials to make signed AWS API calls directly. User Pool tokens are OIDC JWTs — they cannot sign AWS API requests.",
+    optionExplanations: [
+      "Correct. The Identity Pool authenticates the User Pool token and calls STS AssumeRoleWithWebIdentity to return temporary IAM credentials. The browser uses those credentials with SigV4 signing to call S3 directly.",
+      "Incorrect. Cognito User Pool users are not IAM users — you cannot attach IAM policies to them. Access to AWS services requires going through an Identity Pool to obtain IAM credentials.",
+      "Incorrect. User Pool tokens are OIDC JWTs used for application-level authentication. AWS service APIs require SigV4-signed requests using IAM credentials — JWTs cannot substitute for IAM credentials.",
+      "Incorrect. S3 does not natively accept Cognito JWTs as authorization. All S3 API access requires IAM credentials for SigV4 signing (or presigned URLs generated server-side).",
+    ],
+    tags: ["cognito", "identity-pool", "s3", "credentials", "sts"],
+  },
+
+  // --- NEW: AWS KMS ---
+  {
+    id: "qq-130",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS KMS",
+    question:
+      "A developer needs to encrypt data larger than 4 KB in their application using KMS. What is the correct approach?",
+    options: [
+      "Use GenerateDataKey to get a plaintext data key, encrypt the data locally, then store the encrypted data key alongside the ciphertext",
+      "Call the KMS Encrypt API directly with the full data payload",
+      "Split the data into 4 KB chunks and encrypt each chunk separately with KMS Encrypt",
+      "Store the plaintext data key in Secrets Manager and use it to encrypt data locally",
+    ],
+    correctIndices: [0],
+    explanation:
+      "KMS Encrypt has a 4 KB limit. For larger data, use envelope encryption: GenerateDataKey returns a plaintext data key and an encrypted copy. You encrypt your data locally with the plaintext key (using AES-256), discard the plaintext key, and store the encrypted data key with the ciphertext. To decrypt, call KMS Decrypt on the encrypted data key to recover the plaintext key, then decrypt locally.",
+    optionExplanations: [
+      "Correct. This is envelope encryption — the industry-standard pattern for encrypting large data with KMS. KMS protects the data key; the data key protects the actual data.",
+      "Incorrect. The KMS Encrypt API has a hard limit of 4 KB for the plaintext payload. Larger data must use envelope encryption with GenerateDataKey.",
+      "Incorrect. Splitting data into chunks and encrypting each separately with KMS Encrypt would generate thousands of KMS API calls for large files, incurring high cost and latency, and is not how envelope encryption works.",
+      "Incorrect. Storing a plaintext encryption key in Secrets Manager defeats the purpose of KMS key management. The plaintext data key should be used in memory and immediately discarded — never persisted.",
+    ],
+    tags: ["kms", "envelope-encryption", "data-key", "encryption"],
+  },
+  {
+    id: "qq-131",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS KMS",
+    question:
+      "A Lambda function in Account A needs to decrypt data encrypted with a KMS Customer Managed Key in Account B. What must be configured?",
+    options: [
+      "The KMS key policy in Account B must allow Account A's Lambda execution role as a principal, and Account A's IAM policy must allow kms:Decrypt on the key ARN",
+      "The Lambda execution role in Account A must have an inline policy granting kms:Decrypt on all KMS keys",
+      "A KMS key grant must be created in Account A pointing to Account B's key",
+      "The KMS key must be shared using AWS Resource Access Manager (RAM)",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cross-account KMS access requires two things: the key policy in the key's account must explicitly allow the external principal (or account), AND the IAM policy in the caller's account must allow the kms:Decrypt action on the specific key ARN. Both must allow the action — either one alone is insufficient.",
+    optionExplanations: [
+      "Correct. Cross-account KMS access requires permissions on both sides: the key policy in Account B must trust Account A's Lambda role, and Account A's IAM policy must grant kms:Decrypt on the Account B key ARN.",
+      "Incorrect. An IAM policy in Account A granting kms:Decrypt is necessary but not sufficient — the key policy in Account B must also explicitly allow the Account A principal. IAM alone cannot override a KMS key policy that doesn't grant access.",
+      "Incorrect. KMS grants are created on a key in the key's own account and delegate permissions to principals — they cannot be created from a different account. The correct mechanism is key policy + IAM policy.",
+      "Incorrect. KMS Customer Managed Keys cannot be shared via AWS RAM. Cross-account KMS access is managed through key policies and IAM policies, not RAM.",
+    ],
+    tags: ["kms", "cross-account", "key-policy", "iam"],
+  },
+
+  // --- NEW: AWS CloudFormation ---
+  {
+    id: "qq-132",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CloudFormation",
+    question:
+      "A CloudFormation stack update fails and rolls back. The developer needs to understand exactly which resource change caused the failure. Where should they look?",
+    options: [
+      "The stack Events tab in the CloudFormation console, filtered to FAILED status",
+      "AWS CloudTrail logs for the CloudFormation API calls",
+      "The stack Outputs section which lists failed resource changes",
+      "Amazon CloudWatch Logs for the CloudFormation service",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The CloudFormation stack Events tab shows a chronological log of every resource action during a stack operation, including the status reason for each FAILED event. This is the primary place to diagnose which resource failed and why during a stack update or rollback.",
+    optionExplanations: [
+      "Correct. The Events tab in the CloudFormation console (or DescribeStackEvents API) shows each resource's status transitions with a StatusReason field explaining failures. Filtering to FAILED events quickly identifies the root cause.",
+      "Incorrect. CloudTrail logs CloudFormation API calls (CreateStack, UpdateStack, etc.) but does not provide resource-level failure details or the reason a specific resource change failed.",
+      "Incorrect. The Outputs section displays exported values from the stack — it contains no information about deployment failures or resource errors.",
+      "Incorrect. CloudFormation does not write detailed deployment logs to CloudWatch Logs by default. Resource-level failure details are in the stack Events, not CloudWatch.",
+    ],
+    tags: ["cloudformation", "troubleshooting", "events", "rollback"],
+  },
+  {
+    id: "qq-133",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CloudFormation",
+    question:
+      "A CloudFormation template needs to provision a resource type that CloudFormation does not natively support. What is the correct approach?",
+    options: [
+      "Use a Custom Resource backed by a Lambda function to handle Create, Update, and Delete lifecycle events",
+      "Use a CloudFormation Macro to transform the template before deployment",
+      "Use AWS CDK to wrap the unsupported resource and synthesize a template",
+      "Use a CloudFormation StackSet to deploy the resource across multiple accounts",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Custom Resources let you run arbitrary Lambda code during stack operations. CloudFormation sends Create/Update/Delete events to the Lambda function, which provisions the resource and sends a success/failure signal back via a pre-signed S3 URL. This enables managing any resource — third-party APIs, on-premises resources, unsupported AWS services.",
+    optionExplanations: [
+      "Correct. Custom Resources (AWS::CloudFormation::CustomResource or Custom::MyResource) invoke a Lambda function for each lifecycle event. The function must respond with a presigned S3 URL callback indicating success or failure.",
+      "Incorrect. CloudFormation Macros transform template syntax before deployment — they're used for template preprocessing (like loops or shorthand), not for provisioning unsupported resource types.",
+      "Incorrect. CDK synthesizes CloudFormation templates — if CloudFormation doesn't natively support a resource, CDK alone doesn't add that capability. CDK can use Custom Resources, but the underlying mechanism is still a Custom Resource.",
+      "Incorrect. StackSets deploy the same CloudFormation template across multiple accounts and regions — they don't add support for new resource types.",
+    ],
+    tags: ["cloudformation", "custom-resource", "lambda", "extensibility"],
+  },
+
+  // --- NEW: AWS X-Ray ---
+  {
+    id: "qq-134",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS X-Ray",
+    question:
+      "A developer wants to add searchable business context to X-Ray traces — for example, tagging traces with a customer ID — so they can filter traces by customer in the X-Ray console. What should they use?",
+    options: [
+      "X-Ray annotations, which are indexed key-value pairs filterable in the console",
+      "X-Ray metadata, which stores arbitrary data attached to segments",
+      "Custom CloudWatch dimensions added alongside X-Ray trace IDs",
+      "X-Ray subsegments with the customer ID in the subsegment name",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Annotations are indexed key-value pairs (string, number, or boolean) attached to segments or subsegments. They can be used in filter expressions in the X-Ray console to find traces matching specific values. Metadata is not indexed and cannot be used for filtering — it's for storing large or complex data for debugging.",
+    optionExplanations: [
+      "Correct. Annotations are indexed and filterable. Use putAnnotation() in the SDK to add key-value pairs like customerId, then filter in the X-Ray console using annotation.customerId = '12345'.",
+      "Incorrect. Metadata can store arbitrary objects (JSON) but is not indexed and cannot be used in filter expressions. It's useful for attaching debug context but not for searching traces.",
+      "Incorrect. CloudWatch dimensions are for CloudWatch metrics — they have no effect on X-Ray trace filtering or searchability.",
+      "Incorrect. Subsegment names appear in the service map and trace timeline but are not indexed as searchable attributes. Using them for business data would pollute the service map without enabling filtering.",
+    ],
+    tags: ["xray", "annotations", "tracing", "filtering"],
+  },
+  {
+    id: "qq-135",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS X-Ray",
+    question:
+      "An ECS task running on Fargate needs to send X-Ray trace data. The application uses the X-Ray SDK but traces are not appearing in the console. What is the MOST likely missing configuration?",
+    options: [
+      "The X-Ray daemon is not running as a sidecar container in the task definition",
+      "The ECS cluster does not have X-Ray enabled at the cluster level",
+      "The task definition does not specify a CloudWatch log group for X-Ray",
+      "The X-Ray SDK must be replaced with the OpenTelemetry SDK on Fargate",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The X-Ray SDK sends trace segments to the X-Ray daemon on UDP port 2000. On ECS Fargate, there is no host daemon — you must add the X-Ray daemon as a sidecar container in the same task definition. The sidecar receives segments from the SDK and forwards them to the X-Ray service.",
+    optionExplanations: [
+      "Correct. On ECS Fargate, there is no EC2 host to run the daemon. The X-Ray daemon must be added as a sidecar container (amazon/aws-xray-daemon) in the task definition. The SDK sends to localhost:2000 (UDP) which the sidecar listens on.",
+      "Incorrect. X-Ray does not have a cluster-level enable setting in ECS. Tracing is configured at the task definition level by including the daemon sidecar and granting the task role xray:PutTraceSegments permission.",
+      "Incorrect. X-Ray trace data is not sent via CloudWatch Logs — the daemon forwards segments directly to the X-Ray API. Log groups are not part of the trace data path.",
+      "Incorrect. The X-Ray SDK works on Fargate — the issue is the missing daemon sidecar, not the SDK choice. OpenTelemetry is an alternative instrumentation approach but is not required on Fargate.",
+    ],
+    tags: ["xray", "ecs", "fargate", "daemon", "tracing"],
+  },
+
+  // --- NEW: Amazon EventBridge ---
+  {
+    id: "qq-136",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon EventBridge",
+    question:
+      "A developer wants to trigger a Lambda function every weekday at 9 AM UTC. What is the correct EventBridge rule configuration?",
+    options: [
+      "A schedule rule using the cron expression cron(0 9 ? * MON-FRI *)",
+      "A schedule rule using rate(1 day) with a start time of 9 AM",
+      "An event pattern rule matching a custom event published at 9 AM",
+      "A schedule rule using cron(9 0 * * MON-FRI) in standard cron format",
+    ],
+    correctIndices: [0],
+    explanation:
+      "EventBridge cron expressions use the format cron(Minutes Hours Day-of-month Month Day-of-week Year). cron(0 9 ? * MON-FRI *) means minute 0, hour 9, any day-of-month (?), any month, Monday through Friday, any year. The ? is required when specifying day-of-week to avoid conflict with day-of-month.",
+    optionExplanations: [
+      "Correct. EventBridge cron syntax is cron(min hour dom month dow year). cron(0 9 ? * MON-FRI *) fires at 09:00 UTC on weekdays. The ? in the day-of-month field is required when day-of-week is specified.",
+      "Incorrect. rate() expressions fire at a fixed interval (e.g. rate(1 day) fires every 24 hours from creation) — they do not support time-of-day or day-of-week targeting.",
+      "Incorrect. Event pattern rules match events from AWS services or custom event buses — they respond to events, not schedules. You cannot use an event pattern to trigger on a time schedule.",
+      "Incorrect. This uses standard Unix cron field order (min hour dom month dow), but EventBridge cron requires a sixth Year field and uses ? for unspecified fields. The field order here is also inverted from EventBridge's format.",
+    ],
+    tags: ["eventbridge", "schedule", "cron", "lambda"],
+  },
+  {
+    id: "qq-137",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon EventBridge",
+    question:
+      "An application publishes custom events to EventBridge. A downstream team in a separate AWS account needs to consume these events. What must be configured to enable cross-account event delivery?",
+    options: [
+      "Add a resource-based policy to the target account's event bus allowing the source account to put events, and create a rule in the source account targeting the destination event bus",
+      "Create an SNS topic as an intermediary and subscribe the target account's Lambda to it",
+      "Use EventBridge Schema Registry to share event schemas across accounts",
+      "Enable EventBridge global endpoints and configure both accounts as endpoints",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cross-account EventBridge delivery requires: (1) a resource policy on the target account's event bus granting the source account permission to send events, and (2) a rule in the source account with the target account's event bus ARN as the target. Events flow directly between event buses across accounts.",
+    optionExplanations: [
+      "Correct. The target account's event bus needs a resource-based policy allowing events:PutEvents from the source account. The source account creates a rule that routes matching events to the target event bus ARN.",
+      "Incorrect. Using SNS as an intermediary adds unnecessary complexity and latency. EventBridge natively supports cross-account event bus targeting without requiring an SNS bridge.",
+      "Incorrect. The Schema Registry stores and discovers event schemas to help developers understand event structure — it does not control event routing or cross-account delivery.",
+      "Incorrect. EventBridge global endpoints provide multi-region failover for event ingestion — they are not a mechanism for cross-account event delivery.",
+    ],
+    tags: ["eventbridge", "cross-account", "event-bus", "resource-policy"],
+  },
+
+  // --- NEW: Amazon RDS ---
+  {
+    id: "qq-138",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon RDS",
+    question:
+      "A developer's application connects to RDS using a username and password stored in environment variables. The security team requires credentials to rotate automatically every 30 days without application downtime. What is the BEST solution?",
+    options: [
+      "Store credentials in Secrets Manager with automatic rotation enabled and use the Secrets Manager SDK to retrieve credentials at runtime",
+      "Store credentials in SSM Parameter Store SecureString and update them with a scheduled Lambda",
+      "Enable RDS IAM database authentication and remove the password entirely",
+      "Use an RDS Proxy to cache credentials and rotate them at the proxy layer",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Secrets Manager has built-in rotation support for RDS — it rotates the password on the database and in the secret automatically. Applications use the Secrets Manager API to retrieve credentials at runtime and cache them with a short TTL. When rotation occurs, the next cache miss retrieves the new credentials transparently.",
+    optionExplanations: [
+      "Correct. Secrets Manager's managed rotation for RDS automatically updates the database password and the secret value on the configured schedule. Applications retrieve the current secret at runtime, so rotation is transparent.",
+      "Incorrect. SSM Parameter Store does not have built-in rotation for RDS credentials. You could build a custom rotation Lambda, but Secrets Manager already has this built in — it's the purpose-built solution.",
+      "Incorrect. IAM database authentication is a valid approach for eliminating passwords, but it requires changes to how the application connects (using an auth token instead of a password) and does not work with all database engines or client libraries.",
+      "Incorrect. RDS Proxy can work with Secrets Manager to retrieve credentials, but the Proxy itself does not rotate credentials — Secrets Manager does. Using a Proxy alone doesn't solve the rotation requirement.",
+    ],
+    tags: ["rds", "secrets-manager", "rotation", "credentials", "security"],
+  },
+  {
+    id: "qq-139",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon RDS",
+    question:
+      "An RDS Multi-AZ deployment fails over to the standby instance. The application experiences a connection error for approximately 60 seconds after the failover. What is the BEST way to minimize the connection disruption?",
+    options: [
+      "Use RDS Proxy to pool and maintain connections, which reconnects automatically during failover",
+      "Increase the RDS instance size to reduce failover time",
+      "Configure the application to retry connections with exponential backoff",
+      "Switch to RDS Aurora which has near-zero failover time",
+    ],
+    correctIndices: [0],
+    explanation:
+      "RDS Proxy maintains a connection pool to the database and handles failover transparently. When the primary instance fails over, the Proxy reconnects to the new primary without the application needing to re-establish connections. This reduces application-visible disruption from ~60s to a few seconds.",
+    optionExplanations: [
+      "Correct. RDS Proxy sits between the application and RDS, maintaining persistent connections to the database. During a Multi-AZ failover, the Proxy automatically reconnects to the new primary, significantly reducing the time applications experience connection errors.",
+      "Incorrect. Failover time in Multi-AZ is determined by DNS propagation and instance promotion, not instance size. A larger instance does not reduce failover duration.",
+      "Incorrect. Retry with exponential backoff is a good practice and reduces error impact, but the application still experiences ~60 seconds of failed connections before the DNS update propagates. It doesn't reduce the failover window itself.",
+      "Incorrect. Aurora does have faster failover (typically under 30 seconds), but the question asks how to minimize disruption for an existing Multi-AZ deployment. RDS Proxy is the more targeted answer and works with standard RDS Multi-AZ.",
+    ],
+    tags: ["rds", "multi-az", "failover", "rds-proxy", "availability"],
+  },
+
+  // --- NEW: AWS Step Functions ---
+  {
+    id: "qq-140",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Step Functions",
+    question:
+      "A Step Functions state machine needs to process 1,000 records in parallel. Each record requires an independent Lambda invocation. What state type should the developer use?",
+    options: [
+      "Map state with the records as the input array and a Lambda Task as the iterator",
+      "Parallel state with 1,000 branches each containing a Lambda Task",
+      "A single Task state invoking a Lambda function that processes all records",
+      "Choice state branching to different Lambda functions based on record count",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The Map state dynamically iterates over an array and runs the same set of steps for each item, in parallel. It's purpose-built for processing collections. Parallel state has a fixed number of branches defined at design time — it cannot scale dynamically to 1,000 items.",
+    optionExplanations: [
+      "Correct. The Map state accepts an array input and runs an iterator state machine for each element, optionally in parallel up to a configurable concurrency limit. This handles any array size dynamically.",
+      "Incorrect. Parallel state branches are fixed in the state machine definition — you cannot define a dynamic number of branches at runtime. It's used for running known, distinct workflows concurrently.",
+      "Incorrect. A single Lambda invocation processing all 1,000 records loses the parallelism and fault isolation benefits of Step Functions orchestration, and risks hitting Lambda's 15-minute timeout.",
+      "Incorrect. Choice state evaluates conditions to branch to different states — it's for conditional logic, not parallel iteration over a collection.",
+    ],
+    tags: ["step-functions", "map-state", "parallel", "lambda"],
+  },
+  {
+    id: "qq-141",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Step Functions",
+    question:
+      "A Step Functions state machine calls a third-party API that occasionally returns transient 503 errors. How should the developer configure the state machine to retry on 503 errors before failing?",
+    options: [
+      "Add a Retry field to the Task state specifying the error type, max attempts, interval, and backoff rate",
+      "Wrap the Task state in a Try/Catch block within the Lambda function",
+      "Add a Catch field to the Task state and route 503 errors back to the same state",
+      "Use a Wait state before each API call to prevent rate limiting",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Step Functions Task states support a Retry field with rules specifying ErrorEquals (error types to match), MaxAttempts, IntervalSeconds (initial wait), and BackoffRate (multiplier). This handles transient failures without Lambda-level retry logic. Catch handles errors after all retries are exhausted.",
+    optionExplanations: [
+      "Correct. The Retry field on a Task state is the purpose-built mechanism for automatic retries. You specify the error types, number of attempts, initial interval, and exponential backoff rate declaratively in the state machine definition.",
+      "Incorrect. Handling retries inside the Lambda function works but defeats the purpose of Step Functions orchestration. Lambda has its own timeout constraints and doesn't benefit from Step Functions' exponential backoff or state visibility.",
+      "Incorrect. Catch handles errors that occur after all retries are exhausted — it's for fallback routing, not for retrying. Using Catch to loop back to the same state is an anti-pattern that bypasses retry semantics.",
+      "Incorrect. Wait states introduce a fixed delay — they don't retry failed operations or respond to specific error conditions. They're used for scheduled delays, not error handling.",
+    ],
+    tags: ["step-functions", "retry", "error-handling", "task-state"],
+  },
+  {
+    id: "qq-142",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Step Functions",
+    question:
+      "A developer needs to pause a Step Functions execution and wait for a human approval before continuing. The wait period could be up to 7 days. What pattern should they use?",
+    options: [
+      "Use a Task state with .waitForTaskToken and send the token to an external system for approval",
+      "Use a Wait state with a fixed duration of 7 days",
+      "Poll a DynamoDB table from a Lambda function until an approval flag is set",
+      "Use an Activity task with a worker that checks for approval every minute",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The .waitForTaskToken integration pattern pauses the state machine execution indefinitely until an external system calls SendTaskSuccess or SendTaskFailure with the token. This is the correct pattern for human-in-the-loop workflows — the execution waits at zero cost until the approval arrives.",
+    optionExplanations: [
+      "Correct. .waitForTaskToken sends the task token to an external system (via SQS, SNS, API Gateway, etc.). The state machine pauses and resumes only when the token is returned via SendTaskSuccess/SendTaskFailure — no polling, no fixed wait.",
+      "Incorrect. Wait state pauses for a fixed duration — it cannot pause indefinitely or resume based on an external event. It would resume after exactly 7 days regardless of whether approval happened.",
+      "Incorrect. Polling DynamoDB from a Lambda in a loop wastes Lambda invocations, incurs cost, and is not how Step Functions is designed to be used. .waitForTaskToken is the purpose-built mechanism.",
+      "Incorrect. Activity tasks use a polling worker, which means the worker must continuously poll for the task token. This requires a long-running worker process and is more complex than .waitForTaskToken for human approval scenarios.",
+    ],
+    tags: [
+      "step-functions",
+      "wait-for-task-token",
+      "human-approval",
+      "callback",
+    ],
+  },
+
+  // --- NEW: AWS Secrets Manager ---
+  {
+    id: "qq-143",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Secrets Manager",
+    question:
+      "A Lambda function retrieves a database password from Secrets Manager on every invocation. The team notices high Secrets Manager API costs. What is the BEST way to reduce these costs?",
+    options: [
+      "Cache the secret in the Lambda execution environment and refresh only when a decryption error occurs or TTL expires",
+      "Store the secret in an environment variable after the first retrieval",
+      "Switch to SSM Parameter Store which has lower API costs",
+      "Increase the Lambda timeout so fewer cold starts occur",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Fetching the secret outside the handler (in the init code) caches it in the execution environment across warm invocations. The AWS Secrets Manager Lambda extension further automates this with a local HTTP cache. Storing in an environment variable bypasses Secrets Manager entirely and defeats its rotation and audit benefits.",
+    optionExplanations: [
+      "Correct. Initialize the secret outside the handler so it is cached per execution environment. On warm invocations, the cached value is reused. Implement a TTL or catch rotation-related errors to refresh. The Secrets Manager Lambda extension handles this automatically.",
+      "Incorrect. Storing the secret in a Lambda environment variable means it is visible in plaintext in the Lambda configuration, bypasses Secrets Manager's rotation, and loses the audit trail — this undermines the entire purpose of Secrets Manager.",
+      "Incorrect. SSM Parameter Store SecureString is cheaper for static secrets but lacks automatic rotation for database credentials. The goal here is reducing API calls through caching, not switching services.",
+      "Incorrect. Lambda timeout controls how long a function can run — it does not affect API call frequency per invocation or reduce the number of GetSecretValue calls.",
+    ],
+    tags: ["secrets-manager", "lambda", "caching", "cost"],
+  },
+  {
+    id: "qq-144",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Secrets Manager",
+    question:
+      "A secret in Secrets Manager is configured with automatic rotation. After rotation, some application instances start returning authentication errors. What is the MOST likely cause?",
+    options: [
+      "The application cached the old secret value and has not retrieved the new version yet",
+      "The rotation Lambda function deleted the old secret version immediately after rotation",
+      "Secrets Manager changed the secret ARN during rotation",
+      "The RDS instance rejected the new password because it does not meet complexity requirements",
+    ],
+    correctIndices: [0],
+    explanation:
+      "During rotation, Secrets Manager stages versions: the new secret is AWSPENDING during creation, then promoted to AWSCURRENT, while the old value moves to AWSPREVIOUS. Applications caching the old credentials will get auth errors until they refresh. The AWSPREVIOUS stage is kept for a grace period precisely to handle in-flight connections.",
+    optionExplanations: [
+      "Correct. Applications that cache credentials in memory will continue using the old password after rotation. They need to detect auth errors, invalidate the cache, and re-fetch the current secret. Secrets Manager retains the old version as AWSPREVIOUS during the grace period.",
+      "Incorrect. Secrets Manager retains the previous secret version (AWSPREVIOUS stage label) during the rotation grace period specifically to allow in-flight connections to complete. The old version is not immediately deleted.",
+      "Incorrect. The secret ARN never changes during rotation — only the secret value and version labels change. Applications that use the ARN to retrieve the secret will always get the current version.",
+      "Incorrect. The rotation Lambda function is responsible for setting the new password on the database. If the password didn't meet complexity requirements, the rotation would have failed and the secret would have rolled back — not partially succeeded.",
+    ],
+    tags: ["secrets-manager", "rotation", "caching", "troubleshooting"],
+  },
+  {
+    id: "qq-145",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Secrets Manager",
+    question:
+      "An ECS task in Account A needs to access a secret stored in Secrets Manager in Account B. What must be configured?",
+    options: [
+      "The secret's resource policy in Account B must allow the ECS task role from Account A, and the task role must have secretsmanager:GetSecretValue permission",
+      "The secret must be replicated to Account A using Secrets Manager cross-region replication",
+      "A VPC peering connection must be established between the two accounts",
+      "The ECS task must assume a role in Account B using STS before accessing the secret",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cross-account Secrets Manager access requires a resource-based policy on the secret allowing the external principal, plus an IAM policy on the caller granting secretsmanager:GetSecretValue. The secret must also be encrypted with a KMS CMK (not the default AWS-managed key) and the key policy must allow the cross-account principal.",
+    optionExplanations: [
+      "Correct. The secret needs a resource policy allowing the Account A task role, the task role needs an IAM policy granting GetSecretValue on the secret ARN, and the KMS key policy must also allow the Account A principal to use the key for decryption.",
+      "Incorrect. Cross-region replication copies a secret to another region within the same account — it does not copy secrets to a different AWS account.",
+      "Incorrect. Secrets Manager is accessed via HTTPS API endpoints — no VPC peering is required for cross-account access. Network connectivity (VPC endpoint or internet) is needed, but not peering.",
+      "Incorrect. Role assumption is one way to achieve cross-account access, but it is not required. With the correct resource policy and IAM policy, the ECS task can call Secrets Manager in Account B directly without assuming a role in Account B.",
+    ],
+    tags: ["secrets-manager", "cross-account", "iam", "resource-policy"],
+  },
+
+  // --- NEW: AWS CodeDeploy ---
+  {
+    id: "qq-146",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodeDeploy",
+    question:
+      "A CodeDeploy deployment to EC2 instances succeeds on some instances but fails on others. The deployment is marked as failed and a rollback begins. Where should the developer look to find the specific error on the failed instances?",
+    options: [
+      "The CodeDeploy agent log at /var/log/aws/codedeploy-agent/ and the deployment lifecycle event logs in the CodeDeploy console",
+      "AWS CloudTrail logs for the CodeDeploy API calls",
+      "The CodeDeploy deployment group configuration in the console",
+      "Amazon CloudWatch metrics for the CodeDeploy deployment",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The CodeDeploy agent runs on each instance and writes detailed logs including lifecycle hook output, script errors, and file operation failures. The console also shows per-instance deployment status with lifecycle event details. These are the primary sources for diagnosing instance-level deployment failures.",
+    optionExplanations: [
+      "Correct. The CodeDeploy agent log (/var/log/aws/codedeploy-agent/codedeploy-agent.log) records what the agent did on each instance. The console shows each lifecycle event's status and the stdout/stderr from lifecycle hook scripts.",
+      "Incorrect. CloudTrail logs CodeDeploy API operations (CreateDeployment, etc.) — it does not capture what happened on individual EC2 instances during the deployment lifecycle.",
+      "Incorrect. The deployment group configuration shows settings like deployment strategy and target instances — it does not contain runtime error information from a specific deployment.",
+      "Incorrect. CodeDeploy publishes high-level deployment metrics to CloudWatch, but instance-level lifecycle errors are not surfaced there. The agent logs and console event details are the right diagnostic tools.",
+    ],
+    tags: ["codedeploy", "troubleshooting", "ec2", "lifecycle-hooks"],
+  },
+  {
+    id: "qq-147",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodeDeploy",
+    question:
+      "A team uses CodeDeploy to deploy to ECS with a blue/green deployment strategy. They want to run integration tests against the new (green) task set before shifting production traffic. How should they configure this?",
+    options: [
+      "Configure a BeforeAllowTraffic lifecycle hook that runs tests and calls PutLifecycleEventHookExecutionStatus to signal success or failure",
+      "Add a Wait state in the deployment group configuration with a manual approval step",
+      "Use the AfterAllowTraffic hook to run tests and roll back if tests fail",
+      "Configure the deployment to use a Canary strategy and test during the initial traffic shift",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The BeforeAllowTraffic lifecycle hook fires after the green task set is registered with the test listener but before any production traffic is shifted. A Lambda function can run integration tests against the test listener endpoint and call PutLifecycleEventHookExecutionStatus with Succeeded or Failed to control whether the deployment proceeds.",
+    optionExplanations: [
+      "Correct. BeforeAllowTraffic is the correct hook for pre-traffic validation. The green task set is running and accessible via the test listener, but no production traffic has shifted yet. Tests run and signal the result via PutLifecycleEventHookExecutionStatus.",
+      "Incorrect. CodeDeploy ECS deployments do not have a built-in manual approval step in the deployment group configuration. Manual approvals in a pipeline are handled by CodePipeline approval actions, not within CodeDeploy itself.",
+      "Incorrect. AfterAllowTraffic fires after production traffic has already shifted to the green task set. Running tests here means real users are already receiving traffic from the untested deployment — the window for pre-traffic validation has passed.",
+      "Incorrect. Canary deployment strategy shifts a percentage of traffic to green first, then all remaining — it doesn't provide a zero-traffic testing window before any production traffic is shifted.",
+    ],
+    tags: ["codedeploy", "ecs", "blue-green", "lifecycle-hooks", "testing"],
+  },
+  {
+    id: "qq-148",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodeDeploy",
+    question:
+      "A CodeDeploy appspec.yml for an EC2 deployment specifies a BeforeInstall lifecycle hook script. The script takes 45 seconds to run but CodeDeploy marks it as failed after 30 seconds. What should the developer change?",
+    options: [
+      "Increase the timeout value for the BeforeInstall hook in the appspec.yml hooks configuration",
+      "Move the script logic to the AfterInstall hook which has a longer default timeout",
+      "Split the script into two scripts and run them in separate hooks",
+      "Set the CodeDeploy deployment group timeout to 60 seconds",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Each lifecycle hook in appspec.yml can specify a timeout value (in seconds). The default is 3600 seconds for most hooks, but if a custom timeout is configured and is too short, the hook will be terminated. Setting an appropriate timeout in the hooks section resolves the issue.",
+    optionExplanations: [
+      "Correct. The appspec.yml hooks section supports a timeout field per hook script (e.g. timeout: 60). Increasing this value gives the script enough time to complete before CodeDeploy marks it as timed out.",
+      "Incorrect. AfterInstall does not have a longer default timeout than BeforeInstall — both default to 3600 seconds. Moving logic between hooks changes deployment ordering, not timeout behavior.",
+      "Incorrect. Splitting the script into two hooks does not increase the total time available — each hook still has its configured or default timeout. It also changes the logical structure unnecessarily.",
+      "Incorrect. The deployment group timeout controls the overall maximum duration of the entire deployment, not individual lifecycle hook script timeouts. The hook-level timeout is configured in appspec.yml.",
+    ],
+    tags: ["codedeploy", "appspec", "lifecycle-hooks", "timeout"],
+  },
+
+  // --- NEW: AWS SAM ---
+  {
+    id: "qq-149",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS SAM",
+    question:
+      "A developer defines an AWS::Serverless::Function resource in a SAM template with an Api event source. What AWS resources does SAM automatically create in addition to the Lambda function?",
+    options: [
+      "An API Gateway REST API, a deployment, and a stage",
+      "An API Gateway HTTP API and a CloudFront distribution",
+      "An API Gateway REST API and an IAM role with full Lambda permissions",
+      "An Application Load Balancer and a target group",
+    ],
+    correctIndices: [0],
+    explanation:
+      "When a SAM function includes an Api event source, SAM automatically generates an AWS::ApiGateway::RestApi, a deployment, and a stage (defaulting to 'Prod'). These implicit resources are created in the transformed CloudFormation template — the developer only needs to define the function and event in the SAM template.",
+    optionExplanations: [
+      "Correct. SAM transforms the AWS::Serverless::Function with an Api event into a Lambda function plus an API Gateway REST API, deployment, and stage. This is the SAM transform's core convenience — one resource definition creates several CloudFormation resources.",
+      "Incorrect. SAM's Api event source creates a REST API, not an HTTP API. HTTP API is a different API Gateway product. SAM does not create a CloudFront distribution automatically.",
+      "Incorrect. SAM does create an IAM execution role for the Lambda function, but it grants the Lambda service permission to invoke the function — not full Lambda permissions. The API Gateway resources are REST API + deployment + stage, not just the REST API.",
+      "Incorrect. SAM does not create ALB resources. The Api event source maps to API Gateway, not a load balancer.",
+    ],
+    tags: ["sam", "api-gateway", "transform", "serverless"],
+  },
+  {
+    id: "qq-150",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS SAM",
+    question:
+      "A team wants to use SAM to gradually shift traffic to a new Lambda version using a canary deployment, with automatic rollback if CloudWatch alarms fire. What SAM feature enables this?",
+    options: [
+      "DeploymentPreference on the function resource specifying type, alarms, and hooks",
+      "AWS::Serverless::Application with a nested SAM template for canary logic",
+      "A CodeDeploy deployment group referenced in the SAM template Globals section",
+      "SAM Accelerate (sam sync) with a canary flag",
+    ],
+    correctIndices: [0],
+    explanation:
+      "SAM's DeploymentPreference property on AWS::Serverless::Function integrates with CodeDeploy to shift traffic gradually (Canary, Linear, or AllAtOnce strategies). You specify Alarms to trigger automatic rollback and Hooks for pre/post-traffic Lambda functions — all configured declaratively in the SAM template.",
+    optionExplanations: [
+      "Correct. DeploymentPreference creates a CodeDeploy application and deployment group automatically. Set Type to Canary10Percent5Minutes (or similar), list CloudWatch alarm ARNs for automatic rollback, and optionally specify pre/post-traffic hook functions.",
+      "Incorrect. AWS::Serverless::Application is for embedding nested applications from the SAR — it is not a mechanism for configuring canary deployment strategies on a function.",
+      "Incorrect. You do not reference CodeDeploy deployment groups directly in SAM — SAM creates and manages the CodeDeploy resources automatically when DeploymentPreference is specified.",
+      "Incorrect. sam sync (SAM Accelerate) is a fast deployment tool for inner-loop development that syncs code changes without a full CloudFormation deployment — it does not support canary traffic shifting.",
+    ],
+    tags: ["sam", "deployment-preference", "canary", "codedeploy", "rollback"],
+  },
+  {
+    id: "qq-151",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS SAM",
+    question:
+      "A developer wants to test a SAM Lambda function locally with a simulated API Gateway event before deploying. What command should they use?",
+    options: [
+      "sam local invoke with an event JSON file, or sam local start-api to run a local HTTP server",
+      "sam build followed by sam deploy --dry-run",
+      "sam validate to check the template and simulate invocations",
+      "sam logs --tail to stream logs from a locally running function",
+    ],
+    correctIndices: [0],
+    explanation:
+      "sam local invoke runs a Lambda function locally using Docker, passing an event from a JSON file. sam local start-api starts a local HTTP server that simulates API Gateway and invokes the function on each request. Both require Docker to be running locally.",
+    optionExplanations: [
+      "Correct. sam local invoke MyFunction -e event.json runs the function with a specific event payload. sam local start-api starts a local server on port 3000 (by default) that routes HTTP requests to the function, mimicking API Gateway behavior.",
+      "Incorrect. sam build packages the function code and dependencies. sam deploy deploys to AWS — --dry-run does not exist as a flag and would not invoke the function locally.",
+      "Incorrect. sam validate checks the SAM template for syntax errors — it does not simulate or invoke Lambda functions.",
+      "Incorrect. sam logs tails log output from a deployed AWS Lambda function — it requires an actual deployment and does not run functions locally.",
+    ],
+    tags: ["sam", "local-testing", "lambda", "api-gateway"],
+  },
+
+  // --- NEW: AWS CDK ---
+  {
+    id: "qq-152",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CDK",
+    question:
+      "A developer runs cdk deploy for the first time in a new AWS account and region and receives an error saying the environment is not bootstrapped. What does bootstrapping create, and how is it done?",
+    options: [
+      "Bootstrapping creates an S3 bucket for assets and an ECR repository plus IAM roles; run cdk bootstrap to create them",
+      "Bootstrapping installs the CDK CLI in the AWS account; run aws cdk install",
+      "Bootstrapping creates the CDK app's VPC and networking prerequisites; run cdk init",
+      "Bootstrapping configures AWS credentials for the CDK CLI; run aws configure",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CDK bootstrapping deploys a CloudFormation stack (CDKToolkit) that provisions resources CDK needs to deploy: an S3 bucket for assets (Lambda code, Docker images), an ECR repository, and IAM roles for deployment. Run cdk bootstrap aws://ACCOUNT-ID/REGION once per account/region combination.",
+    optionExplanations: [
+      "Correct. cdk bootstrap creates the CDKToolkit stack containing the S3 staging bucket, ECR repository, and IAM roles (CloudFormationExecutionRole, DeploymentActionRole, etc.) required for CDK deployments in that account/region.",
+      "Incorrect. The CDK CLI is installed locally via npm (npm install -g aws-cdk) — there is nothing to install in the AWS account itself.",
+      "Incorrect. cdk init creates a new CDK app project locally from a template — it does not create any AWS resources or configure account-level prerequisites.",
+      "Incorrect. aws configure sets up local AWS credentials and region — it is a prerequisite for CDK but is not the bootstrapping process that cdk bootstrap performs.",
+    ],
+    tags: ["cdk", "bootstrap", "deployment", "cloudformation"],
+  },
+  {
+    id: "qq-153",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CDK",
+    question:
+      "A CDK app defines an S3 bucket with a Lambda function. The developer wants to ensure every S3 bucket in the app has versioning enabled, without modifying each bucket construct individually. What CDK feature allows this?",
+    options: [
+      "CDK Aspects, which visit every node in the construct tree and can validate or mutate properties",
+      "CDK Context values set in cdk.json that override bucket defaults",
+      "A CDK Stack environment variable that applies to all child constructs",
+      "CDK Escape hatches that override CloudFormation resource properties globally",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Aspects implement the IAspect interface and are applied to a scope (stack, app, or construct). CDK calls visit() on every node in the tree during synthesis. An Aspect can inspect each node and, if it's a Bucket, enable versioning — affecting all buckets without touching individual construct definitions.",
+    optionExplanations: [
+      "Correct. Aspects traverse the entire construct tree during synthesis. By implementing IAspect and calling Aspects.of(app).add(new MyAspect()), you can enforce policies (like versioning) across all matching constructs automatically.",
+      "Incorrect. cdk.json context values are key-value pairs for parameterizing construct behavior — they don't automatically apply properties across all instances of a construct type.",
+      "Incorrect. CDK stacks don't have environment variables that propagate to child construct configurations. Stack environment (account/region) is different from construct property defaults.",
+      "Incorrect. Escape hatches (cfnBucket.addPropertyOverride) modify a specific resource's CloudFormation properties — they operate on individual construct instances, not globally across all constructs of a type.",
+    ],
+    tags: ["cdk", "aspects", "compliance", "constructs"],
+  },
+  {
+    id: "qq-154",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CDK",
+    question: "What is the difference between L1, L2, and L3 CDK constructs?",
+    options: [
+      "L1 are CloudFormation resource wrappers (Cfn*), L2 add defaults and helper methods, L3 (patterns) combine multiple resources into a reusable higher-level component",
+      "L1 constructs are for development, L2 for staging, and L3 for production deployments",
+      "L1 are basic constructs, L2 add IAM policies, and L3 add VPC networking automatically",
+      "L1 constructs are language-specific, L2 are cross-language, and L3 are AWS-managed",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CDK has three abstraction layers. L1 (Cfn*) are direct CloudFormation resource mappings with no defaults. L2 constructs add sensible defaults, security best practices, and helper methods (e.g. bucket.grantRead()). L3 constructs (patterns) like aws-ecs-patterns.ApplicationLoadBalancedFargateService combine multiple L2 resources into complete architectural patterns.",
+    optionExplanations: [
+      "Correct. L1 = 1:1 CloudFormation mapping, fully explicit. L2 = higher-level with defaults and convenience methods. L3 = opinionated patterns combining multiple services (e.g. API + Lambda + DynamoDB as one construct).",
+      "Incorrect. L1/L2/L3 are abstraction levels, not deployment environment tiers. All three can be used in any environment.",
+      "Incorrect. All construct levels can configure IAM policies and VPC networking — these are not distinguishing features between levels.",
+      "Incorrect. CDK constructs at all levels are available in all supported languages (TypeScript, Python, Java, C#, Go) — language is not the differentiator.",
+    ],
+    tags: ["cdk", "constructs", "l1", "l2", "l3"],
+  },
+
+  // --- NEW: Amazon ECS ---
+  {
+    id: "qq-155",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon ECS",
+    question:
+      "An ECS task definition has two containers: an application container and a sidecar. The application container must not start until the sidecar is healthy. How should the developer configure this?",
+    options: [
+      "Set a dependsOn condition of HEALTHY on the sidecar in the application container's definition",
+      "Configure the application container's entryPoint to sleep until the sidecar port is open",
+      "Set the sidecar container as essential: false so it starts independently",
+      "Use a Lambda function to start the application container after verifying the sidecar",
+    ],
+    correctIndices: [0],
+    explanation:
+      "ECS container dependencies (dependsOn) allow you to specify startup ordering within a task. The condition HEALTHY waits for the dependency container's health check to pass before starting the dependent container. Conditions include START (just started), COMPLETE (exited 0), SUCCESS (exited 0), and HEALTHY (health check passed).",
+    optionExplanations: [
+      "Correct. The dependsOn field in the application container's definition lists the sidecar with condition: HEALTHY. ECS will not start the application container until the sidecar's health check reports healthy.",
+      "Incorrect. Adding a sleep in the entrypoint is fragile — it uses a fixed wait time rather than responding to actual sidecar health, and it wastes startup time when the sidecar is ready early.",
+      "Incorrect. Setting essential: false means the task continues running if the sidecar exits — it has no effect on startup ordering.",
+      "Incorrect. ECS manages container lifecycle within a task — using Lambda to orchestrate container startup adds unnecessary complexity when dependsOn handles this natively.",
+    ],
+    tags: ["ecs", "container-dependencies", "task-definition", "health-check"],
+  },
+  {
+    id: "qq-156",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon ECS",
+    question:
+      "An ECS service on Fargate is consistently showing tasks in STOPPED state with the error 'CannotPullContainerError'. What are the MOST likely causes?",
+    options: [
+      "The task's subnet has no route to the ECR endpoint, or the task execution role lacks ecr:GetAuthorizationToken and ecr:BatchGetImage permissions",
+      "The ECS service's desired count is set higher than the cluster's available capacity",
+      "The container image tag specified in the task definition does not exist in the repository",
+      "The Fargate platform version is incompatible with the container runtime",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CannotPullContainerError on Fargate has two main causes: network (the task's ENI cannot reach ECR — needs a NAT Gateway, public IP, or VPC endpoint) and permissions (the task execution role needs ecr:GetAuthorizationToken, ecr:BatchGetImage, and ecr:GetDownloadUrlForLayer). The image tag not existing would show a different error.",
+    optionExplanations: [
+      "Correct. Fargate tasks pull images at startup. If the subnet is private with no NAT Gateway or ECR VPC endpoint, the pull fails. If the execution role is missing ECR permissions, the authorization step fails. Both present as CannotPullContainerError.",
+      "Incorrect. Fargate doesn't have cluster capacity constraints the same way EC2 does — Fargate allocates resources on-demand. A capacity issue would result in task placement failures before the container pull stage.",
+      "Incorrect. A missing image tag would cause a different error related to the image not being found (manifest unknown or similar) rather than CannotPullContainerError, which specifically indicates a connectivity or authentication failure.",
+      "Incorrect. Platform version incompatibilities are rare and would typically be a configuration error surfaced at service creation, not at container pull time.",
+    ],
+    tags: ["ecs", "fargate", "ecr", "troubleshooting", "networking"],
+  },
+  {
+    id: "qq-157",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon ECS",
+    question:
+      "A developer needs to pass a database connection string to an ECS container securely without storing it as a plaintext environment variable in the task definition. What is the recommended approach?",
+    options: [
+      "Reference the secret ARN from Secrets Manager or SSM Parameter Store in the task definition's secrets field",
+      "Build the connection string into the container image at build time",
+      "Pass the connection string as a Docker build argument in the task definition",
+      "Store the connection string in an S3 object and have the container download it at startup",
+    ],
+    correctIndices: [0],
+    explanation:
+      "ECS supports the secrets field in container definitions, which references Secrets Manager secret ARNs or SSM Parameter Store parameter ARNs. ECS (via the task execution role) fetches the value at task startup and injects it as an environment variable — the value is never stored in plaintext in the task definition.",
+    optionExplanations: [
+      "Correct. The secrets field in an ECS container definition accepts Secrets Manager ARNs and SSM Parameter Store ARNs. The task execution role needs secretsmanager:GetSecretValue or ssm:GetParameters. ECS decrypts and injects the value at startup.",
+      "Incorrect. Building secrets into container images is a serious security risk — the secret is stored in image layers, potentially in registries, and visible in image history. Never embed secrets in images.",
+      "Incorrect. Docker build arguments are for build-time parameters — they cannot be passed at ECS task runtime and are not a secure secret injection mechanism.",
+      "Incorrect. Downloading secrets from S3 at startup requires the container to have S3 access and custom startup script logic. This works but is more complex than the native secrets field integration and still requires careful access control.",
+    ],
+    tags: ["ecs", "secrets", "secrets-manager", "ssm", "security"],
+  },
+
+  // --- NEW: Amazon CloudFront ---
+  {
+    id: "qq-158",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon CloudFront",
+    question:
+      "A CloudFront distribution serves an S3 bucket. The developer wants to ensure users can only access the S3 content through CloudFront and not directly via the S3 URL. What should they configure?",
+    options: [
+      "Origin Access Control (OAC) on the distribution and a bucket policy allowing only the CloudFront service principal",
+      "S3 Block Public Access on the bucket and a signed URL requirement on CloudFront",
+      "An S3 bucket policy denying all public access and enabling CloudFront Transfer Acceleration",
+      "A Lambda@Edge function that rejects requests not coming from CloudFront IP ranges",
+    ],
+    correctIndices: [0],
+    explanation:
+      "OAC is the current recommended mechanism. It gives CloudFront an identity that can be granted access in the S3 bucket policy via the cloudfront.amazonaws.com service principal with a condition on the distribution ARN. Users who try to access the S3 URL directly are denied because the bucket has no public access policy.",
+    optionExplanations: [
+      "Correct. OAC (replacing the older OAI) lets CloudFront sign requests to S3 using SigV4. The bucket policy allows only the CloudFront service principal (aws:SourceArn matching the distribution ARN). Direct S3 access is blocked because no other principal is allowed.",
+      "Incorrect. Block Public Access and signed URLs are separate concepts. Signed URLs control who can access CloudFront, not whether S3 is directly accessible. You still need OAC/OAI to restrict direct S3 access.",
+      "Incorrect. Transfer Acceleration is for accelerating uploads to S3 — it has nothing to do with restricting direct S3 access or enforcing CloudFront routing.",
+      "Incorrect. Using Lambda@Edge to check CloudFront IPs is fragile (IP ranges change), adds latency, and is unnecessary when OAC + bucket policy is the purpose-built solution.",
+    ],
+    tags: ["cloudfront", "s3", "oac", "origin-access-control", "security"],
+  },
+  {
+    id: "qq-159",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon CloudFront",
+    question:
+      "A CloudFront distribution caches API responses. After deploying a bug fix, users are still receiving stale responses. The developer needs to immediately clear the cache for a specific API path. What should they do?",
+    options: [
+      "Create a CloudFront invalidation for the specific path pattern (e.g. /api/products/*)",
+      "Update the CloudFront distribution configuration to set the TTL to 0 for that path",
+      "Delete and recreate the CloudFront distribution to clear all cached content",
+      "Change the API Gateway stage name to force CloudFront to treat it as a new origin path",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CloudFront invalidations remove objects from edge caches before their TTL expires. You specify path patterns (e.g. /api/products/* or /*) and CloudFront propagates the invalidation to all edge locations. The first 1,000 paths per month are free; additional paths incur a charge.",
+    optionExplanations: [
+      "Correct. Create an invalidation in the CloudFront console or via the API with the path pattern to invalidate. CloudFront removes matching objects from all edge caches, forcing the next request to fetch from the origin.",
+      "Incorrect. Changing the TTL to 0 affects future caching behavior — it does not purge objects already cached at edge locations. Users would still receive stale content until existing cached objects expire.",
+      "Incorrect. Deleting and recreating the distribution is destructive, changes the distribution domain name, and takes much longer than creating an invalidation. It is never the right approach for cache clearing.",
+      "Incorrect. Changing the API Gateway stage name changes the origin path but does not clear what CloudFront has already cached under the old path. Cached objects remain until TTL or invalidation.",
+    ],
+    tags: ["cloudfront", "invalidation", "caching", "deployment"],
+  },
+  {
+    id: "qq-160",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon CloudFront",
+    question:
+      "A developer needs to serve premium video content via CloudFront and ensure only authenticated, paying subscribers can download the files. What CloudFront feature should they use?",
+    options: [
+      "CloudFront signed URLs or signed cookies, generated server-side using a CloudFront key pair",
+      "CloudFront Origin Access Control with subscriber-specific IAM roles",
+      "S3 presigned URLs generated by a Lambda function for each request",
+      "CloudFront field-level encryption to restrict access to subscriber data",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Signed URLs grant time-limited access to a single object. Signed cookies grant access to multiple objects matching a pattern — better for streaming or multi-file subscriptions. Both are signed with a CloudFront key pair (Ed25519 or RSA) and can encode expiry, IP restrictions, and path patterns.",
+    optionExplanations: [
+      "Correct. Signed URLs are ideal for single file downloads. Signed cookies are better for HLS video streaming (multiple segments) or subscription access to a directory. Both restrict access to authenticated subscribers and expire after a configured time.",
+      "Incorrect. OAC restricts which AWS service (CloudFront) can access the S3 origin — it doesn't authenticate end users or implement subscriber access control.",
+      "Incorrect. S3 presigned URLs bypass CloudFront entirely and go directly to S3. This loses CloudFront's edge caching, CDN performance, and any other CloudFront features (WAF, geo-restriction, etc.).",
+      "Incorrect. Field-level encryption protects sensitive form fields (like credit card numbers) in POST requests — it is not a mechanism for controlling who can access content objects.",
+    ],
+    tags: [
+      "cloudfront",
+      "signed-urls",
+      "signed-cookies",
+      "security",
+      "access-control",
+    ],
+  },
+
+  // --- NEW: AWS CodeBuild ---
+  {
+    id: "qq-161",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodeBuild",
+    question:
+      "A CodeBuild project builds a Docker image and pushes it to ECR. The build is failing with 'AccessDeniedException' when pushing to ECR. What is the MOST likely cause?",
+    options: [
+      "The CodeBuild service role is missing ecr:GetAuthorizationToken and ecr:BatchCheckLayerAvailability/ecr:PutImage permissions",
+      "The buildspec.yml is missing the docker login command before the push",
+      "The ECR repository does not exist in the same region as the CodeBuild project",
+      "CodeBuild cannot push to ECR — a separate Lambda function must perform the push",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodeBuild uses its service role for all AWS API calls. To push to ECR, the role needs ecr:GetAuthorizationToken (to get a login token) plus ecr:BatchCheckLayerAvailability, ecr:PutImage, and ecr:InitiateLayerUpload on the specific repository. The AWS-managed policy AmazonEC2ContainerRegistryPowerUser grants these.",
+    optionExplanations: [
+      "Correct. The CodeBuild service role is the identity used for all AWS API calls during the build. Missing ECR permissions on this role causes AccessDeniedException. The buildspec runs aws ecr get-login-password which calls ecr:GetAuthorizationToken using the service role's credentials.",
+      "Incorrect. The buildspec does need docker login (or aws ecr get-login-password piped to docker login), but if that command fails with AccessDeniedException it's a role permissions issue, not a missing command issue.",
+      "Incorrect. CodeBuild can push to ECR repositories in the same or different regions. A cross-region push works as long as the repository URI and permissions are correct.",
+      "Incorrect. CodeBuild can absolutely push Docker images to ECR — this is one of the most common CodeBuild use cases. No Lambda intermediary is needed.",
+    ],
+    tags: ["codebuild", "ecr", "iam", "docker", "troubleshooting"],
+  },
+  {
+    id: "qq-162",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodeBuild",
+    question:
+      "A CodeBuild project runs npm install on every build, which takes 3 minutes. The developer wants to cache node_modules across builds to speed this up. What should they configure?",
+    options: [
+      "Enable S3 caching in the CodeBuild project and specify /root/.npm or node_modules as cache paths in buildspec.yml",
+      "Use a custom Docker image with node_modules pre-installed as the CodeBuild environment image",
+      "Add a pre_build phase that downloads node_modules from S3 before npm install",
+      "Enable CodeBuild Local Cache on the build fleet to persist node_modules between builds",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodeBuild supports S3 caching for arbitrary local paths. After a build, CodeBuild zips the specified paths and stores them in S3. On subsequent builds, it restores the cache before the build phases. This is the standard way to cache package manager dependencies across builds.",
+    optionExplanations: [
+      "Correct. Configure cache type: S3 in the project settings and add cache paths (e.g. node_modules or /root/.npm) in buildspec.yml. CodeBuild saves and restores the cache automatically, reducing npm install time on cache hits.",
+      "Incorrect. A custom Docker image with pre-installed node_modules would freeze dependencies at image build time and not reflect package.json changes — it doesn't actually cache the current build's dependencies dynamically.",
+      "Incorrect. Manually managing an S3 cache in the buildspec is essentially rebuilding CodeBuild's built-in caching mechanism — it's unnecessary extra code.",
+      "Incorrect. CodeBuild does support local caching (for source, Docker layers, and custom cache) when using a dedicated build fleet, but S3 caching is the standard approach for most projects and doesn't require a dedicated fleet.",
+    ],
+    tags: ["codebuild", "caching", "npm", "performance"],
+  },
+  {
+    id: "qq-163",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodeBuild",
+    question:
+      "A CodeBuild buildspec.yml needs to use a database password during integration tests. The developer does not want the password to appear in build logs. What is the correct approach?",
+    options: [
+      "Store the password in Secrets Manager or SSM Parameter Store and reference it as an environment variable with type SECRETS_MANAGER or PARAMETER_STORE in the project configuration",
+      "Set the environment variable in buildspec.yml and mark the phase as no-export",
+      "Base64-encode the password in the buildspec.yml env section to obscure it",
+      "Use a CodeBuild private environment and the password will be automatically masked",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodeBuild environment variables support three types: PLAINTEXT, PARAMETER_STORE (SSM), and SECRETS_MANAGER. When using the latter two, CodeBuild retrieves the value at runtime and masks it in build logs. The password is never stored in the buildspec or project definition in plaintext.",
+    optionExplanations: [
+      "Correct. Set the environment variable type to SECRETS_MANAGER or PARAMETER_STORE in the CodeBuild project or buildspec env section. CodeBuild fetches the value at runtime and masks it in CloudWatch Logs automatically.",
+      "Incorrect. buildspec.yml does not have a no-export flag for phases. Any plaintext value in the env section of buildspec.yml is stored in the project definition and visible in build logs.",
+      "Incorrect. Base64 encoding is not encryption — it's trivially reversible and provides no security. The encoded value would still appear in build logs.",
+      "Incorrect. There is no automatic masking of environment variables in a 'private environment'. CodeBuild masks values only for PARAMETER_STORE and SECRETS_MANAGER type environment variables.",
+    ],
+    tags: ["codebuild", "secrets", "security", "environment-variables"],
+  },
+  {
+    id: "qq-164",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodeBuild",
+    question:
+      "A CodeBuild project needs to run integration tests against an RDS database in a private subnet with no internet access. What configuration is required?",
+    options: [
+      "Configure the CodeBuild project to run inside the VPC by specifying the VPC ID, subnets, and security group",
+      "Create a VPC peering connection between the CodeBuild service VPC and the application VPC",
+      "Use an AWS PrivateLink endpoint for CodeBuild to access the private subnet",
+      "Deploy a bastion host in the private subnet and have CodeBuild SSH through it",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodeBuild supports VPC configuration — you specify a VPC ID, private subnets, and a security group. CodeBuild places the build environment ENIs in those subnets, giving builds direct network access to resources like RDS, ElastiCache, and internal services without internet exposure.",
+    optionExplanations: [
+      "Correct. VPC-enabled CodeBuild projects run with ENIs in your specified subnets. The security group controls inbound/outbound traffic. The RDS security group must allow inbound from the CodeBuild security group.",
+      "Incorrect. CodeBuild builds run in AWS-managed infrastructure — there is no CodeBuild-owned VPC to peer with. The VPC configuration approach places build ENIs directly in your VPC.",
+      "Incorrect. AWS PrivateLink endpoints allow private connectivity to AWS services from within a VPC, not the other way around. The solution is running CodeBuild inside the VPC, not adding an endpoint.",
+      "Incorrect. SSH through a bastion adds complexity and requires managing SSH keys and bastion infrastructure. The native VPC configuration is the purpose-built solution.",
+    ],
+    tags: ["codebuild", "vpc", "rds", "networking", "private-subnet"],
+  },
+
+  // --- NEW: AWS Elastic Beanstalk ---
+  {
+    id: "qq-165",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Elastic Beanstalk",
+    question:
+      "A developer needs to install a custom package and configure a cron job on every EC2 instance in an Elastic Beanstalk environment. What is the correct approach?",
+    options: [
+      "Use .ebextensions configuration files in the application bundle to run commands and configure files during deployment",
+      "SSH into each instance and manually configure the package and cron job",
+      "Create a custom AMI with the package pre-installed and configure Beanstalk to use it",
+      "Use AWS Systems Manager Run Command to execute configuration scripts after deployment",
+    ],
+    correctIndices: [0],
+    explanation:
+      ".ebextensions are YAML/JSON configuration files placed in a .ebextensions/ directory in the application bundle. They run during instance provisioning and deployment using the commands, container_commands, files, and packages keys — enabling package installation, file creation, and cron job configuration as code.",
+    optionExplanations: [
+      "Correct. .ebextensions files are processed on every instance during deployment. The packages key installs system packages, files creates or modifies files (including cron files in /etc/cron.d/), and commands runs shell commands.",
+      "Incorrect. Manual SSH configuration is not repeatable, is wiped on instance replacement, and doesn't scale. Beanstalk can replace instances during scaling or health events.",
+      "Incorrect. A custom AMI works for pre-installed packages but doesn't update automatically with new package versions, requires AMI management overhead, and doesn't handle per-deployment configuration changes.",
+      "Incorrect. Systems Manager Run Command can execute scripts on instances but runs after Beanstalk deployment completes and requires SSM agent to be installed. .ebextensions is the purpose-built mechanism for instance configuration during deployment.",
+    ],
+    tags: ["elastic-beanstalk", "ebextensions", "configuration", "deployment"],
+  },
+  {
+    id: "qq-166",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Elastic Beanstalk",
+    question:
+      "An Elastic Beanstalk environment is running a web application. During a deployment, the team wants zero downtime and the ability to instantly roll back if the new version has issues. Which deployment policy should they use?",
+    options: [
+      "Immutable deployment, which launches a new set of instances and only cuts over after health checks pass",
+      "Rolling deployment with batch size 1 to minimize impact during updates",
+      "All at once deployment for speed, relying on Beanstalk's automatic rollback",
+      "Blue/green by using Beanstalk's environment swap (CNAME swap) after testing on a separate environment",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Immutable deployments launch a completely new set of instances with the new version in a temporary Auto Scaling group. Only if all new instances pass health checks does traffic shift. Rollback is instant — just terminate the new instances. The old instances continue serving traffic throughout.",
+    optionExplanations: [
+      "Correct. Immutable deployments maintain the old fleet in service throughout the deployment. A new ASG with new instances is launched, tested, then added to the load balancer. The old ASG is terminated. Rollback is instant: terminate the new ASG.",
+      "Incorrect. Rolling deployments update instances in batches — during the update, some instances run the old version and some run the new. There is partial downtime (reduced capacity) and rollback requires another rolling deployment.",
+      "Incorrect. All at once updates all instances simultaneously — there is downtime during the deployment and rollback requires redeploying the old version. This is the riskiest option.",
+      "Incorrect. Blue/green with CNAME swap is also a valid zero-downtime strategy, but the question asks about a single environment. CNAME swap involves two full Beanstalk environments and is more operationally complex than immutable deployments.",
+    ],
+    tags: [
+      "elastic-beanstalk",
+      "deployment",
+      "immutable",
+      "zero-downtime",
+      "rollback",
+    ],
+  },
+  {
+    id: "qq-167",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Elastic Beanstalk",
+    question:
+      "An Elastic Beanstalk deployment completes successfully but the application is returning 502 errors. Where should the developer look first to diagnose the issue?",
+    options: [
+      "The application logs accessible via the Beanstalk console Logs section, and the /var/log/nginx/error.log or /var/log/httpd/error_log on the instance",
+      "AWS CloudTrail to find the API calls made during the deployment",
+      "The Beanstalk environment configuration to check instance type and scaling settings",
+      "CloudWatch metrics for the Elastic Load Balancer to identify throttling",
+    ],
+    correctIndices: [0],
+    explanation:
+      "502 Bad Gateway means the load balancer reached the instance but the application process returned an invalid response or wasn't listening on the expected port. Application logs show crashes and startup errors. The reverse proxy error log (nginx/Apache) shows exactly what happened between the proxy and the app process.",
+    optionExplanations: [
+      "Correct. The Beanstalk Logs section retrieves logs from all instances. Nginx or Apache error logs show 502 causes (upstream connection refused, app not listening on expected port, timeout). Application stdout/stderr logs show application crashes.",
+      "Incorrect. CloudTrail logs API operations against Beanstalk — it does not contain application-level HTTP errors or runtime process failures.",
+      "Incorrect. Instance type and scaling settings are configuration concerns — they don't explain why the application is returning 502 errors after a successful deployment.",
+      "Incorrect. ELB throttling causes 503 errors (service unavailable), not 502. 502 specifically indicates the backend instance returned an invalid HTTP response or the connection was refused.",
+    ],
+    tags: ["elastic-beanstalk", "troubleshooting", "502", "logs"],
+  },
+  {
+    id: "qq-168",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Elastic Beanstalk",
+    question:
+      "A developer needs to run a long-running background job that processes messages from an SQS queue, separate from the web tier that handles HTTP requests. What Elastic Beanstalk feature supports this architecture?",
+    options: [
+      "A Worker environment tier that automatically polls an SQS queue and delivers messages to the application via HTTP POST to /",
+      "A second Web Server environment tier that is configured to poll SQS",
+      "A Lambda function triggered by the SQS queue, deployed alongside the Beanstalk environment",
+      "An EC2 Auto Scaling group deployed separately from Beanstalk that runs the worker process",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Elastic Beanstalk Worker environments are designed for background processing. Beanstalk deploys an SQS daemon on each instance that polls the queue and delivers each message as an HTTP POST to localhost. The application only needs to expose an HTTP endpoint — no SQS SDK code required.",
+    optionExplanations: [
+      "Correct. Worker tier environments include a built-in SQS daemon. You configure the SQS queue and the worker tier polls it, posting messages to the application's / endpoint (or a configurable path). The web tier and worker tier are separate Beanstalk environments.",
+      "Incorrect. Web Server tier environments are for handling HTTP requests from users via a load balancer — they are not designed for SQS polling and do not include the SQS daemon.",
+      "Incorrect. A standalone Lambda function works but is not a Beanstalk feature. The question specifically asks about Elastic Beanstalk architecture — Worker tier is the Beanstalk-native answer.",
+      "Incorrect. A standalone EC2 Auto Scaling group exists outside of Beanstalk and loses all of Beanstalk's deployment, monitoring, and management benefits. Worker tier is the managed Beanstalk solution.",
+    ],
+    tags: ["elastic-beanstalk", "worker-tier", "sqs", "background-processing"],
+  },
+
+  // --- NEW: AWS CodePipeline ---
+  {
+    id: "qq-169",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodePipeline",
+    question:
+      "A CodePipeline pipeline deploys to a production environment. The team wants a manual approval step before the production deployment executes. What should they add to the pipeline?",
+    options: [
+      "A Manual Approval action in a stage between the build stage and the production deploy stage",
+      "A CodeBuild action that sends an email and pauses until a reply is received",
+      "A Lambda action that checks an approval DynamoDB table before proceeding",
+      "A Gate condition on the production deploy action using an IAM policy",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodePipeline has a built-in Manual Approval action type. When the pipeline reaches this action, it pauses and sends an SNS notification. A reviewer approves or rejects via the console, CLI, or SDK. The pipeline resumes on approval or fails on rejection.",
+    optionExplanations: [
+      "Correct. Add a stage with an Approval action between build and production deployment. Configure an SNS topic for notifications. The pipeline pauses until a reviewer with codepipeline:PutApprovalResult permission approves or rejects.",
+      "Incorrect. CodeBuild cannot pause a pipeline — a CodeBuild action runs to completion. There is no mechanism for CodeBuild to pause the pipeline pending an email reply.",
+      "Incorrect. A Lambda action runs to completion and signals success or failure — it cannot pause the pipeline indefinitely for a human decision. Lambda actions are for automated checks, not human approvals.",
+      "Incorrect. CodePipeline does not support IAM-based gate conditions on individual actions. Access control determines who can interact with the pipeline, not whether it proceeds.",
+    ],
+    tags: ["codepipeline", "manual-approval", "deployment", "governance"],
+  },
+  {
+    id: "qq-170",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodePipeline",
+    question:
+      "A CodePipeline pipeline has a CodeBuild stage that produces a build artifact. A later CodeDeploy stage needs to use that artifact. How are artifacts passed between stages in CodePipeline?",
+    options: [
+      "CodePipeline stores artifacts in an S3 bucket and passes the artifact reference between actions; each action specifies its input and output artifacts by name",
+      "Each stage writes its output to a shared EFS file system that subsequent stages read from",
+      "Artifacts are passed as environment variables between pipeline stages",
+      "Each action must upload its output to a fixed S3 key that downstream actions know to read from",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodePipeline uses an S3 artifact bucket to pass data between actions. Each action declares InputArtifacts and OutputArtifacts by name. CodePipeline handles uploading and downloading automatically — actions access their input artifacts from the workspace without managing S3 keys directly.",
+    optionExplanations: [
+      "Correct. CodePipeline manages artifact storage in S3. A CodeBuild action declares an OutputArtifact named e.g. 'BuildOutput'. The CodeDeploy action declares 'BuildOutput' as its InputArtifact. CodePipeline passes the S3 location automatically.",
+      "Incorrect. EFS is not used by CodePipeline for artifact passing. Actions run in separate environments (CodeBuild containers, CodeDeploy agent) — shared EFS would require complex network configuration.",
+      "Incorrect. Environment variables in CodePipeline are used for action configuration parameters, not for passing binary artifacts like build outputs or deployment packages.",
+      "Incorrect. While artifacts are stored in S3, actions don't manage S3 keys directly. CodePipeline abstracts the storage — actions reference artifacts by their declared name and CodePipeline handles the rest.",
+    ],
+    tags: ["codepipeline", "artifacts", "s3", "codebuild", "codedeploy"],
+  },
+  {
+    id: "qq-171",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS CodePipeline",
+    question:
+      "A team wants their pipeline to trigger automatically whenever code is pushed to the main branch of their CodeCommit repository. What is the recommended way to configure this trigger?",
+    options: [
+      "Create an Amazon EventBridge rule that matches CodeCommit repository state change events and targets the CodePipeline StartPipelineExecution API",
+      "Configure a CodeCommit trigger that calls the pipeline webhook directly",
+      "Enable polling in the CodePipeline source action to check for new commits every minute",
+      "Use a Lambda function subscribed to CodeCommit notifications to start the pipeline",
+    ],
+    correctIndices: [0],
+    explanation:
+      "EventBridge is the recommended trigger mechanism for CodePipeline. When new commits are pushed to CodeCommit, CodeCommit publishes an event to EventBridge. An EventBridge rule matches the event and invokes codepipeline:StartPipelineExecution. This is event-driven with low latency, unlike polling.",
+    optionExplanations: [
+      "Correct. EventBridge rules with CodeCommit as the source provide near-instant pipeline triggering on push. When you create a pipeline with a CodeCommit source in the console, the EventBridge rule is created automatically.",
+      "Incorrect. CodeCommit triggers can notify SNS or invoke Lambda — they don't directly start CodePipeline executions. An EventBridge rule is the correct integration path.",
+      "Incorrect. Polling checks for changes on a schedule (default 1 minute) and has higher latency than event-driven triggering. AWS recommends EventBridge over polling for all new pipelines.",
+      "Incorrect. Using a Lambda function to start the pipeline via CodeCommit notifications adds an unnecessary intermediate step — EventBridge can invoke CodePipeline directly without a Lambda.",
+    ],
+    tags: ["codepipeline", "codecommit", "eventbridge", "triggers", "cicd"],
+  },
+  {
+    id: "qq-172",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodePipeline",
+    question:
+      "A pipeline deploys to three environments: dev, staging, and production in separate AWS accounts. What is the BEST way to structure this multi-account deployment?",
+    options: [
+      "Use cross-account roles — each target account has a deployment role that the pipeline's CodePipeline role can assume, and CodeDeploy or CloudFormation executes in the target account",
+      "Create a separate CodePipeline in each account and trigger them sequentially via EventBridge",
+      "Deploy all environments to the same account and use separate VPCs for isolation",
+      "Use AWS Organizations to share the CodePipeline with all member accounts",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodePipeline supports cross-account deployments via role assumption. The pipeline's IAM role assumes a cross-account role in each target account. CloudFormation or CodeDeploy actions run in the target account's context. The artifact S3 bucket must be accessible from all accounts (cross-account bucket policy or KMS CMK sharing).",
+    optionExplanations: [
+      "Correct. The pipeline role assumes account-specific deployment roles via STS. Each target account has a role trusting the pipeline's account. CloudFormation/CodeDeploy run under the assumed role in the target account. The artifact bucket key must allow cross-account access.",
+      "Incorrect. Separate pipelines per account require complex triggering logic, duplicate pipeline definitions, and make it hard to enforce a single deployment sequence across environments.",
+      "Incorrect. Using separate VPCs in one account does not provide the account-level isolation, billing separation, and security boundaries that separate accounts provide.",
+      "Incorrect. AWS Organizations is for account management and SCP governance — it does not share CodePipeline across accounts or enable multi-account deployments.",
+    ],
+    tags: [
+      "codepipeline",
+      "cross-account",
+      "multi-account",
+      "iam",
+      "deployment",
+    ],
+  },
+
+  // --- NEW: Amazon VPC ---
+  {
+    id: "qq-173",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon VPC",
+    question:
+      "A Lambda function in a VPC needs to call the DynamoDB API without routing traffic through the internet. The VPC has no NAT Gateway. What is the MOST cost-effective solution?",
+    options: [
+      "Create a VPC Gateway Endpoint for DynamoDB, which routes DynamoDB traffic through AWS's private network at no additional cost",
+      "Add a NAT Gateway to the VPC to enable internet access for the Lambda function",
+      "Move the Lambda function outside the VPC so it can use the public DynamoDB endpoint",
+      "Create a VPC Interface Endpoint (PrivateLink) for DynamoDB",
+    ],
+    correctIndices: [0],
+    explanation:
+      "DynamoDB and S3 support Gateway Endpoints, which are free and route traffic through AWS's private network via the VPC route table. No NAT Gateway, no internet gateway, and no per-hour or data processing charges. Interface Endpoints (PrivateLink) work for most other AWS services but incur hourly and data charges.",
+    optionExplanations: [
+      "Correct. Gateway Endpoints for DynamoDB and S3 are free. They add an entry to your route table directing DynamoDB traffic to the endpoint, keeping it within the AWS network. No NAT Gateway needed.",
+      "Incorrect. A NAT Gateway costs $0.045/hour plus data processing charges — it's significantly more expensive than a free Gateway Endpoint, and unnecessary when a Gateway Endpoint achieves the same result.",
+      "Incorrect. Moving Lambda outside the VPC gives it internet access but means it can no longer reach private VPC resources (RDS, ElastiCache, etc.) — it's a tradeoff that may break other requirements.",
+      "Incorrect. DynamoDB supports both Gateway Endpoints (free) and Interface Endpoints (paid). For cost-effectiveness, Gateway Endpoint is the correct choice for DynamoDB and S3.",
+    ],
+    tags: ["vpc", "gateway-endpoint", "dynamodb", "lambda", "cost"],
+  },
+  {
+    id: "qq-174",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon VPC",
+    question:
+      "A security team needs to audit all network traffic entering and leaving a VPC for compliance. They need to capture source IP, destination IP, ports, protocol, and whether the traffic was accepted or rejected. What should they enable?",
+    options: [
+      "VPC Flow Logs published to CloudWatch Logs or S3, which capture IP traffic metadata for network interfaces",
+      "AWS CloudTrail with data events enabled for all VPC API calls",
+      "Amazon GuardDuty to analyze VPC traffic patterns and detect anomalies",
+      "AWS Config rules to evaluate VPC security group configurations",
+    ],
+    correctIndices: [0],
+    explanation:
+      "VPC Flow Logs capture IP traffic metadata (not packet contents) for ENIs, subnets, or the entire VPC. Each log record includes srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, and action (ACCEPT/REJECT). Published to CloudWatch Logs or S3 for analysis.",
+    optionExplanations: [
+      "Correct. VPC Flow Logs are the purpose-built tool for network traffic auditing in AWS. They capture the exact fields mentioned: source/destination IP, ports, protocol, and accept/reject action. They can be queried in CloudWatch Logs Insights or Athena.",
+      "Incorrect. CloudTrail logs AWS API calls (management events) — it does not capture network-level IP traffic between resources. It would show 'CreateInstance' but not the TCP connections the instance makes.",
+      "Incorrect. GuardDuty analyzes VPC Flow Logs and DNS logs to detect threats — it is a threat detection service built on top of flow data, not the raw audit log itself.",
+      "Incorrect. AWS Config evaluates resource configurations against rules — it tracks configuration changes (e.g. 'security group rule changed') but does not capture runtime network traffic.",
+    ],
+    tags: ["vpc", "flow-logs", "auditing", "security", "compliance"],
+  },
+  {
+    id: "qq-175",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon VPC",
+    question:
+      "A security group rule allows inbound traffic on port 443 from 0.0.0.0/0. A NACL on the same subnet denies inbound traffic on port 443. Which takes effect?",
+    options: [
+      "The NACL deny takes effect — NACLs are evaluated before security groups and an explicit NACL deny blocks traffic before it reaches the security group",
+      "The security group allow takes effect — security groups have higher priority than NACLs",
+      "Both are evaluated independently and traffic is allowed since at least one rule allows it",
+      "The most restrictive rule wins — the deny takes effect because deny is more specific than allow",
+    ],
+    correctIndices: [0],
+    explanation:
+      "NACLs are stateless and evaluated at the subnet boundary before traffic reaches the instance (and its security group). An explicit NACL deny on port 443 drops the packet at the subnet level — it never reaches the instance for security group evaluation. Security groups only evaluate traffic that passes the NACL.",
+    optionExplanations: [
+      "Correct. NACLs operate at the subnet boundary and are stateless. Traffic hits the NACL first. If an explicit deny matches, the packet is dropped and never reaches the instance or its security group.",
+      "Incorrect. Security groups do not have higher priority than NACLs — they operate at different layers. NACLs are subnet-level; security groups are instance-level. Subnet-level evaluation happens first.",
+      "Incorrect. NACLs and security groups are not evaluated as a union — they are evaluated in sequence. A NACL deny means the packet doesn't reach the security group for evaluation.",
+      "Incorrect. While the outcome (deny wins) is correct, the reasoning is wrong. It's not about specificity — it's about evaluation order. NACLs evaluate first, and an explicit deny stops processing before security groups are consulted.",
+    ],
+    tags: ["vpc", "nacl", "security-group", "networking", "traffic-filtering"],
+  },
+  {
+    id: "qq-176",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon VPC",
+    question:
+      "Two VPCs need to communicate privately. VPC A has CIDR 10.0.0.0/16 and VPC B has CIDR 10.0.0.0/16. Which option allows private connectivity?",
+    options: [
+      "Neither VPC peering nor Transit Gateway will work due to overlapping CIDRs — redesign the IP address scheme",
+      "Create a VPC peering connection — peering works regardless of CIDR overlap",
+      "Use AWS Transit Gateway which handles overlapping CIDRs through its routing table",
+      "Use VPC sharing via AWS Resource Access Manager to share subnets between VPCs",
+    ],
+    correctIndices: [0],
+    explanation:
+      "VPC peering and Transit Gateway do not support overlapping CIDR blocks. If two VPCs have the same CIDR range (both 10.0.0.0/16), routing is ambiguous — AWS cannot determine which VPC a destination IP belongs to. The solution is to use non-overlapping CIDRs from the start.",
+    optionExplanations: [
+      "Correct. VPC peering explicitly prohibits overlapping CIDRs, and Transit Gateway also requires non-overlapping CIDRs for connected VPCs. The only solution is to redesign the IP addressing so the VPCs have distinct CIDR ranges.",
+      "Incorrect. VPC peering has a hard requirement for non-overlapping CIDRs. AWS will reject a peering request if the VPCs have overlapping IP ranges.",
+      "Incorrect. Transit Gateway also requires non-overlapping CIDRs between attached VPCs. It cannot route traffic when the source and destination share the same IP range.",
+      "Incorrect. VPC sharing (RAM) allows subnets from one VPC to be shared with another account — it doesn't create routing between separate VPCs with overlapping CIDRs.",
+    ],
+    tags: ["vpc", "peering", "cidr", "networking", "transit-gateway"],
+  },
+
+  // --- NEW: AWS AppSync ---
+  {
+    id: "qq-177",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppSync",
+    question:
+      "An AppSync API needs to combine data from DynamoDB and a Lambda function in a single GraphQL query response. What AppSync feature enables fetching from multiple data sources in one resolver?",
+    options: [
+      "Pipeline resolvers, which chain multiple functions (each with its own data source) sequentially",
+      "Batch resolvers that parallelize requests to multiple data sources",
+      "AppSync subscriptions that aggregate data from multiple sources",
+      "A Lambda resolver that orchestrates calls to DynamoDB and other services",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Pipeline resolvers consist of a before mapping template, an ordered list of AppSync Functions (each with a data source), and an after mapping template. Each function can call a different data source (DynamoDB, Lambda, HTTP, etc.), and the output of one function can be passed as input to the next.",
+    optionExplanations: [
+      "Correct. Pipeline resolvers chain AppSync Functions. Each function has its own data source and resolver mapping templates. The pipeline executes them in order, allowing data from DynamoDB to be enriched with Lambda results in a single GraphQL operation.",
+      "Incorrect. AppSync does not have a 'batch resolver' type for parallelizing across multiple data sources. Pipeline resolvers execute sequentially; parallel execution requires Lambda orchestration.",
+      "Incorrect. AppSync subscriptions push data to clients when mutations occur — they are for real-time updates, not for aggregating data from multiple sources in a query response.",
+      "Incorrect. Using a Lambda resolver that calls DynamoDB internally works, but it adds Lambda overhead and latency. Pipeline resolvers are the native AppSync solution for multi-source composition without Lambda.",
+    ],
+    tags: ["appsync", "pipeline-resolver", "graphql", "dynamodb", "lambda"],
+  },
+  {
+    id: "qq-178",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppSync",
+    question:
+      "An AppSync API needs to allow unauthenticated users to read public data and authenticated users to read and write their own private data. What authorization configuration supports this?",
+    options: [
+      "Configure multiple authorization modes — API_KEY for unauthenticated reads and AMAZON_COGNITO_USER_POOLS for authenticated operations, using @auth directives to control access per field and type",
+      "Create two separate AppSync APIs — one public with API key auth and one private with Cognito auth",
+      "Use IAM authorization for all requests and create an IAM role for unauthenticated users",
+      "Use Lambda authorization that checks for the presence of a Cognito token and falls back to API key access",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppSync supports multiple authorization modes on a single API. The primary mode handles unauthenticated requests (API_KEY). Additional modes (Cognito User Pools, IAM, Lambda, OIDC) are applied per operation. @auth directives on schema types and fields control which authorization mode is required for each operation.",
+    optionExplanations: [
+      "Correct. AppSync's multiple auth mode support allows a single API to serve both public and authenticated users. @auth directives specify which mode is required per type or field, enabling fine-grained access control on the same schema.",
+      "Incorrect. Two separate APIs require clients to know which endpoint to call, duplicate schema maintenance, and cannot easily combine public and private data in a single response.",
+      "Incorrect. IAM authorization requires AWS credentials for every request — unauthenticated users (without AWS credentials) cannot access IAM-authorized APIs without additional complexity like Cognito Identity Pool unauthenticated identities.",
+      "Incorrect. A Lambda authorizer can implement complex custom logic but is heavier and more expensive than using AppSync's built-in multiple auth mode support with declarative @auth directives.",
+    ],
+    tags: ["appsync", "authorization", "cognito", "api-key", "graphql"],
+  },
+  {
+    id: "qq-179",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS AppSync",
+    question:
+      "An AppSync subscription is set up so mobile clients receive real-time updates when a DynamoDB item is updated. Updates are happening in DynamoDB but clients are not receiving subscription events. What is the MOST likely cause?",
+    options: [
+      "AppSync subscriptions are triggered by GraphQL mutations, not directly by DynamoDB changes — the application must call a mutation when updating DynamoDB",
+      "AppSync WebSocket connections require an API Gateway WebSocket API to be configured as an intermediary",
+      "DynamoDB Streams must be enabled and connected to AppSync via an EventBridge pipe",
+      "Subscriptions only work when the client and server are in the same AWS region",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppSync subscriptions are triggered when a matching mutation is executed through AppSync — not by underlying data source changes. If data is written directly to DynamoDB (bypassing AppSync), no subscription event fires. The mutation must go through AppSync to trigger subscriber notifications.",
+    optionExplanations: [
+      "Correct. AppSync subscriptions listen for specific mutations. When a client or backend calls a mutation through AppSync, AppSync notifies all subscribed clients. Direct DynamoDB writes (via SDK, Lambda, console) bypass AppSync and produce no subscription events.",
+      "Incorrect. AppSync manages WebSocket connections natively — no API Gateway WebSocket API is needed. AppSync's subscription infrastructure handles connection management and message delivery.",
+      "Incorrect. AppSync does not natively integrate with DynamoDB Streams for subscription triggering. Subscriptions are mutation-driven within AppSync's own request/response cycle.",
+      "Incorrect. AppSync subscriptions work across regions — clients connect to the AppSync endpoint regardless of their geographic location. Region mismatch between client and AppSync endpoint is not a constraint.",
+    ],
+    tags: ["appsync", "subscriptions", "real-time", "mutations", "dynamodb"],
+  },
+  {
+    id: "qq-180",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppSync",
+    question:
+      "An AppSync resolver needs to call an existing REST API as a data source. What data source type should the developer configure?",
+    options: [
+      "HTTP data source, which allows AppSync to make HTTP requests to any REST endpoint",
+      "Lambda data source, where a Lambda function proxies the HTTP call",
+      "None data source, using local resolvers to return mock data while the REST API is built",
+      "RDS data source, since REST APIs return relational data",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppSync HTTP data sources allow resolvers to make signed or unsigned HTTP requests to REST endpoints. The resolver mapping template builds the HTTP request (method, path, headers, body) and maps the response to the GraphQL return type. This avoids the Lambda overhead for simple REST proxy patterns.",
+    optionExplanations: [
+      "Correct. AppSync HTTP data sources connect directly to REST APIs. The request mapping template constructs the HTTP request, and the response mapping template transforms the JSON response to match the GraphQL schema.",
+      "Incorrect. A Lambda data source works but adds unnecessary latency, cost, and operational overhead when AppSync's native HTTP data source can call the REST API directly without an intermediate function.",
+      "Incorrect. None data source (local resolvers) evaluates a mapping template without calling any backend — it's for returning computed or hardcoded data, not for calling external REST APIs.",
+      "Incorrect. RDS data source connects to Aurora Serverless v1 via the RDS Data API — it's for SQL databases, not REST APIs.",
+    ],
+    tags: ["appsync", "http-data-source", "rest-api", "resolver"],
+  },
+
+  // --- NEW: AWS Systems Manager ---
+  {
+    id: "qq-181",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Systems Manager",
+    question:
+      "A developer needs to run a shell script on 50 EC2 instances simultaneously to apply a security patch. No SSH access is configured on the instances. What SSM feature should they use?",
+    options: [
+      "SSM Run Command with the AWS-RunShellScript document to execute commands on multiple instances without SSH",
+      "SSM Session Manager to open a terminal session and manually run the script on each instance",
+      "SSM Patch Manager with a custom patch baseline that includes the security patch",
+      "SSM Parameter Store to store the script and have instances pull and execute it on a schedule",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Run Command sends commands to managed instances via the SSM agent without requiring SSH, open inbound ports, or bastion hosts. You specify a document (AWS-RunShellScript for Linux), the command, and a target (instance IDs, tags, or all managed instances). Output is captured to CloudWatch Logs or S3.",
+    optionExplanations: [
+      "Correct. Run Command is designed for this use case — executing commands at scale across multiple instances. Target 50 instances by tag or instance ID, specify the script in the Parameters, and Run Command distributes and executes it via the SSM agent.",
+      "Incorrect. Session Manager opens interactive terminal sessions — it's for interactive access, not batch command execution across multiple instances. You'd need to run the script manually on each instance.",
+      "Incorrect. Patch Manager automates OS patch management using pre-defined or custom patch baselines for OS packages — it's not designed to run arbitrary custom scripts.",
+      "Incorrect. Parameter Store stores configuration values and secrets — it's not a script execution mechanism. Instances don't automatically pull and execute scripts stored in Parameter Store.",
+    ],
+    tags: ["systems-manager", "run-command", "ec2", "automation"],
+  },
+  {
+    id: "qq-182",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Systems Manager",
+    question:
+      "An application's configuration is stored in SSM Parameter Store. The Lambda function reads the parameter on every invocation, causing latency and unnecessary API calls. What is the BEST solution?",
+    options: [
+      "Use the AWS Parameters and Secrets Lambda Extension to cache parameter values locally with a configurable TTL",
+      "Increase the Lambda memory to reduce the latency of GetParameter API calls",
+      "Store the parameter value in a Lambda environment variable during deployment",
+      "Use SSM Parameter Store Advanced tier which has lower API latency",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The AWS Parameters and Secrets Lambda Extension runs as a Lambda layer and provides a local HTTP endpoint (localhost:2772). Lambda functions request parameters from this local endpoint — the extension caches values and refreshes them when the TTL expires, eliminating redundant GetParameter API calls across warm invocations.",
+    optionExplanations: [
+      "Correct. The extension caches parameter values in memory for the configurable TTL. The Lambda function calls localhost:2772/systemsmanager/parameters/get?name=... and gets the cached value without an SDK call or API latency.",
+      "Incorrect. Lambda memory allocation affects CPU performance and function execution speed, not the latency of individual network API calls to SSM Parameter Store.",
+      "Incorrect. Storing parameter values in environment variables loses the ability to update the configuration without redeploying Lambda, and the value is stored in plaintext in the Lambda configuration for SecureString parameters.",
+      "Incorrect. SSM Parameter Store Advanced tier has higher throughput limits and supports parameter policies, but it does not reduce per-call latency — both tiers have similar API latency.",
+    ],
+    tags: [
+      "systems-manager",
+      "parameter-store",
+      "lambda",
+      "caching",
+      "extension",
+    ],
+  },
+  {
+    id: "qq-183",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Systems Manager",
+    question:
+      "A developer needs to securely connect to an EC2 instance in a private subnet for debugging. The subnet has no internet gateway and no inbound security group rules. What SSM feature enables this?",
+    options: [
+      "SSM Session Manager, which creates an interactive shell session via the SSM agent without requiring inbound ports or SSH keys",
+      "SSM Run Command with the AWS-StartInteractiveCommand document",
+      "SSM Automation with a runbook that opens a temporary SSH tunnel",
+      "SSM Fleet Manager, which provides a graphical remote desktop connection",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Session Manager connects to instances through the SSM agent's outbound HTTPS connection to the SSM service endpoint — no inbound ports needed, no SSH keys, no bastion host. The instance needs the SSM agent installed and an IAM instance profile with AmazonSSMManagedInstanceCore policy, plus outbound HTTPS (port 443) to the SSM service (or a VPC endpoint).",
+    optionExplanations: [
+      "Correct. Session Manager works via the SSM agent's outbound connection. For private subnets with no internet access, create VPC Interface Endpoints for ssm, ssmmessages, and ec2messages to allow the agent to communicate with the SSM service.",
+      "Incorrect. AWS-StartInteractiveCommand is not a valid SSM document. Run Command is for batch commands, not interactive sessions — Session Manager is the correct feature for interactive shell access.",
+      "Incorrect. SSM Automation runs operational runbooks (multi-step automated tasks) — it does not create interactive debugging sessions or SSH tunnels.",
+      "Incorrect. Fleet Manager provides a GUI-based view for managing instances (file browser, performance monitoring) — it does not provide an interactive terminal session for debugging.",
+    ],
+    tags: [
+      "systems-manager",
+      "session-manager",
+      "ec2",
+      "security",
+      "private-subnet",
+    ],
+  },
+  {
+    id: "qq-184",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Systems Manager",
+    question:
+      "A team needs to automate patching EC2 instances every Sunday at 2 AM with minimal disruption. Instances should be patched in batches of 20% at a time, with health checks between batches. What SSM feature handles this?",
+    options: [
+      "Patch Manager with a maintenance window configured for Sunday 2 AM, using a patch baseline and concurrency settings",
+      "SSM Run Command scheduled with EventBridge to run every Sunday at 2 AM",
+      "SSM Automation with a custom runbook that calls aws ec2 reboot-instances in batches",
+      "SSM State Manager with an association that applies a patch document on a weekly schedule",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Patch Manager integrates with Maintenance Windows for scheduled patching. The Maintenance Window controls timing (Sunday 2 AM), concurrency (20% of targets at a time), and error thresholds (stop if X% fail). Patch Manager uses patch baselines to define which patches to apply and registers targets and tasks in the window.",
+    optionExplanations: [
+      "Correct. Maintenance Windows + Patch Manager is the purpose-built solution. The Maintenance Window defines the schedule, concurrency (e.g. 20%), and stop conditions. Patch Manager handles patch selection via baselines and instance patching. The concurrency setting controls how many instances patch simultaneously.",
+      "Incorrect. Run Command with EventBridge can execute commands on a schedule, but it lacks the built-in concurrency controls, patch baseline integration, and health-check-between-batches behavior that Maintenance Windows provide.",
+      "Incorrect. An SSM Automation runbook calling reboot-instances is a custom solution that requires building batch logic manually — Patch Manager + Maintenance Windows provides this natively.",
+      "Incorrect. State Manager associations maintain desired state configuration continuously (e.g. ensure software is installed) — they don't provide the scheduling flexibility, concurrency controls, or maintenance window integration needed for controlled batch patching.",
+    ],
+    tags: [
+      "systems-manager",
+      "patch-manager",
+      "maintenance-window",
+      "automation",
+    ],
+  },
+
+  // --- NEW: AWS STS ---
+  {
+    id: "qq-185",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "A developer calls sts:AssumeRole and receives temporary credentials with a 1-hour session. The application needs to continue operating beyond that hour. How should the application handle credential renewal?",
+    options: [
+      "Use the AWS SDK's credential provider chain, which automatically refreshes credentials by calling AssumeRole before they expire",
+      "Call sts:RefreshCredentials before the session expires to extend the existing session",
+      "Increase the role's MaxSessionDuration to 12 hours and call AssumeRole once at startup",
+      "Store the credentials in Secrets Manager and have the application fetch them when needed",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The AWS SDK's AssumeRoleProvider (or assume_role provider in various SDKs) automatically manages credential refresh. It calls AssumeRole before credentials expire and caches the new credentials. Applications using the SDK credential chain get seamless renewal without any manual logic.",
+    optionExplanations: [
+      "Correct. The AWS SDK's built-in assume role credential provider tracks expiration and proactively calls AssumeRole to refresh credentials. Applications using the SDK's credential chain (environment variables, instance profile, assume role provider) get this automatically.",
+      "Incorrect. sts:RefreshCredentials does not exist as an API. Temporary credentials cannot be extended — you must call AssumeRole again to get a new set of credentials.",
+      "Incorrect. Increasing MaxSessionDuration to 12 hours reduces the frequency of AssumeRole calls but doesn't eliminate the need for renewal. After 12 hours, the credentials still expire and the application would fail without renewal logic.",
+      "Incorrect. Storing temporary credentials in Secrets Manager defeats their purpose — they're meant to be short-lived. Secrets Manager is for long-term secrets. Credentials from AssumeRole should be used directly by the SDK.",
+    ],
+    tags: ["sts", "assume-role", "credentials", "sdk", "renewal"],
+  },
+  {
+    id: "qq-186",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "A third-party company needs to access resources in your AWS account without you sharing long-term credentials. They will assume a role in your account from their own AWS account. What security measure prevents the confused deputy problem?",
+    options: [
+      "Add an ExternalId condition to the role's trust policy that the third party must provide when calling AssumeRole",
+      "Require the third party to use MFA before assuming the role",
+      "Limit the role's session duration to 15 minutes to reduce exposure time",
+      "Use a permission boundary on the role to limit what the third party can do",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The confused deputy problem occurs when a third party could trick another service into using your role on their behalf. ExternalId is a secret value agreed upon between you and the third party. The trust policy requires ExternalId in the AssumeRole call — an attacker who knows only the role ARN cannot assume it without the ExternalId.",
+    optionExplanations: [
+      "Correct. ExternalId is the standard mitigation for the confused deputy problem. The third party provides ExternalId; you add it to the trust policy condition. An attacker knowing only the role ARN cannot assume it without the matching ExternalId.",
+      "Incorrect. MFA requirements in trust policies add a human factor but don't address the confused deputy problem, which involves automated service calls. The third party's automated systems cannot satisfy an MFA condition.",
+      "Incorrect. Short session duration limits the window of exposure after a successful assume role, but doesn't prevent an unauthorized assume role call from succeeding in the first place.",
+      "Incorrect. Permission boundaries limit what the role can do after assumption — they don't prevent unauthorized parties from assuming the role. The trust policy and ExternalId control who can assume it.",
+    ],
+    tags: ["sts", "assume-role", "external-id", "confused-deputy", "security"],
+  },
+  {
+    id: "qq-187",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "A mobile app authenticates users with Google Sign-In. After authentication, the app needs temporary AWS credentials to upload files directly to S3. What STS API should the app call?",
+    options: [
+      "sts:AssumeRoleWithWebIdentity, passing the Google ID token to obtain temporary AWS credentials",
+      "sts:AssumeRole, using the Google access token as the RoleSessionName",
+      "sts:GetSessionToken, which converts any OAuth token to AWS credentials",
+      "sts:AssumeRoleWithSAML, passing the Google token as a SAML assertion",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AssumeRoleWithWebIdentity is the STS API for web identity federation. The app passes the OIDC token (Google ID token) and the role ARN. STS validates the token with Google and returns temporary credentials if the trust policy allows the Google identity provider. Cognito Identity Pools wrap this API for mobile apps.",
+    optionExplanations: [
+      "Correct. AssumeRoleWithWebIdentity accepts an OIDC/OAuth2 ID token from a trusted identity provider (Google, Facebook, Amazon, or any OIDC provider) and returns temporary AWS credentials. The role's trust policy must allow the identity provider.",
+      "Incorrect. AssumeRole is for IAM principals (roles, users) assuming other roles — it requires AWS credentials to sign the request. A Google-authenticated user doesn't have AWS credentials before getting them from STS.",
+      "Incorrect. GetSessionToken generates temporary credentials for an IAM user with optional MFA — it requires existing IAM credentials and does not accept OAuth tokens from external identity providers.",
+      "Incorrect. AssumeRoleWithSAML is for SAML 2.0 federation (typically enterprise SSO with ADFS or Okta) — it requires a SAML assertion, not an OIDC JWT. Google Sign-In uses OIDC, not SAML.",
+    ],
+    tags: ["sts", "web-identity", "oauth", "oidc", "federation"],
+  },
+  {
+    id: "qq-188",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "A developer assumes a role that has full S3 access. They also pass a session policy that allows only s3:GetObject. What actions can the developer perform with the resulting credentials?",
+    options: [
+      "Only s3:GetObject — the effective permissions are the intersection of the role's policies and the session policy",
+      "Full S3 access — the role's permissions override the more restrictive session policy",
+      "No permissions — passing a session policy that doesn't match the role's policies causes an error",
+      "s3:GetObject plus any actions explicitly denied in the session policy",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Session policies can only restrict, never expand, permissions. The effective permissions are the intersection of the role's identity policies, permission boundaries (if any), and the session policy. The role has full S3 access but the session policy allows only GetObject — the intersection is GetObject only.",
+    optionExplanations: [
+      "Correct. Session policies are additive restrictions. Effective permissions = role policies AND session policy. The session policy limits the session to s3:GetObject even though the role allows all S3 actions.",
+      "Incorrect. Session policies cannot be overridden by role policies. The session policy is always applied as an additional restriction — it can only reduce what the role allows, never expand it.",
+      "Incorrect. Passing a session policy that is more restrictive than the role is valid and common — it doesn't cause an error. It simply results in a more limited credential set.",
+      "Incorrect. Explicit denies work differently — an explicit deny in a session policy or role policy would block the action. But a session policy that allows only GetObject doesn't explicitly deny other actions — it just doesn't allow them, and without an allow, access is denied by default.",
+    ],
+    tags: ["sts", "session-policy", "permissions", "iam", "intersection"],
+  },
+  {
+    id: "qq-189",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "An application running on EC2 needs to access DynamoDB. A junior developer suggests embedding IAM access keys in the application code. What is the correct alternative?",
+    options: [
+      "Attach an IAM role to the EC2 instance via an instance profile — the AWS SDK automatically retrieves temporary credentials from the instance metadata service",
+      "Store the access keys in the EC2 instance's /etc/environment file to keep them off the source code",
+      "Encrypt the access keys with KMS and store them in the application's configuration file",
+      "Use a Secrets Manager secret to store the access keys and retrieve them at startup",
+    ],
+    correctIndices: [0],
+    explanation:
+      "EC2 instance profiles attach an IAM role to an instance. The AWS SDK's credential chain automatically calls the Instance Metadata Service (IMDS) at 169.254.169.254 to get temporary credentials. These rotate automatically — no long-term keys are needed anywhere.",
+    optionExplanations: [
+      "Correct. Instance profiles provide temporary, automatically-rotating credentials via IMDS. The SDK credential chain finds them automatically. No access keys need to be generated, stored, or rotated manually.",
+      "Incorrect. Storing access keys in /etc/environment keeps them off source code but they're still long-term keys that could be accessed by anyone with OS-level access to the instance and won't auto-rotate.",
+      "Incorrect. Encrypting access keys with KMS and storing them in config files adds complexity but doesn't solve the fundamental problem — long-term keys that must be manually rotated and could be compromised.",
+      "Incorrect. Storing IAM access keys in Secrets Manager is better than hardcoding, but they're still long-term credentials requiring manual rotation. The instance profile approach eliminates long-term keys entirely.",
+    ],
+    tags: ["sts", "ec2", "instance-profile", "credentials", "imds"],
+  },
+
+  // --- NEW: AWS AppConfig ---
+  {
+    id: "qq-190",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppConfig",
+    question:
+      "A developer needs to roll out a new feature flag to 10% of Lambda function instances initially, then expand to 100% over 30 minutes with automatic rollback if error rates increase. What AppConfig feature supports this?",
+    options: [
+      "A deployment strategy with a Linear rollout type, growth factor of 10, and a CloudWatch alarm configured for automatic rollback",
+      "A feature flag configuration profile with a canary percentage attribute set to 10",
+      "An AppConfig extension that integrates with Lambda aliases for traffic shifting",
+      "An AppConfig environment filter that targets specific Lambda instance IDs",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppConfig deployment strategies control how configuration changes roll out. A Linear strategy with growth factor 10 and interval of 3 minutes would update 10% of clients every 3 minutes over 30 minutes. CloudWatch alarms can trigger automatic rollback if metrics (error rate, latency) breach thresholds during rollout.",
+    optionExplanations: [
+      "Correct. AppConfig deployment strategies define Type (AllAtOnce, Linear, Exponential), GrowthFactor (percent per interval), DeploymentDurationInMinutes, and FinalBakeTimeInMinutes. CloudWatch alarms in the environment trigger rollback automatically when metrics breach thresholds.",
+      "Incorrect. AppConfig feature flag configuration profiles define the feature flags themselves (name, type, value) — they don't contain rollout percentage attributes. Rollout behavior is controlled by the deployment strategy.",
+      "Incorrect. AppConfig does not integrate with Lambda aliases for traffic shifting. Lambda alias routing is a separate mechanism managed through the Lambda service. AppConfig controls configuration rollout, not traffic routing.",
+      "Incorrect. AppConfig targets environments (dev, staging, prod) rather than specific Lambda instance IDs. Lambda functions poll AppConfig and receive the current configuration regardless of instance identity.",
+    ],
+    tags: ["appconfig", "deployment-strategy", "feature-flags", "rollback"],
+  },
+  {
+    id: "qq-191",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppConfig",
+    question:
+      "A Lambda function uses AppConfig to manage feature flags. The team wants the function to pick up configuration changes within 30 seconds without redeployment. How should they configure this?",
+    options: [
+      "Use the AppConfig Lambda Extension with a polling interval of 30 seconds — the extension caches and refreshes configuration from a local HTTP endpoint",
+      "Set the Lambda function's timeout to 30 seconds and call AppConfig on each invocation",
+      "Use EventBridge to trigger the Lambda function whenever AppConfig deployment completes",
+      "Set TTL on the AppConfig environment to 30 seconds so changes propagate automatically",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The AppConfig Lambda Extension runs alongside the function and polls AppConfig for configuration changes at the configured interval. The function reads configuration from localhost:2772 — a local HTTP endpoint. With a 30-second polling interval, the function picks up new deployments within 30 seconds without redeployment.",
+    optionExplanations: [
+      "Correct. The AppConfig extension handles polling and caching transparently. Set AWS_APPCONFIG_EXTENSION_POLL_INTERVAL_SECONDS=30 and the function reads from localhost:2772/applications/.../configurations/... on each invocation — the extension returns cached or fresh config.",
+      "Incorrect. Lambda timeout controls maximum execution duration — it has no effect on configuration refresh frequency. Calling AppConfig on every invocation without caching would be expensive and slow.",
+      "Incorrect. Triggering Lambda via EventBridge on AppConfig deployment completion would invoke the function to do something, but it wouldn't cause configuration to be refreshed in other running Lambda instances.",
+      "Incorrect. AppConfig environments don't have a TTL setting. Configuration refresh is controlled by the client polling interval (extension or SDK), not an environment-level TTL.",
+    ],
+    tags: ["appconfig", "lambda", "extension", "feature-flags", "polling"],
+  },
+  {
+    id: "qq-192",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS AppConfig",
+    question:
+      "An AppConfig configuration change is deployed. Five minutes later, a validator Lambda function is invoked and returns a failure. What happens to the deployment?",
+    options: [
+      "The deployment is rolled back to the previous configuration version automatically",
+      "The deployment continues since validators only run before the deployment starts",
+      "The deployment is paused and waits for manual approval to proceed or roll back",
+      "The validator failure is logged but does not affect the ongoing deployment",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppConfig validators can be JSON Schema validators (run before deployment) or Lambda validators (run before and during deployment). If a Lambda validator returns a failure during the deployment, AppConfig automatically rolls back to the previous known-good configuration. This is the automated rollback mechanism.",
+    optionExplanations: [
+      "Correct. Lambda validators are invoked during deployment. A failure causes AppConfig to automatically roll back, restoring the previous configuration across all polling clients. This provides a safety net during gradual rollouts.",
+      "Incorrect. Lambda validators run both before deployment starts (validation) and during deployment (as a hook). A failure during deployment triggers rollback, not continuation.",
+      "Incorrect. AppConfig does not pause for manual intervention when a validator fails — it automatically rolls back. Manual approval is a deployment strategy choice, not a validator failure response.",
+      "Incorrect. Validator failures are not merely logged — they are actionable events that trigger automatic rollback. This is the core safety guarantee of AppConfig validators.",
+    ],
+    tags: ["appconfig", "validators", "rollback", "deployment"],
+  },
+  {
+    id: "qq-193",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppConfig",
+    question:
+      "A team stores feature flags in AppConfig and wants to prevent a bad configuration (e.g. invalid JSON or a missing required key) from being deployed. What AppConfig feature prevents invalid configurations from reaching production?",
+    options: [
+      "Validators — either a JSON Schema validator that checks structure and types, or a Lambda validator with custom logic",
+      "AppConfig deployment strategies that include a validation phase before traffic shifts",
+      "AppConfig environment variables that enforce schema constraints on configuration values",
+      "AWS Config rules that evaluate AppConfig configuration profiles for compliance",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppConfig supports two validator types on configuration profiles. JSON Schema validators automatically reject configurations that don't match the schema before deployment begins. Lambda validators run custom validation logic — checking business rules, required keys, value ranges, etc. — and fail the deployment if validation fails.",
+    optionExplanations: [
+      "Correct. Attach a JSON Schema validator to the configuration profile to enforce structure and types. Use a Lambda validator for business logic validation (e.g. 'rate limit must be between 1 and 1000'). AppConfig rejects deployments that fail validation before any client receives the bad config.",
+      "Incorrect. Deployment strategies control rollout speed and rollback triggers — they don't validate configuration content before deployment begins.",
+      "Incorrect. AppConfig does not use environment variables for schema enforcement. Validation is done through the Validators configuration on configuration profiles.",
+      "Incorrect. AWS Config evaluates AWS resource configurations for compliance against Config rules — it does not validate AppConfig configuration profile content.",
+    ],
+    tags: ["appconfig", "validators", "json-schema", "configuration"],
+  },
+  {
+    id: "qq-194",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS AppConfig",
+    question:
+      "An AppConfig configuration profile stores a JSON document with database connection settings. The team wants the connection string value to be stored securely and referenced dynamically at deploy time rather than stored plaintext in AppConfig. What configuration profile type supports this?",
+    options: [
+      "An AWS SSM Parameter Store or Secrets Manager sourced configuration profile that retrieves the value from Parameter Store or Secrets Manager at deployment time",
+      "A hosted configuration profile with the value encrypted using AppConfig's built-in encryption",
+      "A feature flag configuration profile with the secret stored as a boolean flag",
+      "A Lambda data source that retrieves the connection string from RDS Secrets Manager at runtime",
+    ],
+    correctIndices: [0],
+    explanation:
+      "AppConfig supports configuration profiles sourced from SSM Parameter Store and Secrets Manager. Instead of storing sensitive values in the AppConfig hosted configuration, you reference the Parameter Store path or Secrets Manager ARN. AppConfig retrieves the current value at deployment time. This keeps secrets out of AppConfig's storage.",
+    optionExplanations: [
+      "Correct. AppConfig SSM Parameter and Secrets Manager sourced profiles store a reference, not the value. At deployment time, AppConfig retrieves the current value from the source. This leverages Secrets Manager's rotation and encryption while using AppConfig's deployment and rollback capabilities.",
+      "Incorrect. AppConfig hosted configuration profiles store configuration data directly in AppConfig. While data is encrypted at rest by AWS, the plaintext value is stored in AppConfig and visible to anyone with GetConfiguration access.",
+      "Incorrect. Feature flag profiles are structured specifically for boolean/string/number feature flags — they don't support referencing external secrets or dynamic values.",
+      "Incorrect. AppConfig does not have a Lambda data source type for configuration profiles. Lambda validators can validate configurations, but they don't serve as data sources for the configuration content itself.",
+    ],
+    tags: ["appconfig", "secrets-manager", "ssm", "configuration", "security"],
+  },
+
+  // --- NEW: AWS Amplify ---
+  {
+    id: "qq-195",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Amplify",
+    question:
+      "A team uses AWS Amplify Hosting to deploy a React app. They want the main branch to deploy to production and feature branches to automatically deploy to unique preview URLs. What Amplify feature enables this?",
+    options: [
+      "Amplify's branch-based deployments — each connected branch gets its own URL, and feature branch deployments are isolated from production",
+      "Amplify's manual deployment mode where developers upload build artifacts for each branch",
+      "AWS CodePipeline integration that creates a separate Amplify app per branch",
+      "CloudFront's multi-origin routing rules to serve different branches from different S3 buckets",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Amplify Hosting auto-detects new branches when connected to a Git repository and deploys each branch to a unique URL (https://branch-name.app-id.amplifyapp.com). Pull request previews create ephemeral environments for each PR. Production uses the main/master branch URL. No extra configuration needed for branch deployments.",
+    optionExplanations: [
+      "Correct. Connect Amplify to your Git repository and enable branch auto-detection. Each branch gets an isolated deployment with its own URL. Merge to main triggers production deployment. PR previews can be enabled for pull request environments.",
+      "Incorrect. Manual deployment requires uploading a ZIP file of the build output — it doesn't support automatic branch detection or PR preview URLs.",
+      "Incorrect. Creating a separate Amplify app per branch is unnecessary and operationally heavy. Amplify's single app supports multiple branch deployments natively.",
+      "Incorrect. CloudFront multi-origin routing is a lower-level CDN configuration — Amplify abstracts all of this and provides branch deployments without needing to configure CloudFront directly.",
+    ],
+    tags: ["amplify", "hosting", "branch-deployments", "preview", "cicd"],
+  },
+  {
+    id: "qq-196",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Amplify",
+    question:
+      "A mobile app built with Amplify needs to allow users to sign up, sign in, and sign out. Which Amplify library and backend resource should the developer use?",
+    options: [
+      "Amplify Auth category backed by Amazon Cognito User Pools, configured with amplify add auth",
+      "Amplify API category with a REST API that validates username and password",
+      "AWS SDK for Cognito called directly from the mobile app with hardcoded User Pool credentials",
+      "Amplify Geo category with custom authentication logic",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Amplify Auth is a category that wraps Cognito User Pools (and optionally Identity Pools). Running amplify add auth provisions the Cognito resources and generates configuration. The Amplify library provides signUp(), signIn(), signOut(), and other auth methods that handle token management, refresh, and storage automatically.",
+    optionExplanations: [
+      "Correct. amplify add auth provisions Cognito User Pool (and optionally Identity Pool) and generates the amplify/backend/auth configuration. The Amplify.Auth library provides high-level methods for all authentication flows including signup, signin, MFA, and password reset.",
+      "Incorrect. A REST API for authentication would require building session management, password hashing, and token issuance from scratch — Cognito and Amplify Auth handle all of this.",
+      "Incorrect. Using the raw Cognito SDK requires managing token storage, refresh logic, and configuration manually. Amplify Auth provides a higher-level abstraction that handles these concerns automatically.",
+      "Incorrect. Amplify Geo provides location services (maps, place search) — it is entirely unrelated to user authentication.",
+    ],
+    tags: ["amplify", "auth", "cognito", "authentication"],
+  },
+  {
+    id: "qq-197",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Amplify",
+    question:
+      "An Amplify Gen 2 app uses Amplify's backend to define a DynamoDB-backed GraphQL API. A developer adds a new field to a data model. What happens when they run npx ampx sandbox?",
+    options: [
+      "Amplify synthesizes a CloudFormation stack from the TypeScript backend definition and deploys the changes to a personal cloud sandbox environment",
+      "Amplify generates a new GraphQL schema and requires manual deployment to CloudFormation",
+      "Amplify updates the local mock server with the new field without touching AWS resources",
+      "Amplify creates a new DynamoDB table for the updated model and deletes the old one",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Amplify Gen 2 uses TypeScript to define backend resources (data models, auth, storage). npx ampx sandbox synthesizes CloudFormation from the TypeScript definitions and deploys a personal sandbox environment in AWS — a real cloud environment isolated per developer. Changes to data models update the DynamoDB table and AppSync schema.",
+    optionExplanations: [
+      "Correct. Amplify Gen 2's sandbox command provisions or updates real AWS resources (AppSync, DynamoDB, Cognito, etc.) in a personal sandbox CloudFormation stack. Each developer gets an isolated environment. Changes are deployed immediately on save with file watching.",
+      "Incorrect. Gen 2 does not generate a static GraphQL schema file for manual deployment — it synthesizes CloudFormation directly from TypeScript and deploys automatically.",
+      "Incorrect. The sandbox command deploys to real AWS resources, not just a local mock. Amplify does support local mocking (amplify mock) separately, but sandbox is cloud-based.",
+      "Incorrect. Amplify updates the existing DynamoDB table for model changes where possible. It does not drop and recreate tables for field additions — that would cause data loss.",
+    ],
+    tags: ["amplify", "gen2", "sandbox", "cloudformation", "deployment"],
+  },
+  {
+    id: "qq-198",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Amplify",
+    question:
+      "An Amplify app needs to store user profile images so each user can only read and write their own files. What Amplify Storage access level provides this?",
+    options: [
+      "Private access level, which scopes files to the authenticated user's identity and prevents other users from accessing them",
+      "Protected access level, which allows authenticated users to read each other's files but only write their own",
+      "Public access level with IAM conditions restricting writes to the file owner",
+      "Custom access level defined in an S3 bucket policy based on Cognito user attributes",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Amplify Storage has three access levels: Public (all users read/write), Protected (all authenticated users can read, only owner can write), and Private (only the owner can read and write). Private is correct for profile images where users should only access their own files.",
+    optionExplanations: [
+      "Correct. Private access level stores files under a user-specific prefix (private/{identityId}/). Only the file owner can read and write their own files. Other authenticated users cannot access private files.",
+      "Incorrect. Protected access level allows any authenticated user to read the files but only the owner to write — this is appropriate for content meant to be publicly shared among users, not private profile data.",
+      "Incorrect. Public access level allows all users (including unauthenticated) to read and all authenticated users to write — there are no per-user write restrictions, and all users can read all files.",
+      "Incorrect. Amplify Storage's built-in access levels handle user-scoped access automatically via S3 and IAM policies generated by Amplify — custom S3 bucket policies are not needed for standard per-user access control.",
+    ],
+    tags: ["amplify", "storage", "s3", "access-control", "private"],
+  },
+  {
+    id: "qq-199",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Amplify",
+    question:
+      "An Amplify app uses DataStore for offline data synchronization. When the app comes back online after being offline, a conflict is detected between the local version and the server version of the same record. What is the default conflict resolution strategy?",
+    options: [
+      "Auto Merge — Amplify attempts to merge non-conflicting fields; if fields conflict, the server version wins (last writer wins based on server timestamp)",
+      "Client wins — the local offline changes always overwrite the server version",
+      "Server wins — the server version always overwrites local offline changes",
+      "Manual resolution — the app must implement a custom conflict handler function",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Amplify DataStore's default conflict resolution is Auto Merge. It compares the local and server versions field by field. Non-conflicting field changes are merged. For conflicting fields (both sides changed the same field), the server version takes precedence based on the _version counter. Custom handlers can override this behavior.",
+    optionExplanations: [
+      "Correct. Auto Merge is the default. DataStore uses AppSync's conflict detection (optimistic concurrency via _version) and attempts to merge changes. When fields conflict, the server version wins by default. This minimizes data loss while handling the most common offline edit patterns.",
+      "Incorrect. Client wins is an available conflict resolution strategy but is not the default. It would cause data loss if two users edit the same record while offline.",
+      "Incorrect. Server wins (Automerge with server priority) is available but not the default. It would discard all offline changes whenever any conflict exists, which is too aggressive for typical use cases.",
+      "Incorrect. Manual resolution requires implementing a custom conflict handler, which is supported but opt-in. The default behavior is Auto Merge without requiring any custom code.",
+    ],
+    tags: ["amplify", "datastore", "offline", "conflict-resolution", "sync"],
+  },
 ];
