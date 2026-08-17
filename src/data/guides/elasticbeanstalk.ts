@@ -11,64 +11,29 @@ export const elasticBeanstalkGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Concepts",
-      body: `**Application**: logical container for environments and versions. Like a project or repository.
+      body: `Elastic Beanstalk organizes deployments around three concepts. An **application** is the logical container for all the versions and environments of a single project — think of it as the equivalent of a repository. An **application version** is a specific labeled release of your code, stored as a ZIP or WAR file in S3. You can deploy any version to any environment, making rollbacks as simple as deploying an older version. An **environment** is a running deployment of an application version — it has its own EC2 instances, load balancer, Auto Scaling group, and security groups, all independent from other environments.
 
-**Application Version**: a specific, labeled deployment of your code. Stored as a ZIP/WAR file in S3. You can deploy any version to any environment.
+Environments come in two tiers. The **Web Server tier** handles HTTP requests through an ALB and Auto Scaling Group — this is your internet-facing application. The **Worker tier** processes tasks from an SQS queue without a load balancer. EC2 instances in the worker tier poll SQS, and Beanstalk's daemon handles message visibility and deletion. This makes the worker tier ideal for background jobs, email sending, report generation, or any workload that should be decoupled from the web tier.
 
-**Environment**: a running deployment of an application version. Has its own EC2 instances, load balancer, Auto Scaling group. Each environment is independent.
-
-**Environment Tier**:
-- *Web Server tier*: handles HTTP requests. ALB + Auto Scaling Group + EC2 instances.
-- *Worker tier*: processes tasks from an SQS queue. No load balancer. EC2 instances poll SQS. Use for background job processing.
-
-**Platform**: the runtime for your application. Examples:
-- Node.js, Python, Java, Go, Ruby, PHP, .NET, Docker
-- Amazon Linux 2023-based platforms (current)
-
-**Managed Platform Updates**: Beanstalk can automatically apply platform patches (OS, runtime) during a maintenance window. You control minor vs major version updates.`,
+Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Python, Java, Go, Ruby, PHP, .NET, and Docker are all available on Amazon Linux 2023-based platforms. Beanstalk can automatically apply platform updates (OS patches, runtime minor versions) during a configured maintenance window, reducing the operational burden of keeping instances current.`,
     },
     {
       heading: "Deployment Policies",
-      body: `Beanstalk offers multiple deployment strategies with different trade-offs:
+      body: `Beanstalk gives you several deployment strategies with different tradeoffs between speed, cost, and downtime.
 
-**All at once** (default):
-- Deploy to all instances simultaneously
-- Fastest
-- Downtime during deployment (all instances updating at once)
-- Use for dev/test only
+**All at once** deploys to every instance simultaneously. It's the fastest option and has no additional cost, but all instances are updating at the same time — meaning your application is briefly unavailable during deployment. This is acceptable in development and test environments but not in production.
 
-**Rolling**:
-- Deploy to a batch of instances, then the next batch
-- No additional instances created
-- Some old, some new versions running simultaneously (version inconsistency window)
-- Configurable batch size (% or count)
+**Rolling** divides instances into batches and deploys to one batch at a time. During the deployment window, some instances run the old version and some run the new version — a brief period of version inconsistency. No additional instances are created, and capacity is temporarily reduced during each batch update. Configure the batch size as a percentage or fixed count.
 
-**Rolling with additional batch**:
-- Launch a new batch of instances first, deploy to them, then roll through existing
-- Maintains full capacity during deployment
-- Brief additional cost for extra instances
+**Rolling with additional batch** launches a new batch of instances first, then rolls through the existing ones. This maintains full capacity throughout the deployment since you always have at least the original number of instances serving traffic.
 
-**Immutable**:
-- Launch a completely new Auto Scaling Group with new instances
-- Switch traffic when all new instances pass health checks
-- Old instances terminated after successful switch
-- Zero downtime; easy rollback (just terminate new ASG)
-- Slowest; highest cost temporarily
+**Immutable** deployment is the safest option. Beanstalk launches a completely new Auto Scaling Group with the new version, runs health checks on the new instances, and only terminates the old instances after the new fleet is healthy. Rollback is trivial — just terminate the new Auto Scaling Group. The tradeoff is cost (you briefly run double the instances) and speed (it's the slowest option).
 
-**Traffic splitting (Canary)**:
-- Deploy to new instances and route a % of traffic to them
-- Monitor for errors; shift more traffic gradually
-- Rollback: redirect 100% back to old instances
-
-**Blue/Green** (manual via swap URLs):
-- Create new environment (green) alongside existing (blue)
-- Deploy new version to green; test it
-- Swap CNAMEs between blue and green → instant traffic shift
-- Old environment (blue) preserved for rollback by swapping back`,
+**Traffic Splitting (Canary)** is similar to immutable but explicitly designed for canary testing. A configurable percentage of traffic routes to the new version while the rest stays on the current version, letting you validate behavior before full rollout. **Blue/Green** is a manual pattern: create a second environment, deploy to it, test it, then use Beanstalk's "Swap Environment URLs" feature to swap the CNAMEs between environments — instant traffic shift with easy rollback.`,
     },
     {
       heading: ".ebextensions Configuration",
-      body: `**.ebextensions**: directory in your application bundle containing configuration files (YAML/JSON with \`.config\` extension). Customize environment resources, install software, run commands.
+      body: `The **.ebextensions** directory in your application bundle contains configuration files (YAML or JSON with a \`.config\` extension) that customize the environment. These run during environment creation and during deployments, letting you install packages, write files, run commands, and add CloudFormation resources.
 
 \`\`\`yaml
 # .ebextensions/01-packages.config
@@ -98,74 +63,37 @@ option_settings:
     MaxSize: 10
 \`\`\`
 
-**Resources**: add CloudFormation resources to the environment:
-\`\`\`yaml
-Resources:
-  MyQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      VisibilityTimeout: 300
-\`\`\`
+You can add CloudFormation resources to the environment (like an SQS queue or a DynamoDB table) by adding a \`Resources\` section. These resources become part of the environment's CloudFormation stack and are deleted when the environment is terminated. Configuration files are processed in lexicographic order by filename — the naming convention \`01-...\`, \`02-...\` makes the ordering explicit.
 
-**hooks**: run scripts at specific lifecycle events (pre-deploy, post-deploy).
-
-**Execution order**: numbered config files run in lexicographic order (01-..., 02-...).
-
-**Procfile**: specify multiple process types for your application. Beanstalk starts each process.`,
+Beanstalk uses CloudFormation under the hood for all resource management, so all created resources are visible in the CloudFormation console. **Saved configurations** snapshot your entire environment's settings and can be used to recreate identical environments — the right tool for maintaining dev/staging/prod parity.`,
     },
     {
       heading: "Environment Variables & Configuration",
-      body: `**Environment properties**: key-value pairs set in Beanstalk console, CLI, or .ebextensions. Injected as environment variables in the application.
+      body: `Beanstalk injects environment-specific configuration into your application through **environment properties** — key-value pairs that become environment variables accessible in your application code. You can set these through the console, CLI, or .ebextensions \`option_settings\`.
 
-**Precedence** (highest to lowest):
-1. Settings applied directly to the environment (console/CLI)
-2. Saved configurations
-3. .ebextensions config files
-4. Default values
+Configuration precedence runs from highest to lowest: settings applied directly to the environment (console/CLI) override saved configurations, which override .ebextensions files, which override Beanstalk defaults. This layering lets you commit sensible defaults in .ebextensions while allowing environment-specific overrides without code changes.
 
-**Saved configurations**: snapshot of environment settings stored in S3. Apply to recreate identical environments (dev/staging/prod parity).
+A common mistake is storing database credentials, API keys, or other secrets in environment properties. They're visible in the Beanstalk console and stored in configuration history — not appropriate for secrets. Instead, fetch credentials from Secrets Manager or SSM Parameter Store in your application's startup code. Your application reads a secret name or parameter path from an environment variable (which is safe), then calls the Secrets Manager or SSM API at startup to retrieve the actual value.
 
-**Configuration files** (.ebextensions option_settings): set any Beanstalk namespace option:
-- \`aws:elasticbeanstalk:application:environment\`: environment variables
-- \`aws:autoscaling:launchconfiguration\`: instance type, key pair, security groups
-- \`aws:elasticbeanstalk:environment\`: environment type (LoadBalanced vs SingleInstance)
-- \`aws:elasticbeanstalk:environment:process:default\`: health check path, port
-
-**Secrets**: do NOT store secrets in environment properties (visible in console). Instead: fetch from Secrets Manager or SSM in application startup code.`,
+The \`option_settings\` namespace system gives you access to every Beanstalk and AWS configuration option: instance type, minimum and maximum Auto Scaling capacity, health check paths, load balancer settings, and more — all without touching the console.`,
     },
     {
       heading: "Monitoring & Health",
-      body: `**Enhanced Health Reporting**: detailed health information beyond basic EC2/ELB checks. Reports health at instance, environment, and overall level. Shows causes (e.g. "CommandFailed", "NoBeat"). Costs extra.
+      body: `Beanstalk provides two tiers of health monitoring. **Basic health** reports a simple status for each instance and the overall environment based on EC2 instance health and ELB health check results. **Enhanced Health Reporting** adds detailed per-instance health information with specific causes — it tells you not just that an instance is unhealthy, but *why* (like "CommandFailed" during deployment or "NoBeat" from the Beanstalk daemon). Enhanced health has an additional cost but is recommended for production.
 
-**Health states**:
-- Green: all instances healthy
-- Yellow: some instances unhealthy or degraded
-- Red: environment not responding / most instances unhealthy / deployment failed
-- Grey: environment updating
+Environment health is summarized by color: Green (all healthy), Yellow (degraded), Red (critical failures), and Grey (updating). The environment health page shows which specific instances and which specific metrics are causing the status, making it much easier to diagnose issues than the basic traffic-light indicator alone.
 
-**CloudWatch integration**: automatically publishes metrics per environment. Alarm on environment health, request count, latency.
-
-**Managed Updates**: Beanstalk can automatically apply platform updates (OS patches, runtime minor versions) during a maintenance window. Configure allowed impact for updates.
-
-**Log access**: request logs from the environment. Beanstalk retrieves logs from all instances and bundles them. Or configure log streaming to CloudWatch Logs.
-
-**Event history**: view all environment events in console (deployments, scaling, health changes).`,
+Beanstalk automatically publishes metrics to CloudWatch for each environment. You can create alarms on environment health, request count, and latency. For log access, Beanstalk can retrieve logs from all instances and bundle them, or you can configure log streaming to CloudWatch Logs for real-time access — the latter is strongly recommended for production, since you can query logs in CloudWatch Logs Insights without SSH access or waiting for log retrieval.`,
     },
     {
       heading: "Elastic Beanstalk with Other Services",
-      body: `**Beanstalk + RDS**: you can create an RDS instance inside a Beanstalk environment (coupled) or use an external RDS (decoupled — recommended for production). Coupling means RDS deleted with environment; decoupling means DB persists.
+      body: `One of the most common Beanstalk pitfalls involves **RDS**. You can create an RDS instance inside a Beanstalk environment (coupled), but this ties the database's lifecycle to the environment — when you terminate the environment, RDS is deleted too. For production, create RDS outside Beanstalk (decoupled) and pass the connection string through environment properties. The database persists even if you rebuild the Beanstalk environment, which is the correct behavior for any stateful data store.
 
-**Beanstalk + S3**: application versions stored in S3. Beanstalk manages a versioning bucket automatically. Logs streamed to S3.
+**Beanstalk + CodePipeline** is the most common CI/CD pattern for Beanstalk applications. CodePipeline's Deploy stage targets a Beanstalk environment, automatically deploying new application versions whenever the pipeline runs. **Beanstalk + Docker** supports both single-container mode (one Docker container per instance) and multi-container mode (multiple containers per instance using ECS under the hood, configured via \`Dockerrun.aws.json\`).
 
-**Beanstalk + CodePipeline**: Deploy stage in CodePipeline targets a Beanstalk environment. Automatic deployments on code changes.
+The **Worker tier + SQS** pattern decouples long-running work from your web tier. The web tier puts a task message on SQS and returns immediately to the user. Worker tier instances pick up the message, process it (generating a report, sending an email, processing an image), and delete the message when done. This architecture is clean and scalable — each tier scales independently based on its own load.
 
-**Beanstalk + Docker**: deploy Docker containers. Single container mode (one container per instance) or multi-container mode (ECS cluster on each instance — uses ECS under the hood, Dockerrun.aws.json config).
-
-**Beanstalk + Worker Tier + SQS**: web tier sends tasks to SQS; worker tier polls SQS, processes tasks. Decoupled architecture for async workloads. Worker daemon handles SQS message visibility and deletion.
-
-**Beanstalk + CloudWatch Logs**: enable log streaming to CloudWatch Logs in environment configuration. View logs in CloudWatch Logs Insights without SSHing into instances.
-
-**Beanstalk + ACM**: attach an SSL certificate from ACM to the load balancer via environment configuration. Terminate HTTPS at the load balancer.`,
+Beanstalk manages ACM certificate attachment to the load balancer through environment configuration, terminating HTTPS at the load balancer so your application instances only need to handle HTTP internally.`,
     },
   ],
 

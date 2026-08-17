@@ -11,62 +11,30 @@ export const cloudwatchGuide: ServiceGuide = {
   sections: [
     {
       heading: "Metrics",
-      body: `A **metric** is a time-ordered set of data points published to CloudWatch. Every AWS service publishes metrics automatically (EC2 CPU, Lambda Duration, DynamoDB ConsumedRCU).
+      body: `A **metric** is a time-ordered set of data points published to CloudWatch. Every AWS service publishes metrics automatically — EC2 CPU utilization, Lambda duration, DynamoDB consumed capacity — and you can publish your own custom metrics using the \`PutMetricData\` API.
 
-**Namespace**: logical container for metrics. AWS services use namespaces like \`AWS/EC2\`, \`AWS/Lambda\`, \`AWS/DynamoDB\`. Your custom metrics go in your own namespace (e.g. \`MyApp/Orders\`).
+Metrics are organized into **namespaces**, which are logical containers. AWS services use namespaces like \`AWS/EC2\`, \`AWS/Lambda\`, and \`AWS/DynamoDB\`. Your application's custom metrics should go in your own namespace (like \`MyApp/Orders\`) to keep them separate from AWS-managed metrics.
 
-**Dimensions**: key-value pairs that identify a metric. EC2 metrics have a \`InstanceId\` dimension. Lambda metrics have \`FunctionName\` and \`Resource\`. You can filter and aggregate by dimension.
+Within a namespace, **dimensions** are key-value pairs that identify a specific metric instance. An EC2 CPU metric has an \`InstanceId\` dimension that distinguishes metrics from different instances. Lambda metrics have \`FunctionName\` and \`Resource\` dimensions. You use dimensions to filter and aggregate metrics — for example, viewing CPU across all instances or just one specific instance.
 
-**Resolution**:
-- *Standard resolution*: 1-minute granularity (default for AWS service metrics)
-- *High resolution*: 1-second granularity (for custom metrics published with StorageResolution=1). Stored for 3 hours at 1-second, 1 hour at 60-second, then downsampled further.
+CloudWatch offers two resolution tiers. **Standard resolution** stores metrics at 1-minute granularity, which is what most AWS services publish by default. **High resolution** stores at 1-second granularity (set \`StorageResolution=1\` when publishing), at additional cost, which is useful for applications where sub-minute anomalies matter. Metric data is retained progressively longer at lower resolutions: 1-second data for 3 hours, 1-minute data for 15 days, 5-minute data for 63 days, and 1-hour data for 15 months.
 
-**Metric retention**:
-- 3 hours: 1-second data
-- 15 days: 1-minute data
-- 63 days: 5-minute data
-- 15 months: 1-hour data
-
-**Statistics**: Sum, Average, Minimum, Maximum, SampleCount, Percentile (p90, p99). Percentile statistics require sufficient data points.
-
-**Metric Math**: perform calculations across multiple metrics (e.g. \`error_rate = errors / requests * 100\`). Use in dashboards and alarms.`,
+**Metric Math** lets you perform calculations across multiple metrics to derive new values — for example, computing an error rate as \`errors / requests * 100\`. Metric Math expressions can be used in dashboards and alarms just like raw metrics.`,
     },
     {
       heading: "Custom Metrics",
-      body: `Publish custom metrics using **PutMetricData** API. Use from Lambda, EC2, ECS tasks, or any service with SDK access.
+      body: `You publish custom metrics using the \`PutMetricData\` API from any code that can make AWS SDK calls — Lambda functions, EC2 instances, ECS containers, or any other compute environment. Each metric data point includes a namespace, metric name, dimensions, value, unit, and an optional timestamp. Setting \`StorageResolution\` to 1 publishes a high-resolution metric at 1-second granularity.
 
-\`\`\`
-cloudwatch.put_metric_data(
-  Namespace='MyApp/Orders',
-  MetricData=[{
-    'MetricName': 'OrdersPlaced',
-    'Dimensions': [{'Name': 'Environment', 'Value': 'production'}],
-    'Value': 1,
-    'Unit': 'Count',
-    'StorageResolution': 60  # standard; use 1 for high-res
-  }]
-)
-\`\`\`
+For EC2 instances and on-premises servers, the **CloudWatch Agent** extends what you can monitor. By default, EC2 publishes CPU, network, and disk I/O metrics — but memory utilization and disk usage at the file system level are not published by the EC2 service itself. Installing the CloudWatch Agent gives you those operating system-level metrics, plus the ability to collect application logs from files on disk.
 
-**CloudWatch Agent**: install on EC2 or on-premises servers to collect:
-- System-level metrics not available by default: memory utilization, disk I/O, swap
-- Application logs from files on disk
-- Custom application metrics via StatsD or collectd
-
-**Embedded Metrics Format (EMF)**: write metrics as structured JSON logs to stdout. CloudWatch Logs agent or Lambda runtime automatically extracts them as CloudWatch Metrics. No explicit PutMetricData call needed. Ideal for Lambda:
-\`\`\`
-{ "_aws": { "Timestamp": 1234567890000, "CloudWatchMetrics": [{ "Namespace": "MyApp", "Dimensions": [["FunctionName"]], "Metrics": [{"Name": "OrdersProcessed", "Unit": "Count"}] }] }, "FunctionName": "order-processor", "OrdersProcessed": 5 }
-\`\`\``,
+The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for Lambda. Instead of calling \`PutMetricData\` from your function, you write structured JSON to stdout that includes a special \`_aws\` envelope. The Lambda runtime (or CloudWatch Logs agent) automatically detects the EMF format and extracts the metrics, publishing them to CloudWatch without an explicit API call. This avoids adding latency to your function's response while still capturing metrics.`,
     },
     {
       heading: "CloudWatch Logs",
-      body: `CloudWatch Logs stores, monitors, and provides access to log files from AWS services and your applications.
+      body: `CloudWatch Logs is the centralized logging platform for AWS. Logs are organized into **log groups** (one per application or service, where you set the retention period) and **log streams** (one per source instance — a single Lambda execution environment, a single EC2 instance, a single ECS task). Retention can be set from 1 day to 10 years, or configured to never expire. Setting appropriate retention is important — unlimited log retention accumulates cost.
 
-**Log Group**: container for log streams. Set retention (1 day to never). Associate metric filters and subscription filters at this level.
+**CloudWatch Logs Insights** is an interactive query engine for your logs. It uses a SQL-like syntax that supports filtering, aggregating, sorting, and visualizing log data across multiple log groups simultaneously:
 
-**Log Stream**: sequence of log events from a single source (one Lambda function instance, one EC2 instance, one ECS task).
-
-**Log Insights**: interactive query language for logs. SQL-like syntax:
 \`\`\`
 fields @timestamp, @message
 | filter @message like /ERROR/
@@ -74,85 +42,48 @@ fields @timestamp, @message
 | sort @timestamp desc
 | limit 20
 \`\`\`
-Queries run across multiple log groups. Results exportable.
 
-**Metric Filters**: extract metric data from log text patterns. Example: count occurrences of "ERROR" in Lambda logs → publish as a CloudWatch metric → alarm on it.
+**Metric Filters** extract metric values from log text patterns without requiring any code changes. For example, you can configure a metric filter that counts occurrences of the string "ERROR" in your Lambda logs and publishes that count as a CloudWatch metric, which you can then alarm on.
 
-**Subscription Filters**: stream log data in near real-time to:
-- Lambda (process/analyze)
-- Kinesis Data Streams (downstream consumers)
-- Kinesis Firehose (S3, Elasticsearch)
-- OpenSearch Service
-
-**Log retention**: set per log group (1 day to 10 years or never expire). Cost increases with storage — set appropriate retention.
-
-**VPC Flow Logs / CloudTrail**: both can publish to CloudWatch Logs for analysis.`,
+**Subscription Filters** stream log data in near real-time to other services for processing or storage: Lambda (for real-time analysis or routing), Kinesis Data Streams (for downstream consumers), Kinesis Firehose (for delivery to S3 or OpenSearch), or OpenSearch Service directly. This is how you build log aggregation pipelines and centralized logging architectures. VPC Flow Logs and CloudTrail can both publish to CloudWatch Logs for unified analysis.`,
     },
     {
       heading: "Alarms",
-      body: `A **CloudWatch Alarm** watches a single metric or metric math expression and triggers actions when the metric crosses a threshold.
+      body: `A **CloudWatch Alarm** watches a metric or Metric Math expression and changes state when the metric crosses a threshold for a configured number of consecutive evaluation periods. The three states are **OK** (metric is within the threshold), **ALARM** (metric has breached the threshold), and **INSUFFICIENT_DATA** (not enough data points to evaluate).
 
-**States**: OK, ALARM, INSUFFICIENT_DATA (not enough data points to evaluate).
+Alarm configuration involves several parameters that work together. The **period** is the evaluation window (60 seconds, 300 seconds, etc.). **Evaluation periods** is how many consecutive windows to check. **Datapoints to alarm** is how many of those windows must be in breach — setting this to "3 of 5" means the alarm only fires after 3 consecutive breaches within a 5-period window, reducing false positives from brief spikes. **Missing data treatment** determines how gaps in metric data affect alarm state.
 
-**Alarm types**:
-- *Metric alarm*: single metric vs threshold
-- *Composite alarm*: combines multiple alarms with AND/OR logic. Reduces alarm noise.
+When an alarm transitions to ALARM state, it can trigger actions including SNS notifications (which fan out to email, SMS, Lambda, or SQS), EC2 instance actions (stop, terminate, reboot, recover), Auto Scaling actions, and Systems Manager OpsCenter OpsItem creation.
 
-**Alarm configuration**:
-- Period: evaluation window (60s, 300s, etc.)
-- Evaluation periods: how many consecutive periods must be in breach
-- Datapoints to alarm: of the evaluation periods, how many must breach (e.g. 3 of 5 to avoid flapping)
-- Missing data treatment: breaching, not-breaching, ignore, missing
-
-**Alarm actions**:
-- SNS notification → email, SMS, Lambda, SQS
-- EC2 actions: stop, terminate, reboot, recover instance
-- Auto Scaling: scale out/in
-- Systems Manager OpsCenter: create OpsItem
-
-**Anomaly Detection**: use ML to model expected metric behavior and alarm when actual deviates from the band. Accounts for time-of-day and day-of-week patterns.
-
-**CloudWatch Synthetics (Canaries)**: configurable scripts that run on schedule and monitor endpoints or APIs. Alarm if canary fails. Generates detailed HAR files and screenshots.`,
+**Composite Alarms** combine multiple alarms using AND/OR logic to create a single higher-level alarm. This reduces noise — instead of getting paged for every individual metric threshold breach, you can require that both CPU is high AND error rate is elevated before triggering an alert. **Anomaly Detection** uses ML to model the expected behavior of a metric over time (including time-of-day and day-of-week patterns) and alarms when the actual metric deviates significantly from the expected band. **CloudWatch Synthetics** lets you define canary scripts that run on a schedule and alarm if they fail, providing synthetic monitoring for your endpoints.`,
     },
     {
       heading: "Dashboards",
-      body: `CloudWatch Dashboards are customizable home pages in the CloudWatch console for monitoring your resources in a single view.
+      body: `CloudWatch Dashboards are customizable views that bring multiple metrics, alarms, and log queries together in a single screen. They support a variety of widget types — line charts, stacked area charts, number widgets (for current values), bar charts, pie charts, alarm status widgets, and text blocks with markdown.
 
-**Widget types**: line chart, stacked area, number, bar chart, pie chart, text (markdown), alarm status, logs table.
+Dashboards can display metrics and alarms from multiple AWS accounts and regions in a single view, which requires setting up CloudWatch cross-account observability (where monitored accounts share metric data with a monitoring account). This is the standard approach for centralized observability in multi-account AWS environments.
 
-**Cross-account/cross-region**: dashboards can display metrics from multiple AWS accounts and regions in one view (requires CloudWatch cross-account observability setup).
-
-**Automatic dashboards**: CloudWatch automatically creates service-level dashboards for many AWS services. Available in the CloudWatch console under "Service dashboards."
-
-**Dashboard sharing**: share dashboards publicly or with specific IAM roles/users. Useful for NOC/ops teams who don't have full console access.
-
-**Cost**: $3/dashboard/month (first 3 dashboards free). Widgets within a dashboard are free.`,
+CloudWatch automatically creates **service dashboards** for many AWS services — these pre-built dashboards for services like Lambda, API Gateway, and DynamoDB appear under "Service dashboards" in the console and require no configuration. Dashboards can also be shared with specific IAM users or made publicly accessible (without AWS credentials), which is useful for operations teams or NOC displays.`,
     },
     {
       heading: "CloudWatch Events / EventBridge",
-      body: `CloudWatch Events has been superseded by **Amazon EventBridge** (the same underlying service, now branded separately). CloudWatch Events is still functional but new development should use EventBridge.
+      body: `CloudWatch Events was the original name for what is now **Amazon EventBridge**. The underlying service is the same — the branding changed when AWS expanded it with partner event buses, schema registry, API Destinations, and Pipes. CloudWatch Events still works, but new development should use EventBridge directly.
 
-**What it does**: respond to state changes in AWS resources. Schedule automated actions (cron). Route events to targets (Lambda, SQS, SNS, ECS, Step Functions).
+The core capability is responding to state changes in AWS resources in near real-time. When an EC2 instance changes state, a CodePipeline execution changes status, or an S3 object is created, an event is emitted to the default EventBridge event bus. You create rules that match these events and route them to targets like Lambda functions, SQS queues, SNS topics, ECS tasks, or Step Functions state machines.
 
-See the EventBridge guide for full detail. The CloudWatch-side integration: CloudWatch Alarms can publish to EventBridge when alarm state changes.`,
+CloudWatch Alarms can publish to EventBridge when their state changes, enabling automated remediation workflows triggered by metric thresholds. See the EventBridge guide for full detail on event patterns, scheduling, and advanced routing features.`,
     },
     {
       heading: "CloudWatch with Other Services",
-      body: `**CloudWatch + Lambda**: Lambda automatically publishes Duration, Invocations, Errors, Throttles, ConcurrentExecutions, UnreservedConcurrentExecutions metrics. Alarm on Errors rate or throttle rate for Lambda health.
+      body: `CloudWatch's integrations with other AWS services form the backbone of operational observability.
 
-**CloudWatch + API Gateway**: publishes Count, Latency, IntegrationLatency, 4XXError, 5XXError per stage and route. Enable detailed metrics per resource for per-route breakdown. Enable access logging to a log group for full request details.
+Lambda automatically publishes \`Duration\`, \`Invocations\`, \`Errors\`, \`Throttles\`, \`ConcurrentExecutions\`, and \`UnreservedConcurrentExecutions\` metrics. Alarms on error rate and throttle rate are the minimum viable monitoring for any production Lambda function.
 
-**CloudWatch + DynamoDB**: ConsumedRCU/WCU, SuccessfulRequestLatency, ThrottledRequests, SystemErrors. Alarm on throttles to detect capacity issues.
+API Gateway publishes \`Count\`, \`Latency\`, \`IntegrationLatency\`, \`4XXError\`, and \`5XXError\` per stage. Enable detailed metrics for per-route breakdowns and access logging for full request details — these are both disabled by default and must be configured explicitly.
 
-**CloudWatch + ECS**: Task CPU/memory utilization, service metrics. Install CloudWatch agent as sidecar for container-level metrics and logs.
+DynamoDB emits \`ConsumedRCU\`, \`ConsumedWCU\`, \`SuccessfulRequestLatency\`, and \`ThrottledRequests\`. Alarms on \`ThrottledRequests\` are the primary signal for DynamoDB capacity issues. EC2's default metrics come at 5-minute granularity for free; enabling detailed monitoring gives 1-minute granularity at additional cost. Memory utilization and disk usage require the CloudWatch Agent to be installed.
 
-**CloudWatch + EC2**: basic monitoring = 5-min metrics (free). Detailed monitoring = 1-min metrics ($). Memory and disk require CloudWatch agent.
-
-**CloudWatch + RDS**: CPU, FreeStorageSpace, DatabaseConnections, ReadIOPS, WriteIOPS. Enhanced Monitoring: 1-second OS-level metrics (separate cost).
-
-**CloudWatch + Alarms → Auto Scaling**: the most common CloudWatch integration. Scale EC2/ECS based on CPU, queue depth, custom metric.
-
-**CloudWatch + X-Ray**: X-Ray provides trace data; CloudWatch Logs Insights can query X-Ray trace logs. Use together for full observability (metrics + traces + logs = three pillars).`,
+The most commonly used CloudWatch integration is **CloudWatch Alarms driving Auto Scaling** — scaling EC2 fleets and ECS services based on CPU utilization, queue depth, or custom application metrics. Together with X-Ray (distributed traces) and CloudWatch Logs, CloudWatch metrics form the "three pillars" of observability for AWS workloads.`,
     },
   ],
 

@@ -11,30 +11,19 @@ export const xrayGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Concepts",
-      body: `**Trace**: a collection of segments representing a single end-to-end request across all services it touches. A trace has a unique **Trace ID** propagated via HTTP header (\`X-Amzn-Trace-Id\`).
+      body: `X-Ray's tracing model is built around a hierarchy of data structures that together represent a single request's journey through your system.
 
-**Segment**: data block emitted by a single service/resource for one request. Includes timing, HTTP metadata, error info.
+A **trace** is the top-level container — it represents one end-to-end request and is identified by a unique **Trace ID** that propagates via the \`X-Amzn-Trace-Id\` HTTP header. Every service that processes the request adds its data to the trace by submitting segments. When you look at a trace in the X-Ray console, you see the entire request's lifecycle stitched together across all services.
 
-**Subsegment**: additional granularity within a segment. Use to trace downstream calls: DynamoDB queries, HTTP calls to third-party APIs, SQL queries.
+A **segment** is the data block that one service emits for its participation in a request — including timing, HTTP request and response metadata, errors, and any downstream calls. A **subsegment** provides finer-grained detail within a segment: individual DynamoDB queries, outbound HTTP calls to third-party APIs, SQL queries, or any block of code you want to time and annotate. The SDK creates subsegments automatically for AWS SDK calls and HTTP requests, and you can create custom subsegments in your application code.
 
-**Annotations**: key-value pairs indexed by X-Ray for **filtering** traces. Limited to primitive types (string, number, boolean). Use to filter by user ID, order ID, environment, etc.
-
-**Metadata**: arbitrary key-value data attached to segments/subsegments. Not indexed — cannot filter by metadata, but visible in trace details.
-
-**Service Map**: visual graph of services and their connections. Shows request counts, error rates, and latency for each service and edge. Generated automatically from trace data.
-
-**Sampling**: X-Ray does not record every request by default (would be expensive/noisy). Default rule: first request per second + 5% of additional requests. Configure custom sampling rules by service name, URL, method.`,
+**Annotations** and **metadata** are two ways to attach additional information to segments and subsegments. Annotations are indexed key-value pairs (strings, numbers, or booleans) that you can filter by in the X-Ray console — for example, filtering all traces by \`userId\` or \`orderId\`. Metadata is arbitrary JSON-serializable data that appears in trace details but is not indexed, so it can't be used for filtering but can contain rich debugging information. The **service map** is X-Ray's visual output: an automatically generated graph showing every service that participated in recent traces, with edges representing calls between services, color-coded by health (green, yellow, orange, red), and annotated with request rates, error rates, and latency percentiles.`,
     },
     {
       heading: "X-Ray SDK & Integration",
-      body: `**X-Ray SDK**: available for Node.js, Python, Java, Go, Ruby, .NET. Wrap your application code to:
-- Automatically instrument incoming HTTP requests
-- Trace outgoing HTTP/HTTPS calls (wrapping \`http\`/\`https\` modules)
-- Trace AWS SDK calls (DynamoDB, S3, SQS, etc.)
-- Create custom subsegments for business logic
+      body: `The X-Ray SDK is available for Node.js, Python, Java, Go, Ruby, and .NET, and it instruments your application in two complementary ways: automatic instrumentation of infrastructure-level calls (HTTP requests, AWS SDK calls) and manual instrumentation for custom business logic.
 
-**Lambda integration**: enable Active Tracing in Lambda function configuration (or via SAM/CDK). Lambda automatically creates a segment per invocation. Import the X-Ray SDK to add subsegments.
-
+In Python, \`patch_all()\` automatically wraps the \`boto3\` library, the \`requests\` library, and other supported libraries so that all AWS SDK calls and outbound HTTP requests are automatically traced as subsegments without any additional code:
 \`\`\`python
 from aws_xray_sdk.core import xray_recorder, patch_all
 patch_all()  # patches boto3, requests, etc.
@@ -44,78 +33,49 @@ def process_order(order_id):
     # This block creates a subsegment named 'process_order'
     ...
 \`\`\`
+The \`@xray_recorder.capture\` decorator creates a named subsegment for any function, and \`xray_recorder.begin_subsegment\` / \`end_subsegment\` provides the same capability without decorators.
 
-**API Gateway integration**: enable X-Ray tracing per stage. API Gateway creates segments and passes the trace ID to the backend (Lambda, HTTP integration).
+**Lambda** is the simplest integration path: enable Active Tracing in the Lambda function configuration (or set \`Tracing: Active\` in SAM/CDK), and Lambda automatically creates a segment for each invocation and passes the trace context to the X-Ray SDK. The Lambda runtime handles the daemon communication, so no sidecar is needed.
 
-**ECS/Fargate**: run X-Ray daemon as a sidecar container. SDK in your app container sends UDP segments to the daemon (localhost:2000). Daemon batches and sends to X-Ray service.
-
-**EC2**: install and run X-Ray daemon as a background process. SDK sends to localhost:2000.
-
-**Beanstalk**: X-Ray daemon is pre-installed. Enable via console or .ebextensions config.`,
+**API Gateway** tracing is enabled per stage — API Gateway creates segments for each request and passes the Trace ID downstream to the integration target (Lambda or HTTP backend). **ECS and Fargate** run the X-Ray daemon as a sidecar container alongside your application container. The application SDK sends UDP segments to the daemon at \`localhost:2000\` (in \`awsvpc\` mode) or to the daemon container's IP (in \`bridge\` mode). **Elastic Beanstalk** has the daemon pre-installed and enables it via the console or \`.ebextensions\` configuration.`,
     },
     {
       heading: "X-Ray Daemon",
-      body: `The **X-Ray daemon** is a lightweight process that listens for UDP traffic on port 2000, buffers segments, and forwards them to the X-Ray service. Required for EC2, ECS, and on-premises; Lambda has a built-in equivalent.
+      body: `The **X-Ray daemon** is a lightweight background process that buffers trace segments locally and forwards them to the X-Ray service in batches. It listens for UDP segments on port 2000 and sends them via HTTPS to the X-Ray API. The daemon pattern exists for an important reason: it decouples your application from the latency and retry logic of making synchronous HTTP calls to the X-Ray API. The SDK sends UDP (fire-and-forget, zero blocking time) to the local daemon, and the daemon handles batching, retries, and error handling asynchronously.
 
-**Why a daemon?**: avoids blocking application threads on HTTP calls to X-Ray. The SDK sends UDP (fire-and-forget) to the local daemon, which handles batching and retries.
+For most environments — EC2 instances and ECS tasks — you run the daemon as a background process or sidecar container. If the daemon is not on \`localhost\`, set the \`AWS_XRAY_DAEMON_ADDRESS\` environment variable to point the SDK to the correct address. In ECS with \`bridge\` networking, the daemon sidecar has a container-specific IP, so this environment variable is required for the application container to find it.
 
-**Daemon configuration**: set \`AWS_XRAY_DAEMON_ADDRESS\` environment variable if the daemon is not on localhost (e.g. for ECS sidecar on a different host).
-
-**IAM**: the daemon's IAM role/instance profile needs \`xray:PutTraceSegments\` and \`xray:PutTelemetryRecords\`.
-
-**Lambda**: no separate daemon needed. Lambda runtime captures and sends segments automatically.`,
+The daemon's IAM principal (instance profile for EC2, task role for ECS) needs two permissions: \`xray:PutTraceSegments\` to send segment data and \`xray:PutTelemetryRecords\` to send operational metrics about the daemon itself. **Lambda is the exception**: the Lambda runtime includes built-in daemon functionality, so you don't deploy a separate daemon process and don't need to manage these IAM permissions explicitly — they're included in Lambda's managed execution model.`,
     },
     {
       heading: "Sampling Rules",
-      body: `Sampling controls which requests are traced. Too many traces = high cost. Too few = miss issues.
+      body: `Tracing every single request in a high-traffic application would be expensive and generate more data than is practical to analyze. Sampling controls what fraction of requests are actually traced, balancing cost and observability.
 
-**Default rule**: reservoir = 1 req/s + 5% fixed rate.
+X-Ray's default sampling rule traces the **first request per second** from each host (the reservoir — ensuring at least some traces even for low-traffic services) plus **5% of additional requests** beyond that. For most applications, this provides good coverage at reasonable cost without tracing every request.
 
-**Custom rules**: define rules by service name, host, URL path, HTTP method. Set reservoir (fixed count per second) and rate (percentage beyond reservoir).
+**Custom sampling rules** let you override the default for specific traffic patterns. You define rules by service name, host, URL path, and HTTP method, and set a reservoir (fixed count per second, always traced) and a rate (percentage of requests beyond the reservoir). Rules are evaluated in priority order — the first matching rule applies, with the default rule as the last resort. Higher-priority rules for specific endpoints (like a high-value checkout flow) can ensure those requests are traced at 100%, while lower-priority rules reduce sampling for high-volume but less critical endpoints like health checks.
 
-**Rule evaluation**: X-Ray evaluates rules in priority order. First matching rule applies. Default rule is last resort.
-
-**Reservoir**: the number of requests per second that are always traced regardless of rate (helps ensure at least some traces per second for low-traffic services).
-
-**Cost implication**: more traces = higher cost. Tune sampling for high-traffic services to avoid paying for 100% of traces.
-
-**GetSamplingRules API**: SDK calls this to get current rules. Rules can be updated in the X-Ray console or via API without redeploying your application.`,
+The SDK fetches current sampling rules at runtime via the \`GetSamplingRules\` API, which means you can update sampling configuration in the X-Ray console and it takes effect without redeploying your application. This is a significant operational advantage — you can increase sampling temporarily to debug a production issue and then reduce it again, all without touching your code. Sampling rules also affect cost directly, so tuning them is an important cost optimization for high-traffic services.`,
     },
     {
       heading: "Service Map & Analysis",
-      body: `The **Service Map** in the X-Ray console shows a visual graph where:
-- Circles = services (Lambda, API Gateway, DynamoDB, external)
-- Arrows = calls between services
-- Color coding: green (OK), yellow (slow), orange (error), red (fault)
-- Each node shows request rate, error rate, latency distribution
+      body: `The **Service Map** is X-Ray's primary visual output — an automatically generated graph of all services involved in traced requests. Each node represents a service (Lambda function, API Gateway, DynamoDB table, external HTTP endpoint, or any other instrumented resource), and edges represent calls between services with latency and error rate annotations. Nodes are color-coded: green means healthy, yellow means slow, orange means there are client errors (4xx), and red means there are server errors (5xx) or faults. At a glance, the service map shows you where in your distributed system problems are occurring.
 
-**Trace filtering**: filter traces by:
-- Service name, URL, HTTP method, status code
-- Annotations (indexed key-value pairs you set in code)
-- Duration (find slow requests: \`duration > 5\`)
-- Error, fault, or throttle flags
+**Trace filtering** lets you narrow down which traces you're examining. You can filter by service name, URL, HTTP method, status code, and duration (e.g. \`duration > 5\` to find slow requests). Most importantly, you can filter by **annotations** — the indexed key-value pairs your application attaches to traces. If you annotate traces with \`userId\`, you can instantly retrieve all traces for a specific user who reported a problem. If you annotate with \`orderId\`, you can trace exactly what happened to a specific order through every service it touched.
 
-**Groups**: create named filter expressions to segment traces (e.g. group for admin API calls). Groups appear in the service map and can have separate sampling rules.
+**Groups** are saved filter expressions with names, appearing as separate views in the service map. A "PaymentErrors" group filtered to 5xx responses from your payment service gives you a dedicated operational view for payment reliability. Groups can have separate sampling rules — you can sample payment-related requests at a higher rate than general traffic.
 
-**Insights**: X-Ray Insights automatically detects anomalies (spikes in error rate, latency) and surfaces root cause candidates. Sends notifications via SNS.
-
-**CloudWatch integration**: X-Ray trace data surfaces in CloudWatch ServiceLens — combined metrics + traces + logs view.`,
+**X-Ray Insights** automatically detects anomalies in your trace data — spikes in error rates, latency regressions, or sudden changes in throughput — without requiring you to define thresholds. When an anomaly is detected, Insights surfaces the likely root cause services and sends a notification via SNS. **CloudWatch ServiceLens** integrates X-Ray traces with CloudWatch metrics and logs, giving you a unified view where you can click from a latency metric spike directly to the X-Ray traces that occurred during that window.`,
     },
     {
       heading: "X-Ray with Other Services",
-      body: `**X-Ray + Lambda**: enable active tracing on function → Lambda creates root segment. SDK adds subsegments for DynamoDB/S3/etc. calls.
+      body: `**X-Ray + Lambda** is the most common integration pattern for serverless architectures. Enable Active Tracing on the function configuration, import the X-Ray SDK, call \`patch_all()\` (Python) or the equivalent for your runtime, and every Lambda invocation creates a trace with automatic subsegments for all AWS SDK calls. Custom subsegments wrap business logic you want to time and annotate.
 
-**X-Ray + API Gateway**: tracing per stage. API Gateway segment visible on service map as the entry point. Pass-through of trace header to Lambda.
+**X-Ray + API Gateway** traces requests from the moment they hit the API Gateway stage, before they reach Lambda. The API Gateway segment appears as the entry point in the service map, and its latency includes authentication, throttling checks, and request transformation — useful for diagnosing overhead that isn't visible when only tracing Lambda.
 
-**X-Ray + ECS**: sidecar daemon pattern. App containers send to daemon. Service map shows ECS tasks as nodes.
+**X-Ray + Step Functions** provides end-to-end traces across workflow executions. Step Functions creates segments for each state transition, so a full execution trace shows the time spent in each state, the Lambda invocations that occurred, and any errors or retries — all in one connected view. **X-Ray + SNS/SQS** propagates trace context across asynchronous boundaries: X-Ray adds the Trace ID to SNS message attributes and SQS message attributes, and the downstream Lambda consumer picks up that trace ID to continue the trace — giving you end-to-end visibility across async fan-out patterns.
 
-**X-Ray + Step Functions**: Step Functions creates segments for each state (Task, Choice, Wait). Full end-to-end trace from API Gateway → Step Functions → Lambda → DynamoDB visible on one trace.
-
-**X-Ray + SNS / SQS**: trace propagation across async boundaries. X-Ray adds trace header to SNS/SQS message attributes. Downstream Lambda picks up and continues the trace.
-
-**X-Ray + CloudWatch ServiceLens**: ServiceLens integrates CloudWatch metrics + X-Ray traces + CloudWatch Logs. See latency SLO compliance, error budgets, and click through to traces from a metric alarm.
-
-**X-Ray + Synthetics Canaries**: canary runs create synthetic traces. Use to monitor golden path end-to-end.`,
+**X-Ray + CloudWatch ServiceLens** is the unified observability experience: ServiceLens shows CloudWatch metrics alongside X-Ray trace data and CloudWatch Logs in a single view. You can go from a metric alarm firing (high 5xx rate) to the X-Ray service map showing which service is failing, to individual traces showing the specific errors, to the CloudWatch Logs entries for those requests — all without switching tools or correlating data manually.`,
     },
   ],
 

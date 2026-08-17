@@ -11,144 +11,63 @@ export const elasticacheGuide: ServiceGuide = {
   sections: [
     {
       heading: "Redis vs Memcached",
-      body: `**Redis (ElastiCache for Redis)**:
-- Rich data structures: strings, hashes, lists, sets, sorted sets, bitmaps, HyperLogLog, geospatial indexes
-- Persistence: optional RDB snapshots and AOF (append-only file)
-- Replication: primary + read replicas (up to 5 per shard)
-- Multi-AZ automatic failover
-- Cluster mode: partition data across multiple shards (horizontal scaling)
-- Pub/Sub messaging
-- Lua scripting
-- Transactions (MULTI/EXEC)
-- Sorted sets: ideal for leaderboards, rate limiting
-- **Use for**: caching, sessions, leaderboards, pub/sub, geospatial, queues
+      body: `ElastiCache supports two engines with fundamentally different capabilities, and choosing the right one matters significantly for your use case.
 
-**Memcached**:
-- Simple key-value store only (string → blob)
-- No persistence, no replication, no failover
-- Multi-threaded: better CPU utilization per node
-- Auto-discovery: clients discover nodes automatically
-- Simpler; scales horizontally by adding nodes
-- **Use for**: simple object caching where you don't need persistence or replication
+**Redis** is the more capable engine. Beyond basic key-value storage, Redis supports rich data structures — strings, hashes, lists, sets, sorted sets, bitmaps, HyperLogLog, and geospatial indexes. Each structure comes with specialized operations: sorted sets support \`ZADD\`, \`ZRANK\`, and \`ZRANGE\` for real-time leaderboards; lists support \`LPUSH\` and \`BRPOP\` for work queues; pub/sub enables message broadcasting. Redis also supports **persistence** through RDB snapshots and AOF (append-only file) logging, which survive restarts. Multi-AZ configurations with a primary node and up to 5 read replicas per shard provide high availability, and cluster mode can horizontally partition data across multiple shards. Redis supports Lua scripting and MULTI/EXEC transactions for atomic operations across multiple keys.
 
-**Decision guide**:
-- Need replication / HA → Redis
-- Need persistence → Redis
-- Need complex data types → Redis
-- Need pub/sub → Redis
-- Need simple multi-threaded caching → Memcached
-- Exam: when in doubt → Redis`,
+**Memcached** is simpler by design: it's a multi-threaded key-value store with better CPU utilization per node. It has no persistence, no replication, no failover, and no complex data structures — just raw throughput for string-to-blob caching. Memcached scales horizontally by adding nodes, and clients use auto-discovery to find all nodes. Choose Memcached when you need simple, high-throughput object caching and don't require any of Redis's advanced features. In practice, when in doubt, Redis is the better default — it's more capable and the performance overhead is negligible for typical workloads.`,
     },
     {
       heading: "Redis Cluster Mode",
-      body: `**Cluster Mode Disabled** (classic replication):
-- Single shard (one primary + up to 5 read replicas)
-- All data on one primary; replicas are read-only copies
-- Vertical scaling only (change node type)
-- Good for: datasets that fit in one node, simple HA
+      body: `Redis on ElastiCache comes in two configurations that determine how data is distributed and how you scale.
 
-**Cluster Mode Enabled**:
-- Multiple shards, each with their own primary + replicas
-- Data partitioned (sharded) across nodes by key slot (0–16383 hash slots)
-- Scale horizontally by adding shards
-- Scale reads by adding replicas per shard
-- Online resharding: add/remove shards without downtime
-- **Must use**: Redis Cluster client (not classic Redis client)
+**Cluster Mode Disabled** (classic replication) uses a single shard: one primary node handles all writes, and up to 5 read replicas hold copies of the data. If the primary fails, ElastiCache promotes a replica automatically. This configuration is straightforward and works well when your entire working set fits in one node. You scale vertically by changing the node type. The standard Redis client works without any special configuration.
 
-**Choosing**:
-- Dataset too large for one node → Cluster Mode Enabled
-- Need horizontal write scaling → Cluster Mode Enabled
-- Simple use case, one node sufficient → Cluster Mode Disabled`,
+**Cluster Mode Enabled** distributes data across multiple shards using consistent hashing. Each shard has its own primary node and optional replicas. The cluster uses 16,384 hash slots divided evenly across shards — each key maps to a slot, and each slot maps to a shard. This enables horizontal write scaling: instead of one primary handling all writes, each shard's primary handles writes for its portion of the key space. You can add shards (online resharding) without downtime, and you can scale reads by adding replicas per shard independently. The requirement is using a Redis Cluster-aware client — the standard Redis client doesn't understand cluster topology. Enable cluster mode when your dataset is too large for a single node or when write throughput exceeds what a single primary can handle.`,
     },
     {
       heading: "Caching Strategies",
-      body: `**Lazy Loading (Cache-Aside)**:
-1. Application checks cache for data
-2. Cache hit: return cached data
-3. Cache miss: fetch from DB, write to cache, return data
+      body: `The caching strategy you choose determines the freshness/consistency tradeoff of your cached data.
 
-Pros: only caches what's requested. Cons: first request always misses (cold start); stale data possible if DB updates without cache invalidation.
+**Lazy Loading (Cache-Aside)** is the most common pattern. The application checks the cache before querying the database. On a cache hit, the cached value is returned directly without touching the database. On a cache miss, the application queries the database, writes the result to the cache with an appropriate TTL, and returns the value. The advantages are that only requested data is cached (no wasted memory on unread data) and the application still works if the cache is empty or unavailable. The disadvantage is that the first request for any data always incurs a cache miss, and if the database is updated directly (bypassing the cache), the cached data becomes stale until the TTL expires.
 
-**Write-Through**:
-1. On every DB write, also write to cache
-2. Cache always has current data
+**Write-Through** updates the cache every time the database is written. Every write is two writes: one to the database and one to the cache. This keeps the cache always fresh — there's no stale data — but at the cost of extra write latency and the risk of caching data that's never read. Write-through works best for data that's both frequently written and frequently read.
 
-Pros: no stale data. Cons: writes are slower (two writes: DB + cache); caches data that may never be read.
+**TTL (Time to Live)** is complementary to both strategies. Setting a TTL on cache keys ensures that stale data expires automatically, providing a safety net against cache-database divergence. The right TTL depends on how often the data changes and how fresh it needs to be. Too short a TTL means frequent cache misses; too long means users see stale data.
 
-**Write-Behind (Write-Back)**:
-- Write to cache first, async flush to DB later
-- Risk: data loss if cache fails before flush
-
-**TTL (Time-To-Live)**:
-- Set expiry on cache keys to prevent stale data
-- Lazy loading: set TTL so stale data expires automatically
-- Too short: frequent cache misses. Too long: stale data.
-
-**Cache Eviction Policies** (Redis):
-- \`allkeys-lru\`: evict least recently used keys (good general default)
-- \`volatile-lru\`: LRU among keys with TTL set
-- \`allkeys-lfu\`: evict least frequently used
-- \`noeviction\`: return error when memory full (not for caching)`,
+**Cache eviction policies** determine what Redis removes when memory is full. \`allkeys-lru\` (evict the least recently used key) is a good general default for caches. \`volatile-lru\` applies LRU eviction only to keys with TTLs set. \`noeviction\` returns an error when memory is full — never appropriate for a cache.`,
     },
     {
       heading: "Security",
-      body: `**Encryption at rest**: ElastiCache for Redis supports encryption at rest (uses KMS). Memcached does not support encryption at rest.
+      body: `ElastiCache for Redis provides several security mechanisms that should all be used together in production.
 
-**Encryption in transit**: ElastiCache supports TLS for data in transit (Redis). Enable at cluster creation. Client must use TLS connection.
+**Encryption in transit** secures data between your application and the cache cluster using TLS. Enabling this requires your Redis client to use a TLS-capable connection. **Encryption at rest** encrypts the data stored in Redis (including RDB snapshots and AOF files) using KMS — this is only available for Redis, not Memcached.
 
-**Redis AUTH**: password-based authentication for Redis (legacy). Single password required on all connections.
+For authentication, Redis supports two approaches. **Redis AUTH** is the legacy single-password mechanism: any client that knows the password can connect. **Redis RBAC** (Role-Based Access Control), available in Redis 6+, creates named users with specific permissions for which commands they can execute and which key namespaces they can access. Users are assigned to a user group, and the group is attached to the cluster. RBAC is more granular and auditable than AUTH.
 
-**Redis RBAC (Role-Based Access Control)**: create users with specific commands/keys they can access. Supported in Redis 6+. More granular than AUTH. Assign users to a user group, attach to cluster.
-
-**VPC**: ElastiCache clusters run inside a VPC. Access restricted by VPC security groups. No public internet access by default.
-
-**Security Groups**: control inbound traffic to the cluster port (Redis: 6379, Memcached: 11211). Allow only your application layer security groups.
-
-**Subnet Groups**: define which subnets ElastiCache can use for node placement. Typically private subnets.`,
+ElastiCache clusters run inside your VPC and are not publicly accessible. **Security groups** control which sources can reach the cluster on the Redis port (6379) or Memcached port (11211). The typical pattern is an application-tier security group that allows inbound connections from your ECS task security group or Lambda — nothing else. **Subnet groups** define which subnets ElastiCache can use for node placement; these should always be private subnets with no public internet route.`,
     },
     {
       heading: "ElastiCache Patterns",
-      body: `**Session Store**:
-- Store user sessions in Redis instead of server memory
-- Stateless application servers — any server can handle any request
-- TTL on session keys for automatic expiry
-- Enables horizontal scaling of web tier
+      body: `Several patterns come up repeatedly when designing ElastiCache architectures.
 
-**Database Query Cache**:
-- Cache results of expensive SQL queries
-- Key = hash of query + parameters
-- Invalidate on writes (delete cache key or use TTL)
-- Reduce DB load by 90%+ for read-heavy apps
+**Session Store** is the most common pattern for web applications. Instead of storing user sessions in memory on each application server (which breaks horizontal scaling — if a user's request goes to a different server, their session is lost), you store sessions in Redis. Every application server reads from and writes to the same Redis cluster, making application servers truly stateless. TTL on session keys provides automatic expiry. This pattern enables horizontal scaling of your web tier without sticky sessions.
 
-**Leaderboard (Sorted Sets)**:
-- Redis Sorted Set: ZADD/ZRANGE/ZRANK
-- Real-time leaderboard for gaming, scoring
-- O(log N) for add/update/rank operations
+**Database Query Cache** stores the results of expensive SQL or NoSQL queries in Redis. The cache key is typically a hash of the query string and parameters. When the underlying data changes, you can either delete the cache key to force a miss on the next request or rely on TTL expiry. A well-tuned query cache can reduce database load by an order of magnitude on read-heavy applications.
 
-**Rate Limiting**:
-- Redis INCR + EXPIRE: increment counter per user per window
-- Atomically increment and check against limit
-- SETNX + EXPIRE for distributed locks
+**Leaderboards with Sorted Sets** exploit Redis's native sorted set data structure. \`ZADD\` adds or updates a score, \`ZRANK\` retrieves a player's rank, and \`ZRANGE\` with \`WITHSCORES\` retrieves a range of entries with their scores — all in O(log N) time. A global leaderboard that would require expensive SQL \`ORDER BY\` queries becomes a single Redis call.
 
-**Pub/Sub**:
-- Producers PUBLISH to channels
-- Consumers SUBSCRIBE to channels
-- Not durable (messages not stored; subscriber must be connected)
-- Use for: real-time notifications, chat, event broadcasting (not reliable delivery)`,
+**Rate Limiting** uses Redis's atomic \`INCR\` command combined with \`EXPIRE\`. Increment a counter keyed by user ID and time window, and compare it to your rate limit threshold. Because \`INCR\` is atomic in Redis, there's no race condition between checking and incrementing the counter.`,
     },
     {
       heading: "ElastiCache with Other Services",
-      body: `**ElastiCache + RDS**: cache query results from RDS. On cache miss, query RDS and populate cache. Reduces RDS load and improves response time.
+      body: `**ElastiCache + RDS** is the foundational pattern for improving read performance on relational databases. On a cache miss, the application queries RDS and populates the cache. On subsequent reads, the cache serves the result. This pattern can reduce RDS query load dramatically for applications with high read-to-write ratios. When RDS data changes, the cache key must be invalidated to prevent stale reads.
 
-**ElastiCache + Lambda**: Lambda functions connect to ElastiCache inside VPC. Use connection reuse (init outside handler). Redis client connections persist across warm Lambda invocations.
+**ElastiCache + Lambda** requires the Lambda function to run inside the same VPC as the ElastiCache cluster, since ElastiCache has no public endpoint. Initialize the Redis connection outside the handler function to reuse it across warm invocations — establishing a new TCP connection on every invocation would add significant latency for short-lived Lambda functions.
 
-**ElastiCache + ECS/EC2**: web or API containers connect to Redis for session state. Common pattern: ECS tasks (stateless) + ElastiCache (state).
+**ElastiCache + ECS** follows the same connection reuse principle. Stateless ECS containers connect to Redis for session state, making the application tier horizontally scalable. The ECS task security group needs permission to connect to the ElastiCache security group on port 6379.
 
-**ElastiCache + DynamoDB**: cache DynamoDB results for hot items. DAX is the managed DynamoDB-specific cache; ElastiCache is general-purpose.
-
-**ElastiCache + Secrets Manager**: store Redis AUTH password or RBAC credentials in Secrets Manager. Rotate without code change.
-
-**ElastiCache + CloudWatch**: metrics: CacheMisses, CacheHits, CurrConnections, Evictions, BytesUsedForCache. Alarm on Evictions (cache too small) or high CacheMisses (low hit rate).`,
+For secret management, store Redis AUTH passwords or RBAC user credentials in **Secrets Manager** and fetch them at startup. This enables credential rotation without redeploying your application — the application just needs to handle connection reestablishment when credentials change.`,
     },
   ],
 

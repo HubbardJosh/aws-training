@@ -11,116 +11,65 @@ export const rdsGuide: ServiceGuide = {
   sections: [
     {
       heading: "Supported Engines & Aurora",
-      body: `**Standard RDS engines**: MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server.
+      body: `RDS supports five standard open-source and commercial engines — MySQL, PostgreSQL, MariaDB, Oracle, and Microsoft SQL Server — with AWS handling the underlying infrastructure for all of them. For new workloads, **Amazon Aurora** is generally the better choice: it's an AWS-built engine with MySQL and PostgreSQL compatibility that delivers up to 5x the throughput of MySQL and 3x that of PostgreSQL.
 
-**Amazon Aurora**: AWS-built relational engine compatible with MySQL and PostgreSQL.
-- Up to 5x faster than MySQL, 3x faster than PostgreSQL
-- Storage auto-scales up to 128 TiB in 10 GiB increments
-- 6 copies of data across 3 AZs (storage-level replication, not instance-level)
-- Up to 15 Aurora Read Replicas with sub-10ms replica lag
-- Automated failover to a replica in < 30 seconds
-- Aurora Global Database: replicate across regions with < 1 second latency
-- Aurora Serverless v2: scales capacity in fine-grained increments; scales to zero (v1 had cold start issues)
-- Aurora Multi-Master: multiple write nodes (active-active writes across AZs)
-- **Backtrack**: rewind the database to a previous point in time without restoring from backup (Aurora MySQL only)
+Aurora's performance advantage comes from a fundamentally different storage architecture. Rather than replicating at the instance level, Aurora replicates at the storage level: six copies of your data are maintained across three Availability Zones automatically, with the storage auto-scaling in 10 GiB increments up to 128 TiB. You can attach up to 15 Aurora Read Replicas with sub-10ms replica lag, and automated failover to a replica completes in under 30 seconds.
 
-**Choosing Aurora vs RDS**: for new workloads, Aurora is generally preferred for performance, HA, and storage auto-scaling. Use standard engines when you need specific engine versions or licensing constraints.`,
+For global applications and disaster recovery, **Aurora Global Database** replicates across regions with less than one second of lag, enabling failover to a secondary region in under a minute. **Aurora Serverless v2** scales capacity in fine-grained ACU (Aurora Capacity Unit) increments and scales to near-zero when idle — v2 addressed the cold-start latency problems that made v1 impractical for latency-sensitive workloads. **Aurora Multi-Master** allows multiple write nodes across AZs for active-active write scenarios. One Aurora-specific feature worth knowing for the exam is **Backtrack**: it can rewind an Aurora MySQL database to a specific point in time without restoring from a backup — the database stays on the same instance with the same endpoint.`,
     },
     {
       heading: "Multi-AZ & Read Replicas",
-      body: `**Multi-AZ**: synchronous replication to a standby instance in a different AZ. Automatic failover on:
-- Primary instance failure
-- AZ failure
-- Maintenance
-- Manual failover trigger
+      body: `RDS offers two distinct replication features that solve different problems, and confusing them is one of the most common mistakes on the exam.
 
-Failover time: 60–120 seconds (DNS record updated to point to standby). The standby is NOT available for reads — it's only for failover. **Purpose: high availability, not performance**.
+**Multi-AZ** is a high-availability feature. RDS maintains a synchronous standby replica in a different Availability Zone. Every write to the primary is synchronously confirmed on the standby before being acknowledged to the application. If the primary fails — due to hardware failure, AZ outage, or scheduled maintenance — RDS automatically updates the DNS record to point to the standby within 60–120 seconds, and the application reconnects transparently. The standby is not accessible for reads; it exists solely as a failover target. Multi-AZ adds resilience, not performance.
 
-**Read Replicas**: asynchronous replication from primary. Can be in same region, different region, or different account. Used to offload read traffic. Up to 5 per MySQL/PostgreSQL, 15 for Aurora.
+**Read Replicas** are for performance. They use asynchronous replication from the primary, meaning there's a small propagation lag before changes are visible on the replica. You can have up to 5 read replicas for MySQL and PostgreSQL, or up to 15 for Aurora. Read replicas have their own endpoints, so your application must be explicitly configured to direct read queries there. A read replica can be promoted to a standalone primary instance, but this breaks the replication relationship and is typically done only for failover, migration, or scaling decisions. Read replicas can span regions, enabling cross-region read scaling and providing a basis for disaster recovery.
 
-Can be promoted to standalone DB (breaks replication). Different endpoint from primary — application must be configured to send reads to replica endpoint.
-
-**Multi-AZ vs Read Replica**:
-| | Multi-AZ | Read Replica |
-|--|---------|-------------|
-| Replication | Synchronous | Asynchronous |
-| Purpose | HA / failover | Read scaling |
-| Readable | No | Yes |
-| Failover | Automatic | Manual promotion |
-| Cross-region | Yes (some engines) | Yes |`,
+The summary: Multi-AZ handles the case where your primary goes down. Read replicas handle the case where your primary can't keep up with query load. They're complementary, not interchangeable — and the exam frequently tests whether you know which one to recommend in a given scenario.`,
     },
     {
       heading: "Backups & Restore",
-      body: `**Automated Backups**:
-- Daily snapshot + transaction logs (point-in-time recovery)
-- Retention: 1–35 days (default 7)
-- Backups occur during backup window (minimal impact; brief I/O suspension for single-AZ)
-- Restored to a new RDS instance (cannot restore in-place)
-- Free storage up to the size of your DB
+      body: `RDS provides two backup mechanisms with different purposes and retention characteristics.
 
-**Manual Snapshots**:
-- User-initiated snapshot
-- Retained until you delete them (not subject to retention period)
-- Can be shared with other AWS accounts or copied to other regions
-- Cross-region copy for DR
+**Automated backups** run daily during a configurable backup window and capture transaction logs continuously throughout the day. Together, these enable **Point-in-Time Recovery (PITR)**: you can restore the database to any second within the retention window (1–35 days, defaulting to 7). The automated backup takes a full snapshot and then uses the transaction logs to replay changes to the requested time. Restores always create a new RDS instance — you cannot restore in-place on the existing instance, and the new instance will have a different endpoint. For Multi-AZ instances, the backup is taken from the standby to avoid I/O impact on the primary.
 
-**Point-in-Time Restore (PITR)**: restore to any second within the retention window. Creates a new DB instance. Replays transaction logs from the last snapshot to the requested time.
+**Manual snapshots** are user-initiated and retained until you explicitly delete them, independent of the automated backup retention period. They're useful for pre-migration checkpoints, compliance archives, and cross-account or cross-region sharing — you can copy a snapshot to another region for disaster recovery or share it with another AWS account.
 
-**Aurora Backtrack**: rewind Aurora MySQL database to a specific time (not a restore — same instance, no new endpoint). Useful for recovering from accidental DELETE/UPDATE without waiting for full restore.
-
-**RDS Snapshot Export to S3**: export RDS/Aurora snapshot to S3 as Apache Parquet format for analysis with Athena.`,
+**Aurora Backtrack** deserves special mention as a uniquely Aurora-MySQL capability. Rather than restoring from a backup to a new instance, Backtrack rewinds the existing Aurora cluster to a previous point in time without creating a new endpoint. This is faster and operationally simpler for recovering from accidental \`DELETE\` or \`UPDATE\` statements. Finally, **RDS Snapshot Export to S3** lets you export a snapshot in Apache Parquet format for analysis with Athena — without consuming any read capacity from the live database.`,
     },
     {
       heading: "Security",
-      body: `**Encryption at rest**: enable at DB creation using KMS. All data, automated backups, snapshots, replicas encrypted with same key. **Cannot encrypt an unencrypted DB in place** — must: take snapshot → copy snapshot with encryption enabled → restore to new encrypted DB.
+      body: `Securing an RDS instance involves four layers that should all be configured together in production.
 
-**Encryption in transit**: SSL/TLS for client connections. Force SSL with parameter group setting (\`rds.force_ssl=1\` for PostgreSQL, use \`require_secure_transport=ON\` for MySQL).
+**Encryption at rest** using KMS must be enabled at database creation time — you cannot enable it on a running instance. Once enabled, all data files, automated backups, snapshots, and read replicas are encrypted with the same KMS key. If you need to encrypt an existing unencrypted instance, the path is: take a snapshot, copy the snapshot with encryption enabled, restore a new encrypted instance from the copy. It's a three-step process and the original unencrypted instance continues running until you cut over.
 
-**VPC**: RDS instances run inside a VPC in a DB subnet group (subnets across multiple AZs). Configure security groups to allow only application layer to connect on DB port.
+**Encryption in transit** uses SSL/TLS for client connections. You can enforce TLS-only connections through parameter group settings: \`rds.force_ssl=1\` for PostgreSQL or \`require_secure_transport=ON\` for MySQL. Without enforcement, some clients may connect unencrypted, so the parameter group setting is important for compliance.
 
-**IAM Database Authentication** (MySQL, PostgreSQL): authenticate with IAM credentials instead of username/password. Generate authentication token with \`generate-db-auth-token\` CLI; use as password. Token valid for 15 minutes. Great for Lambda, ECS — no need to store DB passwords.
+**Network isolation** is achieved by placing RDS instances in private subnets within a VPC DB subnet group. Security groups control which sources can reach the database port — typically only the application tier's security group, with no public internet access. **IAM Database Authentication** provides an alternative to username/password authentication for MySQL and PostgreSQL: you generate a short-lived authentication token using the AWS CLI or SDK (\`generate-db-auth-token\`), pass it as the database password, and the token expires after 15 minutes. This is particularly useful for Lambda functions and ECS tasks where storing database passwords in environment variables is undesirable.
 
-**Secrets Manager integration**: store DB credentials in Secrets Manager. Enable auto-rotation (built-in Lambda for RDS). Application fetches credentials from Secrets Manager.
-
-**Database Activity Streams**: real-time stream of DB activity to Kinesis. Used for audit, compliance monitoring. Aurora only.`,
+**Secrets Manager** provides automatic credential rotation for RDS through built-in rotation Lambda functions. The application fetches credentials from Secrets Manager at startup, and Secrets Manager rotates the password on a schedule by updating both the RDS user's password and the secret value simultaneously.`,
     },
     {
       heading: "Performance & Scaling",
-      body: `**Vertical scaling**: change instance type (requires reboot for most engines; Aurora can do some without reboot).
+      body: `RDS scaling works differently depending on whether you're scaling compute, storage, or read capacity, and the mechanisms have different operational impacts.
 
-**Storage scaling**: increase storage (cannot decrease). Enable **storage auto-scaling** to automatically expand storage when threshold is reached.
+**Vertical scaling** (changing the instance type) requires a reboot for most engines, causing a brief interruption. For Multi-AZ instances, you can apply the change during the maintenance window, and RDS performs the upgrade on the standby first, then fails over — minimizing downtime to the failover period rather than the full upgrade time. Aurora can perform some instance class changes without a reboot.
 
-**Read scaling**: add Read Replicas. Route read queries to replica endpoint.
+**Storage scaling** is one-directional: you can increase storage size but never decrease it. Enable **storage auto-scaling** to have RDS automatically expand storage when free space drops below a threshold — this prevents the "out of disk space" failure mode that would require a manual scaling operation at an inconvenient time.
 
-**Connection pooling**: RDS Proxy — managed proxy that pools and shares connections to the database. Reduces connection overhead for Lambda (which opens many short-lived connections). Integrates with Secrets Manager and IAM for auth. No connection limit spikes.
+**Connection pooling with RDS Proxy** is essential when your application tier generates many short-lived database connections — Lambda functions are the primary example. Lambda can have thousands of concurrent executions, each opening a new database connection, which quickly exhausts the database's connection limit and causes failures. RDS Proxy maintains a connection pool to the database and multiplexes many application connections through a smaller set of database connections. The proxy also integrates with Secrets Manager and IAM authentication, and it absorbs Multi-AZ failovers so the application sees a brief pause rather than a connection error.
 
-**RDS Proxy**:
-- Pools connections: Lambda functions share a small pool of DB connections
-- Reduces latency from connection establishment
-- Handles failover faster (proxy absorbs the failover; app sees brief pause, not disconnect)
-- Supports MySQL, PostgreSQL, MariaDB, SQL Server, Aurora
-
-**Parameter Groups**: engine configuration parameters. Tune memory, query cache, logging. Some changes require reboot (\`static\` parameters); others apply immediately (\`dynamic\`).
-
-**Enhanced Monitoring**: 1-second OS-level metrics for RDS (CPU steal, memory, I/O per process). Separate from CloudWatch standard metrics (5-min default, 1-min with detailed).`,
+**Enhanced Monitoring** provides OS-level metrics at 1-second granularity (CPU steal, per-process memory, I/O) that are not available in CloudWatch's standard RDS metrics. It's more detailed than CloudWatch's 1-minute minimum and is critical for diagnosing workload interference on shared hardware.`,
     },
     {
       heading: "RDS with Other Services",
-      body: `**RDS + Lambda**: Lambda connects to RDS for CRUD operations. Use RDS Proxy to handle connection pooling (Lambda creates many connections). Lambda must be in same VPC as RDS.
+      body: `**RDS + Lambda** is a common architecture for serverless applications that need relational data, but the connection model requires care. Lambda functions can create a new database connection on every cold start, and high concurrency means many simultaneous connections. RDS Proxy solves this by pooling connections — Lambda connects to the proxy instead of the database, and the proxy manages the actual database connections. Lambda also must be deployed inside the same VPC as RDS, since RDS has no public endpoint.
 
-**RDS + Secrets Manager**: store DB password in Secrets Manager with auto-rotation. RDS-specific rotation Lambda built in. Application uses GetSecretValue at startup.
+**RDS + Secrets Manager** is the recommended approach for credential management. Secrets Manager stores the database username, password, host, and port as a JSON secret, and its built-in rotation Lambda function rotates the RDS user's password on a schedule without any application downtime. Applications fetch credentials via \`GetSecretValue\` at startup and implement a retry-on-auth-failure pattern to handle the brief window during rotation.
 
-**RDS + ElastiCache**: cache query results to reduce RDS load. Lazy loading pattern: check cache first, populate on miss.
+**RDS + ElastiCache** follows the lazy-loading pattern: the application checks the cache for query results before hitting the database, writes cache misses to the cache after querying, and invalidates cache keys when the underlying data changes. On read-heavy workloads this can reduce RDS query load by an order of magnitude.
 
-**RDS + CloudWatch**: CPU, IOPS, FreeStorageSpace, DatabaseConnections, ReadLatency metrics. Alarm on FreeStorageSpace to prevent running out.
-
-**RDS + DMS (Database Migration Service)**: migrate from on-premises or other cloud DBs to RDS. Continuous replication for minimal downtime migration.
-
-**RDS + Kinesis (Database Activity Streams)**: stream DB activity to Kinesis for real-time audit and compliance (Aurora only).
-
-**RDS + IAM Authentication**: Lambda, ECS tasks authenticate with IAM tokens instead of passwords. Eliminates stored DB passwords in application config.
-
-**RDS + VPC**: DB in private subnets. Application in private subnets. Security group allows app → DB on port. No public internet access.`,
+**RDS + DMS (Database Migration Service)** supports migrating from on-premises databases, other cloud providers, or different database engines to RDS. DMS supports continuous replication for near-zero-downtime migrations, making it possible to migrate production databases with only seconds of final cutover downtime. **RDS + IAM Authentication** is particularly clean for containerized workloads: ECS tasks and Lambda functions can authenticate to the database using their IAM role rather than a stored password, eliminating credential management entirely.`,
     },
   ],
 

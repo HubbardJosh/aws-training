@@ -12,7 +12,7 @@ export const samGuide: ServiceGuide = {
   sections: [
     {
       heading: "SAM Template",
-      body: `SAM templates extend CloudFormation templates. Add \`Transform: AWS::Serverless-2016-10-31\` at the top — this tells CloudFormation to process it with the SAM transform.
+      body: `A SAM template is a CloudFormation template with one key addition: the \`Transform: AWS::Serverless-2016-10-31\` declaration at the top. This tells CloudFormation's transform engine to expand SAM's shorthand resource types into their full CloudFormation equivalents before deployment. Without this transform declaration, the SAM-specific resource types would be rejected by CloudFormation.
 
 \`\`\`yaml
 AWSTemplateFormatVersion: '2010-09-09'
@@ -54,77 +54,46 @@ Outputs:
     Value: !Sub "https://\${ServerlessRestApi}.execute-api.\${AWS::Region}.amazonaws.com/Prod/"
 \`\`\`
 
-**Globals**: set default properties for all functions, APIs, or tables. Individual resources can override.
-
-**SAM generates standard CloudFormation** under the hood — the transform expands SAM resources into CloudFormation equivalents.`,
+The **Globals** section sets default property values that apply to all functions, APIs, or tables in the template. Individual resources can override any global setting. This eliminates the repetition of copying \`Runtime: nodejs20.x\` and \`Timeout: 30\` to every function definition — a significant quality-of-life improvement in templates with many functions. Because SAM generates standard CloudFormation under the hood, all CloudFormation features — parameters, outputs, conditionals, intrinsic functions, and nested stacks — work exactly as they do in native CloudFormation templates.`,
     },
     {
       heading: "SAM Resource Types",
-      body: `**AWS::Serverless::Function**: Lambda function with event source mappings.
-- Events: Api, HttpApi, S3, SQS, SNS, DynamoDB Streams, EventBridge, Schedule, IoT
-- Policies: SAM policy templates (DynamoDBCrudPolicy, S3CrudPolicy, SQSPollerPolicy, etc.) — shorthand for common IAM permission patterns
-- Layers: list of Lambda Layer ARNs
-- VpcConfig, Environment, Tracing (Active for X-Ray)
+      body: `SAM introduces shorthand resource types that expand into the full set of CloudFormation resources a serverless application needs. A single \`AWS::Serverless::Function\` with an API event, for example, expands into a Lambda function, an API Gateway REST API, stages, deployment, and the permission that allows API Gateway to invoke the function — all from a few lines of SAM YAML.
 
-**AWS::Serverless::Api**: API Gateway REST API.
-- Stages, authorizers, CORS, usage plans, API keys
+**AWS::Serverless::Function** is the core type. Its \`Events\` block maps event sources to the function: \`Api\` and \`HttpApi\` for API Gateway, \`S3\` for object uploads, \`SQS\` for queue processing, \`SNS\` for topic subscriptions, \`DynamoDB\` for stream processing, \`EventBridge\` for event patterns, \`Schedule\` for cron/rate expressions, and \`IoT\` for IoT rules. The \`Policies\` block accepts SAM policy templates (described in the next section) or standard IAM policy documents.
 
-**AWS::Serverless::HttpApi**: API Gateway HTTP API (v2). Cheaper, faster, simpler.
+**AWS::Serverless::Api** creates a REST API with configurable stages, authorizers, CORS settings, usage plans, and API keys. **AWS::Serverless::HttpApi** creates the newer HTTP API (API Gateway v2), which is cheaper, has lower latency, and supports JWT authorizers natively but has fewer features than REST API. **AWS::Serverless::SimpleTable** creates a DynamoDB table with a single primary key — the simplest possible DynamoDB configuration for straightforward use cases.
 
-**AWS::Serverless::SimpleTable**: DynamoDB table with a single primary key (simplest config).
-
-**AWS::Serverless::LayerVersion**: Lambda layer for shared code/dependencies.
-
-**AWS::Serverless::Application**: embed a SAM app from the Serverless Application Repository or another S3 template (nested applications).
-
-**AWS::Serverless::StateMachine**: Step Functions state machine defined inline or from a file.`,
+**AWS::Serverless::LayerVersion** packages shared code or dependencies (Node.js modules, Python packages, binaries) as a Lambda layer that multiple functions can reference. **AWS::Serverless::Application** embeds a SAM application from the Serverless Application Repository or another S3-hosted template, enabling nested application composition. **AWS::Serverless::StateMachine** defines a Step Functions state machine inline or from a separate JSON/YAML file.`,
     },
     {
       heading: "SAM CLI",
-      body: `The **SAM CLI** is the primary developer tool for SAM applications.
+      body: `The SAM CLI is the developer workflow tool that makes serverless development significantly faster than working with CloudFormation and Lambda directly.
 
-**sam init**: initialize a new SAM project from a template (Hello World, Step Functions, etc.).
+**sam init** bootstraps a new project from a predefined template — Hello World, Step Functions, event-driven processing, and others — with the correct directory structure and a working template.
 
-**sam build**: build your application (resolve dependencies, compile code). Output in \`.aws-sam/build/\`. Respects \`BuildMethod\` in template (esbuild for TypeScript, makefile for custom).
+**sam build** compiles your application code and resolves dependencies, placing the build output in \`.aws-sam/build/\`. It respects \`BuildMethod\` in the template, so TypeScript projects can use esbuild for fast transpilation, and projects with complex build requirements can use a Makefile. Running \`sam build\` before deployment ensures you're deploying the compiled output, not raw source files.
 
-**sam local invoke**: run a Lambda function locally. Starts a Docker container with the function runtime, invokes it with a test event.
+**sam local invoke** runs a Lambda function in a Docker container matching the function's runtime:
 \`\`\`
 sam local invoke OrdersFunction --event events/order.json
 \`\`\`
+This lets you validate the function logic against a realistic event without deploying to AWS.
 
-**sam local start-api**: start a local API Gateway on http://localhost:3000. Maps routes to Lambda functions locally. Hot reload with \`--warm-containers\`.
+**sam local start-api** starts a local HTTP server at \`localhost:3000\` that emulates API Gateway, routing requests to the appropriate Lambda function containers. Combined with \`--warm-containers\`, containers are kept alive between requests, reducing the overhead of repeated testing.
 
-**sam local start-lambda**: local Lambda endpoint for use by other local services.
-
-**sam deploy**: package and deploy to CloudFormation.
+**sam deploy** packages your build output to S3 and creates or updates the CloudFormation stack:
 \`\`\`
 sam deploy --guided  # interactive first-time setup
 sam deploy           # subsequent deploys using samconfig.toml
 \`\`\`
-
-**samconfig.toml**: stores deploy configuration (stack name, region, S3 bucket, capabilities). Committed to repo for consistent deployments.
-
-**sam logs**: tail CloudWatch Logs for a Lambda function.
-
-**sam traces**: view X-Ray traces.
-
-**sam sync**: incremental deployment — syncs code changes directly without a full CloudFormation update (faster for Lambda code-only changes). Uses the \`--watch\` flag for continuous sync during development.`,
+The \`samconfig.toml\` file stores deployment configuration — stack name, region, S3 bucket, capabilities — and is committed to the repository so the team deploys consistently. **sam sync** is an incremental deployment tool that detects code-only changes and syncs them directly to Lambda without a full CloudFormation update, reducing deployment time from minutes to seconds during active development. With \`--watch\`, it continuously syncs as you save files.`,
     },
     {
       heading: "SAM Policy Templates",
-      body: `SAM provides **policy templates** as shorthand for common IAM permissions. These expand into full IAM policy statements.
+      body: `SAM policy templates are one of the most practical features for day-to-day development. They're shorthand aliases for the IAM policy statements that serverless functions need most frequently, and they expand into proper least-privilege policies automatically.
 
-Common templates:
-- **DynamoDBCrudPolicy**: GetItem, PutItem, UpdateItem, DeleteItem, Query, Scan on a table
-- **DynamoDBReadPolicy**: GetItem, Query, Scan
-- **S3CrudPolicy**: PutObject, GetObject, DeleteObject on a bucket
-- **S3ReadPolicy**: GetObject, ListBucket
-- **SQSPollerPolicy**: ReceiveMessage, DeleteMessage, GetQueueAttributes
-- **SQSSendMessagePolicy**: SendMessage on a queue
-- **SNSPublishMessagePolicy**: Publish to a topic
-- **VPCAccessPolicy**: ec2:CreateNetworkInterface, ec2:DescribeNetworkInterfaces (for Lambda VPC)
-- **SecretsManagerRotationPolicy**: for rotation Lambda functions
-- **CloudWatchPutMetricPolicy**: PutMetricData
+Common templates include \`DynamoDBCrudPolicy\` (GetItem, PutItem, UpdateItem, DeleteItem, Query, Scan on a specified table), \`DynamoDBReadPolicy\` (GetItem, Query, Scan), \`S3CrudPolicy\` (PutObject, GetObject, DeleteObject on a bucket), \`S3ReadPolicy\` (GetObject, ListBucket), \`SQSPollerPolicy\` (ReceiveMessage, DeleteMessage, GetQueueAttributes for SQS event source mapping), \`SQSSendMessagePolicy\` (SendMessage to a queue), \`SNSPublishMessagePolicy\` (Publish to a topic), and \`VPCAccessPolicy\` (the ENI permissions Lambda needs to run in a VPC).
 
 \`\`\`yaml
 Policies:
@@ -134,46 +103,34 @@ Policies:
       QueueName: !GetAtt MyQueue.QueueName
 \`\`\`
 
-**Why use templates?**: avoid writing verbose IAM JSON; built-in least privilege; maintained by AWS.`,
+The value over writing raw IAM policies is threefold: you avoid writing verbose IAM JSON for common patterns, the templates are maintained by AWS so they reflect current best practices, and they're parameterized by resource reference so the permissions are automatically scoped to the correct resource ARN. You don't need to look up what permissions \`DynamoDBCrudPolicy\` grants — the name tells you what it does.`,
     },
     {
       heading: "Local Testing & Debugging",
-      body: `**Docker requirement**: local testing requires Docker. SAM starts Lambda runtime containers.
+      body: `SAM's local testing capabilities require Docker, which provides the Lambda runtime environment. When you run \`sam local invoke\` or \`sam local start-api\`, SAM pulls the appropriate Lambda runtime Docker image and runs your function code inside it, giving you an accurate representation of the actual Lambda execution environment.
 
-**Test events**: JSON files representing events. SAM provides sample events for common sources:
+Generating realistic test events is easier with \`sam local generate-event\`, which produces sample event JSON for any supported trigger type:
 \`\`\`
 sam local generate-event apigateway aws-proxy > events/apigw.json
 sam local generate-event s3 put > events/s3-put.json
 \`\`\`
+You can then customize these generated events to match your specific test cases and commit them to the repository as test fixtures.
 
-**Environment variable overrides**: pass additional env vars for local testing:
-\`\`\`
-sam local invoke --env-vars env.json
-\`\`\`
+For debugging, the \`--debug-port\` flag keeps the container running and exposes a debug port that you can attach to from VS Code or another IDE. This gives you full breakpoint debugging inside a Lambda-compatible container without any mock frameworks. Environment variables can be overridden for local testing using \`--env-vars env.json\`, allowing you to point to local or test services without changing the template.
 
-**Debugging**: attach a debugger to the running container. SAM supports \`--debug-port\` flag. Configure VS Code launch.json to attach to the debugger.
-
-**SAM Accelerate (sam sync)**: watch mode continuously syncs code changes to Lambda without full CloudFormation deployment. Dramatically speeds up the inner dev loop. Code-only changes deploy in seconds vs minutes.
-
-**Integration testing**: test against real AWS services (not fully local). Use separate AWS account or SAM-deployed test stack.`,
+**SAM Accelerate** (the \`sam sync --watch\` mode) is the most impactful productivity feature for active development. Rather than running a full CloudFormation update on every change — which can take several minutes — \`sam sync\` detects code-only changes and updates the Lambda function directly, completing in seconds. This transforms the inner development loop from a multi-minute cycle into a near-instant feedback loop.`,
     },
     {
       heading: "SAM with Other Services",
-      body: `**SAM + CloudFormation**: SAM is a CloudFormation extension. SAM templates deploy via CloudFormation stacks. All CloudFormation features (parameters, outputs, conditionals, nested stacks) work in SAM templates.
+      body: `**SAM + CloudFormation** is the foundational relationship: SAM templates deploy as CloudFormation stacks, with the SAM transform expanding shorthand types before CloudFormation processes them. All CloudFormation capabilities are available — parameters, outputs, conditionals, intrinsic functions, stack references, and nested stacks. You can mix SAM shorthand types and native CloudFormation types freely in the same template.
 
-**SAM + CodePipeline**: CodePipeline build stage runs \`sam build\`, deploy stage runs \`sam deploy\` (or uses CloudFormation action with SAM template).
+**SAM + CodePipeline and CodeBuild** is the standard CI/CD pattern for SAM applications. A buildspec.yml runs \`sam build\` followed by \`sam deploy\`, with the CodeBuild service role granted permissions for CloudFormation, S3, Lambda, and API Gateway. CodePipeline orchestrates the source, build, and deploy stages, triggering on code commits.
 
-**SAM + CodeBuild**: buildspec runs \`sam build && sam deploy\`. CodeBuild service role needs CloudFormation, S3, Lambda, API Gateway permissions.
+**SAM + Lambda Layers** works through the \`AWS::Serverless::LayerVersion\` resource type. Shared code (utility libraries, database drivers, authentication middleware) goes in a layer referenced by multiple functions, reducing deployment package size and enabling updates to shared code without touching every function that uses it.
 
-**SAM + Lambda Layers**: define layers in SAM template; reference from multiple functions. Share dependencies (node_modules, Python packages, binary utilities).
+**SAM + API Gateway** is handled automatically through the Events block on functions. When you add an \`Api\` event, SAM creates the REST API, stage, deployment, and invoke permission. Authorizers, CORS, usage plans, and API keys are configured on the \`AWS::Serverless::Api\` resource that SAM creates or that you define explicitly in the template.
 
-**SAM + API Gateway**: SAM creates the API Gateway stage/resources from Events in Function definition. Add authorizers, CORS, usage plans in the Serverless::Api resource.
-
-**SAM + Step Functions**: define state machines in SAM template with \`AWS::Serverless::StateMachine\`. Include Policies for the state machine role.
-
-**SAM + X-Ray**: enable tracing on functions: \`Tracing: Active\`. SAM passes this to Lambda and generates appropriate IAM permissions.
-
-**SAM + Secrets Manager**: reference secrets in Lambda environment via \`!Sub '{{resolve:secretsmanager:\${SecretName}:SecretString:key}}'\` or fetch in code with SDK.`,
+**SAM + X-Ray** requires a single line in the function definition: \`Tracing: Active\`. SAM sets the Lambda tracing mode, adds the required \`xray:PutTraceSegments\` permission to the function's execution role, and enables X-Ray in the API Gateway stage if you're using one. The \`sam traces\` CLI command pulls recent X-Ray traces for quick debugging after deployment.`,
     },
   ],
 

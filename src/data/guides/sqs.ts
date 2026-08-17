@@ -11,112 +11,65 @@ export const sqsGuide: ServiceGuide = {
   sections: [
     {
       heading: "Queue Types",
-      body: `**Standard Queue**
-- **Unlimited throughput**: nearly unlimited transactions per second.
-- **At-least-once delivery**: a message may be delivered more than once (design for idempotency).
-- **Best-effort ordering**: messages are generally delivered in the order sent, but not guaranteed.
-- Use for maximum throughput where duplicate processing is tolerable.
+      body: `SQS offers two queue types that serve fundamentally different use cases. **Standard queues** are designed for maximum throughput — they support nearly unlimited transactions per second and are the right choice when raw speed matters more than perfect ordering. The tradeoff is that Standard queues guarantee **at-least-once delivery**, meaning a message may occasionally be delivered more than once due to the distributed nature of the service. Your consumers must be idempotent — processing the same message twice should have no harmful side effect.
 
-**FIFO Queue**
-- **Exactly-once processing**: deduplication prevents duplicate processing within a 5-minute window.
-- **Strict ordering**: messages within a **MessageGroupId** are delivered in exact FIFO order.
-- **Throughput**: 300 API calls/second (3,000 with batching). Can request higher quota.
-- Queue name must end in \`.fifo\`.
-- Use for financial transactions, order processing, inventory updates — anywhere ordering and exactness matter.`,
+**FIFO queues** trade throughput for correctness. They guarantee exactly-once processing by deduplicating messages within a 5-minute window using a \`MessageDeduplicationId\`, and they deliver messages in strict first-in, first-out order within a **MessageGroupId**. This makes FIFO the right choice for financial transactions, order processing, or any workflow where sequence and uniqueness are critical. The throughput ceiling is 300 API calls per second (or 3,000 with batching), and queue names must end in \`.fifo\`.`,
     },
     {
       heading: "Core Message Attributes",
-      body: `**MessageBody**: the payload. Up to **256 KB**. For larger payloads use the S3-backed Extended Client Library or store in S3 and send the S3 key as the message body.
+      body: `Every SQS message is built from a few key pieces. The **MessageBody** carries your payload and can be up to **256 KB**. When your data exceeds that limit, the standard approach is to store the content in S3 and send the S3 key as the message body, using the extended client library to manage this transparently.
 
-**MessageGroupId** (FIFO only): groups related messages that must be processed in order. Messages in the same group go to the same consumer (one consumer per group at a time).
+For FIFO queues, two additional attributes become critical. The **MessageGroupId** groups related messages that must be processed in order — all messages in the same group are processed sequentially and delivered to a single consumer at a time. The **MessageDeduplicationId** prevents duplicate processing: if you send two messages with the same ID within a 5-minute window, the second is silently discarded. You can generate this ID explicitly or let SQS compute it automatically as a SHA-256 hash of the message body.
 
-**MessageDeduplicationId** (FIFO only): unique ID for deduplication within a 5-minute window. If a message with the same ID is sent twice in 5 minutes, the second is discarded. Can be content-based (SHA-256 hash of body) or explicit.
-
-**MessageAttributes**: metadata key-value pairs (up to 10). Typed (String, Number, Binary). Useful for routing decisions without parsing the body.
-
-**DelaySeconds**: delay before message becomes visible (0–900s per message). Override the queue default delay.`,
+**MessageAttributes** let you attach typed metadata (String, Number, or Binary values, up to 10 per message) without embedding it in the body — useful for routing decisions and filtering. The **DelaySeconds** attribute postpones delivery of an individual message by up to 900 seconds, overriding the queue's default delay setting.`,
     },
     {
       heading: "Visibility Timeout",
-      body: `When a consumer receives a message it becomes **invisible** for the visibility timeout period. The consumer must **delete the message before the timeout expires** or it reappears in the queue.
+      body: `When a consumer calls \`ReceiveMessage\`, SQS makes the message invisible to other consumers for a configurable period — this is the **visibility timeout**. The consumer must process the message and delete it before the timeout expires, or the message becomes visible again and another consumer may pick it up. This is the mechanism that prevents two consumers from processing the same message simultaneously, but it also means duplicate processing is possible if your consumer crashes mid-work.
 
-- Default: **30 seconds**. Maximum: **12 hours**.
-- Set at queue level (default) or per-message (ReceiveMessage call).
-- **Extend with ChangeMessageVisibility**: if processing takes longer than expected, call this API to extend the timeout before it expires.
-- **Best practice**: set visibility timeout to at least **6× the Lambda function timeout** (Lambda may retry internally up to 3 times on throttle before returning the message).
+The default visibility timeout is **30 seconds**, and the maximum is 12 hours. You set it at the queue level, but you can also override it per-message at the time of receipt. If processing is taking longer than expected, you can call \`ChangeMessageVisibility\` to extend the timeout before it expires — this is essential for long-running tasks.
 
-If visibility timeout expires before deletion:
-- Standard queue: message reappears (potential duplicate processing)
-- FIFO queue: message reappears and blocks its message group
-
-**Design for idempotency**: always assume a message may be processed more than once.`,
+When integrating with Lambda, set the queue's visibility timeout to at least **6× the Lambda function timeout**. Lambda may retry an invocation up to 3 times on throttle before returning the message to the queue, and if the visibility timeout is too short, the message becomes visible before Lambda finishes, causing a duplicate delivery. Always design your message processors to be idempotent — assume a message may be processed more than once.`,
     },
     {
       heading: "Dead Letter Queues (DLQ)",
-      body: `A DLQ receives messages that failed processing after **maxReceiveCount** receive attempts (1–1,000).
+      body: `A **Dead Letter Queue** captures messages that have failed processing too many times. You configure this through a **redrive policy** on the source queue, specifying the DLQ ARN and a \`maxReceiveCount\` between 1 and 1,000. When a message has been received that many times without being deleted, SQS automatically moves it to the DLQ.
 
-**Setup**: create a DLQ (same type as source), then configure the source queue's redrive policy pointing to the DLQ with a maxReceiveCount.
+The DLQ must be the same type as its source — a Standard source needs a Standard DLQ, and a FIFO source needs a FIFO DLQ. You should also set the DLQ's retention period longer than the source queue's retention period, giving you enough time to inspect failed messages after fixing the underlying bug.
 
-**Rules**:
-- DLQ must be the same type as source (Standard→Standard, FIFO→FIFO).
-- DLQ retention period should be **longer than the source queue** retention so you have time to inspect failed messages.
-
-**DLQ Redrive (replay)**: move messages from DLQ back to source queue for reprocessing after fixing the bug. Available in the console or via StartMessageMoveTask API.
-
-**Monitoring**: alarm on \`ApproximateNumberOfMessagesVisible\` in DLQ > 0 to detect processing failures early.
-
-**Lambda DLQ**: Lambda functions (async invocations) can also have their own DLQ — separate from the SQS queue DLQ.`,
+Once you've corrected the processing logic, you can replay failed messages back to the source queue using the **DLQ Redrive** feature (available in the console or via the \`StartMessageMoveTask\` API). For monitoring, create a CloudWatch alarm on the DLQ's \`ApproximateNumberOfMessagesVisible\` metric so you're notified the moment messages start failing. Lambda functions invoked asynchronously can also have their own DLQ, which is separate from the SQS queue's DLQ.`,
     },
     {
       heading: "Polling",
-      body: `**Short Polling** (default)
-ReceiveMessage returns immediately with 0–10 messages. May return empty responses even if messages exist (sampling across a subset of servers). Wastes API calls; increases cost.
+      body: `SQS supports two polling modes, and the choice between them has real cost and performance implications. **Short polling** (the default) returns immediately with whatever messages are available at the moment, sampling only a subset of SQS servers. This means you can get empty responses even when messages exist, and each empty response still costs you an API call.
 
-**Long Polling** (recommended)
-ReceiveMessage waits up to **20 seconds** (WaitTimeSeconds parameter) for messages to arrive before returning. Eliminates empty responses. Reduces API calls and cost. Enable at queue level (\`ReceiveMessageWaitTimeSeconds\`) or per-request.
+**Long polling** is almost always the better choice. By setting \`WaitTimeSeconds\` to up to 20 seconds, SQS will hold the connection open and wait until messages are available before responding. This eliminates empty responses, reduces the total number of API calls, and lowers your bill. You can enable long polling at the queue level via \`ReceiveMessageWaitTimeSeconds\`, or per-request. Lambda event source mappings use long polling internally.
 
-**Always use long polling in production.** Lambda event source mapping uses long polling internally.
-
-**Batching**: receive up to **10 messages** per ReceiveMessage call. Process in parallel. Delete with SendMessageBatch (1 API call for up to 10 deletes). Lambda processes up to 10,000 messages per batch (configurable).`,
+For throughput, always use batching. A single \`ReceiveMessage\` call can return up to 10 messages, and \`DeleteMessageBatch\` can delete 10 messages in one API call. When Lambda processes SQS, it can handle up to 10,000 messages per batch (configurable), making batch processing essential at scale.`,
     },
     {
       heading: "Message Retention & Queue Settings",
-      body: `**Message retention period**: how long SQS keeps undelivered messages. Default: **4 days**. Min: 60 seconds. Max: **14 days**. Set longer for critical queues to ensure DLQ inspection window.
+      body: `SQS retains undelivered messages for a configurable period. The default is **4 days**, the minimum is 60 seconds, and the maximum is **14 days**. For critical queues where you want a wide inspection window in the DLQ, set retention to the maximum. Once the retention period expires, SQS permanently deletes the message.
 
-**Delivery delay**: delay before message becomes visible after send. Queue default: 0–900s. Per-message override via DelaySeconds.
+You can delay all new messages by default (0–900 seconds) using the queue's delivery delay setting, and individual messages can override this with their own \`DelaySeconds\` attribute. The maximum message size is 256 KB — beyond that, you must use the S3 Extended Client Library.
 
-**Maximum message size**: 256 KB. Use S3 + Extended Client Library for larger messages.
-
-**Encryption**: SSE-SQS (free, managed by SQS) or SSE-KMS (your CMK, audit trail, cross-account). Encrypts message body at rest.
-
-**Access control**: SQS resource-based policy (queue policy) and IAM identity policies. For cross-account access, use queue policy.`,
+For encryption, SQS offers two options. **SSE-SQS** uses SQS-managed keys and is free. **SSE-KMS** uses your own Customer Managed Key, adding an audit trail in CloudTrail and enabling cross-account key sharing at additional cost. Only the message body is encrypted at rest — metadata like message attributes are not. Access control is handled through SQS resource-based queue policies (for cross-account access) and standard IAM identity policies.`,
     },
     {
       heading: "SQS with Lambda",
-      body: `Lambda polls SQS via **event source mapping**. Lambda manages the polling loop.
+      body: `Lambda consumes SQS messages through an **event source mapping** — Lambda manages the polling loop entirely, so you don't write any polling code. You configure the behavior through three key settings: \`BatchSize\` controls how many messages Lambda receives per invocation (1–10,000), \`MaximumBatchingWindowInSeconds\` tells Lambda to wait up to N seconds to accumulate a full batch before invoking (0–300s), and \`FunctionResponseTypes: [ReportBatchItemFailures]\` enables partial batch success.
 
-**Configuration**:
-- \`BatchSize\`: 1–10,000 messages per invocation.
-- \`MaximumBatchingWindowInSeconds\`: wait up to N seconds to accumulate a full batch (0–300s).
-- \`FunctionResponseTypes: [ReportBatchItemFailures]\`: return partial batch failures — only failed messages return to queue, successful ones are deleted.
+The partial batch failure pattern is important to understand. Without it, if any message in a batch fails, the entire batch returns to the queue and every message gets retried — including ones that succeeded. With \`ReportBatchItemFailures\`, your Lambda function returns a list of failed message IDs, and SQS only retries those specific messages. The successfully processed ones are deleted. This prevents unnecessary reprocessing at scale.
 
-**Concurrency**: Lambda scales up (one concurrent invocation per active message group for FIFO; up to 1,000 for Standard) as backlog grows. With standard queues, Lambda can scale to 1,000 concurrent functions quickly.
-
-**Visibility timeout**: set queue visibility timeout to **6× Lambda timeout** — Lambda retries 3 times internally before returning a message on throttling.
-
-**Error handling**: failed messages return to queue after visibility timeout. After maxReceiveCount, go to DLQ. Use ReportBatchItemFailures to avoid re-processing already-succeeded messages.`,
+For concurrency, Lambda scales aggressively with Standard queues — it can reach 1,000 concurrent invocations as backlog grows. FIFO queues are more constrained: Lambda creates one concurrent invocation per active message group. Always set the queue's visibility timeout to at least **6× the Lambda function timeout** to prevent messages from becoming visible while Lambda is still processing them.`,
     },
     {
       heading: "SQS with Other Services",
-      body: `**SQS + SNS (Fan-out)**: SNS topic → multiple SQS queues. Each queue gets every message. Decouples publisher from multiple consumers. Queues provide buffering and independent retry.
+      body: `The most important SQS integration pattern is **fan-out**: an SNS topic delivers a copy of each message to multiple SQS queues simultaneously. Each queue gets every message, and each downstream consumer operates independently — processing at its own pace, with its own DLQ and retry settings. This decouples a single publisher from multiple consumers without them knowing about each other.
 
-**SQS + EC2/ECS workers**: worker instances or containers poll SQS for tasks. Scale workers with Auto Scaling based on \`ApproximateNumberOfMessagesVisible\`. Classic work-queue pattern.
+For worker-based architectures, EC2 or ECS workers poll SQS for tasks and scale with Auto Scaling based on the \`ApproximateNumberOfMessagesVisible\` metric. This is the classic work-queue pattern — the queue absorbs traffic spikes while workers drain it at a controlled rate.
 
-**SQS + Lambda**: Lambda scales automatically with queue depth. Zero-capacity when queue is empty (pay nothing). Instant scale-out on traffic spike.
-
-**SQS + EventBridge Pipes**: EventBridge Pipes can use SQS as source, apply filtering and enrichment, then deliver to a target — without Lambda code.
-
-**SQS + API Gateway**: API Gateway writes to SQS directly (AWS Service integration). Client gets immediate 200 response; backend processes asynchronously.`,
+SQS also integrates directly with API Gateway using an AWS Service integration. API Gateway writes the client's request directly to an SQS queue and returns HTTP 200 immediately, while the backend processes the message asynchronously. This is useful for accepting high-volume writes without blocking the HTTP connection. EventBridge Pipes can use SQS as a source, applying filtering and enrichment before delivering to a target — a code-free alternative to a polling Lambda.`,
     },
   ],
 

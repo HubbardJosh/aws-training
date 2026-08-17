@@ -12,136 +12,67 @@ export const cognitoGuide: ServiceGuide = {
   sections: [
     {
       heading: "User Pools",
-      body: `A **User Pool** is a managed user directory. It handles:
-- User sign-up (self-registration or admin creation)
-- User sign-in (username/password, email/phone + OTP)
-- Multi-factor authentication (TOTP, SMS)
-- Password policies and account recovery
-- Email and phone verification
-- Hosted UI (pre-built sign-in/sign-up web pages)
-- Custom domain for hosted UI (\`auth.yourdomain.com\`)
-- Social identity provider federation (Google, Facebook, Apple, SAML/OIDC)
+      body: `A **User Pool** is a managed user directory that handles the full authentication lifecycle. When you create a User Pool, Cognito manages user registration (with email or phone verification), password policies, account recovery flows, multi-factor authentication (TOTP or SMS), and social identity provider federation (Google, Facebook, Apple, SAML, OIDC). You can use Cognito's hosted UI — a pre-built set of sign-in and sign-up web pages at a Cognito or custom domain — or build your own UI using the Cognito SDK.
 
-**After successful authentication**, Cognito issues three JWTs:
-- **ID Token**: contains user identity claims (sub, email, name, custom attributes, groups). Used to authenticate with backend services.
-- **Access Token**: contains scopes and Cognito groups. Used to call Cognito APIs and as the bearer token for API Gateway Cognito authorizers.
-- **Refresh Token**: long-lived (default 30 days). Used to get new ID/Access tokens without re-authentication.
+After a user successfully authenticates, Cognito issues three JWTs. The **ID Token** contains identity claims about the user: their \`sub\` (unique user ID), email, name, custom attributes, and group memberships. This is the token you pass to your backend to identify who the user is. The **Access Token** contains scopes and Cognito group information and is used for calling Cognito APIs directly (like \`getUser\` or \`listDevices\`) and as the bearer token for API Gateway Cognito authorizers. The **Refresh Token** is long-lived (default 30 days) and is used to get new ID and Access tokens without requiring the user to sign in again.
 
-**Token lifetimes**:
-- Access token: 1 hour default (5 min – 24 hours)
-- ID token: 1 hour default (5 min – 24 hours)
-- Refresh token: 30 days default (1 hour – 10 years)`,
+Token lifetimes are configurable: Access and ID tokens default to 1 hour (minimum 5 minutes, maximum 24 hours), and Refresh tokens default to 30 days (minimum 1 hour, maximum 10 years). These can be set per app client, so your mobile app and web app can have different token policies.`,
     },
     {
       heading: "User Pool App Clients",
-      body: `An **app client** represents an application that uses the User Pool. Configure:
-- Authentication flows (SRP, USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH)
-- Token lifetimes per client
-- OAuth 2.0 flows (Authorization Code with PKCE for mobile, Implicit for SPAs — deprecated, Client Credentials for M2M)
-- OAuth 2.0 scopes: openid, email, phone, profile, and custom resource server scopes
-- Callback URLs and sign-out URLs (required for hosted UI)
-- Client secret (for server-side apps; not suitable for mobile/SPA)
+      body: `An **app client** represents an application that authenticates through the User Pool. You might have separate clients for your mobile app, web app, and admin console — each with different settings. The app client is where you configure which authentication flows are allowed (\`SRP\`, \`USER_PASSWORD_AUTH\`, \`ALLOW_REFRESH_TOKEN_AUTH\`), token lifetimes, and OAuth 2.0 settings.
 
-**Resource servers**: define custom OAuth 2.0 scopes for your APIs. A resource server represents your API (e.g. \`api.myapp.com\`). Scopes like \`api.myapp.com/read\`, \`api.myapp.com/write\`.
+For OAuth 2.0 flows, **Authorization Code with PKCE** is the correct choice for mobile apps and SPAs — PKCE (Proof Key for Code Exchange) prevents authorization code interception without requiring a client secret, which you can't securely store in client-side code. The **Client Credentials** flow is for machine-to-machine (M2M) authentication where no user is involved. The Implicit flow is deprecated.
 
-**Multiple app clients**: create separate clients for mobile app, web app, and admin console — each with different settings and allowed OAuth flows.`,
+**Resource servers** let you define custom OAuth 2.0 scopes for your own APIs. A resource server represents your API (like \`api.myapp.com\`) and has scopes (like \`api.myapp.com/read\` and \`api.myapp.com/write\`). Clients can request these scopes and use the resulting Access Token to call your API, where you validate the scope.`,
     },
     {
       heading: "Identity Pools (Federated Identities)",
-      body: `An **Identity Pool** exchanges third-party tokens for **temporary AWS credentials** via STS.
+      body: `While User Pools handle authentication (who are you?), **Identity Pools** handle authorization for AWS resources (what AWS services can you access?). An Identity Pool exchanges a third-party token — from a Cognito User Pool, Google, Facebook, Apple, a SAML provider, or an OIDC provider — for **temporary AWS credentials** via STS.
 
-**Supported identity providers**:
-- Cognito User Pool tokens
-- Social providers (Google, Facebook, Apple, Amazon)
-- SAML and OIDC federation
-- Developer authenticated identities (custom auth)
-- Unauthenticated (guest) access
+The flow works in four steps: the user authenticates with their identity provider and receives a token; the app passes that token to Cognito Identity Pools \`GetId\`, which returns a Cognito Identity ID; the app then calls \`GetCredentialsForIdentity\`, which triggers an STS \`AssumeRoleWithWebIdentity\` and returns temporary AWS credentials (AccessKeyId, SecretAccessKey, SessionToken); and the app uses those credentials to call AWS services directly — for example, uploading to an S3 bucket or reading from a DynamoDB table.
 
-**Flow**:
-1. User authenticates with Identity Provider → receives JWT or token
-2. App calls Cognito Identity Pools \`GetId\` with the token → receives Cognito Identity ID
-3. App calls \`GetCredentialsForIdentity\` → STS returns temporary AWS credentials
-4. App uses credentials to call AWS services directly (S3, DynamoDB, etc.)
-
-**Roles**:
-- *Authenticated role*: IAM role assumed by verified users
-- *Unauthenticated role*: IAM role for guest access (limited permissions)
-- *Role-based access control*: map identity pool groups or claims to different IAM roles (requires Token-based or rules-based role selection)
-
-**IAM role trust policy**: must trust \`cognito-identity.amazonaws.com\` with conditions on the identity pool ID and user authentication status.`,
+Identity Pools assign different IAM roles based on authentication status. The **authenticated role** is assumed by users who have provided a valid identity provider token. The **unauthenticated role** allows limited access for guest users who haven't logged in — useful for letting anonymous users view public content stored in S3 or DynamoDB. You can also configure role-based access control that maps Cognito groups or token claims to different IAM roles, giving different tiers of users different AWS permissions.`,
     },
     {
       heading: "User Pool Triggers (Lambda)",
-      body: `Cognito User Pools support Lambda triggers at various points in the auth lifecycle.
+      body: `Cognito User Pools can invoke Lambda functions at key points in the authentication and registration lifecycle, allowing you to customize behavior without building a custom auth service.
 
-**Pre-sign-up**: validate/transform user attributes; auto-confirm users; auto-verify email/phone.
+The **Pre-Sign-Up** trigger fires before a user is created. You can validate custom attributes, automatically confirm users (skipping the verification email), or block registrations from certain domains. The **Post-Confirmation** trigger fires after a user confirms their account — the ideal place to create a user record in DynamoDB, send a welcome email, or sync the new user to a CRM. **Pre-Authentication** lets you validate custom conditions before authentication proceeds. **Post-Authentication** fires after successful sign-in and is useful for logging events or updating timestamps.
 
-**Post-confirmation**: triggered after user confirms registration. Use to: create user records in DynamoDB, send welcome emails, sync with CRM.
+The **Pre-Token Generation** trigger is particularly powerful — it fires just before Cognito issues tokens and lets you modify the claims that appear in the ID Token and Access Token. You can inject custom attributes, add group memberships, or remove claims you don't want clients to see, all without changing your application's sign-in flow.
 
-**Pre-authentication**: validate custom auth conditions before authentication proceeds.
-
-**Post-authentication**: triggered after successful sign-in. Log authentication events, update last-login timestamp.
-
-**Pre-token generation**: modify claims in the ID and access tokens before they are issued. Add custom claims, remove sensitive data, inject group membership.
-
-**Custom authentication challenge** (3 triggers): define custom auth flows (DefineAuthChallenge → CreateAuthChallenge → VerifyAuthChallengeResponse). Use for: passwordless auth (magic links, biometrics), CAPTCHA, custom OTP.
-
-**User migration**: triggered when user doesn't exist in User Pool during sign-in. Look up user in legacy system; if found, migrate to Cognito. Transparent migration without password resets.
-
-**Trigger timeout**: Lambda must respond within **5 seconds**. Failures block the auth flow.`,
+The **Custom Authentication** flow uses three triggers in sequence (DefineAuthChallenge, CreateAuthChallenge, VerifyAuthChallengeResponse) to implement completely custom authentication schemes — magic link emails, biometric verification, CAPTCHA, or custom OTP systems. The **User Migration** trigger enables transparent migration from legacy auth systems: when a user who doesn't exist in Cognito tries to sign in, the trigger fires and looks them up in the old system; if found, they're migrated to Cognito automatically without a password reset. All Lambda triggers must respond within **5 seconds** — a timeout causes the auth flow to fail.`,
     },
     {
       heading: "User Pool Groups",
-      body: `**Groups**: organize users into logical groups. Groups can be mapped to IAM roles (for identity pool role resolution).
+      body: `Cognito User Pool groups provide a simple way to organize users into logical categories and assign them different IAM roles. When you add a user to a group, that group membership appears in both the ID Token and Access Token under the \`cognito:groups\` claim. Your application code can read this claim to implement role-based features — showing admin UI only to users in the Admin group, or enabling premium features for users in the Premium group.
 
-**Precedence**: assign numerical precedence to groups. If a user belongs to multiple groups, the group with the lowest precedence number determines the IAM role.
-
-**Claims**: group memberships appear in the ID token and access token under \`cognito:groups\`.
-
-**Use cases**: role-based access control in your app (admin vs user vs premium), filtering content, feature flags.`,
+Groups have a **precedence** value (a number). When a user belongs to multiple groups, the group with the lowest precedence number takes priority for IAM role assignment through the Identity Pool. This allows you to model a hierarchy — Admin (precedence 1) overrides Member (precedence 10) — without writing custom logic.`,
     },
     {
       heading: "Cognito with API Gateway",
-      body: `**REST API with Cognito User Pool Authorizer**:
-1. Client signs in → receives JWT (ID or Access token)
-2. Client sends request to API Gateway with \`Authorization: Bearer <token>\`
-3. API Gateway validates the JWT against the User Pool (checks signature, expiry, claims)
-4. If valid → forwards request to Lambda with user context in \`requestContext.authorizer.claims\`
+      body: `The most common integration pattern is using a Cognito User Pool to authenticate API Gateway calls. After signing in, the client includes the JWT (ID token or Access token) in the \`Authorization\` header as a Bearer token. API Gateway's Cognito User Pool Authorizer validates this token automatically: it checks the signature using the User Pool's JWKS endpoint, verifies the token hasn't expired, and validates the audience claim (the app client ID). No Lambda code is needed for this validation — it's built into API Gateway.
 
-**Token validation**: API Gateway Cognito authorizer validates:
-- Token signature (using User Pool's JWKS endpoint)
-- Token expiry (\`exp\` claim)
-- Audience (\`aud\` = app client ID for ID token; \`client_id\` for access token)
+Once validated, the user's token claims are forwarded to the Lambda function in the \`requestContext.authorizer.claims\` object. Your Lambda can access the user's \`sub\`, \`email\`, group memberships, and any custom attributes to make authorization decisions.
 
-**Scope validation**: not done automatically by Cognito authorizer — use a Lambda authorizer for scope-based access control.
-
-**HTTP API with JWT authorizer**: HTTP API natively validates JWTs. Configure issuer URL and audience. Cheaper and simpler than REST API Cognito authorizer.`,
+One important limitation: the Cognito authorizer validates token authenticity but does not enforce OAuth scopes. If you need scope-based access control (for example, requiring the \`api.myapp.com/write\` scope on POST endpoints), you need a Lambda authorizer that explicitly checks for the required scope. For HTTP APIs, the JWT authorizer built into API Gateway v2 handles both token validation and scope checking natively.`,
     },
     {
       heading: "Security & Advanced Features",
-      body: `**Advanced Security Features (ASF)**: compromised credential detection, adaptive authentication (risk-based MFA), threat protection. Additional cost.
+      body: `**Advanced Security Features (ASF)** adds a layer of adaptive authentication on top of standard Cognito. It uses machine learning to analyze each authentication attempt and assign a risk score based on signals like unusual location, new device, or impossible travel. High-risk sign-ins can be blocked, required to complete MFA, or just logged — you configure the policy. ASF also includes compromised credential detection, checking submitted passwords against known data breaches. There is an additional per-monthly-active-user cost.
 
-**Token revocation**: Cognito supports access token and refresh token revocation. After revocation, existing tokens cannot be used (requires ASF for access token revocation; refresh token revocation always available).
+**PKCE** (Proof Key for Code Exchange) is required for mobile and SPA applications using the Authorization Code flow. It prevents an attacker who intercepts the authorization code from exchanging it for tokens, because the code exchange requires knowledge of a code verifier that never leaves the client. No client secret is needed with PKCE.
 
-**PKCE (Proof Key for Code Exchange)**: required for Authorization Code flow in mobile/SPA apps. Prevents authorization code interception attacks. No client secret needed.
-
-**Custom domain**: use your own domain for hosted UI (requires SSL certificate in ACM us-east-1).
-
-**Email provider**: Cognito uses SES for email in production. Configure SES for high volume and custom from-address.
-
-**Attribute mapping**: map claims from social/SAML providers to Cognito user attributes automatically on sign-in.`,
+Cognito uses **Amazon SES** for sending verification emails in production volumes. The default Cognito email address has a low sending limit — for production applications with significant sign-up volume, configure your User Pool to use your own SES identity. For custom domains on the hosted UI, you must provide an ACM certificate in us-east-1, similar to CloudFront.`,
     },
     {
       heading: "Cognito with Other Services",
-      body: `**Cognito + API Gateway**: authenticate API calls with Cognito JWT. API Gateway validates token automatically — no Lambda authorizer code needed for basic auth.
+      body: `The most common Cognito integration pattern combines User Pools for authentication with Identity Pools for direct AWS resource access. A user signs in through the User Pool, receives a JWT, exchanges it through the Identity Pool for temporary AWS credentials, and then uploads directly to S3 or reads from DynamoDB without routing through a backend. S3 bucket policies can restrict access to each user's own prefix using the \`cognito-identity.amazonaws.com:sub\` identity pool claim: \`arn:aws:s3:::bucket/\${cognito-identity.amazonaws.com:sub}/*\`.
 
-**Cognito + S3**: User Pool → Identity Pool → temporary AWS credentials → direct S3 upload/download. Use \`aws:username\` or \`cognito-identity.amazonaws.com:sub\` in S3 bucket policy to restrict to user's own files: \`arn:aws:s3:::bucket/\${cognito-identity.amazonaws.com:sub}/*\`.
+**Application Load Balancers** natively support Cognito authentication. The ALB handles the entire OAuth 2.0 Authorization Code flow — redirecting users to the Cognito hosted UI, exchanging the authorization code for tokens, and passing the user's identity to the backend target (Lambda or ECS) in HTTP headers. This requires no custom code for the authentication flow.
 
-**Cognito + AppSync**: AppSync natively supports Cognito User Pool auth. Use \`@aws_auth(cognito_groups: ["Admin"])\` in GraphQL schema.
-
-**Cognito + ALB**: ALB can authenticate users with Cognito hosted UI. ALB handles the OAuth 2.0 flow and passes user identity to the target (Lambda, ECS). No custom code needed.
-
-**Cognito + Lambda triggers**: post-confirmation trigger creates DynamoDB user profile, pre-token generation injects custom claims, user migration trigger migrates legacy users.`,
+**AppSync** natively supports Cognito User Pools as an authorization mode. You can use \`@aws_auth(cognito_groups: ["Admin"])\` directives in your GraphQL schema to restrict access at the type or field level based on group membership. The \`$ctx.identity.claims\` context object in AppSync resolvers gives you access to all token claims for fine-grained authorization logic.`,
     },
   ],
 

@@ -11,24 +11,11 @@ export const cdkGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Concepts",
-      body: `**App**: the root of a CDK application. Contains one or more Stacks.
+      body: `CDK is organized around a hierarchy of three concepts. An **App** is the root of a CDK application and contains one or more Stacks. A **Stack** maps directly to a CloudFormation stack and represents a deployable unit — you typically have one stack per environment (account and region combination). A **Construct** is the fundamental building block, representing one or more CloudFormation resources.
 
-**Stack**: maps to a CloudFormation stack. Deploy independently. One stack per environment (account/region) typically.
+Constructs come in three levels of abstraction, called L1, L2, and L3. **L1 constructs** (prefixed with \`Cfn\`, like \`CfnBucket\`) are direct, one-to-one wrappers around CloudFormation resources. They expose every CloudFormation property but provide no defaults or helper methods — they're the escape hatch when you need full control. **L2 constructs** are the most commonly used: they wrap resources with sensible defaults and convenience methods. \`Bucket\`, \`Function\`, and \`Table\` are L2 constructs — they set secure defaults automatically and provide \`grant*()\` methods for IAM. **L3 constructs** (also called patterns) compose multiple resources to implement a common architecture, like \`ApplicationLoadBalancedFargateService\` or \`LambdaRestApi\`, which stand up an entire stack of infrastructure in a few lines of code.
 
-**Construct**: the basic building block. Represents one or more CloudFormation resources. Three levels:
-- *L1 (Cfn constructs)*: direct CloudFormation resource wrappers (\`CfnBucket\`). One-to-one with CF resources. All properties, no defaults.
-- *L2 (AWS constructs)*: curated, higher-level constructs with sensible defaults and helper methods. Most commonly used (\`Bucket\`, \`Function\`, \`Table\`).
-- *L3 (Patterns)*: multi-resource patterns for common architectures (\`ApplicationLoadBalancedFargateService\`, \`LambdaRestApi\`).
-
-**Synthesis**: CDK converts your code to a CloudFormation template (\`cdk synth\`). The output is a standard CF JSON/YAML template.
-
-**Environment**: account + region. Specify per stack or inherit from CLI context.
-
-\`\`\`typescript
-new MyStack(app, 'MyStack', {
-  env: { account: '123456789', region: 'us-east-1' }
-});
-\`\`\``,
+When you run \`cdk synth\`, CDK evaluates your code and emits a standard CloudFormation template to the \`cdk.out/\` directory. All CloudFormation features apply — CDK is ultimately just a code-based way to generate those templates.`,
     },
     {
       heading: "CDK Code Example",
@@ -66,116 +53,70 @@ export class OrdersStack extends cdk.Stack {
 }
 \`\`\`
 
-Key patterns:
-- **grantX methods**: L2 constructs provide \`grant*()\` methods that automatically add correct IAM permissions (\`grantRead\`, \`grantReadWriteData\`, \`grantPut\`, etc.)
-- **RemovalPolicy**: controls what happens to resources when stack is deleted (DESTROY, RETAIN, SNAPSHOT)
-- **Code.fromAsset**: bundle local directory as Lambda deployment package`,
+Three patterns in this example are characteristic of idiomatic CDK. The **\`grant*()\` methods** on L2 constructs automatically generate the correct IAM policy statements — \`table.grantReadWriteData(handler)\` adds a policy to the Lambda's execution role that allows the exact DynamoDB actions needed, without you writing any IAM JSON. **\`RemovalPolicy\`** controls what happens to a resource when the stack is deleted: \`DESTROY\` deletes it (appropriate for dev), \`RETAIN\` keeps it (appropriate for prod databases), and \`SNAPSHOT\` takes a final snapshot before deletion (for RDS, EBS, Redshift). **\`Code.fromAsset\`** bundles a local directory as the Lambda deployment package, with optional bundling steps.`,
     },
     {
       heading: "CDK CLI Commands",
-      body: `**cdk init**: scaffold a new CDK project in your chosen language.
+      body: `The CDK CLI is your interface for synthesizing, comparing, and deploying stacks. Before your first deployment to any account/region combination, you must run \`cdk bootstrap\`. This deploys the CDKToolkit CloudFormation stack, which creates an S3 bucket for assets and an ECR repository for container images. Without bootstrapping, deployments will fail.
 
-**cdk synth**: synthesize to CloudFormation template. Output to \`cdk.out/\`. Run this to review what will be deployed.
+\`cdk synth\` evaluates your CDK code and generates the CloudFormation template, writing it to \`cdk.out/\`. Run this to preview exactly what CloudFormation will receive — it's a good habit before any deployment. \`cdk diff\` compares the synthesized template against the currently deployed stack and shows you what will change, similar to a CloudFormation change set preview. Review \`cdk diff\` before deploying to catch unexpected changes.
 
-**cdk deploy**: deploy (or update) the stack. Runs \`cdk synth\` first, then deploys the generated template via CloudFormation.
 \`\`\`
 cdk deploy MyStack
 cdk deploy --all  # deploy all stacks in the app
 cdk deploy --require-approval never  # skip manual approval for security group changes
 \`\`\`
 
-**cdk diff**: show differences between deployed stack and local code. Like a change set preview.
-
-**cdk destroy**: delete the stack and all its resources.
-
-**cdk bootstrap**: deploy the CDK bootstrapping stack (\`CDKToolkit\`) to the target account/region. Creates S3 bucket and ECR repository for CDK assets. **Must be run before first deploy**.
-
-**cdk ls**: list all stacks in the app.
-
-**cdk watch**: watch for code changes and automatically deploy (like \`sam sync\`). Slower than SAM for Lambda-only changes.
-
-**Context and feature flags**: \`cdk.json\` stores context values and CDK feature flags. Control CDK behavior and pass environment-specific configuration.`,
+\`cdk destroy\` tears down the stack and all its resources, respecting each resource's \`RemovalPolicy\`. \`cdk ls\` lists all stacks in the app. \`cdk watch\` monitors for code changes and automatically deploys — useful for Lambda development, though \`sam sync\` is faster for Lambda-only changes. Configuration and feature flags live in \`cdk.json\`.`,
     },
     {
       heading: "Constructs Library & Patterns",
-      body: `**aws-cdk-lib**: the main CDK library containing all AWS service constructs. Import per service:
+      body: `The main CDK library is \`aws-cdk-lib\`, which contains constructs for every AWS service organized by module:
+
 \`\`\`typescript
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs from 'aws-cdk-lib/aws-ecs-patterns';
 \`\`\`
 
-**L3 Patterns** (aws-cdk-lib/aws-ecs-patterns, etc.):
-- \`ApplicationLoadBalancedFargateService\`: ALB + ECS Fargate service + task definition + security groups in ~5 lines
-- \`LambdaRestApi\`: API Gateway REST API + Lambda integration
-- \`SqsEventSource\`: trigger Lambda from SQS (handles event source mapping)
-- \`ScheduledFargateTask\`: EventBridge-triggered ECS task
+L3 pattern constructs are particularly powerful for common architectures. \`ApplicationLoadBalancedFargateService\` creates an ALB, ECS Fargate service, task definition, target group, and all associated security groups in roughly 10 lines of CDK. \`LambdaRestApi\` creates an API Gateway REST API with Lambda proxy integration. \`SqsEventSource\` configures a Lambda event source mapping for SQS.
 
-**Custom Constructs**: create reusable constructs for your organization:
-\`\`\`typescript
-export class SecureS3Bucket extends Construct {
-  public readonly bucket: s3.Bucket;
-  constructor(scope: Construct, id: string) {
-    super(scope, id);
-    this.bucket = new s3.Bucket(this, 'Bucket', {
-      encryption: s3.BucketEncryption.S3_MANAGED,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      versioned: true,
-    });
-  }
-}
-\`\`\`
+You can create your own reusable constructs by extending the \`Construct\` base class. An organization can publish a library of approved, secure constructs that teams use as building blocks — ensuring consistent security settings across projects without each team needing to know the details.
 
-**Escape hatch**: access the underlying L1 construct to set properties not exposed by L2:
+When an L2 construct doesn't expose a property you need, the **escape hatch** pattern lets you access the underlying L1 resource:
+
 \`\`\`typescript
 const cfnBucket = bucket.node.defaultChild as s3.CfnBucket;
 cfnBucket.addPropertyOverride('LifecycleConfiguration.Rules.0.Status', 'Disabled');
-\`\`\``,
+\`\`\`
+
+This gives you the full expressiveness of CloudFormation while keeping most of your code at the higher L2 level.`,
     },
     {
       heading: "CDK vs CloudFormation vs SAM",
-      body: `**CloudFormation**: declarative JSON/YAML. Verbose. Full control. Difficult to reuse. Best for: orgs requiring reviewed, static templates.
+      body: `All three tools deploy via CloudFormation — the difference is in the authoring experience and the level of abstraction they provide.
 
-**SAM**: CloudFormation extension. Simplified syntax for serverless. Local testing with SAM CLI. Best for: pure serverless apps, teams comfortable with YAML.
+**CloudFormation** templates are declarative JSON or YAML. They're explicit, reviewable, and completely portable across teams and tools. The downside is verbosity — a production-grade serverless application can require thousands of lines of YAML. CloudFormation is the right choice for organizations that require static, reviewed templates for compliance, or that standardize on hand-authored templates.
 
-**CDK**: imperative code. IDE support, type safety, reusable constructs. Generates CloudFormation. Best for: complex architectures, teams preferring code over YAML, reusability across projects.
+**SAM** is a CloudFormation extension (a Transform) that provides simplified syntax specifically for serverless resources. A Lambda function with an API Gateway trigger that would be 100+ lines in CloudFormation is 10 lines in SAM. SAM's killer feature for developers is the CLI: \`sam local invoke\` and \`sam local start-api\` run your Lambda functions and API locally in Docker containers. SAM is the right choice for pure serverless workloads where local testing and YAML-based authoring are preferred.
 
-**When to choose CDK**:
-- Large or complex infrastructure
-- Want to reuse infrastructure patterns across teams
-- Prefer TypeScript/Python over YAML
-- Need loops, conditionals, or programmatic generation
-
-**When to choose SAM**:
-- Purely serverless (Lambda + API Gateway + DynamoDB)
-- Want local testing with \`sam local\`
-- Simpler, YAML-based workflow
-
-**When to choose CloudFormation directly**:
-- Strict compliance requirements for reviewed static templates
-- Organization-wide standardized templates
-- No programming language allowed in IaC review
-
-Note: SAM and CDK both ultimately deploy via CloudFormation. They're all interoperable.`,
+**CDK** is the right choice when your infrastructure is complex enough to benefit from programming language features — loops, conditionals, functions, classes, and type systems. It's particularly powerful for teams that want to share infrastructure patterns across projects via construct libraries. CDK generates CloudFormation, so everything CloudFormation can do, CDK can do too, plus you get IDE support, compile-time validation, and the ability to write tests for your infrastructure code.`,
     },
     {
       heading: "CDK with Other Services",
-      body: `**CDK + CloudFormation**: CDK synthesizes to CF templates. Deploy via CloudFormation stacks. All CloudFormation features (drift detection, change sets, rollback) apply.
+      body: `CDK's integration with **CodePipeline** is especially powerful through the CDK Pipelines construct. \`pipelines.CodePipeline\` creates a **self-mutating pipeline** — a pipeline that automatically updates itself when you change your CDK app code. This means your pipeline definition and your application code live in the same repository and evolve together.
 
-**CDK + CodePipeline**: \`aws-cdk-lib/aws-codepipeline-actions\` provides CDK-native pipeline constructs. \`pipelines.CodePipeline\` L3 construct creates a self-mutating CDK pipeline — the pipeline updates itself when CDK code changes.
+CDK's integration with **Lambda** includes the \`NodejsFunction\` construct (from \`@aws-cdk/aws-lambda-nodejs\`), which automatically bundles TypeScript with esbuild during synthesis. You don't need a separate build step — CDK handles the transpilation and bundling as part of \`cdk synth\`.
 
-**CDK + Lambda**: \`Code.fromAsset\` bundles local directory. \`NodejsFunction\` construct (from \`@aws-cdk/aws-lambda-nodejs\`) bundles with esbuild automatically. Docker-based bundling for other runtimes.
+For testing CDK infrastructure code, \`aws-cdk-lib/assertions\` provides a test framework that evaluates the synthesized CloudFormation template:
 
-**CDK + ECS**: \`ApplicationLoadBalancedFargateService\` creates the full stack: ALB, target group, ECS service, task definition, security groups, IAM roles. Reduces hundreds of lines of CF to ~10 lines of CDK.
-
-**CDK + IAM**: \`grant*()\` methods (grantRead, grantWrite, grantInvoke) automatically add correct IAM permissions without manual policy JSON. \`iam.PolicyStatement\` for custom policies.
-
-**CDK + Testing**: \`aws-cdk-lib/assertions\` for unit testing CDK constructs:
 \`\`\`typescript
 Template.fromStack(myStack).hasResourceProperties('AWS::S3::Bucket', {
   VersioningConfiguration: { Status: 'Enabled' },
 });
-\`\`\``,
+\`\`\`
+
+This lets you write unit tests that verify your infrastructure has the properties you expect — catching misconfigurations before deployment. Combined with the \`grant*()\` method pattern for IAM and \`RemovalPolicy\` for resource lifecycle management, CDK provides a complete developer experience for infrastructure-as-code.`,
     },
   ],
 

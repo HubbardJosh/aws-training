@@ -11,133 +11,75 @@ export const kinesisGuide: ServiceGuide = {
   sections: [
     {
       heading: "Kinesis Family Overview",
-      body: `**Kinesis Data Streams (KDS)**: real-time, custom consumers, configurable retention (1–365 days), shard-based capacity, sub-second latency. You write consumer code.
+      body: `The Kinesis family consists of four services that solve different parts of the streaming data problem. **Kinesis Data Streams (KDS)** is the core streaming service — it ingests data in real time, stores it durably in shards, and makes it available to consumers you write yourself. It offers configurable retention (1–365 days) and sub-second latency, which makes it the right choice when you need custom processing logic or the ability to replay historical data.
 
-**Kinesis Data Firehose**: near-real-time (min 60-second buffer), fully managed delivery to S3, Redshift, OpenSearch, Splunk, or HTTP endpoints. No consumer code needed.
+**Kinesis Data Firehose** trades flexibility for simplicity. It's a fully managed delivery service that buffers incoming records and delivers them in batches to a destination — S3, Redshift, OpenSearch, Splunk, or HTTP endpoints. You write no consumer code at all; Firehose handles everything from buffering to format conversion. The tradeoff is latency: Firehose's minimum buffer interval is 60 seconds, so it's near-real-time rather than truly real-time.
 
-**Kinesis Data Analytics (for Apache Flink)**: run real-time SQL or Apache Flink applications on streaming data from KDS or Firehose. Managed Flink runtime.
-
-**Kinesis Video Streams**: ingest, process, and store video streams from devices. Not covered in DVA-C02.`,
+**Kinesis Data Analytics** (for Apache Flink) sits between the two: you run managed Apache Flink applications that read from a Data Stream or Firehose and write results to another stream or service. This is the right tool when you need stateful stream processing — windowed aggregations, joins across streams, anomaly detection — without managing your own Flink cluster. **Kinesis Video Streams** handles live video ingestion from devices and is not covered in the DVA-C02 exam.`,
     },
     {
       heading: "Kinesis Data Streams — Shards & Capacity",
-      body: `A stream is made up of **shards**. Each shard provides:
-- **Write**: 1 MB/s or 1,000 records/s per shard
-- **Read**: 2 MB/s per shard (shared across all consumers) OR 2 MB/s per consumer per shard with Enhanced Fan-Out (push-based, not polling)
+      body: `A Kinesis stream is made up of **shards**, and each shard is an independently scalable unit of throughput. Each shard provides 1 MB/s or 1,000 records per second of write capacity, and 2 MB/s of read capacity. Understanding this model is critical for both design and troubleshooting.
 
-**Scaling shards**:
-- *Split shard*: divide one shard into two (double capacity)
-- *Merge shards*: combine two adjacent shards (reduce capacity)
-- *On-demand mode*: automatic scaling, no shard management, higher cost
+The read capacity limit deserves special attention: the 2 MB/s is shared among all standard consumers polling a shard. If you have three applications all reading from the same shard, they compete for that 2 MB/s budget. **Enhanced Fan-Out (EFO)** solves this by giving each registered consumer its own dedicated 2 MB/s per shard via a push-based HTTP/2 delivery model, reducing per-consumer latency from ~200ms to ~70ms. EFO costs more per consumer-shard-hour but is the right choice when multiple independent consumers all need full throughput.
 
-**Partition key**: determines which shard receives a record. Kinesis hashes the key and maps to a shard. Use high-cardinality keys for even distribution. Hot shards cause throttling (ProvisionedThroughputExceededException).
+**Scaling** is manual in provisioned mode — you split a shard to double its capacity or merge two adjacent shards to reduce it. **On-demand mode** handles scaling automatically at higher cost, removing the need to calculate and manage shard counts.
 
-**Sequence number**: unique identifier assigned to each record within a shard. Records within a shard are ordered by sequence number.
-
-**Retention**: 24 hours default. Extend to 7 days (Enhanced, extra cost) or up to 365 days (Long-Term Retention, extra cost).`,
+The **partition key** you assign to each record determines which shard receives it. Kinesis hashes the key to a shard, so high-cardinality keys (user IDs, UUIDs, device IDs) distribute load evenly across shards. Low-cardinality keys create hot shards where all writes go to one or two shards, quickly exhausting their throughput limits and causing \`ProvisionedThroughputExceededException\`. Records within a shard are ordered by their **sequence number** — the guarantee of ordering is per-shard, not across the entire stream.`,
     },
     {
       heading: "Producing Records",
-      body: `**PutRecord**: write one record at a time. Returns sequence number and shard ID. Simple but inefficient at high volume.
+      body: `Writing records to a Kinesis stream can be done at different levels of efficiency depending on your volume requirements. **PutRecord** sends a single record and returns its sequence number and shard ID — simple and useful for low-volume use cases but inefficient at scale. **PutRecords** batches up to 500 records in a single API call and returns individual success or failure status for each record, so you retry only the failed records rather than the whole batch.
 
-**PutRecords**: write up to 500 records per request. Returns individual success/failure per record. Retry only failed records. Much more efficient.
+For high-volume producers, the **Kinesis Producer Library (KPL)** goes further by automatically aggregating multiple small records into a single Kinesis record (up to 1 MB). This aggregation dramatically increases the effective throughput per shard for applications that produce many small records. The KPL also handles retry logic, rate limiting, and CloudWatch metrics automatically. The important caveat: KPL-aggregated records must be deserialized by a KCL consumer or a deaggregation library — a standard \`GetRecords\` call will return the aggregated record as an opaque blob that your application must unpack.
 
-**Kinesis Producer Library (KPL)**: AWS-provided high-performance producer library. Features: automatic batching (aggregation), retry, rate limiting, CloudWatch metrics. Aggregates multiple small records into one Kinesis record (up to 1 MB). Consumers must use KCL or deaggregation library to unpack.
-
-**Record structure**:
-- Data: up to 1 MB (base64-encoded in API)
-- Partition key: string, determines target shard
-- Explicit hash key (optional): override partition-key hashing
-
-**Throttling**: ProvisionedThroughputExceededException. Implement exponential backoff. KPL handles this automatically.`,
+Every record contains the actual data payload (up to 1 MB, base64-encoded in the API), a partition key, and an optional explicit hash key that overrides the default partition-key hashing. When a shard is throttled, implement exponential backoff in your retry logic — the KPL handles this automatically, which is one of the main reasons to use it over raw API calls for high-throughput producers.`,
     },
     {
       heading: "Consuming Records",
-      body: `**Standard consumers (GetRecords polling)**:
-- Consumer polls shard via GetRecords API.
-- Up to 2 MB/s read throughput **shared** across all consumers on a shard.
-- Multiple consumers share the 2 MB/s limit — performance degrades with more consumers.
-- Pull-based; consumer manages checkpointing.
+      body: `Kinesis supports two fundamentally different consumption models, and choosing the wrong one for your architecture is a common source of performance problems.
 
-**Enhanced Fan-Out (EFO)**:
-- Each registered consumer gets **dedicated 2 MB/s** per shard (push-based via HTTP/2).
-- Latency: ~70ms vs ~200ms for standard.
-- Up to 20 registered consumers per stream.
-- Additional cost per consumer-shard-hour.
-- Best for multiple independent consumers needing full throughput.
+**Standard polling consumers** use the \`GetRecords\` API to pull batches of records from a shard. The critical constraint is that the 2 MB/s read throughput per shard is shared across all polling consumers. As you add more consumers, each gets a smaller share of the bandwidth and must poll more frequently to keep up. The **Kinesis Consumer Library (KCL)** is the standard tool for building polling consumers — it handles shard enumeration, checkpointing progress, lease coordination across multiple worker instances, and failure recovery. KCL consumers run as long-lived processes on EC2 or ECS.
 
-**Kinesis Consumer Library (KCL)**: high-level consumer library. Handles shard enumeration, checkpointing, lease coordination (multiple worker instances), failure recovery. Run as a long-lived process on EC2 or ECS.
+**Enhanced Fan-Out** consumers use a push model: each registered consumer gets its own dedicated 2 MB/s per shard, delivered via HTTP/2 with ~70ms latency. Adding a new EFO consumer doesn't degrade existing consumers' throughput. The limit is 20 registered EFO consumers per stream. EFO is the right choice when you're adding a third or fourth consumer to a stream, or when any consumer is latency-sensitive.
 
-**Lambda as consumer**: event source mapping polls Kinesis (standard, not EFO by default). Configurable batch size, starting position, error handling. Lambda processes records in shard order. Multiple shards = multiple concurrent Lambda invocations.`,
+**Lambda** can consume from Kinesis via event source mapping using the standard polling model (EFO for Lambda is also available but must be explicitly configured). Lambda processes records in shard order within each shard, with multiple shards executing as separate concurrent invocations. If Lambda fails to process a batch, it retries until the records expire from the stream — configuring \`BisectBatchOnFunctionError\` splits a failing batch in half to isolate the problematic record rather than blocking the entire shard.`,
     },
     {
       heading: "Kinesis Data Firehose",
-      body: `Firehose is a fully managed delivery service — no shards, no consumers to code.
+      body: `Firehose is designed for the common case where you want to land streaming data in a data store without writing any consumer code. You configure a delivery stream, point producers at it, and Firehose handles buffering, compression, format conversion, and delivery to your chosen destination.
 
-**Data flow**: Producer → Firehose Delivery Stream → (optional transform) → Destination
+**Sources** include Kinesis Data Streams, Amazon MSK (managed Kafka), direct PUT from the SDK or Kinesis Agent, CloudWatch Logs, IoT, and EventBridge. **Destinations** are S3, Amazon Redshift (via S3 staging), OpenSearch Service, Splunk, and HTTP endpoints including Datadog and New Relic. The buffering configuration — size (1–128 MB) and interval (60–900 seconds) — determines when Firehose delivers a batch. Data is delivered as soon as either threshold is met, so a 128 MB buffer with a 300-second interval will deliver when 128 MB accumulates or after 5 minutes, whichever comes first.
 
-**Sources**: Kinesis Data Streams, MSK (Managed Kafka), Direct PUT (SDK/agent), CloudWatch Logs, IoT, EventBridge.
-
-**Destinations**: Amazon S3, Amazon Redshift (via S3 staging), Amazon OpenSearch Service, Splunk, HTTP endpoint, Datadog, New Relic.
-
-**Buffering**: Firehose buffers data before delivery. Configure by size (1–128 MB) and interval (60–900 seconds). Data delivered when either threshold is met. Minimum 60-second latency.
-
-**Transformation**: optionally invoke a Lambda function to transform each record (parse, filter, enrich). Failed records go to an S3 error bucket. Lambda must return transformed records within 5 minutes.
-
-**Format conversion**: convert JSON to Parquet or ORC using AWS Glue Data Catalog schema — no code needed. Essential for cost-efficient Athena queries.
-
-**Compression**: GZIP, ZIP, Snappy for S3 delivery.`,
+Two capabilities make Firehose more powerful than a simple forwarder. **Lambda transformation** lets you invoke a Lambda function on each batch to parse, filter, enrich, or reshape records before delivery. Records that the function fails to transform go to an S3 error bucket, and the function must return results within 5 minutes. **Format conversion** uses AWS Glue Data Catalog schema definitions to convert JSON records to Parquet or ORC format on the fly — critical for cost-efficient Athena queries on S3 data, where columnar formats can reduce query cost by 90% or more. GZIP, ZIP, and Snappy compression are also available for S3 deliveries.`,
     },
     {
       heading: "Kinesis Data Analytics",
-      body: `Kinesis Data Analytics (for Apache Flink) runs managed Apache Flink applications.
+      body: `Kinesis Data Analytics (for Apache Flink) lets you run stateful stream processing without provisioning or managing a Flink cluster. You write a Flink application in Java, Scala, or Python, and the managed service handles cluster management, auto-scaling, checkpointing to S3, and failure recovery and restart.
 
-**Input**: Kinesis Data Streams, Kinesis Data Firehose, S3 (reference data for enrichment).
-**Output**: Kinesis Data Streams, Kinesis Data Firehose, Lambda.
+The service reads from Kinesis Data Streams or Firehose and writes results to Kinesis Data Streams, Firehose, or Lambda. A legacy SQL-based application mode is also supported but Apache Flink applications are preferred for new development, as they support the full Flink API including windowed aggregations, stateful processing, complex event processing, and stream joins.
 
-**SQL application (legacy)**: simpler SQL-based streaming queries. Still supported but Apache Flink is preferred.
-
-**Flink application**: full Apache Flink programs (Java, Scala, Python). Stateful stream processing, windowing, complex event processing, joins.
-
-**Use cases**: real-time dashboards, anomaly detection, click-stream analysis, IoT telemetry aggregation, fraud detection.
-
-**Managed**: KDA handles Flink cluster management, auto-scaling, checkpointing (to S3), and failure recovery.`,
+The practical use cases are workloads that need real-time computation on the stream itself rather than just moving data from point A to point B: detecting anomalies in IoT sensor telemetry, computing rolling aggregates for a real-time dashboard, analyzing click-stream sequences to detect fraud patterns, or joining an event stream with a reference data set to enrich events before forwarding them. The managed aspect is significant — running Apache Flink yourself requires significant operational expertise, and Kinesis Data Analytics removes that burden.`,
     },
     {
       heading: "Kinesis vs SQS vs SNS",
-      body: `**Use Kinesis when**:
-- You need ordered, replayable stream data
-- Multiple consumers need to read the same data
-- Real-time analytics or ML on the stream
-- Sub-second latency matters
-- Data retention for replay (hours to days)
+      body: `These three services all move data between components but serve very different purposes, and choosing the right one depends primarily on the relationship between producers and consumers.
 
-**Use SQS when**:
-- Decoupling producers and consumers
-- Each message processed by exactly one consumer
-- Variable processing speed (queue buffers the difference)
-- Simple work queue pattern
+**Kinesis** is built for ordered, replayable data streams where multiple consumers need to independently read the same data. Records stay in the stream after being read — a consumer's position is tracked separately from the data itself, so you can replay the last 24 hours (or up to 365 days with extended retention), run multiple independent consumers in parallel, and backfill a new consumer from the beginning of the retention window. Use Kinesis when you need real-time analytics, sub-second latency, ordered processing within a partition, or the ability to replay data.
 
-**Use SNS when**:
-- Fan-out to multiple subscribers
-- Push-based notification (email, SMS, mobile push)
-- No need for message replay or ordered processing
+**SQS** is built for work queues where each message should be processed by exactly one consumer. Once a consumer successfully processes a message, it's deleted. SQS provides excellent buffering for variable-rate producers and consumers — when the consumer is slow, messages queue up safely. Use SQS when you need to decouple a producer from a consumer, buffer work items, or ensure each task is processed once.
 
-**Key difference**: Kinesis records remain in the stream after reading (replay possible); SQS messages are deleted after successful processing. SNS has no persistence — deliver-and-forget.`,
+**SNS** is a push notification service — it delivers a copy of each message to all subscribers immediately and discards it. There's no persistence, no replay, and no way for a slow subscriber to catch up on missed messages. SNS is the right choice for fan-out notification where you want to simultaneously notify multiple systems of an event. The canonical pattern is SNS + SQS: SNS delivers to multiple SQS queues, combining fan-out with durable buffering for each consumer.`,
     },
     {
       heading: "Kinesis with Other Services",
-      body: `**Kinesis → Lambda**: event source mapping. Lambda scales per shard. Error handling with BisectBatchOnFunctionError, destinations.
+      body: `**Kinesis → Lambda** is one of the most common streaming patterns. Lambda's event source mapping polls the stream (or uses Enhanced Fan-Out), invokes Lambda with a batch of records per shard, and manages checkpointing. Because Lambda scales to one concurrent invocation per shard, adding shards is the mechanism for increasing parallel Lambda processing.
 
-**Kinesis → Firehose → S3**: common pipeline. Real-time ingestion → near-real-time S3 delivery → Athena queries.
+**Kinesis → Firehose → S3** is the standard pattern for building a data lake from streaming events. Kinesis Data Streams provides real-time access for operational consumers; Firehose delivers a copy to S3 in Parquet format for analytical queries with Athena. This separates operational and analytical concerns without duplicating your producer code.
 
-**Kinesis → Analytics → Kinesis/Lambda**: real-time stream processing. Analytics detects anomalies, triggers Lambda for alerts.
+**Kinesis → Data Analytics → Kinesis/Lambda** handles real-time stream enrichment or anomaly detection. The Analytics application reads the raw stream, computes an aggregate or detects a pattern, and writes results to a separate output stream or invokes Lambda to trigger an alert.
 
-**API Gateway → Kinesis**: API Gateway AWS Service integration writes records directly to Kinesis. Clients POST events; API Gateway calls PutRecord without Lambda.
-
-**IoT → Kinesis**: AWS IoT Core rules route device data to Kinesis streams for real-time analytics.
-
-**CloudWatch Logs → Kinesis Firehose**: subscription filter streams log data to Firehose → S3/OpenSearch for log analytics.`,
+**API Gateway → Kinesis** uses API Gateway's AWS Service integration to write records directly to a Kinesis stream without a Lambda intermediary. Clients POST event data, API Gateway calls \`PutRecord\` on their behalf, and producers never interact with the Kinesis API directly. This is a clean pattern for high-volume event ingestion endpoints. **CloudWatch Logs → Kinesis Firehose** via subscription filters streams log data to Firehose for delivery to S3 or OpenSearch, enabling centralized log analytics without exporting logs manually.`,
     },
   ],
 

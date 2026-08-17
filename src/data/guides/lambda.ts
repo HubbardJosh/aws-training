@@ -11,123 +11,79 @@ export const lambdaGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Concepts",
-      body: `Lambda executes **functions** — discrete units of code packaged as a ZIP or container image. Each function has:
+      body: `Lambda executes **functions** — discrete units of code packaged as a ZIP archive or container image. Each function is defined by a **handler** (the entry point Lambda calls, e.g. \`index.handler\`), a **runtime** (the language environment such as Node.js 20.x, Python 3.12, or Java 21), and a **memory** allocation from 128 MB to 10,240 MB. CPU power scales proportionally with memory, so doubling memory roughly doubles compute capacity. Every function also has an **execution role** — an IAM role granting it permission to call other AWS services — and a **timeout** of up to 15 minutes per invocation.
 
-- **Handler**: the entry point Lambda calls (e.g. \`index.handler\`)
-- **Runtime**: the language environment (Node.js 20.x, Python 3.12, Java 21, Go 1.x, etc.)
-- **Memory**: 128 MB – 10,240 MB (CPU scales proportionally)
-- **Timeout**: max 15 minutes per invocation
-- **Execution Role**: IAM role granting the function permissions to call other AWS services
-
-Lambda manages a fleet of **execution environments** (micro-VMs). Your code runs inside one. Between invocations the environment may be frozen and reused (**warm start**) or a new one is created (**cold start**).`,
+Lambda manages a fleet of **execution environments** (isolated micro-VMs). When your function is invoked, it runs inside one of these environments. Between invocations the environment may be frozen and reused — this is a **warm start**, where initialization code has already run. When no warm environment is available, Lambda must create a new one, which is a **cold start** and adds latency while the runtime initializes.`,
     },
     {
       heading: "Invocation Types",
-      body: `**Synchronous (RequestResponse)**
-Caller waits for the function to finish and returns the result. Used by API Gateway, ALB, Cognito triggers, and direct SDK calls. Errors propagate back to the caller — the caller must handle retries.
+      body: `Lambda supports three fundamentally different invocation models, each with different error-handling behavior.
 
-**Asynchronous (Event)**
-Lambda places the event on an internal queue and returns immediately (HTTP 202). Lambda retries failures twice (3 total attempts). Use **Destinations** or a **DLQ** to capture final failures. Sources: S3, SNS, EventBridge, SES.
+**Synchronous invocation** (RequestResponse) is the model used by API Gateway, ALB, Cognito triggers, and direct SDK calls. The caller waits for the function to complete and receives the result directly. If the function throws an error, the error propagates back to the caller, which is responsible for retrying.
 
-**Polling (Stream/Queue)**
-Lambda polls the source on your behalf (event source mapping). Sources: SQS, Kinesis Data Streams, DynamoDB Streams, Kafka, MQ. Lambda manages the polling loop, batch size, and concurrency.`,
+**Asynchronous invocation** (Event) is used by S3, SNS, EventBridge, and SES. Lambda places the event on an internal queue and returns HTTP 202 immediately. If the function fails, Lambda automatically retries twice (three total attempts). After exhausting retries, you can capture the failed event using **Lambda Destinations** (which route to SQS, SNS, Lambda, or EventBridge with full metadata) or a **DLQ** (which routes to SQS or SNS with less context).
+
+**Polling-based invocation** (event source mapping) applies to SQS, Kinesis Data Streams, DynamoDB Streams, Kafka, and Amazon MQ. Lambda manages the polling loop on your behalf — you don't write any polling code. Lambda handles batch sizing, concurrency, and checkpointing automatically, and scales the number of concurrent invocations based on the depth of the source.`,
     },
     {
       heading: "Execution Environment & Cold Starts",
-      body: `When Lambda receives an invocation with no warm environment available it:
-1. Downloads your deployment package (or pulls the container image)
-2. Starts the runtime process
-3. Runs **initialization code** (code outside your handler)
-4. Calls your handler
+      body: `When Lambda receives an invocation with no warm environment available, it goes through an initialization sequence: it downloads your deployment package (or pulls the container image), starts the runtime process, and runs any **initialization code** — the code outside your handler function. Only then does it call your handler. Steps 1 through 3 constitute the **cold start**, which typically adds 100ms to 1 second for interpreted runtimes like Node.js or Python, and several seconds for JVM or .NET runtimes.
 
-Steps 1–3 are the **cold start** — typically 100ms–1s for interpreted runtimes, up to several seconds for JVM/container.
-
-**Mitigation strategies:**
-- **Provisioned Concurrency**: pre-warms N environments. Eliminates cold starts; billed even when idle.
-- **Minimize package size**: smaller ZIP = faster download. Use tree-shaking, exclude dev deps.
-- **Move init outside handler**: DB connections, SDK clients initialized once per environment.
-- **Choose faster runtimes**: Node.js and Python cold-start faster than Java/.NET.
-- **Keep functions warm** (schedule a ping every 5 min) — low-cost but not reliable at scale.`,
+Several strategies can reduce cold start impact. **Provisioned Concurrency** pre-warms a specified number of environments so they are always ready to handle requests with zero initialization delay — the tradeoff is that you're billed for provisioned environments even when idle. Minimizing your deployment package size reduces download time, and choosing faster runtimes (Node.js and Python start faster than Java or .NET) reduces startup time. Moving initialization code outside your handler — database connections, SDK clients, loaded config files — means that code runs once per environment rather than once per invocation, making warm starts faster and reducing the work done during cold starts.`,
     },
     {
       heading: "Concurrency & Throttling",
-      body: `**Unreserved concurrency**: shared pool across all functions in a region. Default account limit: **1,000 concurrent executions** (can be raised via Service Quotas).
+      body: `Lambda concurrency is the number of function instances processing requests simultaneously. Your account starts with a default limit of **1,000 concurrent executions** per region, shared across all functions. You can raise this limit through Service Quotas.
 
-**Reserved concurrency**: guarantees N slots for a specific function. Subtracts from the unreserved pool. Setting to 0 disables the function. Use to protect other functions from a runaway one.
+**Reserved concurrency** dedicates a portion of the account pool to a specific function. This guarantees that function can always scale up to its reserved amount, but it also caps the function at that limit — setting reserved concurrency to 0 disables the function entirely. Use reserved concurrency to protect other functions from a runaway one consuming the entire account pool.
 
-**Provisioned concurrency**: pre-initializes environments so they are always ready. Counts against reserved concurrency. Best for latency-sensitive workloads with predictable traffic (use auto-scaling to match schedule or traffic patterns).
+**Provisioned concurrency** goes further: it pre-initializes a specific number of execution environments so they are always warm. These count against the function's reserved concurrency. You can configure Auto Scaling on provisioned concurrency to match scheduled traffic patterns or step-scale based on utilization.
 
-When concurrency limit is hit, Lambda returns **429 TooManyRequestsException**. Synchronous callers receive the error immediately. Async invocations are queued up to 6 hours.`,
+When any concurrency limit is hit, Lambda returns **429 TooManyRequestsException**. Synchronous callers receive this error immediately and must handle retries. Asynchronous invocations are queued internally for up to 6 hours before being discarded or sent to a failure destination.`,
     },
     {
       heading: "Deployment Packages & Layers",
-      body: `**ZIP deployment**: package your code + dependencies into a ZIP ≤ 50 MB (compressed) / 250 MB (unzipped). Upload directly or via S3.
+      body: `Lambda supports two packaging formats. **ZIP deployment** packages your code and dependencies into a ZIP file up to 50 MB compressed (250 MB unzipped). You can upload directly or via S3. **Container images** package your function as a Docker image up to 10 GB and must implement the Lambda Runtime Interface. Container images are the right choice for custom runtimes, large ML model dependencies, or when you want consistent dev/prod environments using Docker tooling.
 
-**Container image**: package code as a Docker image up to **10 GB**. Must implement the Lambda Runtime Interface. Enables custom runtimes, larger dependencies (ML models), consistent dev/prod environments.
-
-**Layers**: ZIP archives deployed independently and shared across functions. Up to **5 layers** per function. Extracted to \`/opt\` in the execution environment. Versioned — functions pin to a specific layer version. Ideal for: shared libraries, custom runtimes, configuration files.`,
+**Lambda Layers** are a way to share code and dependencies across multiple functions without bundling them into each deployment package. A layer is a ZIP archive deployed independently and versioned separately. You attach up to 5 layers to a function, and Lambda extracts them to \`/opt\` in the execution environment. Functions pin to a specific layer version, so a layer update won't automatically affect any function — you update the reference explicitly. Layers are ideal for shared libraries, custom runtimes, and configuration files that multiple functions need.`,
     },
     {
       heading: "Environment Variables & Configuration",
-      body: `Environment variables are key-value pairs injected into the runtime as \`process.env\` (Node) or \`os.environ\` (Python). Total size limit: **4 KB**.
+      body: `Environment variables inject configuration into your runtime as key-value pairs accessible via \`process.env\` in Node.js or \`os.environ\` in Python. The total size limit across all variables is **4 KB**. By default, variables are stored in plain text and visible in the Lambda console, so you should never put sensitive values there directly.
 
-**Security**: variables are stored in plain text by default. Encrypt sensitive values using a **KMS Customer Managed Key** (CMK). The execution role needs \`kms:Decrypt\`.
+For secrets, the right pattern is to store them in **Secrets Manager** or **SSM Parameter Store** and fetch them at initialization time in your function's init code (outside the handler). Caching the fetched value in a module-level variable means subsequent warm invocations reuse the cached value without additional API calls. If you must encrypt environment variables, you can use a **KMS Customer Managed Key** — Lambda will encrypt the variable value at rest, and your execution role needs \`kms:Decrypt\` to read it at runtime.
 
-**Best practice**: use environment variables for non-secret config (log level, feature flags, region). Use **Secrets Manager** or **SSM Parameter Store** for credentials — fetch at init time and cache.
-
-**Aliases & versions**: publish a version to snapshot code + config. Create an alias (e.g. \`prod\`, \`staging\`) pointing to a version. Aliases support **traffic shifting** (weighted alias) for canary deployments without CodeDeploy.`,
+**Lambda aliases** are named pointers to specific published versions (e.g. \`prod\` pointing to version 47). Aliases support **weighted traffic shifting** — you can send 10% of traffic to a new version while keeping 90% on the current one. This enables canary deployments without requiring CodeDeploy. The function ARN with an alias suffix remains stable even as you promote new versions.`,
     },
     {
       heading: "Error Handling",
-      body: `**Synchronous**: Lambda returns the error to the caller. No automatic retry. Caller must implement retry with backoff.
+      body: `Error handling in Lambda differs significantly depending on the invocation type. For **synchronous invocations**, Lambda simply returns the error to the caller — there is no automatic retry, and the caller is entirely responsible for retry logic and backoff.
 
-**Asynchronous**: Lambda retries up to **2 additional times** (3 total). Between retries: 1 min wait, then 2 min wait. Configure **Maximum Retry Attempts** (0–2) and **Maximum Event Age** (60s–6h). After exhausting retries, route to:
-- **Lambda Destinations (OnFailure)**: sends event + metadata to SQS, SNS, Lambda, or EventBridge.
-- **DLQ**: sends failed event to SQS or SNS (less metadata than Destinations).
+For **asynchronous invocations**, Lambda automatically retries failed invocations twice more (three total attempts), with a 1-minute wait before the second attempt and a 2-minute wait before the third. You can configure \`Maximum Retry Attempts\` (0–2) and \`Maximum Event Age\` (60 seconds to 6 hours) to control this behavior. After exhausting retries, you can route the failed event to a **Lambda Destination** (configured per OnFailure) or a DLQ. Destinations are preferred because they include the full invocation metadata — the original event, the response, and the request context — whereas DLQ only sends the original event.
 
-**Stream-based (Kinesis/DynamoDB Streams)**:
-- Lambda blocks the shard and retries until success or data expires.
-- \`BisectBatchOnFunctionError\`: splits failing batch in half to isolate bad records.
-- \`MaximumRetryAttempts\`: controls retry count before routing to failure destination.
-- \`DestinationConfig.OnFailure\`: routes isolated bad records to SQS/SNS.
-
-**SQS event source**: failed messages return to queue after visibility timeout expires. After \`maxReceiveCount\` receives, SQS routes to the DLQ. Set visibility timeout ≥ 6× function timeout.`,
+For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process records in order within each shard. A failing batch blocks the shard until it succeeds or expires. The key tools for managing this are \`BisectBatchOnFunctionError\` (which splits a failing batch in half to isolate the bad record) and \`MaximumRetryAttempts\` (which limits how many times a batch is retried before routing bad records to a failure destination). For SQS event sources, failed messages return to the queue after the visibility timeout expires and are retried up to \`maxReceiveCount\` times before going to the DLQ.`,
     },
     {
       heading: "VPC Access",
-      body: `By default Lambda runs outside your VPC (has internet access, can reach AWS APIs). To access resources inside a VPC (RDS, ElastiCache, internal services), attach Lambda to the VPC by specifying **subnets and security groups**.
+      body: `By default, Lambda runs outside any VPC and has internet access to reach AWS APIs and external services. If your function needs to access resources inside a VPC — an RDS database, an ElastiCache cluster, or an internal service — you attach it to the VPC by specifying subnets and security groups. Lambda then creates **Elastic Network Interfaces (ENIs)** in your VPC subnets using the Hyperplane ENI model, which shares ENIs across multiple function instances rather than creating one per invocation, solving the ENI exhaustion problem that plagued earlier Lambda VPC implementations.
 
-Lambda creates **Elastic Network Interfaces (ENIs)** in your VPC subnets using the **Hyperplane ENI** model (shared ENIs, not one per invocation — solved the ENI exhaustion and cold-start problem from the older model).
-
-**Internet access from VPC Lambda**: VPC Lambda has no internet by default. Add a **NAT Gateway** in a public subnet. Private subnet → NAT → Internet Gateway.
-
-**AWS service access from VPC Lambda (no internet)**: use **VPC Endpoints (PrivateLink)** to route traffic to S3, DynamoDB, SQS, etc. without a NAT Gateway. Cheaper and no internet exposure.`,
+When a Lambda function is attached to a VPC, it loses direct internet access — VPC-attached functions route through the VPC's network. To restore internet access (for calling external APIs, for example), you need a **NAT Gateway** in a public subnet with a route from your Lambda's private subnet through the NAT to the internet gateway. A cheaper and more secure alternative for AWS service calls is to use **VPC Endpoints (PrivateLink)** — these let your Lambda reach S3, DynamoDB, SQS, and other services without any internet routing, keeping traffic entirely within the AWS network.`,
     },
     {
       heading: "Performance Tuning",
-      body: `**Memory**: increasing memory also increases CPU. A function that uses 100ms at 1024 MB may use 400ms at 256 MB — cost may be similar or lower at higher memory. Use **AWS Lambda Power Tuning** (open-source Step Functions state machine) to find the optimal memory setting.
+      body: `Lambda's CPU allocation is tied to memory: more memory means proportionally more CPU. A function that completes in 100ms at 1,024 MB might take 400ms at 256 MB, and the cost difference may be small or even favor the higher memory setting. The open-source **Lambda Power Tuning** tool (built on Step Functions) runs your function at multiple memory configurations and produces a cost/performance chart, making it easy to find the optimal setting for your workload.
 
-**Timeout**: set to slightly above your p99 execution time. Too low = unnecessary failures. Too high = runaway invocations accumulate cost.
+Set your function's timeout to slightly above the p99 execution time for your workload. Too low and you'll create unnecessary failures on slow requests; too high and runaway invocations accumulate cost before they're terminated. For functions that connect to databases or call external services, always initialize those connections **outside the handler** — Lambda reuses the execution environment across warm invocations, so a connection established in the init phase persists and is reused rather than re-established on every call.
 
-**Connection reuse**: initialize SDK clients and DB connections **outside the handler**. Lambda reuses the execution environment — subsequent invocations reuse the warm client.
-
-**X-Ray tracing**: enable active tracing to profile cold starts, handler duration, and downstream call latency. Subsegments auto-capture DynamoDB, S3, SQS, SNS calls made via AWS SDK.`,
+Enable **X-Ray active tracing** to profile cold starts, handler duration, and downstream call latency. The X-Ray SDK automatically captures DynamoDB, S3, SQS, and SNS calls made through the AWS SDK, giving you a complete picture of where time is spent across your function's dependency chain.`,
     },
     {
       heading: "Lambda with Other Services",
-      body: `**API Gateway → Lambda**: most common serverless pattern. API Gateway passes HTTP request as event; Lambda returns response body + status code. Use Lambda Proxy integration for simplicity or non-proxy for VTL mapping.
+      body: `The most common Lambda integration is **API Gateway → Lambda**, which forms the backbone of most serverless web APIs. API Gateway passes the full HTTP request as a structured event; Lambda processes it and returns a response object containing the status code, headers, and body. Lambda Proxy integration is the simplest approach — it passes everything through without transformation.
 
-**SQS → Lambda**: event source mapping polls the queue. Lambda processes batches (up to 10,000 messages). Configure \`BatchSize\`, \`MaximumBatchingWindowInSeconds\`, and \`FunctionResponseTypes: [ReportBatchItemFailures]\` to return partial failures.
+For queue-based processing, **SQS → Lambda** via event source mapping lets Lambda scale automatically with queue depth. Configure \`BatchSize\`, \`MaximumBatchingWindowInSeconds\`, and \`ReportBatchItemFailures\` for production-grade batch processing. For stream-based change capture, **DynamoDB Streams → Lambda** triggers processing on table changes — useful for real-time aggregation, cross-region replication, and audit logging.
 
-**DynamoDB Streams → Lambda**: trigger Lambda on table changes. Use for real-time aggregation, cross-region replication, audit logs.
-
-**S3 → Lambda**: trigger on object events (PUT, DELETE). Build image processing pipelines, ETL jobs, virus scanning.
-
-**EventBridge → Lambda**: trigger on schedule (cron/rate) or event pattern. Best for event-driven microservices.
-
-**Step Functions → Lambda**: Lambda as a Task state. Step Functions handles retries, timeouts, and orchestration so Lambda functions stay simple.
-
-**Cognito → Lambda**: triggers for Pre-SignUp, Post-Confirmation, Pre-Token-Generation, Custom-Auth. Customize auth flow and user data.`,
+**S3 → Lambda** triggers on object events like PUT and DELETE, enabling image processing pipelines, ETL jobs, and virus scanning. **EventBridge → Lambda** enables scheduled invocations (cron or rate expressions) and event-driven microservice patterns. **Step Functions → Lambda** places Lambda as a Task state, letting Step Functions handle retries, timeouts, and orchestration so each Lambda function can stay focused on a single well-defined operation. **Cognito → Lambda** triggers customize the authentication flow at pre-signup, post-confirmation, pre-token-generation, and custom auth challenge stages.`,
     },
   ],
 

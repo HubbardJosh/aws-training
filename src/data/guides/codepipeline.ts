@@ -11,45 +11,24 @@ export const codepipelineGuide: ServiceGuide = {
   sections: [
     {
       heading: "Pipeline Structure",
-      body: `A **pipeline** is a series of **stages**. Each stage has one or more **actions**. Actions in a stage can run in parallel or sequentially.
+      body: `A CodePipeline **pipeline** is a sequence of **stages**, and each stage contains one or more **actions**. Actions within a stage can run in parallel or sequentially — you control this by assigning actions to run order groups within the stage. Between stages, CodePipeline transfers **artifacts**: ZIP files stored in an S3 bucket that CodePipeline manages. The output artifact of one action becomes the input artifact of the next.
 
-**Stages**: logical groupings (e.g. Source, Build, Test, Deploy, Approval).
+Stages represent the logical phases of your delivery process — Source, Build, Test, Deploy, and Approval are common names, but you can name them anything. Actions are the actual work units. Each action has a category (Source, Build, Test, Deploy, Invoke, Approval), a provider (the specific tool that does the work), and input/output artifact references. The provider list includes CodeCommit, GitHub, S3, CodeBuild, CodeDeploy, ECS, Lambda, CloudFormation, Elastic Beanstalk, and many more.
 
-**Actions**: the actual work. Each action has:
-- Category: Source, Build, Test, Deploy, Invoke, Approval
-- Provider: CodeCommit, GitHub, S3, CodeBuild, CodeDeploy, ECS, Lambda, CloudFormation, Elastic Beanstalk, etc.
-- Input/output artifacts: files passed between stages (stored in S3)
-
-**Artifacts**: files produced by one action and consumed by the next. Stored in an S3 bucket (CodePipeline manages this). Example: source code → build output → deployment package.
-
-**Pipeline transitions**: connections between stages. Can be disabled to pause the pipeline at a stage (useful for manual gates).
-
-**Execution**: each code change triggers one execution. If a new change arrives while one is in progress, CodePipeline can queue it (superceded mode) or run them in parallel (queued mode).`,
+**Pipeline transitions** are the connections between stages. You can disable a transition to pause the pipeline at a specific stage — this is useful for creating manual gates without using the formal Approval action type. Each pipeline execution represents one code change flowing through. If a new change arrives while one execution is in progress, CodePipeline can queue it (superseded mode) or run them in parallel.`,
     },
     {
       heading: "Source Stage",
-      body: `**Source providers**:
-- **CodeCommit**: AWS-managed Git repository. Triggers on branch push.
-- **GitHub / GitHub Enterprise**: OAuth or GitHub App connection. Trigger on push or PR.
-- **S3**: trigger when a new object version is uploaded (object versioning must be enabled).
-- **Bitbucket, GitLab**: via CodeStar connections.
+      body: `The Source stage defines where CodePipeline watches for changes and what it fetches. The detection method matters significantly for pipeline responsiveness. **EventBridge (CloudWatch Events) detection** triggers the pipeline nearly instantly when a repository change occurs — this is the recommended approach. The legacy **polling** method checks for changes every minute and adds avoidable latency.
 
-**Detection method**:
-- CloudWatch Events (EventBridge): recommended. Near-instant trigger when repo changes.
-- Polling: CodePipeline polls the source every minute (legacy, not recommended).
+**CodeCommit** triggers on branch pushes. **GitHub** and **GitHub Enterprise** connect via OAuth or a GitHub App (using CodeStar Connections) and can trigger on push events or pull request creation. **S3** as a source triggers when a new object version is uploaded to a specific key — object versioning must be enabled on the bucket. **Bitbucket** and **GitLab** connect via CodeStar connections, which are managed connections to third-party providers that handle authentication once for use across multiple pipelines.
 
-**Source output artifact**: the source code zip uploaded to S3. Passed to the Build stage.
-
-**CodeStar Connections**: manage connections to third-party source providers (GitHub, Bitbucket, GitLab) from AWS. Auth handled once; used by multiple pipelines.`,
+The source action produces an output artifact containing the source code as a ZIP file. This artifact flows to the Build stage and is the starting point for the entire pipeline's data flow.`,
     },
     {
       heading: "Build Stage (CodeBuild)",
-      body: `CodeBuild is the most common build action. It compiles, tests, and packages code.
+      body: `CodeBuild is the most common build provider. It takes the source artifact, compiles the code, runs tests, and produces a build artifact. The build is defined by a \`buildspec.yml\` in your repository or inline in the CodeBuild project configuration:
 
-**Input**: source artifact from Source stage.
-**Output**: build output artifact (JAR, ZIP, Docker image, etc.).
-
-**buildspec.yml**: YAML file in repo root (or inline in CodeBuild project) defining build commands:
 \`\`\`yaml
 version: 0.2
 phases:
@@ -66,55 +45,39 @@ artifacts:
   base-directory: dist
 \`\`\`
 
-**Cache**: CodeBuild can cache dependencies in S3 or locally to speed up builds.
+CodePipeline passes environment variables and artifact information to CodeBuild automatically. CodeBuild can also receive **pipeline variables** — values passed from earlier stages that CodeBuild uses to customize the build. For example, the source commit SHA could be passed as a variable and used to tag Docker images.
 
-**Environment**: select managed image (Ubuntu, Amazon Linux) or custom Docker image from ECR. Set environment variables (plain or from SSM/Secrets Manager).
-
-**Concurrent builds**: multiple builds can run simultaneously. Configure concurrency limits.`,
+The build output artifact — a JAR, ZIP, Docker image digest, or whatever your build produces — flows to the Deploy stage. The artifact is stored in CodePipeline's S3 bucket between stages, maintaining the integrity of what was built and ensuring reproducibility.`,
     },
     {
       heading: "Deploy Stage",
-      body: `**CodeDeploy**: deploy to EC2, Lambda, or ECS. Supports in-place and blue/green strategies.
+      body: `The Deploy stage has the widest variety of providers because "deployment" means something different depending on your stack.
 
-**ECS (direct)**: update ECS service with new task definition (rolling update). No CodeDeploy required for rolling. Use CodeDeploy for blue/green ECS.
+**CodeDeploy** handles deployments to EC2, Lambda, and ECS with full support for in-place, rolling, and blue/green strategies. **ECS (direct)** updates an ECS service with a new task definition revision using a rolling update — no CodeDeploy needed for rolling, but CodeDeploy is required for blue/green ECS. **Elastic Beanstalk** receives a new application version and deploys it to a Beanstalk environment using whatever deployment policy the environment is configured with.
 
-**Lambda**: deploy new function version. CodeDeploy shifts traffic between aliases (canary, linear, all-at-once).
+**CloudFormation** is the deploy provider for infrastructure-as-code pipelines. The most important CloudFormation actions are \`CREATE_UPDATE\` (directly creates or updates a stack), \`CHANGE_SET_CREATE\` (creates a change set for review), and \`CHANGE_SET_EXECUTE\` (executes an approved change set). Splitting change set creation and execution across stages with a manual Approval action in between is the safest pattern for infrastructure changes.
 
-**Elastic Beanstalk**: deploy new application version to an environment.
+The **Manual Approval** action pauses the pipeline and sends an SNS notification to reviewers. Reviewers then approve or reject the deployment through the console or via the API. The pipeline waits up to 7 days for a response before timing out.
 
-**CloudFormation**: deploy or update a CloudFormation stack. Actions: CREATE_UPDATE, DELETE_ONLY, REPLACE_ON_FAILURE, CHANGE_SET_EXECUTE. Used for infrastructure-as-code pipelines.
-
-**S3**: upload artifact to S3 bucket (for static website deployments via CloudFront + S3).
-
-**Approval Action**: manual approval step. CodePipeline sends SNS notification. Reviewer approves or rejects in console or via API. Pipeline waits up to 7 days.
-
-**Lambda Action (Invoke)**: invoke a Lambda function from within the pipeline. Use for custom logic: smoke tests, notifications, conditional gates. Lambda must call \`PutJobSuccessResult\` or \`PutJobFailureResult\` to continue/fail the pipeline.`,
+The **Lambda Invoke** action invokes a Lambda function at any point in the pipeline — useful for custom validation logic, smoke tests, notifications, or any operation that doesn't fit another action type. The Lambda function **must** call \`PutJobSuccessResult\` or \`PutJobFailureResult\` with the job ID it receives; otherwise, the pipeline will wait indefinitely until it times out.`,
     },
     {
       heading: "Notifications & Monitoring",
-      body: `**Pipeline notifications**: configure notification rules to send SNS messages on pipeline events (start, success, failure, approval needed).
+      body: `CodePipeline integrates with several monitoring and notification systems. **Notification rules** send SNS messages when pipeline execution state changes — pipeline starts, succeeds, fails, or reaches an action requiring manual approval. These are configured per pipeline and can target SNS topics (which fan out to email, SMS, or Lambda).
 
-**CloudWatch Events (EventBridge)**: pipeline state changes emit events. Trigger Lambda, Step Functions, or other targets. Example: on pipeline failure → trigger a Lambda that posts to Slack.
+Because CodePipeline emits state change events to **EventBridge**, you can build more sophisticated response workflows. When a pipeline fails, an EventBridge rule can trigger a Lambda function that posts to Slack, opens a ticket, or sends a PagerDuty alert. The event contains the pipeline name, stage name, action name, and failure reason, giving you enough context to build useful notifications.
 
-**CloudTrail**: all CodePipeline API calls logged in CloudTrail for audit.
-
-**CloudWatch Metrics**: pipeline execution metrics (PipelineExecutionAttempts, SucceededPipelineExecutions, FailedPipelineExecutions) available per pipeline.
-
-**Retry**: failed actions can be retried from the failed stage without restarting the whole pipeline.`,
+**CloudTrail** records all CodePipeline API calls, providing an audit trail of who created, modified, and triggered pipelines. For debugging, the CodePipeline console shows a visual execution history — you can click into any execution, see each action's status, and retry failed stages without restarting the entire pipeline.`,
     },
     {
       heading: "CodePipeline with Other Services",
-      body: `**CodePipeline + CodeCommit + CodeBuild + CodeDeploy**: the native AWS DevOps stack. Full CI/CD without leaving AWS. CodeCommit as SCM → CodeBuild for build/test → CodeDeploy for deployment.
+      body: `The native AWS DevOps stack is **CodeCommit → CodeBuild → CodeDeploy** orchestrated by CodePipeline. Each tool is specialized: CodeCommit is the source repository, CodeBuild compiles and tests, CodeDeploy manages deployment strategies, and CodePipeline ties them together. For teams using GitHub, the pattern shifts to GitHub as the source with CodeStar connections, but CodeBuild and CodeDeploy remain the same.
 
-**CodePipeline + GitHub + CodeBuild + ECS**: common modern pattern. GitHub for source, CodeBuild for Docker build and ECR push, ECS service update for deployment.
+For containerized applications, a common modern pattern is **GitHub → CodeBuild → ECS**: CodeBuild builds a Docker image and pushes it to ECR, then the pipeline updates the ECS service with the new image digest. The ECS deploy action handles the rolling update, or CodeDeploy handles blue/green if that's required.
 
-**CodePipeline + CloudFormation**: infrastructure pipeline. Code change → CloudFormation change set → manual approval → execute change set → infrastructure updated.
+**Infrastructure pipelines** use CloudFormation as the deploy provider. A typical pattern: code change triggers pipeline, CodeBuild validates the template (using \`cfn-lint\`), a CloudFormation action creates a change set, a Manual Approval action lets a team member review the change set in the CloudFormation console, and a second CloudFormation action executes the approved change set. This gives you safe, auditable infrastructure changes with human review before any resource is modified.
 
-**CodePipeline + Lambda (Invoke action)**: custom gates, smoke tests, notifications within the pipeline. Lambda checks external system, sends notification, or validates deployment.
-
-**CodePipeline + Elastic Beanstalk**: simplest deployment. Developer pushes code → pipeline deploys to Beanstalk environment automatically.
-
-**CodePipeline + S3 + CloudFront**: static site deployment. Build output → S3 → invalidate CloudFront cache via Lambda action.`,
+For static websites, a **S3 + CloudFront** pipeline builds the frontend with CodeBuild, uploads the artifacts to S3, and uses a Lambda Invoke action to invalidate the CloudFront cache — giving you an automated, zero-downtime frontend deployment workflow.`,
     },
   ],
 

@@ -11,122 +11,54 @@ export const ecsGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Components",
-      body: `**Cluster**: logical grouping of compute resources where tasks and services run. Can contain EC2 instances or Fargate capacity.
+      body: `ECS is built from four main abstractions. A **cluster** is the logical boundary where your containers run — it's a grouping of compute capacity (EC2 instances, Fargate capacity, or both) that tasks share. A **task definition** is the blueprint for your containers: it specifies which Docker image to run (from ECR or any registry), how much CPU and memory to allocate, which ports to expose, environment variables, secrets references, logging configuration, IAM roles, and volume mounts. A task definition is versioned — each change creates a new revision.
 
-**Task Definition**: blueprint for your container(s). Defines:
-- Docker image (from ECR, Docker Hub, or any registry)
-- CPU and memory (hard/soft limits)
-- Port mappings
-- Environment variables
-- IAM roles (task role + task execution role)
-- Logging configuration (awslogs, Splunk, Fluentd)
-- Secrets (from Secrets Manager or SSM Parameter Store)
-- Volume mounts
-- Health check
+A **task** is a running instance of a task definition. One task can run multiple containers that share networking and storage. A **service** is what keeps a specified number of tasks running continuously, replacing failed tasks automatically and integrating with an ALB for load balancing. Services support rolling updates (gradually replacing old tasks with new ones) and blue/green deployments via CodeDeploy.
 
-**Task**: a running instance of a task definition. One or more containers running together on the same host.
-
-**Service**: runs and maintains a specified number of tasks simultaneously. Handles task replacement if a task fails. Integrates with ALB target groups for load balancing. Supports rolling updates, blue/green deployments.
-
-**Container Registry (ECR)**: fully managed Docker image registry. Integrated with ECS for image pulls. Images scanned for vulnerabilities.`,
+**Amazon ECR** (Elastic Container Registry) is the fully managed Docker registry that stores your container images. ECS pulls images from ECR automatically using the task execution role's permissions. ECR supports image scanning for vulnerabilities on push and lifecycle policies to automatically expire old image versions.`,
     },
     {
       heading: "Launch Types: EC2 vs Fargate",
-      body: `**EC2 Launch Type**:
-- You manage EC2 instances in the cluster (AMI, instance type, auto scaling)
-- ECS Agent runs on each EC2 instance, registers with the cluster
-- Pay for EC2 instances whether tasks run or not
-- More control over the underlying hosts (SSH access, custom AMIs, GPU instances)
-- ECS-optimized AMI: pre-configured with ECS Agent and Docker
+      body: `The fundamental architectural choice in ECS is whether you manage the underlying compute infrastructure.
 
-**Fargate Launch Type**:
-- Serverless containers — no EC2 instances to manage
-- AWS manages the underlying infrastructure
-- Pay per vCPU and memory per second while task runs
-- Each task gets its own isolated VM slice (strong isolation)
-- No SSH into the host
-- Fargate Spot: up to 70% discount but tasks can be interrupted
-- **Use when**: variable traffic, don't want to manage EC2, microservices, batch jobs
+With the **EC2 launch type**, you provision and manage EC2 instances that form the cluster. Each instance runs the ECS Agent, which registers the instance with the cluster and accepts task placement decisions. You're responsible for instance sizing, OS patching, capacity management, and Auto Scaling Group configuration. You pay for the EC2 instances whether or not they're running tasks. In return, you get more control: SSH access to the hosts, support for GPU instances, custom AMIs, and flexibility in instance types and pricing models (including Spot Instances).
 
-**Comparison**:
-| | EC2 | Fargate |
-|--|-----|---------|
-| Infra management | You | AWS |
-| Cost model | Per instance | Per task (vCPU/mem) |
-| Isolation | Shared host | Per-task VM |
-| GPU | Yes | No |
-| SSH | Yes | No (use ECS Exec) |
-
-**ECS Exec**: run commands directly in a running Fargate or EC2 container via SSM Session Manager. Replaces the need for SSH.`,
+With **Fargate**, AWS manages all the underlying infrastructure. You define the task's CPU and memory requirements, and Fargate places it on managed infrastructure with strong isolation — each Fargate task runs in its own isolated VM slice, with no shared kernel between tasks. You pay per second of vCPU and memory used while the task is running, with no cost when it's stopped. Fargate eliminates operational overhead at the cost of less control and slightly higher per-unit cost. **Fargate Spot** offers up to 70% savings over standard Fargate pricing but tasks can be interrupted with 2 minutes of notice — appropriate for batch jobs and fault-tolerant workloads. When you need to access a running Fargate container for debugging, use **ECS Exec** (powered by SSM Session Manager) rather than SSH — it gives you interactive shell access without opening any ports.`,
     },
     {
       heading: "Networking Modes",
-      body: `**awsvpc** (recommended):
-- Each task gets its own ENI (Elastic Network Interface) with its own VPC IP
-- Full VPC networking features: security groups, VPC flow logs
-- Required for Fargate
-- Task security group can reference other security groups (not just CIDR)
-- More flexible than bridge/host modes
+      body: `ECS supports several networking modes, with the right choice depending on your launch type and requirements.
 
-**bridge** (EC2 only):
-- Docker's default bridge network
-- Ports mapped from container to host with dynamic port mapping
-- Load balancer uses dynamic port mapping (ALB registers container port via target group)
+**awsvpc** is the recommended mode and the only option for Fargate. In awsvpc mode, each task gets its own Elastic Network Interface (ENI) with a dedicated VPC IP address. This means each task has its own security group — you can apply fine-grained security rules per task rather than per host. The task's ENI can be referenced in security group rules by other services, and VPC flow logs capture all task-level traffic. awsvpc mode is more flexible and secure than the alternatives, and enables tasks to be targeted directly by other services.
 
-**host** (EC2 only):
-- Container shares host's network namespace
-- No port translation; container port = host port
-- Not supported by Fargate
+**bridge** mode (EC2 only) uses Docker's default bridge network. Containers bind to random host ports, and the ALB uses dynamic port mapping to route traffic to the correct container on the right port. This allows multiple instances of the same service to run on the same EC2 host without port conflicts. **host** mode (EC2 only) removes the Docker network layer entirely — the container shares the host's network namespace, so container port equals host port. This has the highest performance but prevents multiple containers from binding the same port on a host.
 
-**none**:
-- No external connectivity
-
-**Service Discovery**: ECS integrates with AWS Cloud Map for service discovery. Each task's ENI registered in a private DNS namespace. Other services discover using DNS (e.g. \`orders.myapp.local\`).`,
+ECS integrates with **AWS Cloud Map** for service discovery. When awsvpc mode is used, each task's IP is registered in a private DNS namespace, and other services can discover it by DNS name (like \`orders.myapp.local\`) rather than hardcoding IP addresses or using a load balancer.`,
     },
     {
       heading: "IAM Roles in ECS",
-      body: `ECS uses two distinct IAM roles — a common exam topic:
+      body: `ECS uses two distinct IAM roles for each task, and confusing them is one of the most common ECS exam topics.
 
-**Task Execution Role**: used by the ECS agent (not your application code) to:
-- Pull images from ECR (\`ecr:GetAuthorizationToken\`, \`ecr:BatchGetImage\`, etc.)
-- Write logs to CloudWatch Logs (\`logs:CreateLogGroup\`, \`logs:PutLogEvents\`)
-- Fetch secrets from Secrets Manager or SSM Parameter Store at task launch
+The **task execution role** is used by the ECS infrastructure on your behalf — not by your application code. ECS needs this role to pull your container image from ECR (which requires ECR authentication API calls), to write container logs to CloudWatch Logs, and to retrieve secrets from Secrets Manager or SSM Parameter Store at task launch time. Think of it as the "ECS plumbing" role — everything ECS needs to set up and run the task.
 
-**Task Role**: assumed by your application code running inside the container. Grants permissions for the app to call AWS services (DynamoDB, S3, SQS, etc.). Think of it like an EC2 instance profile but for containers.
+The **task role** is what your application code uses when it needs to call AWS services. If your container application reads from an S3 bucket, writes to a DynamoDB table, or publishes to an SQS queue, those calls use the task role. It's the equivalent of an EC2 instance profile, but for containers — the AWS SDK's credential chain automatically retrieves temporary credentials from the container metadata endpoint, so your code doesn't need to manage credentials explicitly.
 
-**Rule of thumb**: if the container needs to call AWS, give it a Task Role. If ECS needs to do something on behalf of your task (ECR pull, logging), that's the Task Execution Role.
-
-**ECS Task Role trust policy**: trusts \`ecs-tasks.amazonaws.com\`. Credentials accessed via IMDS-like endpoint inside the container.`,
+The rule of thumb: if the container's *application code* is making the AWS call, it needs a task role. If *ECS itself* needs to do something on behalf of your task (image pull, log delivery, secret injection), that's the task execution role. A container that writes to both CloudWatch Logs (via the awslogs driver) and DynamoDB would have the execution role (for logs) and a separate task role (for DynamoDB).`,
     },
     {
       heading: "Service Deployments & Auto Scaling",
-      body: `**Rolling Update** (default):
-- ECS replaces old tasks with new tasks gradually
-- Configure \`minimumHealthyPercent\` (floor) and \`maximumPercent\` (ceiling) during update
-- ALB health checks determine when new tasks are healthy before draining old ones
+      body: `ECS services support several deployment strategies for updating running tasks to a new image or task definition revision.
 
-**Blue/Green Deployment** (with CodeDeploy):
-- Two environments: blue (current) and green (new)
-- Traffic shifts from blue to green (all-at-once, linear, canary)
-- Instant rollback: shift traffic back to blue
-- Requires ALB target groups for each color
+The default **rolling update** replaces old tasks with new ones gradually. \`minimumHealthyPercent\` (default 100%) sets the floor — the percentage of desired tasks that must remain healthy during deployment. \`maximumPercent\` (default 200%) sets the ceiling — how many total tasks (old + new) can exist simultaneously. A minimumHealthyPercent of 50% and maximumPercent of 100% means ECS stops half the old tasks, then starts the new ones — useful when you're capacity-constrained. The ALB's health check path validates new tasks before draining connections from old ones.
 
-**ECS Service Auto Scaling**:
-- Scales number of tasks based on CloudWatch metrics
-- Scaling policies: target tracking (maintain metric at target), step scaling
-- Common metrics: ALBRequestCountPerTarget, CPUUtilization, MemoryUtilization
-- Works with Fargate and EC2
+**Blue/green deployment** via CodeDeploy requires two ALB target groups. ECS creates a new set of tasks (green), CodeDeploy waits for health checks, then shifts traffic from the original target group (blue) to the new one (green). Rollback is instantaneous: CodeDeploy shifts traffic back to the blue target group. This is the zero-downtime pattern for ECS, but it requires more setup than rolling updates.
 
-**EC2 Cluster Auto Scaling** (EC2 launch type):
-- Capacity Providers manage EC2 instance scaling
-- EC2 Auto Scaling Group attached to cluster
-- ECS scales instances up/down as task demand changes
-
-**Spot Capacity Provider**: use EC2 Spot Instances for cost savings. Handle interruptions with graceful shutdown (SIGTERM → SIGKILL).`,
+**ECS Service Auto Scaling** adjusts the number of running tasks based on metrics. Target tracking policies maintain a metric at a target value (like keeping CPU utilization at 50%). Step scaling responds to threshold breaches with fixed capacity changes. Common metrics include \`ALBRequestCountPerTarget\`, \`ECSServiceAverageCPUUtilization\`, and \`ECSServiceAverageMemoryUtilization\`. For EC2 clusters, **Capacity Providers** manage the EC2 Auto Scaling Group, scaling instances up as task demand increases and down when it decreases.`,
     },
     {
       heading: "Logging & Monitoring",
-      body: `**awslogs log driver**: sends container stdout/stderr to CloudWatch Logs. Configure in task definition:
+      body: `Container logs in ECS are sent to CloudWatch Logs using the **awslogs log driver**, configured in the task definition. Every line written to stdout or stderr by the container is forwarded to a CloudWatch Logs log group, with each container instance creating its own log stream.
+
 \`\`\`
 "logConfiguration": {
   "logDriver": "awslogs",
@@ -138,34 +70,23 @@ export const ecsGuide: ServiceGuide = {
 }
 \`\`\`
 
-**Container Insights**: enable per cluster for enhanced container-level metrics (task count, CPU, memory per container). Published to CloudWatch. Additional cost.
+**Container Insights** provides enhanced metrics for ECS at the container level — CPU and memory per container, not just per service. It must be enabled explicitly per cluster and adds cost, but gives you the visibility needed to right-size task CPU and memory allocations.
 
-**X-Ray**: run X-Ray daemon as a sidecar container. Set \`AWS_XRAY_DAEMON_ADDRESS\` in application container to point to sidecar.
+ECS emits events to **EventBridge** when tasks change state (starting, running, stopping, stopped). Creating an EventBridge rule that triggers a Lambda or SNS notification when a task stops unexpectedly is a simple and effective way to detect container failures in near-real-time. ECS service events are also available in the console, showing deployment progress, task placement failures, and scaling events.
 
-**Health Checks**: ECS supports two health check layers:
-- ELB health check: ALB probes task on health check path
-- Container health check: Docker HEALTHCHECK in task definition
-- ECS stops and replaces unhealthy tasks
-
-**ECS Service Events**: view deployment events, task placement failures, and service scaling events in the ECS console or CloudTrail.`,
+For distributed tracing, run the **X-Ray daemon** as a sidecar container in your task definition. The application container sends trace segments to the daemon over UDP (localhost:2000 in awsvpc mode, or the daemon's IP in bridge mode), and the daemon batches and forwards them to the X-Ray service.`,
     },
     {
       heading: "ECS with Other Services",
-      body: `**ECS + ECR**: store and pull images securely. Task Execution Role grants ECR pull permissions. Image scanning on push for vulnerability detection.
+      body: `ECS integrates tightly with other AWS services to form production-grade container architectures.
 
-**ECS + ALB**: service registers tasks in ALB target group. ALB routes traffic. Dynamic port mapping (bridge mode) or awsvpc mode with task-level security groups.
+**ECS + ECR** is the standard image management pattern. Task definitions reference ECR image URIs, and the task execution role's ECR permissions handle authentication automatically. ECR supports lifecycle policies to expire unused image tags, keeping storage costs in check, and vulnerability scanning to alert on security issues in your base images.
 
-**ECS + Secrets Manager / SSM**: reference secrets in task definition. ECS injects as environment variables at task launch. Task Execution Role needs GetSecretValue permission.
+**ECS + ALB** is how you expose ECS services to users. The service registers task ENIs or ports in an ALB target group. The ALB routes traffic, performs health checks, and drains connections from tasks during deployments. This combination handles thousands of requests per second with automatic failover.
 
-**ECS + CloudWatch**: awslogs driver for logs. CloudWatch metrics for alarms and auto scaling. Container Insights for enhanced metrics.
+**ECS + Secrets Manager / SSM Parameter Store** is the recommended way to inject credentials into containers. You reference secrets in the task definition's \`secrets\` block, and ECS fetches and decrypts them at task launch time, injecting them as environment variables. Your application reads standard environment variables — no SDK code needed. The task execution role needs \`secretsmanager:GetSecretValue\` or \`ssm:GetParameters\` permission.
 
-**ECS + CodePipeline / CodeDeploy**: CI/CD pipeline deploys new task definition revision to ECS service. CodeDeploy blue/green for zero-downtime deployments.
-
-**ECS + Step Functions**: Step Functions ECS RunTask.sync integration runs a containerized job and waits for completion. Common for batch ML processing, data transformation.
-
-**ECS + EventBridge**: ECS emits events to EventBridge for task state changes (RUNNING, STOPPED). Trigger Lambda or SNS on container failures.
-
-**ECS + X-Ray**: sidecar daemon container in task definition. App container sends traces to daemon (localhost:2000 with awsvpc or sidecar IP).`,
+**ECS + Step Functions** enables orchestrated batch processing. The Step Functions ECS RunTask.sync integration starts a container task and waits for it to complete before proceeding to the next state. This is the right pattern for containerized ML inference, data transformation, or any batch job that's too complex for Lambda but needs to be part of a workflow.`,
     },
   ],
 

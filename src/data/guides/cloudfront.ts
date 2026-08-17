@@ -11,115 +11,61 @@ export const cloudfrontGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Concepts",
-      body: `**Distribution**: the unit of CloudFront configuration. A distribution has a domain name (e.g. \`d111111abcdef8.cloudfront.net\`) or custom domain (with ACM certificate).
+      body: `A CloudFront **distribution** is the configuration unit — it has a domain name (like \`d111111abcdef8.cloudfront.net\`) or a custom domain backed by an ACM certificate. Within a distribution, you configure **origins** (where CloudFront fetches content when it's not cached) and **cache behaviors** (rules for how CloudFront handles requests matching a given URL pattern).
 
-**Origin**: where CloudFront fetches content from when not cached. Types:
-- S3 bucket (static files, images, videos)
-- ALB or EC2 (dynamic content)
-- API Gateway (REST APIs)
-- Any HTTP server (on-premises, third-party)
+Origins can be S3 buckets, Application Load Balancers, EC2 instances, API Gateway endpoints, or any HTTP server including on-premises systems. Cache behaviors are matched by path pattern — for example, you might send \`/api/*\` to an ALB origin with no caching, \`/images/*\` to S3 with a long TTL, and \`/*\` to S3 for everything else. Each behavior can have its own TTL settings, allowed HTTP methods, cache key configuration, and Lambda@Edge associations.
 
-**Cache Behavior**: rules for how CloudFront handles requests matching a URL pattern. Configure per path pattern (\`/api/*\`, \`/images/*\`, \`/\*\`). Settings: TTL, compression, allowed HTTP methods, cache keys, Lambda@Edge associations.
-
-**Edge Locations**: 400+ points of presence (PoPs) globally. Serve cached content and run Lambda@Edge.
-
-**Regional Edge Caches**: intermediate cache between edge locations and your origin. Larger cache capacity. Reduces hits going all the way to the origin.
-
-**Cache Hit Ratio**: percentage of requests served from cache. Higher = better (less origin load, lower latency). Improve by: consistent cache keys, appropriate TTLs, compressing responses.`,
+Content is served from **edge locations** — 400+ points of presence globally. Between edge locations and your origin sit **Regional Edge Caches**, which have larger storage capacity and absorb content that's too infrequently accessed for edge locations but would still benefit from caching rather than going all the way back to the origin. The key metric to optimize is your **cache hit ratio**: the higher it is, the less load your origin receives and the lower the latency for users.`,
     },
     {
       heading: "Caching & TTL",
-      body: `**Cache Key**: determines if a request is a cache hit. By default: the URL path. Customize to include query strings, headers, cookies.
+      body: `CloudFront's caching behavior is driven by two concepts: the **cache key** and the **TTL**. The cache key is the set of values that uniquely identify a cacheable response — by default it's just the URL path, but you can expand it to include specific query strings, headers, or cookies using a **Cache Policy**. Adding values to the cache key makes caching more precise but reduces the cache hit ratio, because more unique combinations must be stored separately.
 
-**Cache Policy**: CloudFront managed or custom policies controlling:
-- Which query strings to include in cache key
-- Which headers to include in cache key
-- Which cookies to include in cache key
-- TTL settings (min, max, default)
+The **Origin Request Policy** is a related concept that often causes confusion: it controls what CloudFront forwards to your origin (query strings, headers, cookies) *without* including them in the cache key. Use this for values your origin needs (like an auth header) that shouldn't cause cache fragmentation.
 
-**Origin Request Policy**: controls what CloudFront forwards to the origin (query strings, headers, cookies) *without* including them in the cache key. Use for auth headers you need at origin but shouldn't vary cache by.
+TTL settings give you fine-grained control over freshness. You set a default TTL (used when the origin sends no \`Cache-Control\` or \`Expires\` header), a minimum TTL (which overrides the origin if the origin sends a shorter TTL), and a maximum TTL (which caps what the origin can request). For CloudFront specifically, the \`Cache-Control: s-maxage\` directive overrides \`max-age\` — it lets you set a different cache duration for CDN caches versus browser caches.
 
-**TTL settings**:
-- Default TTL: time an object is cached if origin doesn't set Cache-Control/Expires
-- Minimum TTL: override short origin TTLs
-- Maximum TTL: cap origin's long TTLs
-
-**Cache-Control headers from origin**: CloudFront respects \`Cache-Control: max-age\`, \`Cache-Control: s-maxage\`, and \`Expires\`. \`s-maxage\` overrides \`max-age\` for CloudFront specifically.
-
-**Cache Invalidation**: force CloudFront to remove cached objects. Submit an invalidation request with path(s) (e.g. \`/images/*\`, \`/index.html\`). First 1,000 paths per month free; charged after. Propagates to all edge locations.`,
+When you need to force CloudFront to stop serving stale content immediately, submit a **cache invalidation** request specifying one or more paths (like \`/index.html\` or \`/images/*\`). The first 1,000 invalidation paths per month are free; beyond that, there's a per-path charge.`,
     },
     {
       heading: "Origins & Origin Groups",
-      body: `**S3 Origin**:
-- Static website hosting mode: use S3 website endpoint as origin (supports redirects/error docs)
-- S3 REST API mode: use S3 bucket as origin (use OAC for private bucket access)
-- **Origin Access Control (OAC)**: newer way to restrict S3 access to CloudFront only. Replaces Origin Access Identity (OAI). S3 bucket policy allows CloudFront service principal.
+      body: `S3 origins come in two modes. When you use the S3 website endpoint as your origin, CloudFront can leverage S3's static website features like redirects and custom error documents. When you use the S3 REST API endpoint as your origin (the standard mode), you should pair it with **Origin Access Control (OAC)** — the modern way to restrict bucket access to CloudFront only. OAC uses the CloudFront service principal in the bucket policy, replacing the older Origin Access Identity (OAI) approach.
 
-**Custom Origin** (ALB, EC2, HTTP server):
-- CloudFront connects via HTTP or HTTPS to your origin
-- Set origin protocol (HTTP/HTTPS)
-- Custom headers: add secret header that origin validates (ensures requests come through CloudFront, not directly)
+For custom origins (ALB, EC2, HTTP servers), CloudFront connects over HTTP or HTTPS. A useful security pattern is to add a secret custom header to all CloudFront requests and configure your origin to reject requests that don't include it — this ensures traffic can only reach your origin through CloudFront, not by hitting the origin directly.
 
-**Origin Groups**: configure two origins for failover. Primary + secondary. If primary returns 5xx or timeout, CloudFront retries on secondary. Use for high availability (S3 primary → different region S3 secondary).
+**Origin Groups** provide failover: you configure a primary origin and a secondary origin. If the primary returns a 5xx error or times out, CloudFront automatically retries the request on the secondary origin. This enables high-availability patterns like a primary S3 bucket in one region with a replica in another region as the failover origin.
 
-**Multiple Origins per Distribution**: route \`/api/*\` to ALB, \`/static/*\` to S3, \`/*\` to S3 default. Single CloudFront distribution handles all content types.`,
+A single distribution can have **multiple origins and multiple cache behaviors**, letting CloudFront act as the single entry point for an entire application — routing API calls to an ALB, static assets to S3, and everything else to a default S3 bucket, all from one CloudFront domain.`,
     },
     {
       heading: "Security",
-      body: `**HTTPS / TLS**: serve content over HTTPS. Use ACM (Certificate Manager) for SSL certificate. Certificate must be in **us-east-1** for CloudFront (even for global distributions).
+      body: `HTTPS is the foundation of CloudFront security. You attach an ACM certificate to the distribution to enable HTTPS. A critical detail: the ACM certificate for CloudFront **must be provisioned in the us-east-1 region**, regardless of where your distribution serves content or where your origins are located. This is one of the most common exam pitfalls.
 
-**Viewer Protocol Policy**:
-- Allow all (HTTP + HTTPS)
-- Redirect HTTP to HTTPS (recommended)
-- HTTPS only
+The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, or both from viewers. The recommended setting is "Redirect HTTP to HTTPS" — this ensures all traffic is encrypted without breaking clients that use HTTP.
 
-**Field-Level Encryption**: encrypt specific POST request fields at the edge using a public key. Only application with private key can decrypt. Use for sensitive data (credit card numbers).
+**AWS WAF** can be attached to a CloudFront distribution to evaluate requests at the edge before any content is served or any backend is called. WAF rules can block SQL injection and XSS patterns, rate-limit specific IPs or paths, and use geographic blocking. Running WAF at CloudFront is typically cheaper per request than running it at the load balancer level.
 
-**AWS WAF**: attach WAF web ACL to CloudFront distribution. Block/rate-limit by IP, geo, headers, body patterns. WAF rules evaluated at edge before content is served.
+**Signed URLs** grant time-limited, optionally IP-restricted access to a single specific file. They're the right choice for content like video downloads or generated reports that should only be accessible for a limited time. **Signed Cookies** grant the same kind of time-limited access but to multiple files matching a path pattern — useful for protecting an entire content section without modifying every URL. Both use **Trusted Key Groups** to specify which key pairs can generate valid signatures.
 
-**Geo Restriction (Geo Blocking)**: restrict content to specific countries (allowlist) or block specific countries (blocklist). Coarse-grained; uses IP-based geo-lookup.
-
-**Signed URLs**: grant time-limited access to a specific private file. Useful for: paid content, download links that expire. URL contains signature, expiry, and IP restrictions.
-
-**Signed Cookies**: grant time-limited access to multiple files matching a pattern. Set a cookie instead of modifying each URL. Useful for protecting an entire section of a site.
-
-**Trusted Key Groups**: define which key pairs can sign URLs/cookies. Replaces the older CloudFront Key Pairs approach.`,
+**Geo Restriction** lets you allow or block content delivery to specific countries using IP-based geolocation. It's coarse-grained and should not be relied upon as a security control, but it works for compliance requirements that prohibit serving content in certain jurisdictions. **Field-Level Encryption** goes further — it encrypts specific POST request fields at the edge using a public key, so only the application with the private key can decrypt them, even from CloudFront's perspective.`,
     },
     {
       heading: "Lambda@Edge & CloudFront Functions",
-      body: `**Lambda@Edge**: run Lambda functions at edge locations triggered by CloudFront events.
+      body: `CloudFront lets you run code at the edge to customize request and response processing without sending requests back to your origin. Two execution environments are available, suited to different complexity levels.
 
-**4 trigger points**:
-1. *Viewer Request*: when CloudFront receives request from user (before cache check)
-2. *Viewer Response*: before CloudFront forwards response to user (after cache hit)
-3. *Origin Request*: when CloudFront forwards request to origin (on cache miss)
-4. *Origin Response*: when CloudFront receives response from origin (before caching)
+**Lambda@Edge** runs full Lambda functions at edge locations. Your Lambda functions are deployed to us-east-1 and CloudFront replicates them to all edge locations automatically. Lambda@Edge can trigger at four points in the request lifecycle: **Viewer Request** (when CloudFront receives a request from the user, before checking the cache), **Origin Request** (when CloudFront is about to forward a cache miss to the origin), **Origin Response** (when CloudFront receives the response from the origin, before caching it), and **Viewer Response** (before CloudFront sends the response to the user). The Origin Request and Origin Response triggers are particularly powerful because they can modify what's sent to and received from the origin. Lambda@Edge supports complex logic, external API calls, and larger payloads, but it has constraints: no VPC access, no EFS, limited memory (128 MB for viewer triggers), and limited package size.
 
-**Use cases**: A/B testing, auth token validation, URL rewriting/redirects, adding security headers, personalizing content at edge, device detection.
-
-**Constraints**: Lambda@Edge runs in us-east-1 but is replicated to all edges. No VPC access, no EFS, limited memory (128MB viewer, 128MB origin), limited package size.
-
-**CloudFront Functions**: lightweight JavaScript functions running at edge. Faster and cheaper than Lambda@Edge. Only at Viewer Request and Viewer Response events. Nanosecond latency, 2MB memory limit. Good for: simple URL rewrites, HTTP header manipulation, request normalization.
-
-**When to use which**:
-- Simple header manipulation → CloudFront Functions
-- Complex auth, A/B with external state, large computation → Lambda@Edge`,
+**CloudFront Functions** are lighter-weight JavaScript functions that run only at the Viewer Request and Viewer Response stages. They execute in nanoseconds, support 2 MB of memory, and are significantly cheaper than Lambda@Edge. They're the right choice for simple transformations: URL normalization, HTTP header manipulation, request routing decisions, and A/B testing redirects. Use CloudFront Functions when simplicity and speed matter; use Lambda@Edge when you need the Origin Request/Response triggers or more complex logic.`,
     },
     {
       heading: "CloudFront with Other Services",
-      body: `**CloudFront + S3**: serve static websites from S3 via CloudFront. Use OAC to keep bucket private. Set appropriate cache TTLs. Use S3 versioning + cache invalidation for deployments.
+      body: `The most common CloudFront integration is **CloudFront + S3**, which is the standard pattern for serving static websites and application assets globally. Use OAC to keep the S3 bucket private (blocking direct public access) and let CloudFront be the only path to the content. Combine with S3 versioning and cache invalidation for zero-downtime deployments.
 
-**CloudFront + API Gateway**: put CloudFront in front of API Gateway to add WAF, geo restriction, caching of API responses, and custom domain management. API Gateway regional endpoint + CloudFront is a common pattern.
+**CloudFront + API Gateway** is useful when you want to add WAF protection, geographic restrictions, or edge caching to an API that's otherwise served from a single region. A Regional API Gateway endpoint is the correct type to use behind CloudFront — Edge-Optimized API Gateway already uses CloudFront internally, so putting another CloudFront in front of it is redundant.
 
-**CloudFront + ALB**: CloudFront in front of ALB for global acceleration. Add custom header from CloudFront → ALB security group only allows CloudFront IPs (or validates custom header). Protects origin from direct access.
+**CloudFront + ALB** follows a security pattern: CloudFront sends a secret custom header, and the ALB is configured with a WAF rule or security group rule that only accepts traffic including that header. This prevents attackers from bypassing CloudFront by hitting the ALB directly. Because CloudFront's IP ranges are published, you could also restrict the ALB's security group to CloudFront's IP ranges.
 
-**CloudFront + Lambda@Edge**: process requests at edge — auth validation, A/B testing, content personalization — without going back to origin.
-
-**CloudFront + ACM**: free TLS certificates from ACM. Certificate must be in us-east-1. CloudFront handles HTTPS termination at edge.
-
-**CloudFront + WAF**: block malicious traffic at the CDN layer before it reaches origin. Protects against OWASP Top 10, bots, DDoS.
-
-**CloudFront + Route 53**: use Route 53 ALIAS record pointing to CloudFront distribution domain. Enables custom domain (www.example.com) for distribution.`,
+**CloudFront + Route 53** enables custom domains through a Route 53 ALIAS record pointing to the CloudFront distribution's domain name. ALIAS records (unlike CNAMEs) work at the zone apex, so you can use a bare domain like \`example.com\` rather than \`www.example.com\`.`,
     },
   ],
 

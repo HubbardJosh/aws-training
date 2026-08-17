@@ -11,31 +11,15 @@ export const codebuildGuide: ServiceGuide = {
   sections: [
     {
       heading: "How CodeBuild Works",
-      body: `**Build Project**: configuration defining how CodeBuild runs a build. Specifies:
-- Source: CodeCommit, GitHub, S3, Bitbucket
-- Environment: OS, runtime, compute type
-- buildspec.yml location
-- Artifacts: where to put output
-- Cache: S3 or local cache for dependencies
-- VPC: if build needs access to private resources
-- Service role: IAM role the build runs as
+      body: `A **build project** is the configuration that tells CodeBuild how to run a build. It specifies where your source code lives (CodeCommit, GitHub, Bitbucket, or S3), which compute environment to use, where your buildspec lives, where to put build artifacts, and what IAM role the build runs as. When you trigger a **build run**, CodeBuild starts a fresh container, fetches your source, executes the buildspec, and terminates — leaving no persistent state between runs.
 
-**Build Run**: a single execution of a build project. Each run starts a fresh container, runs the buildspec, and terminates.
+Billing is per build minute, based on the compute type you select. Build types range from small (3 GB RAM, 2 vCPU) through medium (7 GB) and large (15 GB) to extra-large configurations for compute-intensive workloads, as well as ARM-based options. Since each build starts a new container and you're billed only while it runs, there are no idle costs — a significant advantage over maintaining dedicated build servers.
 
-**Pay per minute**: billed per build minute based on compute type. No idle costs.
-
-**Compute types**:
-- BUILD_GENERAL1_SMALL: 3 GB RAM, 2 vCPU
-- BUILD_GENERAL1_MEDIUM: 7 GB RAM, 4 vCPU
-- BUILD_GENERAL1_LARGE: 15 GB RAM, 8 vCPU
-- BUILD_GENERAL1_XLARGE / 2XLARGE: for heavy workloads
-- ARM-based: ARM_LAMBDA_1GB, etc.
-
-**Concurrent builds**: by default, builds run concurrently. Configure concurrency limit per project or account.`,
+Multiple builds can run concurrently by default. CodeBuild scales automatically to handle parallel builds from multiple developers or pipeline stages. You can configure concurrency limits per project or per account to prevent runaway build costs.`,
     },
     {
       heading: "buildspec.yml",
-      body: `The **buildspec.yml** is a YAML file at the root of your source that defines build commands.
+      body: `The **buildspec.yml** file at the root of your repository is the instruction set CodeBuild follows. It defines environment variables, build phases, artifact packaging, and caching.
 
 \`\`\`yaml
 version: 0.2
@@ -79,35 +63,20 @@ cache:
     - node_modules/**/*
 \`\`\`
 
-**Phases**: install → pre_build → build → post_build. If any phase fails, subsequent phases don't run.
-
-**finally block**: commands that always run, even if the phase fails (for cleanup).
-
-**env.secrets-manager**: fetch secrets at build time. Service role needs GetSecretValue.
-
-**runtime-versions**: specify language runtime version (nodejs, python, java, etc.).`,
+Phases run in order: \`install\` → \`pre_build\` → \`build\` → \`post_build\`. If any phase fails, subsequent phases are skipped — but a \`finally\` block within a phase always runs even on failure, which is useful for cleanup. The \`env.parameter-store\` and \`env.secrets-manager\` sections fetch values from SSM or Secrets Manager at build time and inject them as environment variables, keeping secrets out of source control. The \`runtime-versions\` block under \`install\` specifies which language runtime version to use for the build.`,
     },
     {
       heading: "Environment & Images",
-      body: `**Managed images**: AWS-provided Docker images with common runtimes pre-installed:
-- aws/codebuild/standard:7.0 (Ubuntu 22.04, latest runtimes)
-- Includes: Node.js, Python, Java, Go, Ruby, .NET, PHP, Docker
+      body: `CodeBuild's managed images come pre-installed with common runtimes and tools. The \`aws/codebuild/standard:7.0\` image (Ubuntu 22.04) includes Node.js, Python, Java, Go, Ruby, .NET, PHP, and Docker — it's the standard choice for most builds. When you need a tool or runtime version not available in managed images, you can specify a custom Docker image from ECR or Docker Hub and CodeBuild will use it as the build environment.
 
-**Custom images**: use your own Docker image from ECR or Docker Hub. Full control over the build environment. Required for specialized tools or specific versions not in managed images.
+**Docker builds** require a special consideration: to run the Docker daemon inside a CodeBuild container (Docker-in-Docker), you must enable **privileged mode** in the build project's environment settings. Without privileged mode, Docker commands will fail. The CodeBuild service role needs ECR permissions to pull your base images and push built images.
 
-**Environment variables**:
-- Plaintext: set directly in project or buildspec (visible in logs/console)
-- SSM Parameter Store: reference as \`/myapp/param-name\` in env.parameter-store
-- Secrets Manager: reference as \`SecretName:json-key\` in env.secrets-manager
-- Variables from CodePipeline: CodePipeline can pass variables to CodeBuild actions
-
-**Docker support**: CodeBuild supports Docker builds. Enable privileged mode in the build environment (required to run Docker daemon inside build container). Push images to ECR using the build service role.
-
-**Local builds**: run CodeBuild builds locally using CodeBuild Local. Useful for debugging buildspec without committing and triggering a build.`,
+Environment variables can be set at three levels: **plaintext** variables embedded in the project or buildspec (visible in the console — never use for secrets), **SSM Parameter Store** references (fetched securely at build time), and **Secrets Manager** references (also fetched at build time). CodePipeline can also pass variables to CodeBuild actions, enabling dynamic per-execution configuration. For debugging buildspec issues locally before committing, CodeBuild Local lets you run builds on your development machine using Docker.`,
     },
     {
       heading: "Artifacts & Cache",
-      body: `**Artifacts**: output files from a successful build. Uploaded to S3. Defined in buildspec:
+      body: `Build **artifacts** are the files CodeBuild produces — a JAR, a ZIP, a compiled binary, or a set of static files. You define which files to include in the artifacts section of your buildspec, and CodeBuild uploads them to S3 on success. The \`base-directory\` setting lets you specify a subdirectory as the artifact root so you don't accidentally include source files in the output. You can also configure **secondary artifacts** to produce multiple distinct output packages from a single build run — useful for producing a test report alongside the deployment package.
+
 \`\`\`yaml
 artifacts:
   files:
@@ -117,51 +86,27 @@ artifacts:
   name: build-$(date +%Y-%m-%d)
 \`\`\`
 
-**Secondary artifacts**: produce multiple artifact outputs from a single build (e.g. test reports, build artifacts, lambda packages).
+**Caching** dramatically reduces build times by preserving dependency directories between builds. S3 caching uploads your \`node_modules\` or \`~/.m2\` directory to S3 at the end of a build and downloads it at the start of the next — slower because it crosses the network, but persistent across different build hosts. Local caching is faster but only works when the same build host is reused across sequential builds.
 
-**S3 artifacts encryption**: artifacts can be encrypted with KMS.
-
-**Cache**: store dependencies between builds to reduce build time.
-- **S3 cache**: upload/download dependency directories to S3 between builds. Slower but persistent across different build hosts.
-- **Local cache**: faster, stored on the build host. Useful for same-host sequential builds. Types: LOCAL_SOURCE_CACHE, LOCAL_DOCKER_LAYER_CACHE, LOCAL_CUSTOM_CACHE.
-
-**Test reports**: CodeBuild can publish test results (JUnit XML format) to CodeBuild test reports. View pass/fail, trends, test duration in console.`,
+**Test reports** give you a visual view of test results in the CodeBuild console. If your test framework produces JUnit XML output, configure CodeBuild to collect it and you get pass/fail counts, trend charts, and individual test durations over time — without needing a separate test reporting tool.`,
     },
     {
       heading: "VPC & Security",
-      body: `**VPC access**: run CodeBuild in a VPC to access resources in private subnets (RDS, ElastiCache, internal services). Configure VPC, subnets, and security groups on the build project.
+      body: `By default, CodeBuild builds run outside any VPC. If your build needs to access resources in private subnets — a private RDS database for integration tests, an internal npm registry, or an ElastiCache cluster — configure the build project to run inside a VPC by specifying the VPC, subnets, and security groups. CodeBuild creates ENIs in your subnets for the duration of the build.
 
-**Service role**: IAM role assumed by the CodeBuild service. Must grant permissions for:
-- S3: artifact uploads, cache
-- CloudWatch Logs: build logs
-- ECR: pull base images, push built images
-- Secrets Manager / SSM: fetch secrets/parameters
-- Any AWS service the build interacts with
+The **service role** is the IAM role that CodeBuild assumes during the build. It needs permissions for everything the build does: S3 (to read source and write artifacts), CloudWatch Logs (to stream build output), ECR (to pull base images and push built images), and any other AWS service the build interacts with. Secrets Manager and SSM permissions are needed if the buildspec references secrets or parameters. Use least-privilege principles — only grant the permissions actually needed.
 
-**Security best practices**:
-- Avoid storing secrets in plaintext environment variables — use SSM or Secrets Manager
-- Use least-privilege service roles
-- Enable CloudTrail for build audit
-
-**CodeBuild + Secrets Manager**: reference secrets in buildspec env section. Secrets injected as environment variables at build time. Not visible in plain text in the console.
-
-**Build badges**: public status badge (passing/failing) embeddable in README files. Shows current build status.`,
+Storing secrets as plaintext environment variables is a common mistake. They're visible in the CodeBuild console and in CloudWatch Logs output. Instead, always reference secrets through \`env.secrets-manager\` or \`env.parameter-store\` in the buildspec, which fetches them at build time and doesn't expose the values in logs. Enable CloudTrail to audit which builds ran, who triggered them, and what configuration was used.`,
     },
     {
       heading: "CodeBuild with Other Services",
-      body: `**CodeBuild + CodePipeline**: CodePipeline invokes CodeBuild in the Build stage. CodePipeline passes source artifact as input; CodeBuild returns build artifact as output.
+      body: `In a typical CI/CD pipeline, **CodePipeline invokes CodeBuild** in the Build stage. CodePipeline passes the source artifact (the code from the Source stage) as input, CodeBuild compiles and tests it, and the output artifact (the deployment package) flows to the Deploy stage. This separation of concerns — CodePipeline orchestrates, CodeBuild builds — is the standard pattern for AWS-native CI/CD.
 
-**CodeBuild + ECR**: build Docker images and push to ECR. Enable privileged mode. Service role needs ECR push permissions (\`ecr:BatchCheckLayerAvailability\`, \`ecr:InitiateLayerUpload\`, \`ecr:PutImage\`, etc.).
+**CodeBuild + ECR** is the standard pattern for containerized applications. The build compiles code, runs tests, builds a Docker image, and pushes it to ECR — all in one build run. The \`docker push\` command uses the CodeBuild service role's ECR permissions, so no separate credentials management is needed.
 
-**CodeBuild + GitHub**: connect via CodeStar connection or OAuth. Webhook triggers build on push/PR. Can run tests on PRs before merge.
+**CodeBuild + GitHub** via CodeStar connections or OAuth enables builds triggered by pull requests. This lets you run tests automatically on every PR, blocking merges if tests fail. Build status is reported back to GitHub's PR interface.
 
-**CodeBuild + CloudWatch Logs**: all build output streamed to CloudWatch Logs in real time. Log group per build project. Useful for debugging failed builds.
-
-**CodeBuild + S3**: pull source from S3 (ZIP file); push artifacts to S3.
-
-**CodeBuild + Lambda**: build Lambda deployment packages. Zip code + dependencies → upload to S3 → deploy via CodeDeploy or SAM.
-
-**CodeBuild + SonarQube / third-party**: install and run static analysis tools in build phases. Fail build if quality gate fails.`,
+All CodeBuild build output is streamed to **CloudWatch Logs** in real time. Each build project gets its own log group, and each build run gets its own log stream. This makes debugging a failed build straightforward — you can tail the logs from the console or CLI, or use Logs Insights to search across multiple build runs.`,
     },
   ],
 
