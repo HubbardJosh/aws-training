@@ -138,6 +138,7 @@ export default function StudyScreen() {
                 navigation.navigate("FlashCard", {
                   domain: selectedDomain,
                   difficulty: selectedDifficulty,
+                  service,
                 })
               }
               activeOpacity={0.8}

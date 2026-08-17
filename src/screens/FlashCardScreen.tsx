@@ -34,7 +34,7 @@ function shuffle<T>(arr: T[]): T[] {
 export default function FlashCardScreen() {
   const navigation = useNavigation();
   const route = useRoute<Route>();
-  const { domain, difficulty } = route.params;
+  const { domain, difficulty, service } = route.params;
 
   const [cards, setCards] = useState<FlashCard[]>([]);
   const [index, setIndex] = useState(0);
@@ -53,7 +53,8 @@ export default function FlashCardScreen() {
       const domainMatch = domain === "all" || c.domain === (domain as Domain);
       const diffMatch =
         difficulty === "all" || c.difficulty === (difficulty as Difficulty);
-      return domainMatch && diffMatch;
+      const serviceMatch = !service || c.service === service;
+      return domainMatch && diffMatch && serviceMatch;
     });
     setCards(shuffle(filtered));
     loadProgress().then(setProgress);
@@ -170,7 +171,7 @@ export default function FlashCardScreen() {
           <Text style={styles.headerCount}>
             {index + 1} / {cards.length}
           </Text>
-          <Text style={styles.headerDomain}>{meta.label}</Text>
+          <Text style={styles.headerDomain}>{service ?? meta.label}</Text>
         </View>
         <View style={styles.sessionStats}>
           <Ionicons name="checkmark-circle" size={16} color={colors.correct} />

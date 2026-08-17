@@ -1186,4 +1186,2003 @@ export const flashcards: FlashCard[] = [
     ],
     tags: ["appconfig", "ssm", "configuration", "feature-flags", "rollback"],
   },
+
+  // --- NEW: Amazon SNS ---
+  {
+    id: "fc-sns-003",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is an SNS subscription filter policy and where is it applied?",
+    answer:
+      "A filter policy is a JSON document attached to a subscription (not the topic) that specifies which MessageAttribute values must match for SNS to deliver the message to that subscriber. Subscribers with no filter policy receive all messages.",
+    keyPoints: [
+      "Filter policies are per-subscription, not per-topic",
+      "Filtering is based on MessageAttributes, not the message body",
+      "Supports string match, prefix, numeric range, exists, anything-but operators",
+      "Reduces unnecessary deliveries and downstream processing cost",
+    ],
+    tags: ["sns", "filtering", "pub-sub", "message-attributes"],
+  },
+  {
+    id: "fc-sns-004",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "medium",
+    question: "What SNS delivery protocols and endpoint types are supported?",
+    answer:
+      "SNS can deliver to: SQS, Lambda, HTTP/HTTPS endpoints, email, email-JSON, SMS, mobile push (APNS, GCM/FCM, ADM), and Kinesis Data Firehose. Each subscription has its own protocol and endpoint. Failed HTTP/HTTPS deliveries can be retried with a delivery policy.",
+    keyPoints: [
+      "SQS and Lambda are the most common programmatic targets",
+      "SMS supports transactional and promotional message types",
+      "Mobile push requires platform application and device token",
+      "Delivery policies control retry behavior for HTTP endpoints",
+    ],
+    tags: ["sns", "subscriptions", "protocols", "mobile-push"],
+  },
+  {
+    id: "fc-sns-005",
+    service: "Amazon SNS",
+    domain: "security",
+    difficulty: "medium",
+    question:
+      "How do you secure an SNS topic with encryption and access control?",
+    answer:
+      "Enable SSE (server-side encryption) using a KMS key on the topic. Control access with topic resource policies (who can publish/subscribe). Combine with IAM policies on publishers. Use VPC endpoints to keep traffic off the public internet.",
+    keyPoints: [
+      "SSE encrypts messages at rest using KMS",
+      "Topic resource policy grants cross-account publish rights",
+      "Enforce HTTPS-only delivery in the topic policy",
+      "VPC endpoint for SNS keeps traffic within AWS network",
+    ],
+    tags: ["sns", "encryption", "kms", "security", "access-control"],
+  },
+  {
+    id: "fc-sns-006",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "What is SNS message archiving and analytics with Kinesis Firehose?",
+    answer:
+      "SNS supports Kinesis Data Firehose as a subscription endpoint, enabling durable archiving of all SNS messages to S3, Redshift, or OpenSearch. This allows analytics without custom consumers. The Firehose subscription receives the raw SNS message payload.",
+    keyPoints: [
+      "SNS → Kinesis Firehose → S3/Redshift/OpenSearch for analytics",
+      "Enables audit trail of all published messages",
+      "No custom Lambda needed for archiving",
+      "Message format includes SNS metadata wrapper around payload",
+    ],
+    tags: ["sns", "firehose", "kinesis", "analytics", "archiving"],
+  },
+
+  // --- NEW: Amazon Kinesis ---
+  {
+    id: "fc-kinesis-003",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is Kinesis Enhanced Fan-Out and when should you use it?",
+    answer:
+      "Enhanced Fan-Out provides a dedicated 2 MB/s throughput per consumer per shard using a push model (HTTP/2). Standard GetRecords shares 2 MB/s across all consumers on a shard. Use Enhanced Fan-Out when you have multiple consumers competing for shard throughput.",
+    keyPoints: [
+      "Standard: 2 MB/s shared across all consumers on a shard",
+      "Enhanced Fan-Out: 2 MB/s per registered consumer per shard",
+      "Push-based via HTTP/2 SubscribeToShard API",
+      "Higher cost than standard GetRecords polling",
+    ],
+    tags: ["kinesis", "enhanced-fan-out", "consumers", "throughput"],
+  },
+  {
+    id: "fc-kinesis-004",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does Kinesis Data Firehose transform data before delivery?",
+    answer:
+      "Firehose can invoke a Lambda function to transform records (format conversion, enrichment) before writing to the destination. It also supports built-in format conversions (JSON to Parquet/ORC) using Glue schemas. Failed records can be delivered to a separate S3 prefix.",
+    keyPoints: [
+      "Lambda transformation: invoke custom code per batch",
+      "Built-in conversion: JSON → Parquet/ORC using Glue Data Catalog",
+      "Buffer hints control batch size (1–128 MB) and interval (60–900s)",
+      "S3 backup captures records before or after transformation",
+    ],
+    tags: ["kinesis", "firehose", "transformation", "lambda", "glue"],
+  },
+  {
+    id: "fc-kinesis-005",
+    service: "Amazon Kinesis",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question:
+      "How do you troubleshoot ProvisionedThroughputExceededException in Kinesis?",
+    answer:
+      "This error occurs when write or read rate exceeds shard limits. Solutions: increase shard count (resharding), use randomized partition keys to distribute load evenly, implement exponential backoff with jitter in the producer, or use Kinesis Producer Library (KPL) which handles aggregation and retries.",
+    keyPoints: [
+      "Write limit: 1 MB/s or 1000 records/s per shard",
+      "Read limit: 2 MB/s per shard (shared across consumers)",
+      "Hot shards from low-cardinality partition keys",
+      "KPL aggregates small records and handles retries automatically",
+    ],
+    tags: ["kinesis", "throttling", "troubleshooting", "resharding", "kpl"],
+  },
+  {
+    id: "fc-kinesis-006",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Kinesis Data Streams retention and how does it affect consumers?",
+    answer:
+      "Default retention is 24 hours; extended to 7 days (standard) or 365 days (long-term) for additional cost. Consumers can replay data from any point within the retention window using sequence numbers or timestamps. Expired records are permanently deleted.",
+    keyPoints: [
+      "Default: 24 hours; max: 365 days (extra cost)",
+      "Replay from any offset within retention window",
+      "Use shard iterator types: TRIM_HORIZON (oldest), LATEST, AT_TIMESTAMP",
+      "Extended retention enables disaster recovery and late consumers",
+    ],
+    tags: ["kinesis", "retention", "replay", "shard-iterator"],
+  },
+
+  // --- NEW: AWS Step Functions ---
+  {
+    id: "fc-stepfn-003",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "hard",
+    question: "How does Step Functions handle errors and retries?",
+    answer:
+      "Each state can define Retry and Catch blocks. Retry: specify ErrorEquals, IntervalSeconds, MaxAttempts, BackoffRate. Catch: catch specific errors and transition to a fallback state. If no Catch matches after retries exhaust, the execution fails. Error names: States.ALL, States.Timeout, States.TaskFailed, etc.",
+    keyPoints: [
+      "Retry: exponential backoff with BackoffRate multiplier",
+      "Catch: fallback state for unrecoverable errors",
+      "States.ALL catches any error (use as last resort)",
+      "States.Timeout occurs when task exceeds TimeoutSeconds",
+    ],
+    tags: ["step-functions", "error-handling", "retry", "catch"],
+  },
+  {
+    id: "fc-stepfn-004",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is the Step Functions Map state and how does it work?",
+    answer:
+      "The Map state runs the same set of steps for each item in an array. It iterates over a JSON array (from input or a static list) and runs a sub-workflow for each element in parallel (up to MaxConcurrency). Use MaxConcurrency=1 for sequential iteration.",
+    keyPoints: [
+      "Replaces looping patterns and recursive Lambda calls",
+      "MaxConcurrency controls parallelism (0 = unlimited)",
+      "Each iteration is an independent execution with its own input",
+      "Results collected into output array",
+    ],
+    tags: ["step-functions", "map-state", "parallel", "iteration"],
+  },
+  {
+    id: "fc-stepfn-005",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What are Step Functions service integrations and what is the difference between request-response and .sync patterns?",
+    answer:
+      "Step Functions can call AWS services directly without Lambda. Request-Response: submit task and move to next state immediately (fire-and-forget). .sync: wait for job/task to complete (e.g., ECS task, Glue job, Batch job). .waitForTaskToken: pause until external system calls SendTaskSuccess/SendTaskFailure.",
+    keyPoints: [
+      "request-response: async fire-and-forget",
+      ".sync: waits for AWS service job to complete",
+      ".waitForTaskToken: pause for callback from any system",
+      "Reduces need for polling Lambda between steps",
+    ],
+    tags: [
+      "step-functions",
+      "service-integrations",
+      "sync",
+      "wait-for-task-token",
+    ],
+  },
+  {
+    id: "fc-stepfn-006",
+    service: "AWS Step Functions",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you debug and monitor Step Functions executions?",
+    answer:
+      "View execution history in the Step Functions console showing each state transition with input/output. Enable logging to CloudWatch Logs for Express workflows (Standard logs to execution history by default). Use X-Ray tracing for end-to-end visibility across downstream calls.",
+    keyPoints: [
+      "Standard workflows: full execution history stored for 90 days",
+      "Express workflows: must use CloudWatch Logs for visibility",
+      "X-Ray traces across Lambda, DynamoDB, SQS calls within workflow",
+      "Execution history shows exact input/output for each state",
+    ],
+    tags: ["step-functions", "monitoring", "cloudwatch", "x-ray", "debugging"],
+  },
+
+  // --- NEW: Amazon Cognito ---
+  {
+    id: "fc-cognito-003",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What are Cognito User Pool Lambda triggers and when would you use them?",
+    answer:
+      "Lambda triggers hook into authentication flows: Pre Sign-up (validate/deny), Post Confirmation, Pre Authentication, Post Authentication, Pre Token Generation (customize tokens), Custom Authentication (passwordless flows), User Migration (migrate from legacy). Triggered synchronously; errors halt the flow.",
+    keyPoints: [
+      "Pre Token Generation: add/remove claims in ID/access tokens",
+      "Custom Authentication: challenge-response for passwordless (OTP, CAPTCHA)",
+      "User Migration: transparent migration from legacy user store",
+      "Triggers run synchronously; Lambda timeout affects auth latency",
+    ],
+    tags: ["cognito", "lambda-triggers", "authentication", "customization"],
+  },
+  {
+    id: "fc-cognito-004",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "medium",
+    question: "How does Cognito Hosted UI and OAuth 2.0 flow work?",
+    answer:
+      "Cognito Hosted UI provides a pre-built sign-in/sign-up web page. Supports Authorization Code grant (recommended), Implicit grant, and Client Credentials grant. After sign-in, Cognito redirects to your callback URL with an authorization code, which your app exchanges for tokens via the /oauth2/token endpoint.",
+    keyPoints: [
+      "Authorization Code flow: more secure, code exchanged server-side",
+      "PKCE: required for public clients (mobile/SPA) with auth code flow",
+      "App client scopes control what the access token can access",
+      "Callback URLs must be pre-registered in the app client settings",
+    ],
+    tags: ["cognito", "hosted-ui", "oauth2", "authorization-code", "pkce"],
+  },
+  {
+    id: "fc-cognito-005",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "medium",
+    question:
+      "What is Cognito Identity Pool role mapping and how does it work?",
+    answer:
+      "Identity Pools map authenticated and unauthenticated users to IAM roles. You can define rules to assign different roles based on token claims (e.g., group membership). The STS AssumeRoleWithWebIdentity call is made on behalf of the user, returning temporary AWS credentials.",
+    keyPoints: [
+      "Default authenticated role and unauthenticated (guest) role",
+      "Rule-based mapping: assign roles based on claim values",
+      "Credentials scoped to role's IAM permissions",
+      "Enhanced flow: Cognito calls STS automatically; basic flow: you call STS",
+    ],
+    tags: ["cognito", "identity-pool", "iam-roles", "sts", "role-mapping"],
+  },
+  {
+    id: "fc-cognito-006",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "easy",
+    question: "What MFA options does Cognito User Pool support?",
+    answer:
+      "Cognito supports TOTP (Time-based One-Time Password via authenticator apps) and SMS-based MFA. MFA can be set to off, optional (user-configured), or required (all users). Adaptive authentication can automatically require MFA based on risk signals.",
+    keyPoints: [
+      "TOTP: Google Authenticator, Authy; more secure than SMS",
+      "SMS MFA requires an SNS-enabled phone number",
+      "Adaptive authentication: risk-based MFA challenges",
+      "MFA can be required, optional, or disabled per user pool",
+    ],
+    tags: ["cognito", "mfa", "totp", "sms", "security"],
+  },
+
+  // --- NEW: AWS KMS ---
+  {
+    id: "fc-kms-003",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What is KMS key policy and how does it differ from IAM policy for KMS access?",
+    answer:
+      "Every KMS key has a key policy (resource-based). Unlike other AWS services, IAM policies alone cannot grant access to KMS keys — the key policy must explicitly allow the principal or allow IAM to control access. The default key policy grants the AWS account root full access, enabling IAM policies to delegate.",
+    keyPoints: [
+      "Key policy must allow access; IAM alone is not sufficient",
+      "Default key policy: allows root → enables IAM delegation",
+      "Key grants: temporary programmatic access without policy changes",
+      "Cross-account: key policy must allow external account; IAM in target account delegates to principals",
+    ],
+    tags: ["kms", "key-policy", "iam", "access-control", "security"],
+  },
+  {
+    id: "fc-kms-004",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "medium",
+    question: "What is KMS key rotation and how does it work?",
+    answer:
+      "Automatic key rotation generates new cryptographic material annually (365 days) for customer managed keys. The key ID and ARN remain the same; KMS retains old material to decrypt previously encrypted data. Rotation does not re-encrypt existing ciphertext.",
+    keyPoints: [
+      "Rotation: new key material, same key ID/ARN",
+      "Old key material retained to decrypt historical ciphertext",
+      "AWS managed keys rotate automatically every 3 years",
+      "Manual rotation: create new key, update applications, disable old key",
+    ],
+    tags: ["kms", "key-rotation", "cmk", "security"],
+  },
+  {
+    id: "fc-kms-005",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What are KMS grants and when would you use them over key policies?",
+    answer:
+      "Grants are temporary permissions delegated programmatically to an AWS principal. Created with CreateGrant API; retired with RetireGrant or RevokeGrant. Used when you need to give temporary access without modifying the key policy (e.g., grant encrypt/decrypt to a service role for a specific job).",
+    keyPoints: [
+      "Grants allow specific operations without editing key policy",
+      "Granular: can limit to single operations (Decrypt, GenerateDataKey)",
+      "Grants can be retired by the grantee or revoked by the key owner",
+      "AWS services use grants internally (e.g., EBS, S3 SSE-KMS)",
+    ],
+    tags: ["kms", "grants", "access-control", "security"],
+  },
+  {
+    id: "fc-kms-006",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "medium",
+    question: "How is KMS used with S3 Server-Side Encryption?",
+    answer:
+      "S3 supports SSE-S3 (S3-managed keys), SSE-KMS (KMS-managed CMK), and SSE-C (customer-provided keys). With SSE-KMS, each object is encrypted with a unique DEK generated by KMS. Requires kms:GenerateDataKey and kms:Decrypt permissions. Bucket key reduces KMS API calls and cost.",
+    keyPoints: [
+      "SSE-KMS: one KMS API call per object by default",
+      "S3 Bucket Key: generates DEKs locally, reducing KMS calls by ~99%",
+      "Must have kms:GenerateDataKey to upload, kms:Decrypt to download",
+      "CloudTrail logs every KMS call for audit",
+    ],
+    tags: ["kms", "s3", "sse-kms", "encryption", "bucket-key"],
+  },
+
+  // --- NEW: AWS CodeDeploy ---
+  {
+    id: "fc-codedeploy-003",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What are CodeDeploy lifecycle event hooks for EC2 deployments?",
+    answer:
+      "EC2 lifecycle hooks in order: ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService. Scripts specified in appspec.yml run at each hook. A script failure at any hook stops the deployment and may trigger rollback.",
+    keyPoints: [
+      "ApplicationStop runs on current running version",
+      "DownloadBundle: CodeDeploy agent downloads revision from S3/GitHub",
+      "ValidateService: best place to run smoke tests",
+      "Hooks run as root by default; timeout default 1800s per hook",
+    ],
+    tags: ["codedeploy", "lifecycle-hooks", "ec2", "appspec"],
+  },
+  {
+    id: "fc-codedeploy-004",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How does CodeDeploy blue/green deployment work for ECS?",
+    answer:
+      "CodeDeploy creates a new task set (green) in the ECS service alongside the current task set (blue). Traffic shifts from blue to green using the ALB target groups. Shift strategies: AllAtOnce, Canary, or Linear. After validation period, original task set (blue) is terminated.",
+    keyPoints: [
+      "Requires Application Load Balancer with two target groups",
+      "CodeDeploy updates ALB listener rules to shift traffic",
+      "Rollback: shift traffic back to original target group",
+      "ValidateService hook Lambda can run automated tests before full shift",
+    ],
+    tags: ["codedeploy", "ecs", "blue-green", "alb", "traffic-shifting"],
+  },
+  {
+    id: "fc-codedeploy-005",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does CodeDeploy automatic rollback work?",
+    answer:
+      "CodeDeploy can automatically rollback on deployment failure or when a CloudWatch alarm breaches during deployment. Rollback re-deploys the last known good revision. You can also manually trigger rollback via console or CLI.",
+    keyPoints: [
+      "Automatic rollback on: deployment failure, alarm breach",
+      "CloudWatch alarms monitor metrics during deployment window",
+      "Rollback is itself a new deployment of the previous revision",
+      "Cannot rollback a rollback (must manually deploy desired version)",
+    ],
+    tags: ["codedeploy", "rollback", "cloudwatch", "deployment"],
+  },
+  {
+    id: "fc-codedeploy-006",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "easy",
+    question: "What is a CodeDeploy deployment group?",
+    answer:
+      "A deployment group defines the target set of instances or resources (EC2 instances by tags or ASG, ECS service, Lambda function). It also specifies the deployment configuration (strategy), service role, load balancer, and rollback settings.",
+    keyPoints: [
+      "Target EC2 by tags or Auto Scaling Group name",
+      "One application can have multiple deployment groups (dev/prod)",
+      "Deployment configuration: predefined (OneAtATime, HalfAtATime, AllAtOnce) or custom",
+      "Service role needs CodeDeploy permissions to interact with AWS resources",
+    ],
+    tags: ["codedeploy", "deployment-group", "ec2", "ecs"],
+  },
+
+  // --- NEW: AWS CloudFormation ---
+  {
+    id: "fc-cfn-003",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "What are CloudFormation intrinsic functions and when are they used?",
+    answer:
+      "Intrinsic functions provide dynamic values in templates. Common ones: !Ref (reference resource or parameter), !GetAtt (get resource attribute), !Sub (string substitution with variables), !Join (join strings), !Select (pick from list), !If (conditional value), !ImportValue (cross-stack export).",
+    keyPoints: [
+      "!Ref on a resource returns its physical ID; on a parameter returns the value",
+      "!GetAtt retrieves specific attributes (e.g., !GetAtt MyBucket.Arn)",
+      "!Sub supports ${Variable} syntax with optional mapping",
+      "!ImportValue references Outputs exported from another stack",
+    ],
+    tags: ["cloudformation", "intrinsic-functions", "ref", "getatt", "sub"],
+  },
+  {
+    id: "fc-cfn-004",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "What are CloudFormation custom resources and when do you use them?",
+    answer:
+      "Custom resources let you run arbitrary logic (via Lambda or SNS) during stack create/update/delete. CloudFormation sends a request to a Lambda function with event type (Create/Update/Delete), and Lambda must signal success or failure back to CloudFormation via a pre-signed S3 URL.",
+    keyPoints: [
+      "Use for unsupported AWS resources or third-party API calls",
+      "Lambda receives Create/Update/Delete events",
+      "Must send response to ResponseURL (pre-signed S3 URL) within 1 hour",
+      "Failure to respond causes stack to hang and eventually roll back",
+    ],
+    tags: ["cloudformation", "custom-resources", "lambda", "automation"],
+  },
+  {
+    id: "fc-cfn-005",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How do CloudFormation StackSets work?",
+    answer:
+      "StackSets deploy CloudFormation stacks across multiple accounts and regions from a single management account. You define the template once; StackSets handles deployment to target accounts. Requires delegated admin or org-level trust. Supports automatic deployment to new accounts in an OU.",
+    keyPoints: [
+      "Deploy to multiple accounts/regions simultaneously",
+      "Requires StackSet administrator and target account roles",
+      "SERVICE_MANAGED: integrated with AWS Organizations",
+      "SELF_MANAGED: manually create IAM roles in each target account",
+    ],
+    tags: ["cloudformation", "stacksets", "multi-account", "organizations"],
+  },
+  {
+    id: "fc-cfn-006",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "What are CloudFormation parameters and how do you use SSM parameter types?",
+    answer:
+      "Parameters let templates accept dynamic inputs at deploy time. AWS-specific parameter types (e.g., AWS::SSM::Parameter::Value<String>) fetch values from SSM Parameter Store at deploy time, allowing AMI IDs and configs to be centrally managed without template changes.",
+    keyPoints: [
+      "Parameter types: String, Number, List, CommaDelimitedList, AWS-specific",
+      "SSM parameter type resolves value at deployment time from Parameter Store",
+      "Pseudo-parameters: AWS::AccountId, AWS::Region, AWS::StackName",
+      "Allowed values and constraints prevent invalid inputs",
+    ],
+    tags: ["cloudformation", "parameters", "ssm", "dynamic-references"],
+  },
+
+  // --- NEW: AWS X-Ray ---
+  {
+    id: "fc-xray-003",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you enable X-Ray tracing for API Gateway and Lambda?",
+    answer:
+      "API Gateway: enable Active Tracing in the Stage settings. Lambda: enable Active Tracing in function configuration (or via SAM/CDK tracing property). Both automatically instrument requests and propagate trace headers (X-Amzn-Trace-Id) to downstream services.",
+    keyPoints: [
+      "API Gateway creates a segment for each request",
+      "Lambda creates a segment per invocation (daemon built-in)",
+      "Trace header propagated to downstream Lambda, HTTP calls",
+      "IAM role needs xray:PutTraceSegments and xray:PutTelemetryRecords",
+    ],
+    tags: ["x-ray", "api-gateway", "lambda", "tracing", "configuration"],
+  },
+  {
+    id: "fc-xray-004",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question:
+      "What is the X-Ray Service Map and what can you diagnose with it?",
+    answer:
+      "The Service Map visualizes all services and connections in a distributed application with response time and error rate data. Each node represents a service; edges show call relationships. Use it to identify latency bottlenecks, error hotspots, and dependencies causing cascading failures.",
+    keyPoints: [
+      "Nodes: color-coded by error rate (green=OK, yellow=error, red=fault)",
+      "Edge labels: avg latency and request rate between services",
+      "Drill down from map to specific trace IDs for individual requests",
+      "Throttle errors show as separate color (cyan/blue)",
+    ],
+    tags: ["x-ray", "service-map", "troubleshooting", "latency", "errors"],
+  },
+  {
+    id: "fc-xray-005",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What are X-Ray annotations vs. metadata and how do they differ?",
+    answer:
+      "Annotations: indexed key-value pairs added to segments/subsegments; can be used in filter expressions to find specific traces. Metadata: non-indexed objects/arrays; visible in trace details but not searchable. Use annotations for filtering, metadata for rich context.",
+    keyPoints: [
+      "Annotations: string/number/boolean, indexed, searchable via filter",
+      "Metadata: any object, not indexed, not filterable",
+      "Filter traces by annotation: annotation.userId = '123'",
+      "Add via X-Ray SDK putAnnotation / putMetadata methods",
+    ],
+    tags: ["x-ray", "annotations", "metadata", "filtering", "sdk"],
+  },
+  {
+    id: "fc-xray-006",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question: "How does X-Ray tracing work in a containerized ECS environment?",
+    answer:
+      "Run the X-Ray daemon as a sidecar container in the ECS task definition. Application containers send UDP data to the daemon on port 2000. Use the task role to grant X-Ray permissions. The daemon batches and forwards data to the X-Ray API.",
+    keyPoints: [
+      "X-Ray daemon runs as sidecar container in same task",
+      "Application sends UDP to 127.0.0.1:2000 (localhost in same task)",
+      "Task IAM role needs xray:PutTraceSegments permission",
+      "Fargate and EC2 launch types both support this pattern",
+    ],
+    tags: ["x-ray", "ecs", "fargate", "sidecar", "daemon"],
+  },
+
+  // --- NEW: Amazon ElastiCache ---
+  {
+    id: "fc-cache-003",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "How does ElastiCache Redis Cluster Mode affect data distribution?",
+    answer:
+      "In Cluster Mode Enabled, data is sharded across 1–90 node groups using hash slots (0–16383). Each key maps to a slot; each node group owns a range. Horizontal scaling by adding/removing shards. All operations on multiple keys must use hash tags to ensure keys land in the same slot.",
+    keyPoints: [
+      "16384 hash slots distributed across shards",
+      "Hash tags: {user}.session and {user}.cart land on same shard",
+      "Cluster Mode Disabled: one shard, read replicas for scale-out reads",
+      "Online resharding: add/remove shards without downtime",
+    ],
+    tags: ["elasticache", "redis", "cluster-mode", "sharding", "hash-slots"],
+  },
+  {
+    id: "fc-cache-004",
+    service: "Amazon ElastiCache",
+    domain: "security",
+    difficulty: "medium",
+    question: "How do you secure ElastiCache Redis?",
+    answer:
+      "Enable in-transit encryption (TLS) and at-rest encryption. Use Redis AUTH token (password) or, for Redis 6+, RBAC (Role-Based Access Control) with user groups. Deploy in a private VPC subnet; use security groups to restrict access. Disable AUTH is not recommended for production.",
+    keyPoints: [
+      "TLS in-transit: supported for both Redis and Memcached",
+      "At-rest encryption: enabled at cluster creation",
+      "Redis AUTH: single password for all connections",
+      "RBAC (Redis 6+): multiple users with different permissions",
+    ],
+    tags: ["elasticache", "redis", "security", "tls", "auth", "rbac"],
+  },
+  {
+    id: "fc-cache-005",
+    service: "Amazon ElastiCache",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question:
+      "What causes cache eviction in ElastiCache and how do you prevent it?",
+    answer:
+      "Eviction occurs when the cache is full and new items must be added. Redis eviction policies: noeviction (error), allkeys-lru, volatile-lru, allkeys-lfu, volatile-ttl, allkeys-random. Monitor Evictions metric in CloudWatch. Prevent by increasing node size, adding replicas, or tuning TTLs.",
+    keyPoints: [
+      "Eviction policy set at cluster/parameter-group level",
+      "allkeys-lru: evict least recently used keys (most common for caching)",
+      "volatile-lru: only evict keys with TTL set",
+      "Monitor Evictions and CacheHits/Misses CloudWatch metrics",
+    ],
+    tags: [
+      "elasticache",
+      "eviction",
+      "troubleshooting",
+      "memory",
+      "cloudwatch",
+    ],
+  },
+  {
+    id: "fc-cache-006",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is ElastiCache for Redis Global Datastore?",
+    answer:
+      "Global Datastore provides active-passive cross-region replication for ElastiCache Redis. One primary region handles reads/writes; up to two secondary regions receive replicated data with sub-second latency. Supports failover: promote a secondary to primary.",
+    keyPoints: [
+      "Replication lag: typically < 1 second cross-region",
+      "Secondary clusters are read-only",
+      "Use for disaster recovery and low-latency global reads",
+      "Promote secondary to primary for region failover",
+    ],
+    tags: [
+      "elasticache",
+      "redis",
+      "global-datastore",
+      "cross-region",
+      "disaster-recovery",
+    ],
+  },
+
+  // --- NEW: Amazon CloudFront ---
+  {
+    id: "fc-cf-003",
+    service: "Amazon CloudFront",
+    domain: "security",
+    difficulty: "hard",
+    question: "How do you restrict CloudFront access to an S3 origin?",
+    answer:
+      "Use Origin Access Control (OAC, recommended) or Origin Access Identity (OAI, legacy). OAC signs requests to S3 using SigV4. S3 bucket policy allows access only from the CloudFront distribution's OAC. This prevents users from bypassing CloudFront to access S3 directly.",
+    keyPoints: [
+      "OAC replaces legacy OAI; supports SSE-KMS and all HTTP methods",
+      "S3 bucket policy: Allow Principal service:cloudfront.amazonaws.com with OAC condition",
+      "Block S3 public access to enforce CloudFront-only access",
+      "OAI: uses special IAM principal (CloudFront identity)",
+    ],
+    tags: ["cloudfront", "s3", "oac", "oai", "security", "origin-access"],
+  },
+  {
+    id: "fc-cf-004",
+    service: "Amazon CloudFront",
+    domain: "security",
+    difficulty: "medium",
+    question: "What are CloudFront signed URLs vs. signed cookies?",
+    answer:
+      "Both restrict access to content to authorized users. Signed URL: per-object access, includes expiry and IP restriction in query params. Signed Cookie: grants access to multiple files with a single cookie set (good for HLS video streams). Use signed URLs for individual files, signed cookies for groups of files.",
+    keyPoints: [
+      "Both use CloudFront key pairs (not S3 pre-signed URLs)",
+      "Signed URL: good for downloadable files, single resource",
+      "Signed Cookie: good for video streaming, multiple resources",
+      "Trusted key groups (recommended) or trusted signers for key management",
+    ],
+    tags: [
+      "cloudfront",
+      "signed-url",
+      "signed-cookie",
+      "security",
+      "access-control",
+    ],
+  },
+  {
+    id: "fc-cf-005",
+    service: "Amazon CloudFront",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What CloudFront error codes indicate cache vs. origin problems?",
+    answer:
+      "CloudFront-generated errors: 502 (bad gateway — origin unreachable), 503 (service unavailable — origin overloaded), 504 (gateway timeout — origin too slow). 4xx from origin are forwarded. CloudFront caches 5xx responses for short period. Use custom error pages for user-friendly responses.",
+    keyPoints: [
+      "502/503/504: CloudFront cannot reach or get response from origin",
+      "Origin errors are cached briefly (ErrorCachingMinTTL)",
+      "Custom error pages: map HTTP codes to S3 objects",
+      "Enable CloudFront access logs and origin-level logs to diagnose",
+    ],
+    tags: ["cloudfront", "troubleshooting", "error-codes", "origin", "caching"],
+  },
+  {
+    id: "fc-cf-006",
+    service: "Amazon CloudFront",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does CloudFront cache behavior and cache policy work?",
+    answer:
+      "Cache behaviors define rules per URL path pattern (e.g., /api/* vs /static/*). Cache policies control what goes into the cache key (headers, cookies, query strings) and TTLs. Origin request policies control what is forwarded to origin (separate from cache key). Use managed policies or create custom.",
+    keyPoints: [
+      "Default behavior: catch-all (*) path pattern",
+      "More specific path patterns take precedence over wildcard",
+      "CachingOptimized policy: no headers/cookies, ideal for static assets",
+      "Origin request policies can forward headers not in cache key",
+    ],
+    tags: [
+      "cloudfront",
+      "cache-behavior",
+      "cache-policy",
+      "ttl",
+      "path-patterns",
+    ],
+  },
+
+  // --- NEW: Amazon ECS ---
+  {
+    id: "fc-ecs-003",
+    service: "Amazon ECS",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is an ECS task definition and what does it contain?",
+    answer:
+      "A task definition is a blueprint for your application. It specifies: Docker image, CPU/memory, port mappings, environment variables, secrets, IAM roles (task role and execution role), logging configuration, and volume mounts. Task definitions are versioned; services reference a specific revision.",
+    keyPoints: [
+      "Task role: permissions the application code uses",
+      "Task execution role: permissions ECS uses (pull image, write logs, get secrets)",
+      "CPU/memory set at task and optionally container level",
+      "awslogs log driver sends container logs to CloudWatch Logs",
+    ],
+    tags: ["ecs", "task-definition", "iam", "logging", "containers"],
+  },
+  {
+    id: "fc-ecs-004",
+    service: "Amazon ECS",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How does ECS service auto scaling work?",
+    answer:
+      "ECS integrates with Application Auto Scaling to scale the desired task count. Scaling policies: Target Tracking (maintain metric at target value) or Step Scaling (scale by fixed amount based on alarm). Metrics: CPUUtilization, MemoryUtilization, ALBRequestCountPerTarget, or custom CloudWatch metrics.",
+    keyPoints: [
+      "Application Auto Scaling manages ECS desired count",
+      "Target Tracking: simplest; scales in/out to maintain target metric",
+      "Step Scaling: explicit scale up/down based on alarm thresholds",
+      "Combine with cluster auto scaling (for EC2) or Fargate (automatic)",
+    ],
+    tags: [
+      "ecs",
+      "auto-scaling",
+      "target-tracking",
+      "step-scaling",
+      "cloudwatch",
+    ],
+  },
+  {
+    id: "fc-ecs-005",
+    service: "Amazon ECS",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you troubleshoot ECS tasks that fail to start?",
+    answer:
+      "Check stopped task details in ECS console for stop reason. Common causes: image pull failure (ECR permissions, image not found), insufficient resources (CPU/memory on cluster), port already in use, IAM role missing permissions, health check failures causing task restart loops.",
+    keyPoints: [
+      "Stop reason and stopped reason in ECS console are key",
+      "Image pull errors: task execution role needs ecr:GetAuthorizationToken",
+      "OOMKilled: container exceeded memory limit — increase allocation",
+      "Health check grace period prevents premature task replacement",
+    ],
+    tags: ["ecs", "troubleshooting", "task-failure", "ecr", "health-check"],
+  },
+  {
+    id: "fc-ecs-006",
+    service: "Amazon ECS",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is ECS service discovery and how does it work?",
+    answer:
+      "ECS integrates with AWS Cloud Map for service discovery. Each ECS service registers tasks as service instances in Cloud Map with DNS records. Other services resolve the DNS name to get task IPs. Supports both DNS-based and API-based discovery. Route 53 auto-creates records for ECS tasks.",
+    keyPoints: [
+      "Cloud Map creates DNS records (A/SRV) per ECS task",
+      "Tasks registered/deregistered automatically as they start/stop",
+      "Works with both ECS EC2 and Fargate",
+      "Private DNS namespace for VPC-internal service mesh",
+    ],
+    tags: ["ecs", "service-discovery", "cloud-map", "dns", "networking"],
+  },
+
+  // --- NEW: Amazon EventBridge ---
+  {
+    id: "fc-eventbridge-002",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does EventBridge event pattern matching work?",
+    answer:
+      "Event patterns are JSON documents that match against event fields. Supports exact match, prefix match, numeric range, exists/not-exists, anything-but, and IP address matching. Patterns are evaluated against the raw event JSON; only matching events trigger the rule targets.",
+    keyPoints: [
+      "Pattern fields must match event fields at the same JSON path",
+      "Multiple values for a field = OR match",
+      "Multiple fields in pattern = AND match",
+      "prefix: match matches string prefix; numeric: supports range operators",
+    ],
+    tags: ["eventbridge", "event-patterns", "filtering", "rules"],
+  },
+  {
+    id: "fc-eventbridge-003",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "What is EventBridge Schema Registry and how does it help developers?",
+    answer:
+      "The Schema Registry automatically discovers and stores schemas for events on an event bus. Schemas describe event structure (JSON Schema). Developers can download code bindings (Java, Python, TypeScript) that deserialize events into typed objects, reducing boilerplate and catching errors at compile time.",
+    keyPoints: [
+      "Auto-discovery: schemas inferred from events flowing through bus",
+      "Code bindings downloadable from console or CLI",
+      "Schema versioning tracks event structure changes",
+      "Works with custom events and AWS service events",
+    ],
+    tags: ["eventbridge", "schema-registry", "code-bindings", "development"],
+  },
+  {
+    id: "fc-eventbridge-004",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is EventBridge Pipes and how does it differ from rules?",
+    answer:
+      "EventBridge Pipes connects event sources (SQS, Kinesis, DynamoDB Streams, Kafka) to targets with optional filtering and enrichment (Lambda, Step Functions, API Gateway). Rules route events from a bus to targets. Pipes are point-to-point with enrichment; rules are fan-out from a bus.",
+    keyPoints: [
+      "Pipes: source → filter → enrich → target (point-to-point)",
+      "Rules: event bus → multiple targets (fan-out)",
+      "Pipes support polling sources like SQS and Kinesis",
+      "Enrichment step transforms events before delivery to target",
+    ],
+    tags: ["eventbridge", "pipes", "rules", "enrichment", "event-driven"],
+  },
+  {
+    id: "fc-eventbridge-005",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does EventBridge Scheduler work?",
+    answer:
+      "EventBridge Scheduler creates scheduled tasks that invoke AWS service APIs or Lambda at fixed rates or cron expressions. Unlike CloudWatch Events cron rules, Scheduler supports time zones, flexible time windows, and a large volume of one-time or recurring schedules.",
+    keyPoints: [
+      "Cron and rate expressions for recurring schedules",
+      "One-time schedules for future single executions",
+      "Flexible time windows reduce API burst pressure",
+      "Supports 200+ AWS service API targets directly",
+    ],
+    tags: ["eventbridge", "scheduler", "cron", "scheduled-tasks"],
+  },
+  {
+    id: "fc-eventbridge-006",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "hard",
+    question: "How does cross-account event routing work in EventBridge?",
+    answer:
+      "You can send events from one account's event bus to another account's event bus using resource-based policies. The receiving bus must have a policy allowing the source account to PutEvents. Use this for centralized event processing, audit logging, or multi-account architectures.",
+    keyPoints: [
+      "Target: event bus ARN in another account",
+      "Receiving bus needs resource policy: allow source account's events",
+      "Rules in receiving account then route to local targets",
+      "Organizations integration allows org-wide event routing",
+    ],
+    tags: ["eventbridge", "cross-account", "event-bus", "organizations"],
+  },
+
+  // --- NEW: AWS AppSync ---
+  {
+    id: "fc-appsync-002",
+    service: "AWS AppSync",
+    domain: "security",
+    difficulty: "medium",
+    question: "What authentication modes does AWS AppSync support?",
+    answer:
+      "AppSync supports four auth modes: API key (simple, dev/test), Amazon Cognito User Pools (JWT), AWS IAM (SigV4, service-to-service), and OIDC (third-party identity provider). Multiple auth modes can be configured; the default mode applies when no explicit mode is specified.",
+    keyPoints: [
+      "API key: simplest, rotate every 365 days max",
+      "Cognito: recommended for end-user auth, uses ID token",
+      "IAM: for AWS services and Lambda calling AppSync",
+      "Multiple auth modes: use @auth directive per type/field",
+    ],
+    tags: ["appsync", "authentication", "cognito", "iam", "api-key"],
+  },
+  {
+    id: "fc-appsync-003",
+    service: "AWS AppSync",
+    domain: "development",
+    difficulty: "hard",
+    question: "How do AppSync resolvers and pipeline resolvers work?",
+    answer:
+      "A resolver connects a GraphQL field to a data source. Unit resolver: one data source. Pipeline resolver: chains multiple functions (each hitting a data source) in sequence; output of one is input to next. Resolvers use VTL mapping templates or JavaScript (JS resolvers) for request/response transformation.",
+    keyPoints: [
+      "Pipeline resolvers: sequence of AppSync functions",
+      "Each function has its own data source and mapping templates",
+      "Before and after mapping templates wrap the pipeline",
+      "JS resolvers (APPSYNC_JS runtime) replace VTL for simpler syntax",
+    ],
+    tags: ["appsync", "resolvers", "pipeline", "vtl", "graphql"],
+  },
+  {
+    id: "fc-appsync-004",
+    service: "AWS AppSync",
+    domain: "development",
+    difficulty: "medium",
+    question: "How do AppSync real-time subscriptions work?",
+    answer:
+      "Subscriptions use WebSocket connections (MQTT over WebSocket). Clients subscribe to a GraphQL subscription field. When a mutation matching the subscription triggers, AppSync pushes the update to all connected subscribers. Subscription connections are managed by AppSync; you define the data shape.",
+    keyPoints: [
+      "WebSocket connection maintained by AppSync",
+      "Subscriptions triggered by mutations",
+      "Filter subscriptions using Enhanced Subscriptions filtering",
+      "Connection limits: 1000 concurrent connections per API by default",
+    ],
+    tags: ["appsync", "subscriptions", "websocket", "real-time", "graphql"],
+  },
+  {
+    id: "fc-appsync-005",
+    service: "AWS AppSync",
+    domain: "development",
+    difficulty: "medium",
+    question: "What data sources does AppSync support?",
+    answer:
+      "AppSync data sources: Amazon DynamoDB, AWS Lambda, Amazon OpenSearch, Amazon RDS (via RDS Data API), HTTP endpoints, and None (for local resolvers returning static data). Lambda is the most flexible — it can call any backend. None data source is useful for purely client-side mutations.",
+    keyPoints: [
+      "DynamoDB: direct integration, no Lambda needed",
+      "Lambda: most flexible, handle any backend logic",
+      "HTTP: call REST APIs from resolvers",
+      "None: for subscriptions or local transformations without backend",
+    ],
+    tags: ["appsync", "data-sources", "dynamodb", "lambda", "graphql"],
+  },
+  {
+    id: "fc-appsync-006",
+    service: "AWS AppSync",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you monitor and debug AppSync APIs?",
+    answer:
+      "Enable CloudWatch logging in AppSync settings (field-level logs for full request/response detail, error-only for just failures). Use CloudWatch Metrics (4xx, 5xx, latency). Enable X-Ray tracing for end-to-end visibility into resolver performance and downstream calls.",
+    keyPoints: [
+      "Field-level logging: captures request/response for each resolver",
+      "Logging levels: NONE, ERROR, ALL",
+      "Metrics: 4xxError, 5xxError, Latency available in CloudWatch",
+      "X-Ray traces show resolver execution time and data source calls",
+    ],
+    tags: ["appsync", "monitoring", "cloudwatch", "x-ray", "debugging"],
+  },
+
+  // --- NEW: AWS Secrets Manager ---
+  {
+    id: "fc-secrets-002",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "hard",
+    question: "How does Secrets Manager automatic rotation work?",
+    answer:
+      "Rotation uses a Lambda function that implements four steps: createSecret (new version), setSecret (set on target), testSecret (validate new credentials), finishSecret (mark new version as AWSCURRENT). Rotation can be immediate or on a schedule. During rotation, both old and new credentials briefly coexist.",
+    keyPoints: [
+      "Four Lambda lifecycle steps: create → set → test → finish",
+      "AWSCURRENT: active version; AWSPENDING: new version during rotation",
+      "AWSPREVIOUS: old version kept briefly for in-flight connections",
+      "AWS provides rotation Lambda templates for common databases (RDS, Redshift)",
+    ],
+    tags: ["secrets-manager", "rotation", "lambda", "security"],
+  },
+  {
+    id: "fc-secrets-003",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    question: "How do applications retrieve secrets from Secrets Manager?",
+    answer:
+      "Call GetSecretValue API with the secret name or ARN. SDK caches the secret locally by default to reduce API calls. Use the AWS SDK caching client or implement your own caching with TTL. Avoid calling GetSecretValue on every request — it has API rate limits and incurs cost.",
+    keyPoints: [
+      "GetSecretValue: returns SecretString or SecretBinary",
+      "SDK caching client: refreshes based on TTL, reduces API calls",
+      "Rate limit: default 100 TPS per region (can be raised)",
+      "IAM permission: secretsmanager:GetSecretValue on the secret ARN",
+    ],
+    tags: ["secrets-manager", "api", "caching", "sdk", "development"],
+  },
+  {
+    id: "fc-secrets-004",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    question: "How does cross-account secret sharing work in Secrets Manager?",
+    answer:
+      "Attach a resource policy to the secret granting access to principals in other accounts. The external account's principals also need IAM permission to call GetSecretValue. The KMS key used to encrypt the secret must also allow the external account to use it.",
+    keyPoints: [
+      "Resource policy on secret grants cross-account access",
+      "Target account IAM policy must also allow secretsmanager:GetSecretValue",
+      "KMS key policy must allow target account's kms:Decrypt",
+      "Use secret ARN (not name) for cross-account access",
+    ],
+    tags: ["secrets-manager", "cross-account", "resource-policy", "kms"],
+  },
+  {
+    id: "fc-secrets-005",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "easy",
+    question: "What are Secrets Manager secret versions and staging labels?",
+    answer:
+      "Secrets Manager stores multiple versions of a secret simultaneously. Each version has one or more staging labels: AWSCURRENT (active), AWSPENDING (during rotation), AWSPREVIOUS (previous active). You can retrieve a specific version by staging label or version ID.",
+    keyPoints: [
+      "AWSCURRENT: version your application should use",
+      "AWSPENDING: new version being tested during rotation",
+      "AWSPREVIOUS: previous version kept for rollback",
+      "GetSecretValue defaults to AWSCURRENT if no version specified",
+    ],
+    tags: ["secrets-manager", "versioning", "staging-labels", "rotation"],
+  },
+  {
+    id: "fc-secrets-006",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    question: "How do you use Secrets Manager with ECS and Lambda?",
+    answer:
+      "ECS: reference secrets in task definition using secrets field with Secrets Manager ARN; secrets injected as env vars at task launch. Lambda: call GetSecretValue in handler init code (outside handler function) and cache the value. Use SDK caching client for automatic refresh.",
+    keyPoints: [
+      "ECS: task execution role needs secretsmanager:GetSecretValue",
+      "ECS injects secrets at task start — not dynamically refreshed",
+      "Lambda: retrieve in init code (outside handler) for reuse across invocations",
+      "SDK caching client handles refresh when secret rotates",
+    ],
+    tags: ["secrets-manager", "ecs", "lambda", "integration", "security"],
+  },
+
+  // --- NEW: AWS CodePipeline ---
+  {
+    id: "fc-codepipeline-002",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does CodePipeline integrate with manual approval actions?",
+    answer:
+      "Add an Approval action to any stage. CodePipeline pauses and sends an SNS notification with a review link. Approver visits the link, reviews changes, and approves or rejects. On rejection, pipeline stops; on approval, it continues. Approval has a configurable timeout (default 7 days).",
+    keyPoints: [
+      "Approval action pauses pipeline at that stage",
+      "SNS topic configured for notifications to reviewers",
+      "Approval URL sent in notification with pipeline details",
+      "Timeout: pipeline fails if no action taken within configured period",
+    ],
+    tags: ["codepipeline", "manual-approval", "ci-cd", "sns"],
+  },
+  {
+    id: "fc-codepipeline-003",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How do you share artifacts between CodePipeline stages?",
+    answer:
+      "CodePipeline stores artifacts in a designated S3 bucket (artifact store). Output artifacts from one action are available as input artifacts to subsequent actions. Each artifact is a ZIP file. Actions define their InputArtifacts (what they consume) and OutputArtifacts (what they produce).",
+    keyPoints: [
+      "Artifact store: S3 bucket (encrypted with KMS)",
+      "Artifacts are ZIP files uploaded between stages",
+      "Action OutputArtifacts become available InputArtifacts to downstream actions",
+      "Cross-region pipelines use artifact stores per region",
+    ],
+    tags: ["codepipeline", "artifacts", "s3", "ci-cd"],
+  },
+  {
+    id: "fc-codepipeline-004",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does CodePipeline trigger on source changes?",
+    answer:
+      "Source triggers: CodeCommit (CloudWatch Events/EventBridge rule), S3 (CloudWatch Events on object change), GitHub (webhooks via CodeStar Connections). Detection method: EventBridge rules (recommended, immediate) or periodic checking (polling, every minute, deprecated for some sources).",
+    keyPoints: [
+      "EventBridge: near-instant trigger on commit/push",
+      "CodeStar Connections: links GitHub, Bitbucket, GitLab to CodePipeline",
+      "S3 source: trigger on object version change",
+      "Polling: fallback method, up to 1-min delay",
+    ],
+    tags: ["codepipeline", "triggers", "codecommit", "github", "eventbridge"],
+  },
+  {
+    id: "fc-codepipeline-005",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How do you deploy to multiple environments with CodePipeline?",
+    answer:
+      "Add separate deploy stages for each environment (dev → staging → prod), each with its own Deploy action targeting the respective environment. Use manual approval before prod. Pass environment-specific config via stage-level variables or different artifact sets per deploy target.",
+    keyPoints: [
+      "Sequential stages enforce promotion gates (dev → staging → prod)",
+      "Manual approval gate before production deploy",
+      "Use CodeDeploy deployment groups per environment",
+      "Namespace stage variables per stage for environment-specific config",
+    ],
+    tags: ["codepipeline", "environments", "promotion", "deployment", "ci-cd"],
+  },
+  {
+    id: "fc-codepipeline-006",
+    service: "AWS CodePipeline",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you monitor and troubleshoot CodePipeline failures?",
+    answer:
+      "Pipeline execution history shows per-action status and failure reason. CloudWatch Events/EventBridge rules can detect FAILED state and trigger SNS notifications. For CodeBuild failures, check build logs in CloudWatch Logs. For CodeDeploy, check deployment events and instance logs.",
+    keyPoints: [
+      "Console shows per-action failure details and error messages",
+      "EventBridge rule: trigger on pipeline execution state change",
+      "CodeBuild log stream in CloudWatch Logs for build errors",
+      "CodeDeploy deployment events show hook failures",
+    ],
+    tags: ["codepipeline", "troubleshooting", "monitoring", "cloudwatch"],
+  },
+
+  // --- NEW: AWS CodeBuild ---
+  {
+    id: "fc-codebuild-002",
+    service: "AWS CodeBuild",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does CodeBuild caching improve build performance?",
+    answer:
+      "CodeBuild supports S3 cache and local cache. S3 cache: uploads specified paths (node_modules, Maven .m2) to S3 after build; downloads at next build start. Local cache: uses the underlying build machine cache (Docker layer, source, custom). Local cache is faster but not shared across build hosts.",
+    keyPoints: [
+      "S3 cache: shared across all builds, slower to upload/download",
+      "Local Docker layer cache: speeds Docker image builds significantly",
+      "Cache key uses project name and optional branch/hash",
+      "Specify paths in buildspec.yml cache.paths section",
+    ],
+    tags: ["codebuild", "caching", "performance", "s3", "docker"],
+  },
+  {
+    id: "fc-codebuild-003",
+    service: "AWS CodeBuild",
+    domain: "security",
+    difficulty: "medium",
+    question: "How do you securely pass secrets to CodeBuild?",
+    answer:
+      "Reference SSM Parameter Store or Secrets Manager values in buildspec.yml env.parameter-store or env.secrets-manager sections. CodeBuild resolves these at build time using the build project's service role. Never hardcode secrets in buildspec.yml or env.variables.",
+    keyPoints: [
+      "env.parameter-store: resolve SSM parameters by path",
+      "env.secrets-manager: resolve Secrets Manager secrets",
+      "Service role needs ssm:GetParameters or secretsmanager:GetSecretValue",
+      "Values available as environment variables in build commands",
+    ],
+    tags: ["codebuild", "secrets", "ssm", "secrets-manager", "security"],
+  },
+  {
+    id: "fc-codebuild-004",
+    service: "AWS CodeBuild",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How does CodeBuild work inside a VPC?",
+    answer:
+      "Configure CodeBuild with VPC, subnets, and security groups to give builds access to private resources (RDS, ElastiCache, private APIs). Build runs on an ENI in your VPC. For internet access (package downloads), the subnet must route through a NAT Gateway. VPC-attached builds cannot use public endpoints without NAT.",
+    keyPoints: [
+      "VPC config: VPC ID, subnets, security group IDs",
+      "Private resources accessible from build environment",
+      "Internet access requires NAT Gateway in private subnet",
+      "Service role needs ec2:CreateNetworkInterface permission",
+    ],
+    tags: ["codebuild", "vpc", "networking", "nat-gateway", "security"],
+  },
+  {
+    id: "fc-codebuild-005",
+    service: "AWS CodeBuild",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What are CodeBuild environment types and compute options?",
+    answer:
+      "CodeBuild offers Linux (Ubuntu, Amazon Linux), Windows, and ARM environments. Compute sizes range from small (3 GB RAM, 2 vCPU) to 2xlarge (145 GB RAM, 72 vCPU). Privileged mode must be enabled for Docker builds (to run Docker daemon inside the build container).",
+    keyPoints: [
+      "Privileged mode: required for docker build commands",
+      "ARM compute: cheaper for ARM-native builds",
+      "Larger compute: use for resource-intensive test suites",
+      "Custom build images: use your own Docker image from ECR",
+    ],
+    tags: ["codebuild", "compute", "environments", "docker", "privileged-mode"],
+  },
+  {
+    id: "fc-codebuild-006",
+    service: "AWS CodeBuild",
+    domain: "troubleshooting",
+    difficulty: "easy",
+    question:
+      "Where do you find CodeBuild build logs and how do you access them?",
+    answer:
+      "CodeBuild streams build output to CloudWatch Logs (by default) and optionally to S3. Log group: /aws/codebuild/<project-name>. Each build has a unique log stream. Logs viewable in the CodeBuild console, CloudWatch Logs console, or via CLI. Enable S3 logs for long-term retention.",
+    keyPoints: [
+      "Default log group: /aws/codebuild/<project-name>",
+      "Each build = one CloudWatch log stream",
+      "Build phase details shown in console with timing",
+      "S3 log export for long-term archiving beyond CloudWatch retention",
+    ],
+    tags: ["codebuild", "logging", "cloudwatch", "troubleshooting"],
+  },
+
+  // --- NEW: AWS SAM ---
+  {
+    id: "fc-sam-002",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What SAM resource types are available and what do they create?",
+    answer:
+      "AWS::Serverless::Function → Lambda function + IAM execution role + event source mappings. AWS::Serverless::Api → API Gateway REST API + stages. AWS::Serverless::HttpApi → API Gateway HTTP API. AWS::Serverless::SimpleTable → DynamoDB table with basic config. AWS::Serverless::StateMachine → Step Functions state machine.",
+    keyPoints: [
+      "SAM types expand to multiple CloudFormation resources via Transform",
+      "Serverless::Function: Events property defines triggers (API, S3, SQS, etc.)",
+      "Serverless::Api: auto-generated from Function Events or explicit definition",
+      "All standard CloudFormation resources also work in SAM templates",
+    ],
+    tags: ["sam", "serverless", "resource-types", "cloudformation"],
+  },
+  {
+    id: "fc-sam-003",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does SAM local testing work?",
+    answer:
+      "sam local invoke runs a Lambda function locally in a Docker container matching the Lambda runtime. sam local start-api starts a local API Gateway. sam local start-lambda emulates the Lambda API for local testing. Requires Docker. Pass test events as JSON files with -e flag.",
+    keyPoints: [
+      "Requires Docker installed locally",
+      "sam local invoke: one-shot function invocation",
+      "sam local start-api: persistent local API Gateway on port 3000",
+      "Environment variables loaded from .env.json or template Globals",
+    ],
+    tags: ["sam", "local-testing", "docker", "lambda", "development"],
+  },
+  {
+    id: "fc-sam-004",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How does SAM handle deployment and what does sam deploy do?",
+    answer:
+      "sam build packages your Lambda code and dependencies. sam deploy uploads the package to S3, then creates/updates a CloudFormation stack using the transformed template. First run uses --guided to set parameters (stack name, region, S3 bucket). Settings saved to samconfig.toml for subsequent runs.",
+    keyPoints: [
+      "sam build → local build artifact in .aws-sam/",
+      "sam deploy → upload to S3 + CloudFormation create/update",
+      "samconfig.toml persists deployment settings",
+      "Supports CloudFormation change sets before executing (--no-confirm-changeset to skip)",
+    ],
+    tags: ["sam", "deployment", "cloudformation", "s3", "build"],
+  },
+  {
+    id: "fc-sam-005",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How do you define SAM policy templates and what are they?",
+    answer:
+      "SAM policy templates are pre-defined IAM policies you attach to Lambda functions using shorthand. Examples: DynamoDBReadPolicy, S3ReadPolicy, SQSPollerPolicy. They expand to full IAM policies with the correct actions and resource ARNs. Reduces boilerplate compared to writing raw IAM policies.",
+    keyPoints: [
+      "Policy templates referenced in Function Policies property",
+      "Pass resource ARN as parameter (e.g., TableName: !Ref MyTable)",
+      "Expands to least-privilege IAM policy automatically",
+      "60+ built-in policy templates available",
+    ],
+    tags: ["sam", "policy-templates", "iam", "lambda", "security"],
+  },
+  {
+    id: "fc-sam-006",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does SAM support gradual Lambda deployments?",
+    answer:
+      "SAM integrates with CodeDeploy to shift traffic to new Lambda versions. In Function properties, set DeploymentPreference type (Canary10Percent5Minutes, Linear10PercentEvery1Minute, AllAtOnce) and optional Hooks (PreTraffic and PostTraffic Lambda functions for validation).",
+    keyPoints: [
+      "DeploymentPreference: integrates CodeDeploy automatically",
+      "PreTraffic hook: validate new version before any traffic",
+      "PostTraffic hook: validate after full traffic shift",
+      "Rollback triggered if hook Lambda fails or alarm breaches",
+    ],
+    tags: ["sam", "codedeploy", "canary", "traffic-shifting", "deployment"],
+  },
+
+  // --- NEW: AWS Elastic Beanstalk ---
+  {
+    id: "fc-eb-002",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is the .ebextensions directory and what can it configure?",
+    answer:
+      ".ebextensions is a folder in your application bundle with YAML/JSON config files (*.config). They configure environment resources (additional AWS resources via CloudFormation), EC2 instance settings (packages, files, commands, services), and environment variables.",
+    keyPoints: [
+      "Files must end in .config in the .ebextensions/ directory",
+      "option_settings: configure Elastic Beanstalk environment properties",
+      "Resources: add AWS resources (RDS, SQS, etc.) to the environment",
+      "container_commands: run commands during deployment before app starts",
+    ],
+    tags: ["elastic-beanstalk", "ebextensions", "configuration", "deployment"],
+  },
+  {
+    id: "fc-eb-003",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "How does Elastic Beanstalk worker tier differ from web tier?",
+    answer:
+      "Web tier: load-balanced, auto-scaling environment for HTTP traffic, fronted by ALB. Worker tier: processes background tasks from an SQS queue; each instance runs a daemon that polls SQS and POSTs messages to your application's / endpoint. Decouples long-running tasks from web request handling.",
+    keyPoints: [
+      "Worker tier polls SQS and POSTs to localhost as HTTP",
+      "No load balancer on worker tier",
+      "cron.yaml in app root defines periodic tasks (Elastic Beanstalk cron)",
+      "Common pattern: web tier publishes jobs; worker tier consumes them",
+    ],
+    tags: ["elastic-beanstalk", "worker-tier", "sqs", "background-jobs"],
+  },
+  {
+    id: "fc-eb-004",
+    service: "AWS Elastic Beanstalk",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question:
+      "How do you view logs and troubleshoot Elastic Beanstalk deployments?",
+    answer:
+      "Request logs from the EB console or CLI (eb logs): retrieves last 100 lines of relevant logs (web server, deployment, eb-activity). Enable log streaming to CloudWatch Logs for persistent log retention. Check /var/log/eb-activity.log for deployment lifecycle events.",
+    keyPoints: [
+      "eb logs: snapshot or tail logs from instances",
+      "CloudWatch Logs streaming: persistent, searchable logs",
+      "/var/log/eb-activity.log: deployment hook output",
+      "Health dashboard shows event history and environment health",
+    ],
+    tags: ["elastic-beanstalk", "logs", "troubleshooting", "cloudwatch"],
+  },
+  {
+    id: "fc-eb-005",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "How do you pass configuration and secrets to an Elastic Beanstalk application?",
+    answer:
+      "Environment properties set key-value pairs accessible as environment variables in the app. For secrets, use SSM Parameter Store or Secrets Manager and read from the app at runtime using SDK. Avoid putting secrets in .ebextensions or environment properties (visible in console).",
+    keyPoints: [
+      "Environment properties: set via console, CLI, or .ebextensions",
+      "Properties appear as OS environment variables in the instance",
+      "Secrets: use SSM/Secrets Manager, not plain environment properties",
+      "Instance profile needs permissions to read SSM/Secrets Manager",
+    ],
+    tags: ["elastic-beanstalk", "configuration", "secrets", "ssm", "security"],
+  },
+  {
+    id: "fc-eb-006",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "easy",
+    question: "What platforms does Elastic Beanstalk support?",
+    answer:
+      "Elastic Beanstalk supports managed platforms for: Node.js, Python, Ruby, PHP, Java SE, Tomcat, .NET Core on Linux, .NET on Windows, Go, and Docker (single/multi-container). Platforms are versioned; you can pin or auto-update. Custom platforms can be built for unsupported runtimes.",
+    keyPoints: [
+      "Docker platform: deploy any container image",
+      "Multi-container Docker: uses ECS under the hood (Dockerrun.aws.json v2)",
+      "Platform versions updated regularly; update to get security patches",
+      "Custom platform: build with Packer if managed platform insufficient",
+    ],
+    tags: ["elastic-beanstalk", "platforms", "docker", "runtimes"],
+  },
+
+  // --- NEW: AWS CDK ---
+  {
+    id: "fc-cdk-002",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is CDK bootstrapping and why is it required?",
+    answer:
+      "Bootstrapping provisions CDK toolkit resources in an account/region: an S3 bucket (for assets), ECR repository (for Docker images), and IAM roles for deployment. Run cdk bootstrap once per account/region before deploying. Bootstrap stack named CDKToolkit.",
+    keyPoints: [
+      "Creates CDKToolkit CloudFormation stack",
+      "S3 bucket stores Lambda ZIPs, CloudFormation templates",
+      "IAM roles: CloudFormation execution role, deployment role",
+      "Cross-account deployments require bootstrapping in each target account",
+    ],
+    tags: ["cdk", "bootstrap", "deployment", "s3", "iam"],
+  },
+  {
+    id: "fc-cdk-003",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "What is the CDK construct library and how do L1, L2, L3 constructs differ?",
+    answer:
+      "L1 (Cfn* classes): direct CloudFormation resource mapping, all properties exposed, low-level. L2 (e.g., s3.Bucket, lambda.Function): opinionated defaults, helper methods, type-safe, hides complexity. L3 (patterns, e.g., aws-ecs-patterns): complete solutions combining multiple L2s (e.g., ApplicationLoadBalancedFargateService).",
+    keyPoints: [
+      "L1: one-to-one with CloudFormation, prefix Cfn (CfnBucket)",
+      "L2: sensible defaults, escape hatches to L1 via .node.defaultChild",
+      "L3: patterns solve complete use cases in one construct",
+      "Use L2 by default; drop to L1 only for unsupported properties",
+    ],
+    tags: ["cdk", "constructs", "l1", "l2", "l3", "construct-library"],
+  },
+  {
+    id: "fc-cdk-004",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is CDK Aspects and how are they used?",
+    answer:
+      "Aspects are a mechanism to apply operations to all constructs in a scope. They implement the IAspect interface (visit method called on every node). Common use: enforce tagging policies, add security controls, inject permissions. Run during synthesis after the construct tree is fully defined.",
+    keyPoints: [
+      "Aspects.of(scope).add(myAspect): apply to all children",
+      "IAspect.visit(node): called for every construct in scope",
+      "Use to enforce org-wide policies (required tags, encryption)",
+      "Runs during cdk synth, not at deploy time",
+    ],
+    tags: ["cdk", "aspects", "policy-enforcement", "tagging", "synthesis"],
+  },
+  {
+    id: "fc-cdk-005",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does CDK handle environment (account/region) configuration?",
+    answer:
+      "Stacks can be environment-agnostic (resolved at deploy time) or environment-specific (hardcoded account/region). Specify env in Stack props: { account: '123456789', region: 'us-east-1' }. CDK_DEFAULT_ACCOUNT and CDK_DEFAULT_REGION env vars resolve to the CLI profile's account/region.",
+    keyPoints: [
+      "Env-agnostic: use CDK_DEFAULT_ACCOUNT/REGION — resolved at synthesis",
+      "Env-specific: hardcode values for deterministic deployments",
+      "Cross-environment references require concrete environments",
+      "cdk deploy --profile myprofile selects AWS credentials",
+    ],
+    tags: ["cdk", "environment", "account", "region", "deployment"],
+  },
+  {
+    id: "fc-cdk-006",
+    service: "AWS CDK",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What is CDK diff and how do you use it safely?",
+    answer:
+      "cdk diff compares the synthesized CloudFormation template against the currently deployed stack, showing resource additions, modifications, and deletions. Run before cdk deploy to preview changes. Replacement operations (shown with ~) destroy and recreate resources, causing downtime.",
+    keyPoints: [
+      "cdk diff: preview changes before deploy",
+      "~ symbol: replacement — resource will be destroyed and recreated",
+      "+ symbol: new resource addition",
+      "- symbol: resource deletion — check carefully before accepting",
+    ],
+    tags: ["cdk", "diff", "change-preview", "deployment", "safety"],
+  },
+
+  // --- NEW: Amazon VPC ---
+  {
+    id: "fc-vpc-002",
+    service: "Amazon VPC",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is the difference between a Security Group and a Network ACL?",
+    answer:
+      "Security Groups: stateful (return traffic allowed automatically), applies to ENI/instance level, allows only, evaluated as combined set. Network ACLs: stateless (must explicitly allow inbound AND outbound), applies at subnet level, allows and denies, rules evaluated by number (lowest first).",
+    keyPoints: [
+      "SG: stateful; NACL: stateless",
+      "SG: instance/ENI level; NACL: subnet level",
+      "NACL: explicit allow/deny rules with priority order",
+      "Default NACL: allows all traffic; custom NACL: denies all by default",
+    ],
+    tags: ["vpc", "security-group", "nacl", "networking", "security"],
+  },
+  {
+    id: "fc-vpc-003",
+    service: "Amazon VPC",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is a VPC endpoint and what types are available?",
+    answer:
+      "VPC endpoints allow private connectivity to AWS services without internet, NAT, or VPN. Types: Gateway endpoints (S3 and DynamoDB only, free, added to route table), Interface endpoints (PrivateLink, creates ENI in subnet, supports most AWS services, per-hour cost).",
+    keyPoints: [
+      "Gateway endpoints: S3 and DynamoDB; free; route table entry",
+      "Interface endpoints (PrivateLink): ENI in subnet; per-hour + data charge",
+      "Endpoint policies restrict which API actions are allowed through endpoint",
+      "Use VPC endpoints to avoid NAT Gateway cost for AWS service traffic",
+    ],
+    tags: [
+      "vpc",
+      "vpc-endpoints",
+      "privatelink",
+      "gateway-endpoint",
+      "networking",
+    ],
+  },
+  {
+    id: "fc-vpc-004",
+    service: "Amazon VPC",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is VPC peering and what are its limitations?",
+    answer:
+      "VPC peering connects two VPCs (same or different accounts/regions) allowing routing between them with private IPs. No overlapping CIDR blocks allowed. Not transitive: A-B and B-C does not allow A-C. For transitive routing, use Transit Gateway.",
+    keyPoints: [
+      "Non-transitive: must create peering for every VPC pair",
+      "No overlapping CIDR ranges allowed",
+      "Works cross-account and cross-region",
+      "Transit Gateway: hub-and-spoke model, solves transitivity",
+    ],
+    tags: ["vpc", "vpc-peering", "transit-gateway", "networking"],
+  },
+  {
+    id: "fc-vpc-005",
+    service: "Amazon VPC",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is a NAT Gateway and when do you need it?",
+    answer:
+      "A NAT Gateway allows instances in private subnets to initiate outbound internet connections while preventing inbound connections from the internet. Deploy in a public subnet; update private subnet route tables to send 0.0.0.0/0 traffic to the NAT Gateway. Managed, scales automatically.",
+    keyPoints: [
+      "NAT Gateway in public subnet; routes from private subnets",
+      "High availability: deploy one per AZ for redundancy",
+      "Charged per hour + per GB of data processed",
+      "NAT instance (EC2): cheaper but requires management and is a single point of failure",
+    ],
+    tags: [
+      "vpc",
+      "nat-gateway",
+      "internet-access",
+      "networking",
+      "private-subnet",
+    ],
+  },
+  {
+    id: "fc-vpc-006",
+    service: "Amazon VPC",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you use VPC Flow Logs for troubleshooting?",
+    answer:
+      "VPC Flow Logs capture IP traffic information for VPC, subnet, or ENI level. Published to CloudWatch Logs or S3. Log format includes source/dest IP, ports, protocol, action (ACCEPT/REJECT), and status. Use to diagnose security group/NACL blocks, identify traffic patterns, and audit access.",
+    keyPoints: [
+      "Flow logs don't capture: DNS, DHCP, license activation, metadata traffic",
+      "ACCEPT: traffic allowed; REJECT: blocked by SG or NACL",
+      "Analyze with CloudWatch Logs Insights or Athena (S3 destination)",
+      "Enable at VPC, subnet, or ENI level",
+    ],
+    tags: ["vpc", "flow-logs", "troubleshooting", "security", "networking"],
+  },
+
+  // --- NEW: AWS Amplify ---
+  {
+    id: "fc-amplify-002",
+    service: "AWS Amplify",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How does Amplify Hosting CI/CD work?",
+    answer:
+      "Amplify Hosting connects to your Git repository and automatically builds and deploys on every push to configured branches. Build settings defined in amplify.yml or auto-detected for popular frameworks. Each branch gets its own URL; feature branches get preview URLs.",
+    keyPoints: [
+      "Supports GitHub, GitLab, Bitbucket, CodeCommit, and manual zip uploads",
+      "amplify.yml: define build, test, and deployment commands per branch",
+      "Branch-based deployments: each branch = separate environment URL",
+      "Pull Request previews: automatic preview URLs for PRs",
+    ],
+    tags: ["amplify", "hosting", "ci-cd", "git", "deployment"],
+  },
+  {
+    id: "fc-amplify-003",
+    service: "AWS Amplify",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is Amplify Gen 2 and how does it differ from Gen 1?",
+    answer:
+      "Amplify Gen 2 uses TypeScript-first, code-based backend definitions (no Amplify CLI category commands). Backend resources defined in amplify/ directory using TypeScript; changes deployed via Git-based CI/CD or sandbox. Gen 1 used amplify add commands and JSON configuration files.",
+    keyPoints: [
+      "Gen 2: TypeScript code defines backend (auth, data, storage, functions)",
+      "amplify sandbox: local dev environment with hot-reload backend",
+      "Git-based deployment: push to branch → deploy backend + frontend",
+      "Gen 1: amplify add auth/api/storage + JSON config (still supported)",
+    ],
+    tags: ["amplify", "gen2", "typescript", "backend", "development"],
+  },
+  {
+    id: "fc-amplify-004",
+    service: "AWS Amplify",
+    domain: "security",
+    difficulty: "medium",
+    question: "How does Amplify handle authentication?",
+    answer:
+      "Amplify Auth uses Cognito User Pools under the hood. Provides pre-built UI components (Authenticator) and JS/mobile library calls for sign-up, sign-in, MFA, social sign-in, and token management. Handles token refresh automatically. Configure via amplify/auth/resource.ts (Gen 2) or amplify add auth (Gen 1).",
+    keyPoints: [
+      "Backed by Cognito User Pool and optional Identity Pool",
+      "Amplify Authenticator: drop-in React/Vue/Angular UI component",
+      "Social providers (Google, Apple, Facebook) via hosted UI",
+      "Tokens automatically refreshed by Amplify library",
+    ],
+    tags: ["amplify", "authentication", "cognito", "security"],
+  },
+  {
+    id: "fc-amplify-005",
+    service: "AWS Amplify",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does Amplify DataStore work?",
+    answer:
+      "DataStore provides local storage (IndexedDB/SQLite) synchronized with a cloud GraphQL backend (AppSync + DynamoDB). Works offline and online. Data is defined with a schema; DataStore auto-generates save/query/delete operations. Conflict resolution strategies: Auto Merge, Optimistic Concurrency, Lambda.",
+    keyPoints: [
+      "Offline-first: stores data locally, syncs when online",
+      "Backed by AppSync + DynamoDB automatically",
+      "Conflict resolution configured per model",
+      "Subscription-based real-time sync via WebSocket",
+    ],
+    tags: ["amplify", "datastore", "offline", "appsync", "graphql"],
+  },
+  {
+    id: "fc-amplify-006",
+    service: "AWS Amplify",
+    domain: "deployment",
+    difficulty: "easy",
+    question:
+      "What is the difference between Amplify Hosting and Amplify Backend?",
+    answer:
+      "Amplify Hosting: static web hosting with CDN, CI/CD, custom domains, SSL, and branch previews. Amplify Backend: provisioning and managing cloud resources (Auth, API, Storage, Functions) via Amplify CLI or Gen 2 TypeScript code. They are independent — you can use one without the other.",
+    keyPoints: [
+      "Hosting: deploy frontend (React, Next.js, Vue, static sites)",
+      "Backend: Cognito, AppSync, S3, Lambda managed via Amplify",
+      "Can use Amplify Hosting with any non-Amplify backend",
+      "Can use Amplify Backend with any frontend hosting solution",
+    ],
+    tags: ["amplify", "hosting", "backend", "deployment"],
+  },
+
+  // --- NEW: Amazon RDS ---
+  {
+    id: "fc-rds-002",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is RDS Multi-AZ and how does it differ from Read Replicas?",
+    answer:
+      "Multi-AZ: synchronous replication to standby in another AZ for high availability. Automatic failover (60–120s). Standby not readable. Read Replicas: asynchronous replication, used for read scaling, can be in same/different region, readable, manual promotion required.",
+    keyPoints: [
+      "Multi-AZ: synchronous, HA failover, standby is not a read endpoint",
+      "Read Replica: async, scale reads, can be cross-region",
+      "Failover: Multi-AZ automatic; Read Replica manual promotion",
+      "Cross-region Read Replica: disaster recovery + local read latency",
+    ],
+    tags: [
+      "rds",
+      "multi-az",
+      "read-replica",
+      "high-availability",
+      "replication",
+    ],
+  },
+  {
+    id: "fc-rds-003",
+    service: "Amazon RDS",
+    domain: "security",
+    difficulty: "medium",
+    question: "How do you encrypt RDS databases and what are the requirements?",
+    answer:
+      "Enable encryption at creation time using KMS CMK (cannot enable on existing unencrypted instances). Encryption covers data at rest: storage, automated backups, Read Replicas, snapshots. Encrypt an existing instance by taking a snapshot, copying it with encryption enabled, and restoring.",
+    keyPoints: [
+      "Encryption must be enabled at creation — cannot add later",
+      "Encrypted snapshot → restore → encrypted instance",
+      "Read Replicas of encrypted instance must also be encrypted",
+      "In-transit: use SSL/TLS connection; enforce via RDS parameter group",
+    ],
+    tags: ["rds", "encryption", "kms", "security", "ssl"],
+  },
+  {
+    id: "fc-rds-004",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is Amazon Aurora and how does it differ from standard RDS?",
+    answer:
+      "Aurora is an AWS-optimized relational database compatible with MySQL and PostgreSQL. Shared storage auto-scales (10 GB increments, up to 128 TB). 6-way replication across 3 AZs. Up to 15 Aurora Replicas (vs 5 for RDS). Faster failover (~30s). Aurora Serverless v2 scales compute automatically.",
+    keyPoints: [
+      "Storage: shared, 6 copies across 3 AZs, auto-scales",
+      "Up to 15 read replicas with lag < 100ms",
+      "Failover: promotes replica in ~30 seconds",
+      "Aurora Global Database: cross-region with < 1s replication lag",
+    ],
+    tags: ["rds", "aurora", "mysql", "postgresql", "high-availability"],
+  },
+  {
+    id: "fc-rds-005",
+    service: "Amazon RDS",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you monitor RDS performance and what key metrics matter?",
+    answer:
+      "CloudWatch provides: CPUUtilization, DatabaseConnections, FreeStorageSpace, ReadIOPS/WriteIOPS, ReadLatency/WriteLatency, FreeableMemory. Enable Enhanced Monitoring for OS-level metrics (1-second granularity). Performance Insights shows query-level analysis and DB load.",
+    keyPoints: [
+      "DatabaseConnections: monitor for connection exhaustion",
+      "Performance Insights: top SQL queries by wait type",
+      "Enhanced Monitoring: OS metrics not visible in CloudWatch (per-process)",
+      "FreeStorageSpace: set alarm before storage exhausted",
+    ],
+    tags: [
+      "rds",
+      "monitoring",
+      "cloudwatch",
+      "performance-insights",
+      "troubleshooting",
+    ],
+  },
+  {
+    id: "fc-rds-006",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does RDS IAM database authentication work?",
+    answer:
+      "With IAM auth enabled, users authenticate using an IAM authentication token (generated via generate-db-auth-token) instead of a password. The token is valid for 15 minutes. Useful for EC2/Lambda that already have IAM roles — no need to store DB credentials. Supported for MySQL and PostgreSQL.",
+    keyPoints: [
+      "Token generated via AWS CLI or SDK (valid 15 min)",
+      "IAM policy must allow rds-db:connect for the DB user",
+      "No password management; credentials tied to IAM identity",
+      "Supported for MySQL and PostgreSQL on RDS and Aurora",
+    ],
+    tags: ["rds", "iam-authentication", "security", "credentials"],
+  },
+
+  // --- NEW: AWS Systems Manager ---
+  {
+    id: "fc-ssm-002",
+    service: "AWS Systems Manager",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is SSM Parameter Store and what are its parameter types?",
+    answer:
+      "Parameter Store stores configuration data and secrets as key-value pairs. Types: String, StringList, SecureString (encrypted with KMS). Tiers: Standard (free, 4KB max, 10K parameters) and Advanced ($0.05/10K API calls, 8KB max, 100K parameters, parameter policies).",
+    keyPoints: [
+      "SecureString: encrypted at rest with KMS; use for passwords/keys",
+      "Parameter hierarchy: /myapp/prod/db-password for organization",
+      "Integration with Lambda, EC2, ECS, CodeBuild natively",
+      "GetParametersByPath: retrieve all params in a hierarchy at once",
+    ],
+    tags: ["ssm", "parameter-store", "configuration", "secrets", "kms"],
+  },
+  {
+    id: "fc-ssm-003",
+    service: "AWS Systems Manager",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "What is SSM Session Manager and why is it preferred over SSH bastion hosts?",
+    answer:
+      "Session Manager provides browser or CLI-based shell access to EC2 instances without SSH keys, bastion hosts, or open inbound ports. Access controlled via IAM. Session logs audited to CloudWatch/S3. Works for instances without public IPs via SSM Agent.",
+    keyPoints: [
+      "No SSH keys, no bastion host, no open port 22 required",
+      "Access via IAM: ssm:StartSession permission",
+      "Logs all session activity to CloudWatch Logs or S3",
+      "Requires SSM Agent on instance and instance profile with SSM permissions",
+    ],
+    tags: ["ssm", "session-manager", "security", "access", "ec2"],
+  },
+  {
+    id: "fc-ssm-004",
+    service: "AWS Systems Manager",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is SSM Run Command and when would you use it?",
+    answer:
+      "Run Command executes scripts or predefined documents on multiple EC2 instances simultaneously without SSH. Supports targeting by instance ID, tags, or resource groups. Output captured to S3 or CloudWatch Logs. Common use: install software, patch instances, collect diagnostics.",
+    keyPoints: [
+      "No SSH or bastion needed — uses SSM Agent",
+      "Target by instance ID, tag, or Resource Group",
+      "AWS-RunShellScript: run shell commands on Linux",
+      "Rate control: concurrency limit and error threshold",
+    ],
+    tags: ["ssm", "run-command", "automation", "ec2", "management"],
+  },
+  {
+    id: "fc-ssm-005",
+    service: "AWS Systems Manager",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "What is SSM Automation and how does it differ from Run Command?",
+    answer:
+      "SSM Automation runs multi-step workflows (SSM Documents) that can call AWS APIs, run scripts, and approve with human input. Unlike Run Command (which runs on EC2 instances), Automation orchestrates AWS services (restart instances, create AMIs, update CloudFormation stacks). Automation documents use YAML/JSON.",
+    keyPoints: [
+      "Automation: orchestrates AWS API calls across services",
+      "Run Command: executes commands on EC2 instances",
+      "Built-in documents: AWS-RestartEC2Instance, AWS-CreateImage, etc.",
+      "Maintenance Windows: schedule Automation/Run Command at defined times",
+    ],
+    tags: ["ssm", "automation", "run-command", "workflows", "documents"],
+  },
+  {
+    id: "fc-ssm-006",
+    service: "AWS Systems Manager",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How do you use SSM Patch Manager to keep instances up to date?",
+    answer:
+      "Patch Manager defines patch baselines (approved patches by severity/classification) and patch groups (instances by tags). Maintenance Windows schedule patch operations. AWS-RunPatchBaseline document checks compliance and installs approved patches. Compliance reports show patch status.",
+    keyPoints: [
+      "Patch baseline: rules defining which patches are approved",
+      "Patch group: tag key PatchGroup links instances to baseline",
+      "Maintenance window: define schedule for patching",
+      "Compliance dashboard: view patch compliance across fleet",
+    ],
+    tags: [
+      "ssm",
+      "patch-manager",
+      "patching",
+      "compliance",
+      "maintenance-window",
+    ],
+  },
+
+  // --- NEW: Amazon S3 ---
+  {
+    id: "fc-s3-006",
+    service: "Amazon S3",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is S3 Object Lock and how does it provide WORM compliance?",
+    answer:
+      "S3 Object Lock prevents object deletion or overwrite for a fixed period or indefinitely. Modes: Governance (authorized users can override) and Compliance (no one, including root, can delete before retention expires). Legal Hold: indefinite lock that can be removed by authorized users. Requires versioning.",
+    keyPoints: [
+      "Versioning must be enabled before enabling Object Lock",
+      "Compliance mode: strongest protection, cannot be disabled once set",
+      "Governance mode: admins with s3:BypassGovernanceRetention can override",
+      "Legal Hold: on/off toggle independent of retention period",
+    ],
+    tags: ["s3", "object-lock", "compliance", "worm", "security"],
+  },
+
+  // --- NEW: Amazon API Gateway ---
+  {
+    id: "fc-apigw-005",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is API Gateway caching and how does it work?",
+    answer:
+      "API Gateway REST API caches responses from integrations. Cache capacity: 0.5 GB to 237 GB. TTL: 0–3600s. Cache key includes method request path, query strings, and headers (configurable). Cache hit returns response without calling integration. Per-stage setting.",
+    keyPoints: [
+      "Caching available on REST API, not HTTP API",
+      "Reduces backend load and improves latency for repeated requests",
+      "Cache can be invalidated by clients with Cache-Control: max-age=0 header",
+      "Encryption at rest available for cached data",
+    ],
+    tags: ["api-gateway", "caching", "performance", "rest-api"],
+  },
+  {
+    id: "fc-apigw-006",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is API Gateway throttling and usage plans?",
+    answer:
+      "Throttling: limit requests per second (burst: 5000 req, steady: 10000 req/s at account level). Usage plans: associate API keys with rate limits and quotas (daily/weekly/monthly). API keys passed in x-api-key header. Use to monetize or rate-limit API consumers.",
+    keyPoints: [
+      "Account default: 10000 req/s, burst 5000 (can be raised)",
+      "Usage plans: per-client rate limits and monthly quotas",
+      "API key: passed in x-api-key header; not authentication",
+      "Per-method throttling can be configured on individual routes",
+    ],
+    tags: [
+      "api-gateway",
+      "throttling",
+      "usage-plans",
+      "api-keys",
+      "rate-limiting",
+    ],
+  },
+
+  // --- NEW: AWS IAM ---
+  {
+    id: "fc-iam-004",
+    service: "AWS IAM",
+    domain: "security",
+    difficulty: "medium",
+    question: "What is IAM Access Analyzer and what does it detect?",
+    answer:
+      "IAM Access Analyzer identifies resources shared with external principals (outside your AWS organization or account). It analyzes resource policies for S3, IAM roles, KMS keys, SQS queues, Lambda functions, and more. Generates findings for any policy granting external access.",
+    keyPoints: [
+      "Analyzes resource-based policies for external access",
+      "Zone of trust: AWS account or AWS Organization",
+      "Findings: resource + external principal + access level",
+      "Policy validation: checks IAM policies for errors and best practices",
+    ],
+    tags: ["iam", "access-analyzer", "security", "external-access"],
+  },
+  {
+    id: "fc-iam-005",
+    service: "AWS IAM",
+    domain: "security",
+    difficulty: "medium",
+    question: "What are IAM policy conditions and common condition keys?",
+    answer:
+      "Conditions add context-based restrictions to policy statements. Common condition keys: aws:SourceIp (restrict by IP), aws:RequestedRegion (restrict to region), aws:MultiFactorAuthPresent (require MFA), aws:PrincipalTag (tag-based), aws:CurrentTime (time-based). Conditions use condition operators (StringEquals, IpAddress, Bool, etc.).",
+    keyPoints: [
+      "Conditions narrow when a policy statement applies",
+      "aws:SecureTransport: enforce HTTPS-only access",
+      "aws:RequestedRegion: prevent actions outside allowed regions",
+      "Multiple conditions: all must be true (AND logic within a condition block)",
+    ],
+    tags: ["iam", "conditions", "condition-keys", "security", "policy"],
+  },
+  {
+    id: "fc-iam-006",
+    service: "AWS IAM",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What is the difference between identity-based and resource-based IAM policies?",
+    answer:
+      "Identity-based policies attach to IAM users, groups, or roles (control what the identity can do). Resource-based policies attach to resources like S3 buckets, KMS keys, SQS queues (control who can access the resource). Resource-based policies can grant cross-account access without role assumption.",
+    keyPoints: [
+      "Identity-based: attached to principal; defines allowed actions",
+      "Resource-based: attached to resource; defines who can access",
+      "Cross-account: resource policy must explicitly allow external principal",
+      "Lambda resource policy = function policy; allows invokers",
+    ],
+    tags: [
+      "iam",
+      "identity-policy",
+      "resource-policy",
+      "cross-account",
+      "policy-types",
+    ],
+  },
+
+  // --- NEW: Amazon CloudWatch ---
+  {
+    id: "fc-cw-004",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What is CloudWatch Logs Insights and how do you query logs?",
+    answer:
+      "Logs Insights is an interactive log analytics service. Run queries using CloudWatch query language on log groups. Supports parsing JSON logs, filtering, aggregation, and time-series visualization. Results show matching log events and aggregate stats. Queries can be saved and run on dashboards.",
+    keyPoints: [
+      "Query syntax: fields, filter, stats, sort, limit commands",
+      "Auto-discovers fields in JSON logs",
+      "stats count(*) by bin(5m): time-series aggregation",
+      "Query multiple log groups simultaneously",
+    ],
+    tags: ["cloudwatch", "logs-insights", "querying", "analytics"],
+  },
+  {
+    id: "fc-cw-005",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What is CloudWatch Container Insights?",
+    answer:
+      "Container Insights collects, aggregates, and summarizes metrics and logs from containerized applications on ECS, EKS, and Kubernetes on EC2. Provides pre-built dashboards for cluster, node, pod, and container level metrics. Uses CloudWatch agent or Fluent Bit as a daemon.",
+    keyPoints: [
+      "Metrics: CPU, memory, disk, network per pod/container",
+      "Works with ECS, EKS, and self-managed Kubernetes",
+      "CloudWatch agent or Fluent Bit collects and ships metrics/logs",
+      "Performance logs stored in structured CloudWatch Logs format",
+    ],
+    tags: ["cloudwatch", "container-insights", "ecs", "eks", "monitoring"],
+  },
+  {
+    id: "fc-cw-006",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question: "What is CloudWatch anomaly detection and how does it work?",
+    answer:
+      "Anomaly detection uses ML to model the expected behavior of a metric based on historical data, including seasonality and trends. Creates an anomaly detection band (expected range). Alarms can trigger when metric falls outside the band. No fixed threshold needed — adapts to patterns.",
+    keyPoints: [
+      "ML model built on 2 weeks of historical data",
+      "Adapts to time-of-day and day-of-week patterns",
+      "Alarm threshold: ANOMALY_DETECTION_BAND function",
+      "Useful for metrics without predictable absolute thresholds",
+    ],
+    tags: ["cloudwatch", "anomaly-detection", "ml", "alarms", "monitoring"],
+  },
+
+  // --- NEW: Amazon SQS ---
+  {
+    id: "fc-sqs-005",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is the SQS message retention period and message size limit?",
+    answer:
+      "Messages are retained from 1 minute to 14 days (default 4 days). Maximum message size is 256 KB. For larger payloads, use the SQS Extended Client Library which stores the payload in S3 and sends only a reference in the SQS message.",
+    keyPoints: [
+      "Retention: 1 min to 14 days; default 4 days",
+      "Max message size: 256 KB",
+      "SQS Extended Client Library: stores body in S3, sends pointer in SQS",
+      "Batch operations: SendMessageBatch/ReceiveMessage/DeleteMessageBatch (up to 10 messages)",
+    ],
+    tags: ["sqs", "retention", "message-size", "extended-client", "s3"],
+  },
+  {
+    id: "fc-sqs-006",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "hard",
+    question: "How does Lambda event source mapping with SQS work?",
+    answer:
+      "Lambda polls the SQS queue and invokes the function with a batch of messages (batch size 1–10,000). Lambda manages the polling; you don't need consumers. On success, Lambda deletes messages. On failure, messages return to queue (or go to DLQ). Use ReportBatchItemFailures for partial batch success.",
+    keyPoints: [
+      "Lambda polls SQS — you don't write polling code",
+      "Batch size: 1–10,000 messages; batch window up to 300s",
+      "All messages in batch deleted on function success",
+      "ReportBatchItemFailures: return failed message IDs; others are deleted",
+    ],
+    tags: ["sqs", "lambda", "event-source-mapping", "batch-processing"],
+  },
 ];
