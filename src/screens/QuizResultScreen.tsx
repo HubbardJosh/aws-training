@@ -381,6 +381,12 @@ const RECOMMENDATIONS: Record<Domain, string> = {
     "Study CodeDeploy deployment strategies (canary/linear), SAM templates, and CloudFormation rollback triggers.",
   troubleshooting:
     "Practice X-Ray tracing setup, CloudWatch EMF for custom metrics, and ElastiCache caching strategies.",
+  fundamentals:
+    "Review core AI/ML concepts, generative AI fundamentals, and responsible AI principles.",
+  services:
+    "Study the key AWS AI/ML services: Bedrock, SageMaker, Rekognition, Comprehend, and their use cases.",
+  applications:
+    "Practice applying AI services to real-world scenarios and building end-to-end AI-powered solutions.",
 };
 
 const styles = StyleSheet.create({

@@ -11,9 +11,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { quizQuestions } from "../data/quizQuestions";
 import { Domain } from "../types";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -27,6 +28,8 @@ const COUNTS = [5, 10, 20, 40];
 
 export default function QuizMenuScreen() {
   const navigation = useNavigation<Nav>();
+  const { certMeta } = useCert();
+  const { quizQuestions } = useCertData();
   const [selectedDomain, setSelectedDomain] = useState<Domain | "all">("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"
@@ -57,11 +60,10 @@ export default function QuizMenuScreen() {
             color={colors.primary}
           />
           <View style={styles.examCardText}>
-            <Text style={styles.examCardTitle}>DVA-C02 Exam Format</Text>
-            <Text style={styles.examCardSub}>
-              65 questions (50 scored) · 130 min · Multiple choice &amp;
-              multi-select · Pass: 720/1000
+            <Text style={styles.examCardTitle}>
+              {certMeta.name} Exam Format
             </Text>
+            <Text style={styles.examCardSub}>{certMeta.examInfo}</Text>
           </View>
         </View>
 

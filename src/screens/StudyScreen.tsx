@@ -11,9 +11,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { flashcards } from "../data/flashcards";
 import { Domain } from "../types";
 import { RootStackParamList } from "../navigation";
+import { useCertData } from "../context/useCertData";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,10 +25,10 @@ const DOMAINS: Domain[] = [
 ];
 const DIFFICULTIES = ["all", "easy", "medium", "hard"] as const;
 
-const SERVICES = [...new Set(flashcards.map((c) => c.service))].sort();
-
 export default function StudyScreen() {
   const navigation = useNavigation<Nav>();
+  const { flashcards } = useCertData();
+  const SERVICES = [...new Set(flashcards.map((c) => c.service))].sort();
   const [selectedDomain, setSelectedDomain] = useState<Domain | "all">("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"

@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProgress, Domain, GuideProgress, WeakTopic } from "../types";
 
-const STORAGE_KEY = "aws_training_progress";
+const STORAGE_KEY = "aws_training_progress_dva";
 
 const defaultProgress: UserProgress = {
   studiedCards: {},
@@ -11,6 +11,9 @@ const defaultProgress: UserProgress = {
     security: { attempted: 0, correct: 0 },
     deployment: { attempted: 0, correct: 0 },
     troubleshooting: { attempted: 0, correct: 0 },
+    fundamentals: { attempted: 0, correct: 0 },
+    services: { attempted: 0, correct: 0 },
+    applications: { attempted: 0, correct: 0 },
   },
   totalQuestionsAnswered: 0,
   totalCorrect: 0,
@@ -20,15 +23,16 @@ const defaultProgress: UserProgress = {
   weakTopics: {},
 };
 
-export async function loadProgress(): Promise<UserProgress> {
+export async function loadProgress(
+  storageKey: string = STORAGE_KEY,
+): Promise<UserProgress> {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    const raw = await AsyncStorage.getItem(storageKey);
     if (!raw) return defaultProgress;
     const parsed = JSON.parse(raw);
     return {
       ...defaultProgress,
       ...parsed,
-      // Ensure nested objects are merged properly for new fields
       domainScores: {
         ...defaultProgress.domainScores,
         ...parsed.domainScores,
@@ -41,12 +45,17 @@ export async function loadProgress(): Promise<UserProgress> {
   }
 }
 
-export async function saveProgress(progress: UserProgress): Promise<void> {
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+export async function saveProgress(
+  progress: UserProgress,
+  storageKey: string = STORAGE_KEY,
+): Promise<void> {
+  await AsyncStorage.setItem(storageKey, JSON.stringify(progress));
 }
 
-export async function resetProgress(): Promise<void> {
-  await AsyncStorage.removeItem(STORAGE_KEY);
+export async function resetProgress(
+  storageKey: string = STORAGE_KEY,
+): Promise<void> {
+  await AsyncStorage.removeItem(storageKey);
 }
 
 export function getDomainAccuracy(

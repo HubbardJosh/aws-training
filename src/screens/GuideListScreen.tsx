@@ -12,10 +12,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { allGuides } from "../data/guides";
 import { RootStackParamList } from "../navigation";
 import { loadProgress } from "../utils/storage";
 import { UserProgress } from "../types";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,6 +25,8 @@ type DomainFilter = (typeof DOMAINS)[number];
 
 export default function GuideListScreen() {
   const navigation = useNavigation<Nav>();
+  const { certMeta } = useCert();
+  const { guides: allGuides } = useCertData();
   const [search, setSearch] = useState("");
   const [domain, setDomain] = useState<DomainFilter>("all");
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -31,8 +34,8 @@ export default function GuideListScreen() {
   // Reload progress each time screen comes into focus so read indicators update
   useFocusEffect(
     useCallback(() => {
-      loadProgress().then(setProgress);
-    }, []),
+      loadProgress(certMeta.storageKey).then(setProgress);
+    }, [certMeta.storageKey]),
   );
 
   const filtered = useMemo(() => {
@@ -57,7 +60,7 @@ export default function GuideListScreen() {
       >
         <Text style={styles.title}>Service Guides</Text>
         <Text style={styles.subtitle}>
-          {allGuides.length} in-depth guides for DVA-C02
+          {allGuides.length} in-depth guides for {certMeta.name}
         </Text>
 
         {/* Search */}

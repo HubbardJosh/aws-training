@@ -1,5 +1,11 @@
 export type Domain =
-  "development" | "security" | "deployment" | "troubleshooting";
+  | "development"
+  | "security"
+  | "deployment"
+  | "troubleshooting"
+  | "fundamentals"
+  | "services"
+  | "applications";
 
 export type Difficulty = "easy" | "medium" | "hard";
 

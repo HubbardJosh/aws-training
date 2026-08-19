@@ -4,7 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../utils/theme";
+import { CertProvider } from "../context/CertContext";
 
+import CertSelectScreen from "../screens/CertSelectScreen";
 import HomeScreen from "../screens/HomeScreen";
 import StudyScreen from "../screens/StudyScreen";
 import FlashCardScreen from "../screens/FlashCardScreen";
@@ -16,6 +18,7 @@ import GuideListScreen from "../screens/GuideListScreen";
 import GuideDetailScreen from "../screens/GuideDetailScreen";
 
 export type RootStackParamList = {
+  CertSelect: undefined;
   Tabs: undefined;
   FlashCard: { domain: string; difficulty: string; service?: string };
   Quiz: { domain: string; difficulty: string; count: number; service?: string };
@@ -98,16 +101,25 @@ function TabNavigator() {
   );
 }
 
+function RootNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CertSelect" component={CertSelectScreen} />
+      <Stack.Screen name="Tabs" component={TabNavigator} />
+      <Stack.Screen name="FlashCard" component={FlashCardScreen} />
+      <Stack.Screen name="Quiz" component={QuizScreen} />
+      <Stack.Screen name="QuizResult" component={QuizResultScreen} />
+      <Stack.Screen name="GuideDetail" component={GuideDetailScreen} />
+    </Stack.Navigator>
+  );
+}
+
 export default function Navigation() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Tabs" component={TabNavigator} />
-        <Stack.Screen name="FlashCard" component={FlashCardScreen} />
-        <Stack.Screen name="Quiz" component={QuizScreen} />
-        <Stack.Screen name="QuizResult" component={QuizResultScreen} />
-        <Stack.Screen name="GuideDetail" component={GuideDetailScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <CertProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </CertProvider>
   );
 }

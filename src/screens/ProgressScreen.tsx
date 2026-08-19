@@ -24,9 +24,9 @@ import {
   getSortedWeakTopics,
 } from "../utils/storage";
 import { UserProgress, Domain, QuizAttempt, WeakTopic } from "../types";
-import { flashcards } from "../data/flashcards";
-import { allGuides } from "../data/guides";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -39,11 +39,13 @@ const DOMAINS: Domain[] = [
 
 export default function ProgressScreen() {
   const navigation = useNavigation<Nav>();
+  const { certMeta } = useCert();
+  const { flashcards, guides: allGuides } = useCertData();
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
   useEffect(() => {
-    loadProgress().then(setProgress);
-  }, []);
+    loadProgress(certMeta.storageKey).then(setProgress);
+  }, [certMeta.storageKey]);
 
   const handleReset = () => {
     Alert.alert(
@@ -55,8 +57,8 @@ export default function ProgressScreen() {
           text: "Reset",
           style: "destructive",
           onPress: async () => {
-            await resetProgress();
-            const fresh = await loadProgress();
+            await resetProgress(certMeta.storageKey);
+            const fresh = await loadProgress(certMeta.storageKey);
             setProgress(fresh);
           },
         },
@@ -68,7 +70,7 @@ export default function ProgressScreen() {
     if (!progress) return;
     const updated = toggleNeedsReview(progress, service);
     setProgress(updated);
-    await saveProgress(updated);
+    await saveProgress(updated, certMeta.storageKey);
   };
 
   if (!progress) return null;
@@ -93,7 +95,7 @@ export default function ProgressScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Text style={styles.title}>Your Progress</Text>
-        <Text style={styles.subtitle}>DVA-C02 Exam Readiness</Text>
+        <Text style={styles.subtitle}>{certMeta.name} Exam Readiness</Text>
 
         {/* Readiness score */}
         <View style={styles.readinessCard}>

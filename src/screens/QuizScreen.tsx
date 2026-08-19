@@ -12,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { quizQuestions } from "../data/quizQuestions";
 import {
   QuizQuestion,
   Domain,
@@ -27,6 +26,8 @@ import {
   recordWrongAnswers,
 } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 type Route = RouteProp<RootStackParamList, "Quiz">;
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -44,6 +45,8 @@ export default function QuizScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { domain, difficulty, count, service } = route.params;
+  const { certMeta } = useCert();
+  const { quizQuestions } = useCertData();
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -113,7 +116,7 @@ export default function QuizScreen() {
         if (sorted === expected) correct++;
       });
 
-      const progress = await loadProgress();
+      const progress = await loadProgress(certMeta.storageKey);
       const attempt: QuizAttempt = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
@@ -148,7 +151,7 @@ export default function QuizScreen() {
           progress.totalQuestionsAnswered + questions.length,
         totalCorrect: progress.totalCorrect + correct,
       });
-      await saveProgress(updated);
+      await saveProgress(updated, certMeta.storageKey);
     }
   }, [selectedOptions, answers, currentIndex, questions, domain, elapsed]);
 

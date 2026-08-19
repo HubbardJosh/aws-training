@@ -18,9 +18,9 @@ import {
   getOverallAccuracy,
 } from "../utils/storage";
 import { UserProgress, Domain } from "../types";
-import { flashcards } from "../data/flashcards";
-import { quizQuestions } from "../data/quizQuestions";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 const { width } = Dimensions.get("window");
 
@@ -35,11 +35,13 @@ const DOMAINS: Domain[] = [
 
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
+  const { certMeta } = useCert();
+  const { flashcards, quizQuestions } = useCertData();
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
   useEffect(() => {
-    loadProgress().then(setProgress);
-  }, []);
+    loadProgress(certMeta.storageKey).then(setProgress);
+  }, [certMeta.storageKey]);
 
   const overallAccuracy = progress ? getOverallAccuracy(progress) : 0;
   const totalStudied = progress
@@ -53,13 +55,16 @@ export default function HomeScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>AWS Dev Associate</Text>
-            <Text style={styles.subtitle}>DVA-C02 Study App</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.greeting}>{certMeta.name}</Text>
+            <Text style={styles.subtitle}>{certMeta.fullName}</Text>
           </View>
-          <View style={styles.badge}>
-            <Ionicons name="ribbon" size={22} color={colors.primary} />
-          </View>
+          <TouchableOpacity
+            style={styles.badge}
+            onPress={() => navigation.navigate("CertSelect")}
+          >
+            <Ionicons name="swap-horizontal" size={22} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Exam info banner */}
@@ -69,9 +74,7 @@ export default function HomeScreen() {
             size={18}
             color={colors.primary}
           />
-          <Text style={styles.examBannerText}>
-            65 questions · 130 min · Passing score: 720/1000
-          </Text>
+          <Text style={styles.examBannerText}>{certMeta.examInfo}</Text>
         </View>
 
         {/* Overall stats */}

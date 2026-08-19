@@ -10,8 +10,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { allGuides } from "../data/guides";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 import {
   loadProgress,
   saveProgress,
@@ -28,6 +29,8 @@ type Tab = "content" | "facts" | "exam";
 export default function GuideDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteT>();
+  const { certMeta } = useCert();
+  const { guides: allGuides } = useCertData();
   const guide = allGuides.find((g) => g.id === route.params.id);
   const [activeTab, setActiveTab] = useState<Tab>("content");
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
@@ -37,11 +40,11 @@ export default function GuideDetailScreen() {
   // Load progress and mark guide as viewed on mount
   useEffect(() => {
     if (!guide) return;
-    loadProgress().then((p) => {
+    loadProgress(certMeta.storageKey).then((p) => {
       const updated = touchGuide(p, guide.id, guide.sections.length);
       progressRef.current = updated;
       setProgress(updated);
-      saveProgress(updated);
+      saveProgress(updated, certMeta.storageKey);
     });
   }, [guide?.id]);
 
@@ -61,7 +64,7 @@ export default function GuideDetailScreen() {
         );
         progressRef.current = updated;
         setProgress(updated);
-        await saveProgress(updated);
+        await saveProgress(updated, certMeta.storageKey);
       }
     },
     [expandedSection, guide],

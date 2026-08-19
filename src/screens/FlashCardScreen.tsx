@@ -12,10 +12,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
-import { flashcards } from "../data/flashcards";
 import { FlashCard, Domain, Difficulty, UserProgress } from "../types";
 import { loadProgress, saveProgress } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
+import { useCert } from "../context/CertContext";
+import { useCertData } from "../context/useCertData";
 
 type Route = RouteProp<RootStackParamList, "FlashCard">;
 
@@ -35,6 +36,8 @@ export default function FlashCardScreen() {
   const navigation = useNavigation();
   const route = useRoute<Route>();
   const { domain, difficulty, service } = route.params;
+  const { certMeta } = useCert();
+  const { flashcards } = useCertData();
 
   const [cards, setCards] = useState<FlashCard[]>([]);
   const [index, setIndex] = useState(0);
@@ -57,8 +60,8 @@ export default function FlashCardScreen() {
       return domainMatch && diffMatch && serviceMatch;
     });
     setCards(shuffle(filtered));
-    loadProgress().then(setProgress);
-  }, [domain, difficulty]);
+    loadProgress(certMeta.storageKey).then(setProgress);
+  }, [domain, difficulty, certMeta.storageKey]);
 
   const currentCard = cards[index];
 
@@ -122,7 +125,7 @@ export default function FlashCardScreen() {
         lastStudied: new Date().toISOString(),
       };
       setProgress(updated);
-      await saveProgress(updated);
+      await saveProgress(updated, certMeta.storageKey);
 
       if (status === "known") setSessionKnown((n) => n + 1);
       else setSessionLearning((n) => n + 1);
