@@ -19,9 +19,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0],
     explanation:
-      "Lambda Layers are the purpose-built solution for sharing code and dependencies across functions. Each function can reference up to 5 layers. The layer is extracted to /opt in the execution environment. Packaging into each ZIP wastes space and makes updates tedious. EFS mounting works but adds latency and cost. S3 downloads at runtime adds cold start time.",
+      "Lambda Layers are the purpose-built solution for sharing code and dependencies across functions. Each function can reference up to 5 layers, and a layer can be attached to any number of functions. The layer is extracted to /opt in the execution environment. Packaging into each ZIP wastes space and makes updates tedious. EFS mounting works but adds latency and cost. S3 downloads at runtime adds cold start time.",
     optionExplanations: [
-      "Correct. Lambda Layers are the purpose-built solution for sharing libraries — the layer is extracted to /opt in the execution environment and can be attached to up to 5 functions per layer (and each function can use up to 5 layers).",
+      "Correct. Lambda Layers are the purpose-built solution for sharing libraries — the layer is extracted to /opt in the execution environment and can be attached to any number of functions (each function can reference up to 5 layers).",
       "Incorrect. Bundling into each ZIP wastes storage and means every function must be redeployed individually when a shared library is updated, defeating the purpose of code reuse.",
       "Incorrect. Downloading from S3 at runtime adds latency on every cold start (and potentially every invocation) and requires network calls that layers avoid entirely.",
       "Incorrect. EFS mounting works technically but requires VPC configuration, adds network latency, and incurs additional cost — Lambda Layers are the simpler, lower-latency, purpose-built alternative.",
@@ -4821,7 +4821,7 @@ export const quizQuestions: QuizQuestion[] = [
       "Session Manager connects to instances through the SSM agent's outbound HTTPS connection to the SSM service endpoint — no inbound ports needed, no SSH keys, no bastion host. The instance needs the SSM agent installed and an IAM instance profile with AmazonSSMManagedInstanceCore policy, plus outbound HTTPS (port 443) to the SSM service (or a VPC endpoint).",
     optionExplanations: [
       "Correct. Session Manager works via the SSM agent's outbound connection. For private subnets with no internet access, create VPC Interface Endpoints for ssm, ssmmessages, and ec2messages to allow the agent to communicate with the SSM service.",
-      "Incorrect. AWS-StartInteractiveCommand is not a valid SSM document. Run Command is for batch commands, not interactive sessions — Session Manager is the correct feature for interactive shell access.",
+      "Incorrect. AWS-StartInteractiveCommand is an SSM document for running a single command non-interactively via Run Command — it does not create a persistent interactive shell session. Session Manager is the correct feature for a full interactive terminal session.",
       "Incorrect. SSM Automation runs operational runbooks (multi-step automated tasks) — it does not create interactive debugging sessions or SSH tunnels.",
       "Incorrect. Fleet Manager provides a GUI-based view for managing instances (file browser, performance monitoring) — it does not provide an interactive terminal session for debugging.",
     ],
@@ -5769,7 +5769,7 @@ export const quizQuestions: QuizQuestion[] = [
       "Kinesis routes records to shards based on the partition key hash. If all high-traffic records share the same partition key, they all map to the same shard, causing a hot shard. Distributing writes by varying the partition key spreads records across multiple shards, each with its own 1 MB/s limit. Enhanced fan-out is a read-side feature (increases read throughput per consumer) and has no effect on write limits. PutRecords batches API calls but does not change shard routing — the hot shard still receives all records. Encryption affects data security, not throughput.",
     optionExplanations: [
       "Correct. Varying the partition key (randomizing or hashing a secondary attribute) changes which shard each record maps to, distributing load across all 10 shards and effectively multiplying write throughput by up to 10x without adding shards.",
-      "Incorrect. Enhanced fan-out (RegisterStreamConsumer) increases per-consumer read throughput from 2 MB/s to 2 MB/s per consumer — it is a read-side feature and has no impact on shard write limits.",
+      "Incorrect. Enhanced fan-out (RegisterStreamConsumer) is a read-side feature that gives each registered consumer a dedicated 2 MB/s read pipe per shard instead of sharing the shard's 2 MB/s read budget. It has no impact on shard write limits.",
       "Incorrect. PutRecords reduces the number of API round trips by batching records in one call, but each record in the batch is still routed to its shard based on the partition key. If all records have the same key, they all go to the same shard.",
       "Incorrect. Server-side encryption (SSE) encrypts data at rest using KMS but does not compress or reduce the size of records in transit. It has no effect on shard throughput limits.",
     ],
