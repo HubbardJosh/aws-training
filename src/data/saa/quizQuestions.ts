@@ -1285,7 +1285,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [1],
     explanation:
-      "CloudFront Functions run at 218+ edge locations with sub-millisecond startup times and are designed for lightweight, simple operations like header manipulation, URL rewrites, and request normalization. Lambda@Edge runs at regional edge caches and supports more complex logic but with higher latency and cost.",
+      "CloudFront Functions run at 600+ edge locations (all Points of Presence) with sub-millisecond startup times and are designed for lightweight, simple operations like header manipulation, URL rewrites, and request normalization. Lambda@Edge runs at regional edge caches and supports more complex logic but with higher latency and cost.",
     tags: ["cloudfront", "cloudfront-functions", "edge-computing"],
   },
   {
@@ -1860,7 +1860,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [1],
     explanation:
-      "SNS has a built-in retry policy for HTTP/HTTPS subscribers that attempts delivery with exponential backoff across multiple phases (immediate, pre-backoff, backoff, post-backoff) for up to 23 days by default. A DLQ can optionally be configured to capture messages that exhaust all retries.",
+      "SNS has a built-in retry policy for HTTP/HTTPS subscribers. The default policy attempts 3 retries with a 20-second delay between each (total retry window of roughly 1 minute). A custom delivery policy can increase retries up to 100 with configurable backoff phases. A DLQ can optionally be configured on the subscription to capture messages that exhaust all retries.",
     tags: ["sns", "retry-policy", "delivery", "https"],
   },
   {
@@ -2152,7 +2152,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0, 3],
     explanation:
-      "CloudFormation Resource Import allows existing resources to be adopted into a stack without recreation. The IaC Generator (formerly CloudFormation Designer) can scan existing resources and generate template definitions, making it easier to bootstrap IaC for manually created infrastructure.",
+      "CloudFormation Resource Import allows existing resources to be adopted into a stack without recreation. The IaC Generator (a separate capability launched in 2024, not to be confused with CloudFormation Designer) can scan existing resources and generate template definitions, making it easier to bootstrap IaC for manually created infrastructure.",
     tags: ["cloudformation", "resource-import", "iac-generator"],
   },
 
