@@ -360,7 +360,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0],
     explanation:
-      "Amazon RDS supports six database engines: MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server, and Amazon Aurora. DynamoDB is a separate NoSQL service. MongoDB and Cassandra are not supported by RDS (though DocumentDB is compatible with MongoDB).",
+      "Amazon RDS supports multiple database engines: MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server, Amazon Aurora, and IBM Db2. DynamoDB is a separate NoSQL service. MongoDB and Cassandra are not supported by RDS (though DocumentDB is compatible with MongoDB).",
     tags: ["rds", "database-engines", "managed"],
   },
   {
@@ -398,7 +398,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0],
     explanation:
-      "Amazon Aurora is a MySQL and PostgreSQL-compatible relational database built for the cloud. It automatically scales storage in 10 GB increments up to 128 TB and provides up to 5x the throughput of standard MySQL on similar hardware. Aurora is part of the RDS service family but uses a cloud-native architecture.",
+      "Amazon Aurora is a MySQL and PostgreSQL-compatible relational database built for the cloud. It automatically scales storage up to 128 TiB and provides up to 5x the throughput of standard MySQL on similar hardware. Aurora is part of the RDS service family but uses a cloud-native architecture.",
     tags: ["rds", "aurora", "mysql", "performance"],
   },
 
