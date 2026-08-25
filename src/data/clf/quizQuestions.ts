@@ -137,7 +137,7 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "hard",
     type: "multi",
     question:
-      "A company needs EC2 instances for a regulatory workload that requires dedicated physical servers and the ability to use existing per-socket software licenses. Which TWO purchasing options meet these requirements?",
+      "A company needs EC2 instances for a regulatory workload that requires dedicated physical servers and the ability to use existing per-socket software licenses. Which purchasing option meets these requirements?",
     options: [
       "Dedicated Hosts",
       "Dedicated Instances",
@@ -145,9 +145,9 @@ export const quizQuestions: QuizQuestion[] = [
       "Spot Instances",
       "On-Demand Instances",
     ],
-    correctIndices: [0, 1],
+    correctIndices: [0],
     explanation:
-      "Dedicated Hosts provide a physical server fully dedicated to your use, giving visibility into sockets and cores for license management. Dedicated Instances run on hardware dedicated to a single customer but do not provide socket/core visibility for BYOL licensing. Both satisfy physical isolation requirements.",
+      "Dedicated Hosts provide a physical server fully dedicated to your use, giving visibility into sockets, cores, and host ID — which is required for per-socket or per-core BYOL software licensing. Dedicated Instances run on hardware dedicated to a single customer but do NOT provide socket/core visibility and therefore cannot satisfy per-socket BYOL licensing requirements.",
     tags: ["ec2", "dedicated-hosts", "dedicated-instances", "compliance"],
   },
 

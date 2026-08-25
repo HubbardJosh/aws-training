@@ -69,7 +69,7 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
   ],
 
   keyFacts: [
-    "CloudFront is AWS's global CDN, serving content from 400+ edge locations worldwide",
+    "CloudFront is AWS's global CDN, serving content from 600+ Points of Presence (edge locations) worldwide",
     "Reduces latency by caching content at edge locations close to users",
     "Origin can be S3, EC2, ALB, API Gateway, or any HTTP server",
     "Origin Access Control (OAC) keeps S3 buckets private — only CloudFront can access them",

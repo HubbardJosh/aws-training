@@ -1097,7 +1097,7 @@ export const quizQuestions: QuizQuestion[] = [
     type: "multi",
     service: "AWS Lambda",
     question:
-      "A Lambda function is hitting the 3 GB /tmp storage limit. Which TWO alternatives can provide larger or shared persistent storage for Lambda? (Select TWO)",
+      "A Lambda function is hitting the 512 MB default /tmp storage limit. Which TWO alternatives can provide larger or shared persistent storage for Lambda? (Select TWO)",
     options: [
       "Mount an Amazon EFS file system to the Lambda function",
       "Use an S3 bucket to store and retrieve large files during execution",
@@ -1107,7 +1107,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0, 1],
     explanation:
-      "EFS can be mounted to Lambda functions within a VPC, providing virtually unlimited shared storage that persists across invocations and is accessible by multiple functions simultaneously. S3 provides unlimited object storage accessible within Lambda execution via the SDK — ideal for large files. /tmp is limited to 10 GB (recently increased from 512 MB) and is NOT shared across invocations. Memory allocation does not affect /tmp size. Provisioned Concurrency keeps environments warm but /tmp is still isolated per environment.",
+      "EFS can be mounted to Lambda functions within a VPC, providing virtually unlimited shared storage that persists across invocations and is accessible by multiple functions simultaneously. S3 provides unlimited object storage accessible within Lambda execution via the SDK — ideal for large files. /tmp defaults to 512 MB and can be configured up to 10,240 MB (10 GB), but it is NOT shared across invocations. Memory allocation does not affect /tmp size. Provisioned Concurrency keeps environments warm but /tmp is still isolated per environment.",
     optionExplanations: [
       "Correct. Amazon EFS can be mounted to Lambda functions within a VPC, providing virtually unlimited shared persistent storage accessible simultaneously by multiple function instances — persisting data across invocations.",
       "Correct. Amazon S3 provides effectively unlimited object storage that Lambda can read from and write to via the AWS SDK during execution — it is the standard solution for large files that exceed /tmp limits.",
@@ -1133,9 +1133,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0],
     explanation:
-      "When Lambda polls SQS, it scales concurrency based on the number of in-flight message batches. As queue depth grows, Lambda adds more concurrent executions (up to 60 new instances per minute initially, then faster). Scaling is limited by the function's reserved concurrency (if set) or the account-level concurrency limit (default 1,000, adjustable). There is no SQS-specific concurrency cap at 1,000 — that is the account default which applies across all functions.",
+      "When Lambda polls SQS, it scales concurrency based on the number of in-flight message batches. As queue depth grows, Lambda adds more concurrent executions (up to 300 additional concurrent executions per minute). Scaling is limited by the function's reserved concurrency (if set) or the account-level concurrency limit (default 1,000, adjustable). There is no SQS-specific concurrency cap at 1,000 — that is the account default which applies across all functions.",
     optionExplanations: [
-      "Correct. Lambda automatically scales concurrency as SQS queue depth grows — it adds more concurrent executions (up to 60 new instances per minute initially, then faster) until the queue drains or concurrency limits are reached.",
+      "Correct. Lambda automatically scales concurrency as SQS queue depth grows — it adds more concurrent executions (up to 300 additional concurrent executions per minute) until the queue drains or concurrency limits are reached.",
       "Incorrect. Lambda absolutely does scale beyond one concurrent execution for SQS — it increases parallelism based on queue depth and the configured batch size.",
       "Incorrect. SQS does not have shards (that is a Kinesis concept); Lambda scales based on the number of in-flight message batches, not a fixed one-per-shard rule.",
       "Incorrect. The 1,000 concurrent execution figure is the account-level default limit that applies across all functions — it is not an SQS-specific cap, and it can be increased by requesting a quota increase.",
@@ -1387,7 +1387,7 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "SQS Standard queues provide at-least-once delivery — a message may be delivered more than once even if successfully processed and deleted. This is a fundamental characteristic of Standard queues. The visibility timeout (30s) was not exceeded (25s < 30s) and DeleteMessage was called before expiry, but SQS can still deliver duplicate copies that were already stored internally. Applications using Standard SQS must be idempotent. Use FIFO queues if exactly-once is required.",
     optionExplanations: [
-      "Incorrect. This explanation is plausible but does not match the fundamental cause—SQS Standard at-least-once delivery means a second copy can arrive independently of the delete operation's timing.",
+      "Incorrect. This describes how a duplicate might manifest, but the root cause is SQS Standard at-least-once delivery semantics — the distributed backend may store multiple copies of a message, so a second copy can arrive even after the first was successfully processed and deleted.",
       "Incorrect. The visibility timeout was 30 seconds and the consumer finished and deleted the message in 25 seconds, so the timeout was not exceeded; this is not the cause of the duplicate in this scenario.",
       "Correct. SQS Standard queues provide at-least-once delivery, meaning the same message may be stored and delivered as more than one copy in the queue's distributed backend. Even when the first consumer deleted the message before the visibility timeout expired, a duplicate copy already in flight can still be delivered to another consumer.",
       "Incorrect. The DeleteMessage API does not have a known propagation delay of 10 seconds; once acknowledged, the message is removed. The duplicate delivery in this scenario stems from at-least-once delivery semantics, not a delete lag.",
@@ -1771,10 +1771,10 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctIndices: [0],
     explanation:
-      "An explicit Deny in a resource-based policy (S3 bucket policy) that targets all principals (Principal: '*') with a Deny on s3:DeleteBucket wins over any identity-based policy that allows it. Explicit Deny always takes precedence. SCPs work at the account level but cannot target individual resource ARNs. Permission boundaries must be attached individually to each principal. IAM group policies apply to group members only — not all users, and can be overridden by explicit Deny.",
+      "An explicit Deny in a resource-based policy (S3 bucket policy) that targets all principals (Principal: '*') with a Deny on s3:DeleteBucket wins over any identity-based policy that allows it. Explicit Deny always takes precedence. SCPs operate at the account level and apply account-wide to all principals — they cannot be scoped to protect a single specific resource. Permission boundaries must be attached individually to each principal. IAM group policies apply to group members only — not all users, and can be overridden by explicit Deny.",
     optionExplanations: [
       "Correct. An explicit Deny in a resource-based policy (S3 bucket policy) with Principal: '*' applies to all principals, including those with identity policies that would otherwise allow the action. Explicit Deny always takes precedence over any Allow in IAM policy evaluation, making this the most reliable way to protect a specific resource.",
-      "Incorrect. While SCPs can deny actions at the account level, SCPs operate on accounts (or OUs) within AWS Organizations and cannot be scoped to a specific resource ARN like a single S3 bucket. They apply to all resources of a given action across the account.",
+      "Incorrect. While SCPs can include resource ARN conditions in their policy statements, they apply account-wide to all principals in the account — they cannot selectively protect a single S3 bucket without also restricting access to all other S3 buckets for the entire account. A resource-based bucket policy is the targeted, resource-scoped solution.",
       "Incorrect. Permission boundaries must be individually attached to each IAM user or role. They cannot be applied globally to 'all users' in an account in a single operation, and managing them at scale this way would be error-prone. A bucket policy is a simpler, resource-scoped solution.",
       "Incorrect. IAM group policies only apply to members of that group—they do not cover all principals in an account. A user not in the group, or a role, would not be subject to the group Deny. A resource-based bucket policy with Principal: '*' covers all principals universally.",
     ],
@@ -5243,5 +5243,606 @@ export const quizQuestions: QuizQuestion[] = [
       "Incorrect. Manual resolution requires implementing a custom conflict handler, which is supported but opt-in. The default behavior is Auto Merge without requiring any custom code.",
     ],
     tags: ["amplify", "datastore", "offline", "conflict-resolution", "sync"],
+  },
+
+  // ─── SITUATIONAL ────────────────────────────────────────────────────────────
+
+  {
+    id: "qq-200",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Lambda",
+    question:
+      "Your team's Lambda function processes customer orders. During Black Friday load testing you observe that the function runs fine at 50 concurrent executions but at 500 concurrent executions database connections are exhausted and queries start failing. The database is Amazon RDS PostgreSQL. What is the BEST long-term fix?",
+    options: [
+      "Place Amazon RDS Proxy in front of the RDS instance to pool and reuse database connections",
+      "Increase the RDS instance size to db.r6g.16xlarge to support more connections",
+      "Set Lambda reserved concurrency to 50 to cap concurrent executions",
+      "Switch the Lambda runtime to a connection-efficient language like Go",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Each Lambda execution environment opens its own RDS connection. At high concurrency this exhausts RDS max_connections quickly. RDS Proxy maintains a pool of persistent connections to RDS and multiplexes Lambda invocations through that pool, dramatically reducing connection count. Upscaling the instance buys headroom but not scalability. Capping concurrency limits throughput. Switching runtime does not change the fundamental connection-per-environment pattern.",
+    optionExplanations: [
+      "Correct. RDS Proxy is the purpose-built solution for this exact problem. It maintains a warm pool of persistent connections to RDS and multiplexes many Lambda executions through fewer real database connections, eliminating connection exhaustion at scale.",
+      "Incorrect. A larger instance does increase max_connections, but it is an expensive and non-scalable fix — you would need to keep upsizing as traffic grows, and it does not address the root cause of too many short-lived connections.",
+      "Incorrect. Capping reserved concurrency to 50 would prevent connection exhaustion but would also throttle throughput, causing 429 errors and backed-up orders during peak load — the opposite of what you need on Black Friday.",
+      "Incorrect. The runtime language does not change the connection model. Every Lambda execution environment, regardless of language, opens its own connection to RDS unless a proxy is used.",
+    ],
+    tags: ["lambda", "rds", "rds-proxy", "connection-pooling", "concurrency"],
+  },
+  {
+    id: "qq-201",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodeDeploy",
+    question:
+      "You are deploying a critical payment API to a fleet of 200 EC2 instances. The business requires zero downtime and the ability to instantly roll back if the error rate rises above 1% after deployment. Which deployment configuration satisfies BOTH requirements?",
+    options: [
+      "CodeDeploy Canary deployment to a small percentage first, with CloudWatch alarms wired to trigger automatic rollback",
+      "In-place All-at-once deployment with a CloudWatch alarm that pages on-call if errors spike",
+      "Blue/green deployment replacing all instances simultaneously with manual rollback via console",
+      "Rolling deployment updating 50 instances at a time with no alarms configured",
+    ],
+    correctIndices: [0],
+    explanation:
+      "A Canary deployment shifts a small percentage of traffic (e.g. 10%) to the new version first. CloudWatch alarms on error rate are natively integrated with CodeDeploy — if the alarm trips, CodeDeploy automatically rolls back without human intervention. Blue/green with simultaneous cutover meets the zero-downtime requirement but rollback is not instant if done manually. All-at-once causes downtime. Rolling without alarms cannot auto-rollback.",
+    optionExplanations: [
+      "Correct. Canary exposes a small slice of production traffic first. CodeDeploy's alarm-based automatic rollback triggers immediately if error rate exceeds the threshold — satisfying both zero downtime and instant, automatic rollback.",
+      "Incorrect. All-at-once deployment replaces all instances simultaneously, causing downtime during the deployment window. A page to on-call is not an instant rollback.",
+      "Incorrect. Blue/green provides zero downtime via the load balancer, but 'replacing all instances simultaneously' means the rollback requires routing traffic back to the old environment — this can be done but is not instant without pre-configured automatic rollback triggers.",
+      "Incorrect. Rolling at 50 instances at a time preserves some capacity, but with no alarms there is no automatic rollback — a human must notice the error spike and manually intervene.",
+    ],
+    tags: [
+      "codedeploy",
+      "canary",
+      "rollback",
+      "cloudwatch",
+      "zero-downtime",
+      "deployment",
+    ],
+  },
+  {
+    id: "qq-202",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Secrets Manager",
+    question:
+      "Your application retrieves a database password from Secrets Manager on every request. In production you notice the Secrets Manager API is being called 5,000 times per minute and you are hitting throttling errors. The password rotates once every 30 days. What is the MOST cost-effective fix?",
+    options: [
+      "Cache the secret in memory after the first retrieval and refresh the cache only when rotation is detected via a TTL or SecretsManager rotation event",
+      "Request a Secrets Manager API throttling limit increase from AWS Support",
+      "Store the password in an environment variable and redeploy whenever it rotates",
+      "Move the secret to AWS Systems Manager Parameter Store Standard tier which has a higher default rate limit",
+    ],
+    correctIndices: [0],
+    explanation:
+      "The Secrets Manager SDK and many AWS SDKs include built-in client-side caching. You retrieve the secret once, cache it in process memory with a TTL (e.g. 1 hour), and only call the API again when the TTL expires or when an authentication error suggests the secret rotated. This drops API calls from thousands per minute to a handful per hour. Requesting a limit increase does not fix the architectural inefficiency. Environment variables require redeployment on rotation. SSM Parameter Store has higher limits but still requires caching at high call rates.",
+    optionExplanations: [
+      "Correct. In-process caching with a TTL aligned to your rotation window is the standard pattern. The AWS Secrets Manager caching client library implements this out of the box. It slashes API call volume without any risk of using a stale secret beyond the TTL.",
+      "Incorrect. A limit increase treats the symptom, not the cause. It also adds cost (Secrets Manager charges per API call) and the higher limit may eventually be hit again as traffic grows.",
+      "Incorrect. Baking the secret into an environment variable requires a redeployment on every rotation, introduces a window where the old value is live, and defeats the purpose of automatic rotation.",
+      "Incorrect. SSM Parameter Store has a higher default throughput, but at 5,000 requests per minute you would hit those limits too. The correct fix is caching, not switching secret stores.",
+    ],
+    tags: [
+      "secrets-manager",
+      "caching",
+      "throttling",
+      "rotation",
+      "performance",
+    ],
+  },
+  {
+    id: "qq-203",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS X-Ray",
+    question:
+      "A distributed order service spans API Gateway, Lambda, SQS, and a downstream fulfillment Lambda. Users report that roughly 2% of orders silently fail — no error is surfaced to the user but the fulfillment step never runs. You need to identify exactly which service leg is dropping these requests. What is the FASTEST path to root cause?",
+    options: [
+      "Enable X-Ray active tracing on all services in the chain and use the X-Ray Service Map to identify which segment shows a fault percentage",
+      "Add CloudWatch Logs Insights queries to each service and manually correlate log lines by timestamp",
+      "Increase Lambda timeout and memory on both functions to eliminate resource-related drops",
+      "Enable SQS dead-letter queue and inspect messages to find the failing Lambda invocations",
+    ],
+    correctIndices: [0],
+    explanation:
+      "X-Ray propagates a trace ID through the entire call chain — API Gateway → Lambda → SQS → Lambda. The Service Map renders every service as a node with its error, fault, and throttle rates. A 2% fault rate will appear visually on the affected node, letting you pinpoint the exact segment in minutes. Manual log correlation requires timestamp alignment across four services and is slow. Increasing resources addresses a guess, not the identified cause. A DLQ only captures SQS-level failures; if the fault is upstream, messages may never reach SQS.",
+    optionExplanations: [
+      "Correct. X-Ray end-to-end tracing with the Service Map is purpose-built for this problem. The trace ID propagates across all four services, and the map makes the failing segment visually obvious — no manual log correlation needed.",
+      "Incorrect. CloudWatch Logs Insights can answer this question eventually, but correlating log lines by timestamp across four services is slow and error-prone. X-Ray is the right tool for distributed tracing.",
+      "Incorrect. Increasing timeout and memory is a guess without evidence. You should identify the root cause first, then apply the appropriate fix — not speculatively tune resources.",
+      "Incorrect. A DLQ captures messages that could not be processed by the fulfillment Lambda, but if the failure happens in API Gateway or the first Lambda before a message is ever enqueued, the DLQ reveals nothing. It covers only one leg of the chain.",
+    ],
+    tags: ["xray", "service-map", "tracing", "distributed", "troubleshooting"],
+  },
+  {
+    id: "qq-204",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon DynamoDB",
+    question:
+      "Your e-commerce app stores product reviews in DynamoDB with userId as the partition key and reviewId as the sort key. A new requirement asks you to display all reviews for a given productId, sorted by rating descending. The current table design does not include productId as a key. What is the MOST efficient solution?",
+    options: [
+      "Create a Global Secondary Index (GSI) with productId as the partition key and rating as the sort key",
+      "Perform a full table Scan with a FilterExpression on productId each time the page loads",
+      "Add a Local Secondary Index (LSI) with rating as the sort key on the existing table",
+      "Migrate the table to use productId as the partition key and userId as the sort key",
+    ],
+    correctIndices: [0],
+    explanation:
+      "A GSI with productId as PK and rating as SK lets you Query for all reviews of a product already sorted by rating — a single, efficient Query call. A Scan reads every item in the table and is expensive and slow at scale. An LSI requires the same partition key as the base table (userId) and cannot support productId-based queries. Migrating the table's primary key would break all existing access patterns that rely on userId.",
+    optionExplanations: [
+      "Correct. A GSI with productId as the partition key and rating as the sort key lets you Query for all reviews of a specific product sorted by rating in one efficient call, without touching the base table's key structure.",
+      "Incorrect. A Scan with FilterExpression reads every item in the entire table and then filters — it consumes full table read capacity and becomes extremely expensive and slow as the table grows.",
+      "Incorrect. An LSI must share the same partition key as the base table (userId). It cannot support querying by a different partition key like productId.",
+      "Incorrect. Changing the partition key from userId to productId would break every existing access pattern that looks up reviews by userId — a destructive change that requires a full data migration.",
+    ],
+    tags: ["dynamodb", "gsi", "index", "query", "access-patterns"],
+  },
+  {
+    id: "qq-205",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CloudFormation",
+    question:
+      "A CloudFormation stack update is stuck in UPDATE_ROLLBACK_FAILED state. The team cannot delete or update the stack. What is the correct way to recover?",
+    options: [
+      "Use the ContinueUpdateRollback API call, optionally skipping resources that cannot be rolled back, to bring the stack back to a stable state",
+      "Delete the stack and redeploy from scratch — stacks in UPDATE_ROLLBACK_FAILED cannot be recovered",
+      "Manually fix the underlying resources in the AWS console and then force-delete the stack",
+      "Contact AWS Support to reset the stack state from the backend",
+    ],
+    correctIndices: [0],
+    explanation:
+      "UPDATE_ROLLBACK_FAILED means CloudFormation started rolling back a failed update but one or more resources failed during rollback. ContinueUpdateRollback retries the rollback. If a specific resource is permanently stuck (e.g. the underlying resource no longer exists), you can pass it in the ResourcesToSkip parameter and CloudFormation will skip that resource and complete the rollback. The stack is not permanently broken and does not need to be deleted.",
+    optionExplanations: [
+      "Correct. ContinueUpdateRollback is the AWS-documented recovery path for UPDATE_ROLLBACK_FAILED. It retries the rollback operation and allows you to skip specific problematic resources so the stack reaches a stable ROLLBACK_COMPLETE or UPDATE_ROLLBACK_COMPLETE state.",
+      "Incorrect. Stacks in UPDATE_ROLLBACK_FAILED can be recovered using ContinueUpdateRollback without deletion. Deleting and redeploying is a last resort that loses the stack's history and outputs.",
+      "Incorrect. Manually fixing resources in the console can help unblock a stuck resource, but you still need to call ContinueUpdateRollback to tell CloudFormation to retry the rollback — console fixes alone do not change the stack state.",
+      "Incorrect. AWS Support cannot reset stack state from the backend. ContinueUpdateRollback is the self-service API call designed for exactly this scenario.",
+    ],
+    tags: [
+      "cloudformation",
+      "update-rollback-failed",
+      "continue-update-rollback",
+      "recovery",
+    ],
+  },
+  {
+    id: "qq-206",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS IAM",
+    question:
+      "A developer accidentally committed long-term IAM access keys to a public GitHub repository. The keys are for an IAM user that has S3 read/write access to production buckets. What is the CORRECT order of remediation steps?",
+    options: [
+      "1) Immediately deactivate or delete the exposed keys in IAM  2) Check CloudTrail for unauthorized API calls made with those keys  3) Rotate any data that may have been accessed or exfiltrated  4) Enforce short-lived credentials via IAM roles going forward",
+      "1) Remove the commit from Git history using git rebase  2) Notify the team  3) Rotate the keys in 48 hours during the next maintenance window",
+      "1) Create a new IAM user with fresh keys  2) Update the application  3) Delete the old user next sprint",
+      "1) Add an S3 bucket policy denying the old key  2) Check S3 access logs for suspicious activity",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Once keys are pushed to a public repo they must be treated as fully compromised regardless of how quickly the commit is removed — bots scrape GitHub in seconds. The priority order is: (1) immediately cut off access by deactivating/deleting the key, (2) audit CloudTrail to understand what was done with the key, (3) assess and remediate any data impact, (4) fix the root cause by using IAM roles (which issue short-lived tokens) instead of long-term keys. Deleting from git history does not help — the key is already compromised.",
+    optionExplanations: [
+      "Correct. Deactivating the key first stops the bleeding. CloudTrail audit reveals what was accessed. Data remediation follows. Moving to IAM roles prevents recurrence. This is the AWS-recommended incident response sequence.",
+      "Incorrect. Removing the commit is cosmetically useful but irrelevant to security — the keys are already scraped. Waiting 48 hours for a maintenance window is far too slow; damage can occur within minutes.",
+      "Incorrect. Creating a new IAM user with fresh keys does not deactivate the compromised keys — the attacker can still use the old credentials until they are explicitly disabled.",
+      "Incorrect. An S3 bucket policy can restrict one bucket, but the IAM user may have access to other resources. The keys must be deactivated in IAM to cut off all access immediately.",
+    ],
+    tags: [
+      "iam",
+      "security",
+      "key-rotation",
+      "incident-response",
+      "cloudtrail",
+    ],
+  },
+  {
+    id: "qq-207",
+    domain: "development",
+    difficulty: "hard",
+    type: "multi",
+    service: "Amazon DynamoDB",
+    question:
+      "Your DynamoDB table is experiencing hot partition issues — one partition key value (userId '12345') generates 80% of all writes. Which TWO design changes would MOST effectively eliminate the hot partition? (Select TWO)",
+    options: [
+      "Add a random suffix (1–N) to the partition key and aggregate reads across all suffixed partitions",
+      "Enable DynamoDB Auto Scaling to automatically provision more capacity",
+      "Switch the table from provisioned to on-demand capacity mode",
+      "Use write sharding by appending a calculated shard number based on a hash of a secondary attribute",
+      "Add a GSI to distribute reads across a secondary index",
+    ],
+    correctIndices: [0, 3],
+    explanation:
+      "Hot partitions occur when a single key receives a disproportionate share of traffic. Both random suffix sharding and calculated hash sharding spread writes across multiple logical partitions for the same userId, distributing the load. Auto Scaling and on-demand mode add capacity but do not fix the hot partition itself — DynamoDB still routes all writes for that key to the same partition, which will hit the per-partition throughput limit. A GSI redistributes reads but not writes.",
+    optionExplanations: [
+      "Correct. Adding a random suffix (e.g. userId#1 through userId#10) spreads writes evenly across 10 partition key values, distributing load across 10 physical partitions. Reads must query all suffixed partitions and aggregate results.",
+      "Incorrect. Auto Scaling increases provisioned capacity but DynamoDB's partition routing is determined by the key. All writes to userId '12345' still land on the same partition — more capacity does not help if the per-partition limit is the bottleneck.",
+      "Incorrect. On-demand mode removes capacity planning but does not change partition routing. A single hot partition can still hit per-partition throughput limits regardless of billing mode.",
+      "Correct. Using a hash-based shard number derived from a secondary attribute (e.g. orderId % 10 appended to userId) distributes writes deterministically across multiple partitions while remaining predictable for reads.",
+      "Incorrect. A GSI creates a separate index that can distribute read capacity, but it does not affect the write distribution on the base table. Hot write partitions on the base table remain hot.",
+    ],
+    tags: [
+      "dynamodb",
+      "hot-partition",
+      "write-sharding",
+      "partition-key",
+      "performance",
+    ],
+  },
+  {
+    id: "qq-208",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS Elastic Beanstalk",
+    question:
+      "Your team deploys a Node.js API to Elastic Beanstalk. During a deployment using the 'Rolling' policy, a health check reports that instances in the first batch are unhealthy. What does Elastic Beanstalk do by default?",
+    options: [
+      "It stops the deployment and leaves the successfully updated batch on the new version while the remaining instances stay on the old version",
+      "It automatically rolls back all instances to the previous version",
+      "It continues the deployment to the remaining batches regardless of the health check failure",
+      "It terminates the unhealthy instances and replaces them with new ones running the old version",
+    ],
+    correctIndices: [0],
+    explanation:
+      "With a Rolling deployment, Elastic Beanstalk updates one batch at a time. If a batch becomes unhealthy, the deployment stops at that point — it does not continue to further batches. Crucially, Beanstalk does NOT automatically roll back the already-updated batch. You end up in a mixed-version state: the first batch is on the new (broken) version, the rest are on the old. You must then deploy the old version again or use 'Rolling with additional batch' or 'Immutable' policies to avoid this mixed state.",
+    optionExplanations: [
+      "Correct. Rolling deployments stop on health check failure, leaving a mixed-version environment. This is a known limitation of the Rolling policy — it does not perform automatic rollback.",
+      "Incorrect. Elastic Beanstalk's Rolling policy does not perform automatic rollback. Only 'Immutable' deployments can be aborted cleanly; rolling deployments leave the environment in a mixed state.",
+      "Incorrect. Elastic Beanstalk stops the deployment when a batch is unhealthy — it does not continue deploying the broken version to additional batches.",
+      "Incorrect. Beanstalk does not terminate the unhealthy instances and replace them with the old version automatically. You must take a manual action to resolve the mixed-version state.",
+    ],
+    tags: [
+      "elastic-beanstalk",
+      "rolling-deployment",
+      "health-check",
+      "deployment",
+      "mixed-version",
+    ],
+  },
+  {
+    id: "qq-209",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Lambda",
+    question:
+      "A Lambda function that writes to DynamoDB is suddenly returning ThrottlingException errors in production. The DynamoDB table has provisioned capacity with Auto Scaling enabled, but scaling has not triggered. CloudWatch shows the table's consumed write capacity is well below provisioned capacity. What is the MOST likely cause?",
+    options: [
+      "The Lambda function is targeting a specific DynamoDB partition that is exceeding the per-partition throughput limit of 1,000 WCU",
+      "The Lambda function's IAM role lacks the dynamodb:PutItem permission",
+      "Auto Scaling has a cooldown period and needs more time to respond",
+      "The DynamoDB table is in a different region than the Lambda function",
+    ],
+    correctIndices: [0],
+    explanation:
+      "DynamoDB throttles at two levels: table level and partition level. Each partition can handle up to 1,000 WCU writes per second. If a hot partition is receiving the majority of writes (common with poor partition key selection), that partition can be throttled even when the overall table capacity is nowhere near its limit — which is exactly what CloudWatch table-level metrics would show. IAM errors produce AccessDeniedException, not ThrottlingException. Auto Scaling cooldowns cause table-level throttling that shows up in metrics. Cross-region would cause connection errors or high latency, not throttling.",
+    optionExplanations: [
+      "Correct. DynamoDB has a per-partition limit of 1,000 WCU/s. If writes concentrate on a single partition (hot partition), that partition throttles even when table-level consumed capacity is low. CloudWatch's table-level metrics do not expose per-partition throughput, making this deceptive.",
+      "Incorrect. A missing IAM permission would throw AccessDeniedException, not ThrottlingException. The error type itself tells you this is a capacity issue, not an authorization issue.",
+      "Incorrect. Auto Scaling cooldowns delay scaling of table-level provisioned capacity. In this scenario, table-level capacity is sufficient — the issue is at the partition level, which Auto Scaling cannot address.",
+      "Incorrect. Cross-region mismatches would typically produce connection errors, endpoint resolution failures, or very high latency — not ThrottlingException responses.",
+    ],
+    tags: [
+      "dynamodb",
+      "throttling",
+      "hot-partition",
+      "per-partition-limit",
+      "troubleshooting",
+    ],
+  },
+  {
+    id: "qq-210",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon Cognito",
+    question:
+      "Your mobile app uses Cognito User Pools for authentication. A penetration tester reports that unauthenticated users can call your API Gateway endpoint directly by guessing valid JWT tokens. You need to ensure that only tokens issued by your specific Cognito User Pool are accepted. What is the MOST secure configuration?",
+    options: [
+      "Attach a Cognito User Pool Authorizer to API Gateway — it validates the JWT signature, expiry, and issuer against your User Pool automatically",
+      "Add a Lambda Authorizer that decodes the JWT payload and checks the 'sub' claim matches a known list of user IDs",
+      "Require callers to include the Cognito App Client ID as a query string parameter and validate it in a Lambda function",
+      "Enable AWS WAF on API Gateway with a rule that blocks requests without an Authorization header",
+    ],
+    correctIndices: [0],
+    explanation:
+      "A Cognito User Pool Authorizer is natively integrated with API Gateway. It validates the JWT's cryptographic signature using the User Pool's JWKS endpoint, checks the token is not expired, and verifies the issuer (iss) claim matches your specific User Pool URL — all without any custom code. A Lambda Authorizer that only checks the 'sub' claim does not validate the signature and could be spoofed. Passing the App Client ID as a query string is not authentication. WAF can block missing headers but cannot validate JWT contents.",
+    optionExplanations: [
+      "Correct. The Cognito User Pool Authorizer performs full JWT validation: signature verification via JWKS, expiry check, and issuer validation against your User Pool's URL. It is the purpose-built, zero-code solution for this exact requirement.",
+      "Incorrect. Checking only the 'sub' claim in a Lambda Authorizer does not validate the JWT signature. An attacker could forge a token with a valid 'sub' value, and this authorizer would accept it.",
+      "Incorrect. The App Client ID is not a secret credential — it is embedded in the mobile app and can be extracted. Validating it provides no real authentication.",
+      "Incorrect. WAF can enforce the presence of an Authorization header, but it cannot parse or validate a JWT. It would block requests with no header but allow any request with any value in that header.",
+    ],
+    tags: [
+      "cognito",
+      "api-gateway",
+      "jwt",
+      "authorizer",
+      "authentication",
+      "security",
+    ],
+  },
+  {
+    id: "qq-211",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS Step Functions",
+    question:
+      "You are building an order fulfillment workflow in Step Functions that calls three external payment APIs sequentially. Occasionally, one API call fails with a transient HTTP 503 error. You want the workflow to retry the failed step up to 3 times with exponential backoff before failing the entire execution. What is the CORRECT way to configure this?",
+    options: [
+      "Add a Retry block on the Task state with MaxAttempts: 3, BackoffRate: 2, and IntervalSeconds set to the initial wait time",
+      "Wrap each API call in a Lambda function that catches exceptions and retries internally using a for loop",
+      "Use a Choice state after each Task to check if the output is an error and loop back to the Task if it is",
+      "Enable Step Functions Express Workflows which have built-in automatic retry for transient failures",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Step Functions Task states natively support a Retry block in the state definition. You specify the error types to catch (e.g. States.TaskFailed), MaxAttempts (3), IntervalSeconds for the initial wait, and BackoffRate for exponential multiplier. Step Functions handles the retry logic entirely, including the backoff timing, without any Lambda code changes. Lambda-internal retries hide failures from Step Functions and make the execution history less transparent. A Choice loop works but is complex and non-idiomatic. Express Workflows do not add built-in retry logic.",
+    optionExplanations: [
+      "Correct. The Retry field is a first-class feature of Step Functions Task states. It handles MaxAttempts, exponential backoff via BackoffRate, and error type filtering natively — no custom code required and the retry attempts are visible in the execution history.",
+      "Incorrect. Retrying inside the Lambda function hides the retry attempts from Step Functions. The execution history shows a single Task invocation even if it retried 3 times internally, making debugging harder. It also ties retry logic to the Lambda rather than the workflow definition.",
+      "Incorrect. Using a Choice state to loop back is a valid workaround but is verbose, error-prone to implement correctly, and non-idiomatic. The native Retry block was designed specifically to avoid this pattern.",
+      "Incorrect. Express Workflows differ from Standard Workflows in execution semantics (at-least-once vs exactly-once) and duration limits — they do not add automatic retry logic beyond what the Retry block provides in any workflow type.",
+    ],
+    tags: [
+      "step-functions",
+      "retry",
+      "error-handling",
+      "backoff",
+      "task-state",
+    ],
+  },
+  {
+    id: "qq-212",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon API Gateway",
+    question:
+      "Your REST API behind API Gateway is returning HTTP 504 Gateway Timeout errors to clients, but the backend Lambda function logs show it completed successfully within 8 seconds. What is the MOST likely cause?",
+    options: [
+      "API Gateway has a maximum integration timeout of 29 seconds, but the client is timing out before that; however, a more common misconfiguration is that the Lambda function's response is not reaching API Gateway within the configured integration timeout",
+      "The Lambda function is reaching its maximum execution time of 15 minutes",
+      "The API Gateway stage has throttling limits set too low, causing requests to be rejected",
+      "CloudFront in front of API Gateway is caching the 504 response from a previous request",
+    ],
+    correctIndices: [0],
+    explanation:
+      "API Gateway has a hard maximum integration timeout of 29 seconds. If the backend takes longer, or if there is a network-level delay between API Gateway and Lambda that causes the response to not arrive within the configured timeout, API Gateway returns a 504. Lambda logs showing '8 seconds' means the function itself ran for 8s — but if the API Gateway integration timeout is set lower (e.g. 5 seconds), API Gateway times out before Lambda finishes, even though Lambda eventually completes. The fix is to check and increase the API Gateway integration timeout, and ensure Lambda finishes well within that window.",
+    optionExplanations: [
+      "Correct. API Gateway has a configurable integration timeout (default 29 seconds, minimum 50ms). If Lambda takes longer than the configured timeout, API Gateway returns 504 — even if Lambda eventually succeeds. The Lambda logs showing completion does not mean API Gateway received the response in time.",
+      "Incorrect. Lambda's maximum execution timeout is 15 minutes (900 seconds). An 8-second function is nowhere near this limit and this would not cause a 504 from API Gateway.",
+      "Incorrect. Throttling at API Gateway returns HTTP 429 (Too Many Requests), not 504. A 504 specifically indicates a timeout or unreachable backend.",
+      "Incorrect. CloudFront can cache error responses, but this would be a red herring — the root issue is the timeout configuration, not a cached stale 504.",
+    ],
+    tags: [
+      "api-gateway",
+      "504",
+      "integration-timeout",
+      "lambda",
+      "troubleshooting",
+    ],
+  },
+  {
+    id: "qq-213",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    service: "Amazon SQS",
+    question:
+      "Your application publishes messages to an SQS queue and a downstream consumer processes them. During testing you notice that some messages are processed out of order. The business logic requires strict FIFO processing. What change is required?",
+    options: [
+      "Migrate from a Standard SQS queue to a FIFO queue and group related messages using the same MessageGroupId",
+      "Set the SQS visibility timeout to a very high value so only one consumer processes one message at a time",
+      "Reduce the number of consumer Lambda functions to a single instance to enforce serial processing",
+      "Add a sequence number attribute to messages and sort them in the consumer application before processing",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Standard SQS queues offer best-effort ordering and at-least-once delivery — they do not guarantee FIFO. FIFO queues guarantee exactly-once processing and strict ordering within a message group. Using the same MessageGroupId for related messages ensures they are processed in the exact order they were sent. Increasing visibility timeout does not enforce order. A single consumer reduces parallelism but still does not guarantee message order from the queue. Application-level sorting is complex and error-prone.",
+    optionExplanations: [
+      "Correct. FIFO queues are purpose-built for ordered, exactly-once delivery. Messages with the same MessageGroupId are delivered in strict FIFO order to consumers. This is the correct architectural change.",
+      "Incorrect. A high visibility timeout ensures one consumer works on a message at a time but does nothing to enforce the order in which messages are delivered. Messages can still arrive out of order from a Standard queue.",
+      "Incorrect. A single consumer reduces throughput but does not fix the ordering problem. The queue can still return messages in any order — the consumer just processes them one at a time in whatever order it receives them.",
+      "Incorrect. Application-level sorting requires every message to arrive before processing can begin, which is impractical for streaming workloads and adds significant complexity. The correct fix is at the queue level.",
+    ],
+    tags: ["sqs", "fifo", "ordering", "message-group", "exactly-once"],
+  },
+  {
+    id: "qq-214",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS KMS",
+    question:
+      "A Lambda function needs to decrypt an environment variable that was encrypted using a customer-managed KMS key (CMK). The function is in Account A. The CMK is in Account B. What must be configured to allow the cross-account decryption?",
+    options: [
+      "The KMS key policy in Account B must grant the Lambda execution role in Account A the kms:Decrypt permission, AND the IAM role in Account A must have an IAM policy allowing kms:Decrypt on that key ARN",
+      "The Lambda execution role in Account A needs only an IAM policy with kms:Decrypt — KMS key policies in Account B are not required for cross-account access",
+      "An S3 bucket must be used as an intermediary to pass the decryption token between accounts",
+      "The Lambda function must assume a role in Account B using STS to perform the decryption locally in Account B",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cross-account KMS access requires permissions in BOTH accounts. The KMS key policy (resource-based policy) in Account B must explicitly grant the external principal (Account A's Lambda role or Account A root) access. Additionally, the IAM identity in Account A must have an IAM policy allowing it to call kms:Decrypt on that specific key ARN. Both conditions must be true — the key policy alone is not sufficient, and the IAM policy alone is not sufficient. This two-layer requirement is a common exam trap.",
+    optionExplanations: [
+      "Correct. Cross-account KMS access is a two-policy requirement: the key policy in the key-owning account must grant the cross-account principal, and the IAM policy in the calling account must permit the action on that key ARN. Missing either layer blocks access.",
+      "Incorrect. For same-account access, an IAM policy alone can be sufficient if the key policy grants access to the account root. For cross-account access, the key policy MUST explicitly name the external principal — the IAM policy alone is not enough.",
+      "Incorrect. No S3 intermediary or token-passing mechanism is needed. KMS natively supports cross-account API calls when both the key policy and IAM policy are configured correctly.",
+      "Incorrect. Assuming a role in Account B is one valid approach, but it is not required — cross-account KMS calls can be made directly without role assumption when key and IAM policies are both configured correctly.",
+    ],
+    tags: ["kms", "cross-account", "key-policy", "iam", "decrypt", "security"],
+  },
+  {
+    id: "qq-215",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS SAM",
+    question:
+      "A developer runs `sam deploy` and receives the error: 'S3 error: Access Denied' even though the IAM user has s3:PutObject permission on the deployment bucket. The SAM template includes a serverless application that references a layer. What is the MOST likely cause?",
+    options: [
+      "The deployment bucket has a bucket policy that requires s3:PutObjectAcl or object ownership settings that conflict with the IAM user's ability to upload",
+      "The SAM CLI is not installed correctly and needs to be reinstalled",
+      "The Lambda layer ARN referenced in the template does not exist and SAM cannot upload a placeholder",
+      "The AWS region in the SAM config does not match the region of the S3 bucket",
+    ],
+    correctIndices: [0],
+    explanation:
+      "This is a common SAM/CloudFormation deployment trap. Even when an IAM identity has s3:PutObject, an S3 Access Denied can occur if the bucket has a policy requiring s3:PutObjectAcl (e.g. bucket-owner-full-control ACL) and the identity lacks that permission, or if the bucket's Object Ownership setting is set to 'Bucket owner enforced' which disables ACLs but the upload request tries to set one. Region mismatches produce a different error. A missing layer ARN fails at CloudFormation, not S3. Reinstalling SAM does not fix IAM/bucket policy issues.",
+    optionExplanations: [
+      "Correct. The most common cause of 'Access Denied' on SAM deployments when PutObject is granted is a bucket policy or Object Ownership configuration that requires ACL permissions the IAM identity lacks. Specifically, if the bucket requires uploads to include a bucket-owner-full-control ACL, you need s3:PutObjectAcl as well.",
+      "Incorrect. SAM CLI installation issues produce entirely different error messages related to CLI execution, not S3 API errors.",
+      "Incorrect. A missing Lambda layer ARN causes a CloudFormation template validation or deployment error — not an S3 access denied error during the artifact upload phase.",
+      "Incorrect. A region mismatch typically produces a different error such as 'bucket does not exist in the specified region' or a redirect error — not a generic Access Denied.",
+    ],
+    tags: [
+      "sam",
+      "s3",
+      "deployment",
+      "access-denied",
+      "bucket-policy",
+      "troubleshooting",
+    ],
+  },
+  {
+    id: "qq-216",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "multi",
+    service: "AWS CloudFormation",
+    question:
+      "A CloudFormation stack fails with 'Resource handler returned message: Resource of type AWS::Lambda::Function already exists.' Which TWO actions can resolve this? (Select TWO)",
+    options: [
+      "Import the existing Lambda function resource into the CloudFormation stack using the resource import feature",
+      "Delete the existing Lambda function manually, then retry the stack creation",
+      "Add DeletionPolicy: Retain to the Lambda resource in the template",
+      "Rename the Lambda function's LogicalId in the template to force CloudFormation to create a new function with a different name",
+      "Add DependsOn between the Lambda and its execution role to ensure correct creation order",
+    ],
+    correctIndices: [0, 1],
+    explanation:
+      "This error occurs when CloudFormation tries to create a resource that already exists outside of the stack (an orphaned resource). Two valid fixes: (1) Use CloudFormation resource import (aws cloudformation import-stack) to bring the existing function under the stack's management without recreating it. (2) Delete the orphaned function manually so CloudFormation can create it cleanly. Adding DeletionPolicy: Retain applies to stack deletion, not creation failures. Renaming the LogicalId creates a differently-named function but doesn't resolve the existing one. DependsOn affects creation order, not name conflicts.",
+    optionExplanations: [
+      "Correct. CloudFormation resource import allows you to adopt an existing resource into a stack without deleting and recreating it. This is the non-destructive fix that preserves the existing function and its configuration.",
+      "Correct. Deleting the orphaned resource removes the conflict, allowing CloudFormation to create it fresh with the desired configuration. This is destructive but straightforward when the existing resource has no state worth preserving.",
+      "Incorrect. DeletionPolicy: Retain tells CloudFormation what to do with a resource when the stack is deleted — it has no effect on a creation failure caused by a pre-existing resource.",
+      "Incorrect. Renaming the LogicalId causes CloudFormation to try creating a new function with a different physical name (if FunctionName is derived from the LogicalId), but the originally conflicting resource still exists and is now unmanaged by the stack.",
+      "Incorrect. DependsOn controls the order in which CloudFormation creates resources within the stack. It does not resolve a conflict where the resource already exists outside the stack.",
+    ],
+    tags: [
+      "cloudformation",
+      "resource-import",
+      "already-exists",
+      "troubleshooting",
+      "orphaned-resource",
+    ],
+  },
+  {
+    id: "qq-217",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    service: "Amazon Kinesis",
+    question:
+      "Your Kinesis Data Stream has 10 shards and processes clickstream data. A single shard is consistently hitting the 1 MB/s write limit. You identify that all clicks from a high-traffic webpage share the same partition key. What is the correct fix without increasing the number of shards?",
+    options: [
+      "Use a randomized or calculated partition key (e.g. append a random suffix or hash a secondary attribute) to distribute writes across all 10 shards",
+      "Increase the shard's write limit by enabling enhanced fan-out on the stream",
+      "Switch from PutRecord to PutRecords API to batch writes and reduce the per-call overhead",
+      "Enable server-side encryption on the stream to reduce the data payload size per record",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Kinesis routes records to shards based on the partition key hash. If all high-traffic records share the same partition key, they all map to the same shard, causing a hot shard. Distributing writes by varying the partition key spreads records across multiple shards, each with its own 1 MB/s limit. Enhanced fan-out is a read-side feature (increases read throughput per consumer) and has no effect on write limits. PutRecords batches API calls but does not change shard routing — the hot shard still receives all records. Encryption affects data security, not throughput.",
+    optionExplanations: [
+      "Correct. Varying the partition key (randomizing or hashing a secondary attribute) changes which shard each record maps to, distributing load across all 10 shards and effectively multiplying write throughput by up to 10x without adding shards.",
+      "Incorrect. Enhanced fan-out (RegisterStreamConsumer) increases per-consumer read throughput from 2 MB/s to 2 MB/s per consumer — it is a read-side feature and has no impact on shard write limits.",
+      "Incorrect. PutRecords reduces the number of API round trips by batching records in one call, but each record in the batch is still routed to its shard based on the partition key. If all records have the same key, they all go to the same shard.",
+      "Incorrect. Server-side encryption (SSE) encrypts data at rest using KMS but does not compress or reduce the size of records in transit. It has no effect on shard throughput limits.",
+    ],
+    tags: [
+      "kinesis",
+      "hot-shard",
+      "partition-key",
+      "write-throughput",
+      "sharding",
+    ],
+  },
+  {
+    id: "qq-218",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    service: "AWS STS",
+    question:
+      "A developer is building a mobile app that needs to give users temporary AWS credentials to upload files directly to S3. The users authenticate via Cognito User Pools. What is the CORRECT architecture for vending temporary AWS credentials to these authenticated users?",
+    options: [
+      "Cognito Identity Pool (Federated Identities) exchanges the Cognito User Pool token for temporary STS credentials scoped to an IAM role, which the mobile app uses to call S3 directly",
+      "The mobile app calls the AWS STS AssumeRole API directly using a hardcoded IAM access key embedded in the app binary",
+      "API Gateway and Lambda generate presigned S3 URLs on behalf of the user, so no AWS credentials are needed in the app",
+      "The backend issues long-term IAM access keys per user and stores them in the app's local storage",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Cognito Identity Pools are purpose-built for this pattern. After a user authenticates with a Cognito User Pool, the app passes the ID token to the Identity Pool. The Identity Pool calls STS AssumeRoleWithWebIdentity and returns temporary credentials (15 minutes to hours) scoped to an IAM role. The app uses these credentials directly to upload to S3. Hardcoding IAM keys in the app binary is a critical security vulnerability. Presigned URLs are a valid alternative but the question asks about credential vending. Long-term per-user keys are unscalable and insecure.",
+    optionExplanations: [
+      "Correct. Cognito Identity Pools exchange identity provider tokens (including Cognito User Pool tokens) for temporary AWS credentials via STS. This is the AWS-recommended pattern for giving authenticated mobile users scoped AWS access.",
+      "Incorrect. Embedding IAM access keys in a mobile app binary is a severe security vulnerability — the keys can be extracted by anyone who downloads the app. This violates the principle of least privilege and AWS security best practices.",
+      "Incorrect. Presigned URLs are a valid approach and may even be preferable in some cases, but the question specifically asks about vending AWS credentials to authenticated users. Presigned URLs solve a related but different problem and are generated server-side.",
+      "Incorrect. Long-term per-user IAM access keys do not scale to many users, are difficult to rotate, and violate the principle of using temporary credentials. Storing them in local storage also makes them vulnerable to device theft.",
+    ],
+    tags: [
+      "cognito",
+      "identity-pool",
+      "sts",
+      "temporary-credentials",
+      "mobile",
+      "s3",
+    ],
+  },
+  {
+    id: "qq-219",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    service: "AWS CodePipeline",
+    question:
+      "Your CI/CD pipeline using CodePipeline, CodeBuild, and CodeDeploy is deploying a Lambda function. After a successful deployment, automated integration tests catch a regression. You need to automatically trigger a rollback to the previous Lambda version in the pipeline. What is the BEST approach?",
+    options: [
+      "Add a post-deployment test stage in CodePipeline; if tests fail, the pipeline invokes a Lambda or CodeBuild action that publishes the previous Lambda version alias back to the stable alias",
+      "Configure CodeDeploy with a Linear10PercentEvery1Minute deployment config so rollback is automatic if alarms fire",
+      "Use CodePipeline's built-in automatic rollback feature to revert to the last successful pipeline execution",
+      "Set the Lambda function's reserved concurrency to 0 to disable the broken version, then manually redeploy",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CodePipeline does not have a built-in automatic rollback to a previous execution. The pattern is: deploy the new version, then run integration tests as a pipeline stage. If that stage fails, a subsequent action (Lambda function or CodeBuild) updates the Lambda alias to point to the previously published version. CodeDeploy's alarm-based rollback works for traffic-shifting deployments (canary/linear) — if you are deploying via CodeDeploy with traffic shifting, option B would also work. For a pure CodePipeline flow, option A is the general pattern. Setting concurrency to 0 disables the function but does not deploy the old version.",
+    optionExplanations: [
+      "Correct. The standard pattern for CodePipeline rollback is to run integration tests as a stage and, on failure, invoke an action that updates the Lambda alias back to the stable version. This is explicit, auditable, and fits the pipeline model.",
+      "Incorrect. CodeDeploy's Linear10PercentEvery1Minute deployment config with CloudWatch alarm-based rollback is a valid approach for traffic-shifting Lambda deployments, but it operates at the CodeDeploy level and requires CodeDeploy to be configured for Lambda traffic shifting — it is not a CodePipeline-level automatic rollback.",
+      "Incorrect. CodePipeline does not have a native 'rollback to last successful execution' feature. Pipelines are one-directional — you must build the rollback logic explicitly as a pipeline stage or action.",
+      "Incorrect. Setting reserved concurrency to 0 disables all invocations of the function, causing an outage. It does not restore the previous version. Users would experience failures until a new deployment restores service.",
+    ],
+    tags: [
+      "codepipeline",
+      "rollback",
+      "lambda",
+      "alias",
+      "integration-tests",
+      "cicd",
+    ],
   },
 ];

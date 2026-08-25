@@ -12,7 +12,7 @@ export const responsibleAIGuide: ServiceGuide = {
   sections: [
     {
       heading: "Core Principles of Responsible AI",
-      body: `AWS articulates its responsible AI principles around six pillars that should guide AI development and deployment decisions.
+      body: `AWS articulates its responsible AI principles around eight dimensions that should guide AI development and deployment decisions.
 
 **Fairness** means AI systems should treat people equitably and not produce outcomes that systematically disadvantage individuals or groups based on protected characteristics such as race, gender, age, religion, or national origin. Fairness is not a single metric — it encompasses dozens of mathematical definitions (demographic parity, equalized odds, individual fairness) that can be in tension with each other, requiring explicit trade-off decisions.
 
@@ -20,11 +20,15 @@ export const responsibleAIGuide: ServiceGuide = {
 
 **Robustness** means models perform reliably across diverse inputs, edge cases, and adversarial conditions. A model that performs well on average but fails catastrophically on certain subgroups or under distribution shift is not robust enough for production deployment.
 
-**Privacy** means AI systems should respect individuals' data rights — minimizing data collection, applying differential privacy techniques, enabling right-to-deletion, and ensuring that models cannot be queried to reconstruct sensitive training data through membership inference attacks.
+**Privacy and Security** means AI systems should respect individuals' data rights — minimizing data collection, applying differential privacy techniques, enabling right-to-deletion, and ensuring that models cannot be queried to reconstruct sensitive training data through membership inference attacks.
 
 **Safety** means AI systems should not cause harm — physical, financial, psychological, or societal. This includes fail-safe behaviors, human oversight mechanisms, content filtering, and careful deployment planning.
 
-**Controllability** means humans retain meaningful oversight and the ability to correct, adjust, or shut down AI systems.`,
+**Controllability** means humans retain meaningful oversight and the ability to correct, adjust, or shut down AI systems.
+
+**Transparency** means being open about how AI systems work, what data they were trained on, what their limitations are, and when AI is being used to make or influence decisions affecting people.
+
+**Veracity and Robustness** means AI outputs should be accurate and that the system behaves consistently and predictably across a wide range of inputs, resisting attempts to cause failures through adversarial manipulation.`,
     },
     {
       heading: "Types of Bias in ML Systems",
@@ -77,7 +81,7 @@ For generative AI specifically, explainability takes different forms — **promp
   ],
 
   keyFacts: [
-    "AWS responsible AI pillars: Fairness, Explainability, Robustness, Privacy, Safety, Controllability",
+    "AWS responsible AI dimensions (8): Fairness, Explainability, Robustness, Privacy & Security, Safety, Controllability, Transparency, Veracity & Robustness",
     "Bias types: historical, selection, label, measurement, and feedback loop bias",
     "SageMaker Clarify detects pre-training and post-training bias using statistical metrics",
     "SHAP values explain individual predictions by computing marginal feature contributions",
@@ -98,7 +102,7 @@ For generative AI specifically, explainability takes different forms — **promp
   ],
 
   examTips: [
-    "Know all six AWS responsible AI pillars — the exam tests principle identification",
+    "Know all eight AWS responsible AI dimensions — the exam tests principle identification (Fairness, Explainability, Robustness, Privacy & Security, Safety, Controllability, Transparency, Veracity & Robustness)",
     "SageMaker Clarify is the primary bias detection and explainability tool",
     "Distinguish pre-training bias (data imbalance) from post-training bias (model prediction disparity)",
     "SHAP = local feature attribution; feature importance = global model explanation",

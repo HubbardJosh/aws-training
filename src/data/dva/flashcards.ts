@@ -395,7 +395,7 @@ export const flashcards: FlashCard[] = [
     difficulty: "medium",
     question: "What is the difference between SQS Standard and FIFO queues?",
     answer:
-      "Standard: unlimited throughput, at-least-once delivery, best-effort ordering. FIFO: exactly-once processing, ordered delivery (within a message group), max 3000 msg/s with batching, 300 msg/s without.",
+      "Standard: no explicit throughput cap (nearly unlimited scale), at-least-once delivery, best-effort ordering. FIFO: exactly-once processing, ordered delivery (within a message group), 300 msg/s default (3,000 with batching); enable High Throughput FIFO mode for higher limits.",
     keyPoints: [
       "FIFO queue names must end in .fifo",
       "FIFO uses MessageGroupId for ordering within a group",
@@ -714,7 +714,7 @@ export const flashcards: FlashCard[] = [
     answer:
       "AWS Managed Keys: created/managed by AWS for specific services (free, rotated every year automatically). Customer Managed Keys (CMK): created by you, full control, manual or auto rotation, $1/month. Customer Provided Keys (SSE-C for S3): you manage key material outside AWS, no KMS involvement.",
     keyPoints: [
-      "AWS managed keys: auto-rotate every 3 years (recently changed from 1 year)",
+      "AWS managed keys: auto-rotate every 1 year (365 days)",
       "CMK auto-rotation: optional, every year",
       "CMK: can set resource policy, audit via CloudTrail",
       "SSE-C: S3 does not store key; you must provide it on every request",
@@ -1493,7 +1493,7 @@ export const flashcards: FlashCard[] = [
     keyPoints: [
       "Rotation: new key material, same key ID/ARN",
       "Old key material retained to decrypt historical ciphertext",
-      "AWS managed keys rotate automatically every 3 years",
+      "AWS managed keys rotate automatically every 1 year (365 days)",
       "Manual rotation: create new key, update applications, disable old key",
     ],
     tags: ["kms", "key-rotation", "cmk", "security"],

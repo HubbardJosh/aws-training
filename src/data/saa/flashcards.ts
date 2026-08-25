@@ -168,11 +168,12 @@ export const flashcards: FlashCard[] = [
     question:
       "How does S3 Cross-Region Replication (CRR) work and what are its requirements?",
     answer:
-      "CRR asynchronously replicates objects from a source bucket in one region to a destination bucket in a different region. Both buckets must have versioning enabled. CRR does not replicate existing objects (only new ones after configuration), delete markers, or objects encrypted with customer-managed keys by default.",
+      "CRR asynchronously replicates objects from a source bucket in one region to a destination bucket in a different region. Both buckets must have versioning enabled. By default only new objects are replicated after configuration, but S3 Batch Replication can replicate existing objects. Delete markers and SSE-KMS encrypted objects can also be replicated when explicitly configured.",
     keyPoints: [
       "Both buckets need versioning enabled",
-      "Asynchronous replication",
-      "Existing objects not replicated automatically",
+      "Asynchronous replication (new objects by default)",
+      "Existing objects: use S3 Batch Replication",
+      "Delete marker replication and SSE-KMS replication are opt-in configuration options",
       "Requires IAM role with replication permissions",
     ],
     difficulty: "medium",
@@ -909,9 +910,9 @@ export const flashcards: FlashCard[] = [
     domain: "services",
     question: "What is Amazon CloudFront and how does it reduce latency?",
     answer:
-      "CloudFront is a Content Delivery Network (CDN) that caches content at over 400 global edge locations close to end users. Requests are served from the nearest edge location rather than the origin, reducing latency and origin load. It integrates with S3, ALB, EC2, and custom HTTP origins.",
+      "CloudFront is a Content Delivery Network (CDN) that caches content at over 600 global Points of Presence (edge locations) close to end users. Requests are served from the nearest edge location rather than the origin, reducing latency and origin load. It integrates with S3, ALB, EC2, and custom HTTP origins.",
     keyPoints: [
-      "400+ edge locations globally",
+      "600+ edge locations globally",
       "Caches static and dynamic content",
       "Reduces origin load and improves TTL",
     ],
@@ -1242,10 +1243,10 @@ export const flashcards: FlashCard[] = [
     domain: "applications",
     question: "What is the difference between SQS Standard and FIFO queues?",
     answer:
-      "Standard queues offer unlimited throughput, at-least-once delivery, and best-effort ordering. FIFO queues guarantee exactly-once processing and strict ordering within message groups, but are limited to 3,000 messages per second with batching (300 without). Use FIFO when message order and deduplication matter; use Standard for maximum throughput.",
+      "Standard queues have no explicit throughput cap, at-least-once delivery, and best-effort ordering. FIFO queues guarantee exactly-once processing and strict ordering within message groups, with a default of 300 TPS (3,000 with batching); High Throughput FIFO mode removes these limits. Use FIFO when message order and deduplication matter; use Standard for maximum throughput.",
     keyPoints: [
-      "Standard: unlimited TPS, best-effort order, at-least-once",
-      "FIFO: 3,000 TPS with batching, exactly-once, strict order",
+      "Standard: no explicit throughput cap, best-effort order, at-least-once",
+      "FIFO: 300 TPS default (3,000 with batching); High Throughput mode available, exactly-once, strict order",
       "FIFO name must end in .fifo",
     ],
     difficulty: "easy",
@@ -1385,9 +1386,9 @@ export const flashcards: FlashCard[] = [
     domain: "applications",
     question: "What is SNS FIFO and how does it differ from Standard SNS?",
     answer:
-      "SNS FIFO topics guarantee message ordering and deduplication, similar to SQS FIFO queues. They deliver to SQS FIFO queues only and are limited to 300 messages per second (or 3,000 with batching). Standard SNS topics support all subscriber types, offer higher throughput, but do not guarantee ordering.",
+      "SNS FIFO topics guarantee message ordering and deduplication, similar to SQS FIFO queues. They support FIFO SQS queues, Lambda, HTTP/S endpoints, and Kinesis Firehose as subscribers. Limited to 300 messages per second (or 3,000 with batching). Standard SNS topics support all subscriber types, offer higher throughput, but do not guarantee ordering.",
     keyPoints: [
-      "FIFO: ordered, deduplicated, SQS FIFO subscribers only",
+      "FIFO: ordered, deduplicated, supports FIFO SQS, Lambda, HTTP/S, and Kinesis Firehose subscribers",
       "Standard: all subscriber types, higher throughput",
       "FIFO topic name must end in .fifo",
     ],
@@ -1625,7 +1626,7 @@ export const flashcards: FlashCard[] = [
     question:
       "What are CloudFormation Nested Stacks and what problem do they solve?",
     answer:
-      "Nested Stacks allow you to reference other CloudFormation templates as resources within a parent stack using the AWS::CloudFormation::Stack resource type. They solve the problem of template size limits (51,200 bytes for inline, 460,800 bytes from S3) and enable modularization—reusing common infrastructure components (VPC, ECS cluster) across multiple parent stacks.",
+      "Nested Stacks allow you to reference other CloudFormation templates as resources within a parent stack using the AWS::CloudFormation::Stack resource type. They solve the problem of template size limits (51,200 bytes for inline, 1 MB from S3) and enable modularization—reusing common infrastructure components (VPC, ECS cluster) across multiple parent stacks.",
     keyPoints: [
       "Reusable template modules",
       "Parent stack references child stack templates from S3",
@@ -3199,13 +3200,13 @@ export const flashcards: FlashCard[] = [
     id: "saa-glue-6",
     service: "AWS Glue",
     domain: "analytics",
-    question: "What is AWS Glue Elastic Views?",
+    question: "What happened to AWS Glue Elastic Views?",
     answer:
-      "Glue Elastic Views (now part of AWS broader data integration strategy) allows you to create virtual tables that combine and replicate data across multiple data stores using SQL. It continuously replicates source data and keeps materialized views up to date without ETL jobs. This simplifies building unified data products from DynamoDB, Aurora, S3, and other sources.",
+      "AWS Glue Elastic Views was discontinued in June 2023 before reaching general availability. It was a preview feature that aimed to create materialized views across multiple data stores (DynamoDB, Aurora, S3) using SQL, with continuous replication. It is not a current AWS service and will not appear on the SAA-C03 exam.",
     keyPoints: [
-      "SQL-based virtual views across multiple data stores",
-      "Continuous replication keeps views current",
-      "No ETL jobs needed for cross-store joins",
+      "Discontinued June 2023 — not a current AWS service",
+      "Do not study this for the SAA-C03 exam",
+      "For cross-store data integration, consider AWS Glue ETL, AppFlow, or EventBridge Pipes",
     ],
     difficulty: "hard",
     tags: ["glue", "elastic-views", "analytics"],

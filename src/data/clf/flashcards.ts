@@ -549,9 +549,9 @@ export const flashcards: FlashCard[] = [
     domain: "development",
     question: "What is Amazon CloudFront and what problem does it solve?",
     answer:
-      "CloudFront is AWS's global Content Delivery Network (CDN). It caches content at 400+ edge locations worldwide, serving users from the nearest location rather than the origin server — reducing latency and offloading traffic from your origin.",
+      "CloudFront is AWS's global Content Delivery Network (CDN). It caches content at 600+ Points of Presence (edge locations) worldwide, serving users from the nearest location rather than the origin server — reducing latency and offloading traffic from your origin.",
     keyPoints: [
-      "Global CDN with 400+ edge locations",
+      "Global CDN with 600+ edge locations",
       "Caches content near users to reduce latency",
       "Reduces load on origin server",
     ],
@@ -934,10 +934,10 @@ export const flashcards: FlashCard[] = [
     domain: "development",
     question: "What are SNS FIFO topics and when should you use them?",
     answer:
-      "FIFO topics guarantee strict message ordering and exactly-once delivery, but can only deliver to SQS FIFO queues. Use them when the order of notifications matters — such as financial transaction events or inventory updates that must be processed in sequence.",
+      "FIFO topics guarantee strict message ordering and exactly-once delivery. Supported subscribers include SQS FIFO queues, Lambda, HTTP/S endpoints, and Kinesis Firehose. Use them when the order of notifications matters — such as financial transaction events or inventory updates that must be processed in sequence.",
     keyPoints: [
       "Strict ordering + exactly-once delivery",
-      "Only delivers to SQS FIFO queues",
+      "Delivers to SQS FIFO queues, Lambda, HTTP/S, and Kinesis Firehose",
       "Standard topics have no ordering guarantees",
     ],
     difficulty: "hard",

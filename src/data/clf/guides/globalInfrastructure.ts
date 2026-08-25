@@ -11,7 +11,7 @@ export const globalInfrastructureGuide: ServiceGuide = {
   sections: [
     {
       heading: "Regions",
-      body: `An AWS **Region** is a geographic area that contains multiple, isolated data center clusters. As of 2024, AWS operates 30+ regions globally, with more announced. Each region has a name (like \`us-east-1\` for US East N. Virginia) and a friendly display name.
+      body: `An AWS **Region** is a geographic area that contains multiple, isolated data center clusters. As of 2025, AWS operates 36+ regions globally, with more announced. Each region has a name (like \`us-east-1\` for US East N. Virginia) and a friendly display name.
 
 Regions are **completely independent** of each other. Services, data, and infrastructure in one region do not automatically replicate to another. If you deploy a resource in \`us-east-1\`, it exists only in that region unless you explicitly configure cross-region replication or deploy to other regions.
 
@@ -74,7 +74,7 @@ For the Cloud Practitioner exam, the key concepts are: Regions are geographic ar
     "Each region has multiple Availability Zones (typically 3), each physically separate data centers",
     "AZs are connected by high-speed private fiber within a region",
     "Spreading across multiple AZs is the baseline for high availability",
-    "Edge locations (400+) serve CloudFront, Route 53, and Shield — more locations than regions",
+    "Edge locations (600+) serve CloudFront, Route 53, and Shield — more locations than regions",
     "AWS does not move data between regions without explicit customer action (data residency)",
     "Global services (IAM, Route 53, CloudFront) are not tied to a specific region",
     "Local Zones extend AWS infrastructure to large population centers near users",

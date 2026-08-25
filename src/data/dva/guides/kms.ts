@@ -13,7 +13,7 @@ export const kmsGuide: ServiceGuide = {
       heading: "Key Types",
       body: `KMS provides three tiers of key management, each with different control and responsibility tradeoffs.
 
-**AWS Managed Keys** are created and maintained by AWS on your behalf for specific services — you'll see these referenced as \`aws/s3\`, \`aws/lambda\`, or \`aws/dynamodb\` in the console. You cannot use them directly in your own API calls, cannot customize their policies, and cannot delete or disable them. They rotate automatically every year (recently extended to three years for some services) and are free to use, with charges only for API calls made on your behalf.
+**AWS Managed Keys** are created and maintained by AWS on your behalf for specific services — you'll see these referenced as \`aws/s3\`, \`aws/lambda\`, or \`aws/dynamodb\` in the console. You cannot use them directly in your own API calls, cannot customize their policies, and cannot delete or disable them. They rotate automatically every year (365 days) and are free to use, with charges only for API calls made on your behalf.
 
 **Customer Managed Keys (CMKs)** are keys you create and fully control. You write the key policy, set an alias, choose whether to enable automatic rotation, and can schedule deletion. CMKs cost $1 per month per key plus $0.03 per 10,000 API calls. Because you control the key policy, you can share CMKs across accounts, restrict which services can use them, and audit every usage event in CloudTrail. For compliance-sensitive workloads, CMKs are the right choice.
 

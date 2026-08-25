@@ -11,9 +11,9 @@ export const sqsGuide: ServiceGuide = {
   sections: [
     {
       heading: "Queue Types",
-      body: `SQS offers two queue types that serve fundamentally different use cases. **Standard queues** are designed for maximum throughput — they support nearly unlimited transactions per second and are the right choice when raw speed matters more than perfect ordering. The tradeoff is that Standard queues guarantee **at-least-once delivery**, meaning a message may occasionally be delivered more than once due to the distributed nature of the service. Your consumers must be idempotent — processing the same message twice should have no harmful side effect.
+      body: `SQS offers two queue types that serve fundamentally different use cases. **Standard queues** are designed for maximum throughput — they have no explicit throughput cap and scale to handle virtually any message volume, making them the right choice when raw speed matters more than perfect ordering. The tradeoff is that Standard queues guarantee **at-least-once delivery**, meaning a message may occasionally be delivered more than once due to the distributed nature of the service. Your consumers must be idempotent — processing the same message twice should have no harmful side effect.
 
-**FIFO queues** trade throughput for correctness. They guarantee exactly-once processing by deduplicating messages within a 5-minute window using a \`MessageDeduplicationId\`, and they deliver messages in strict first-in, first-out order within a **MessageGroupId**. This makes FIFO the right choice for financial transactions, order processing, or any workflow where sequence and uniqueness are critical. The throughput ceiling is 300 API calls per second (or 3,000 with batching), and queue names must end in \`.fifo\`.`,
+**FIFO queues** trade throughput for correctness. They guarantee exactly-once processing by deduplicating messages within a 5-minute window using a \`MessageDeduplicationId\`, and they deliver messages in strict first-in, first-out order within a **MessageGroupId**. This makes FIFO the right choice for financial transactions, order processing, or any workflow where sequence and uniqueness are critical. The default throughput is 300 API calls per second (or 3,000 with batching); enable **High Throughput FIFO mode** for higher limits. Queue names must end in \`.fifo\`.`,
     },
     {
       heading: "Core Message Attributes",
@@ -74,8 +74,8 @@ SQS also integrates directly with API Gateway using an AWS Service integration. 
   ],
 
   keyFacts: [
-    "Standard: unlimited throughput, at-least-once, best-effort order",
-    "FIFO: exactly-once, strict order within group, 300 TPS (3,000 with batching)",
+    "Standard: no explicit throughput cap (nearly unlimited scale), at-least-once, best-effort order",
+    "FIFO: exactly-once, strict order within group, 300 TPS default (3,000 with batching); High Throughput mode available",
     "Visibility timeout default: 30s; max: 12 hours",
     "Set visibility timeout ≥ 6× Lambda timeout",
     "Long polling: wait up to 20s — eliminates empty responses",

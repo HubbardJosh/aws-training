@@ -31,7 +31,7 @@ Multi-AZ is about **availability and durability**, not performance. The standby 
 
 You can create Read Replicas in the same region, a different region, or even a different AWS account. Cross-region Read Replicas are useful for serving read traffic closer to global users or for disaster recovery.
 
-RDS supports up to **5 Read Replicas** per primary instance for MySQL and PostgreSQL. Aurora supports up to 15 Aurora Replicas. Your application connects to separate endpoints: the primary endpoint for writes, and replica endpoints for reads.
+RDS supports up to **15 Read Replicas** per primary instance for MySQL, MariaDB, and PostgreSQL. Aurora supports up to 15 Aurora Replicas. Your application connects to separate endpoints: the primary endpoint for writes, and replica endpoints for reads.
 
 A Read Replica can be promoted to become an independent primary database, which is useful for disaster recovery scenarios or for creating a new production database from an existing one.`,
     },

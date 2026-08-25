@@ -15,7 +15,7 @@ export const kinesisGuide: ServiceGuide = {
 
 **Kinesis Data Firehose** trades flexibility for simplicity. It's a fully managed delivery service that buffers incoming records and delivers them in batches to a destination — S3, Redshift, OpenSearch, Splunk, or HTTP endpoints. You write no consumer code at all; Firehose handles everything from buffering to format conversion. The tradeoff is latency: Firehose's minimum buffer interval is 60 seconds, so it's near-real-time rather than truly real-time.
 
-**Kinesis Data Analytics** (for Apache Flink) sits between the two: you run managed Apache Flink applications that read from a Data Stream or Firehose and write results to another stream or service. This is the right tool when you need stateful stream processing — windowed aggregations, joins across streams, anomaly detection — without managing your own Flink cluster. **Kinesis Video Streams** handles live video ingestion from devices and is not covered in the DVA-C02 exam.`,
+**Amazon Managed Service for Apache Flink** (formerly Kinesis Data Analytics) sits between the two: you run managed Apache Flink applications that read from a Data Stream or Firehose and write results to another stream or service. This is the right tool when you need stateful stream processing — windowed aggregations, joins across streams, anomaly detection — without managing your own Flink cluster. **Kinesis Video Streams** handles live video ingestion from devices and is not covered in the DVA-C02 exam.`,
     },
     {
       heading: "Kinesis Data Streams — Shards & Capacity",
@@ -54,12 +54,12 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
 Two capabilities make Firehose more powerful than a simple forwarder. **Lambda transformation** lets you invoke a Lambda function on each batch to parse, filter, enrich, or reshape records before delivery. Records that the function fails to transform go to an S3 error bucket, and the function must return results within 5 minutes. **Format conversion** uses AWS Glue Data Catalog schema definitions to convert JSON records to Parquet or ORC format on the fly — critical for cost-efficient Athena queries on S3 data, where columnar formats can reduce query cost by 90% or more. GZIP, ZIP, and Snappy compression are also available for S3 deliveries.`,
     },
     {
-      heading: "Kinesis Data Analytics",
-      body: `Kinesis Data Analytics (for Apache Flink) lets you run stateful stream processing without provisioning or managing a Flink cluster. You write a Flink application in Java, Scala, or Python, and the managed service handles cluster management, auto-scaling, checkpointing to S3, and failure recovery and restart.
+      heading: "Amazon Managed Service for Apache Flink",
+      body: `Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics) lets you run stateful stream processing without provisioning or managing a Flink cluster. You write a Flink application in Java, Scala, or Python, and the managed service handles cluster management, auto-scaling, checkpointing to S3, and failure recovery and restart.
 
 The service reads from Kinesis Data Streams or Firehose and writes results to Kinesis Data Streams, Firehose, or Lambda. A legacy SQL-based application mode is also supported but Apache Flink applications are preferred for new development, as they support the full Flink API including windowed aggregations, stateful processing, complex event processing, and stream joins.
 
-The practical use cases are workloads that need real-time computation on the stream itself rather than just moving data from point A to point B: detecting anomalies in IoT sensor telemetry, computing rolling aggregates for a real-time dashboard, analyzing click-stream sequences to detect fraud patterns, or joining an event stream with a reference data set to enrich events before forwarding them. The managed aspect is significant — running Apache Flink yourself requires significant operational expertise, and Kinesis Data Analytics removes that burden.`,
+The practical use cases are workloads that need real-time computation on the stream itself rather than just moving data from point A to point B: detecting anomalies in IoT sensor telemetry, computing rolling aggregates for a real-time dashboard, analyzing click-stream sequences to detect fraud patterns, or joining an event stream with a reference data set to enrich events before forwarding them. The managed aspect is significant — running Apache Flink yourself requires significant operational expertise, and the managed service removes that burden.`,
     },
     {
       heading: "Kinesis vs SQS vs SNS",

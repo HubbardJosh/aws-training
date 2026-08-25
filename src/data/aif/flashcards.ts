@@ -544,7 +544,7 @@ export const flashcards: FlashCard[] = [
     difficulty: "easy",
     question: "What is Amazon Polly?",
     answer:
-      "Amazon Polly is a managed text-to-speech (TTS) service that converts text into lifelike spoken audio. It offers standard (concatenative) and Neural TTS (NTTS) voices across 60+ languages, and returns audio in formats like MP3, OGG, and PCM.",
+      "Amazon Polly is a managed text-to-speech (TTS) service that converts text into lifelike spoken audio. It offers standard (concatenative) and Neural TTS (NTTS) voices across 30+ languages (with 100+ voices total), and returns audio in formats like MP3, OGG, and PCM.",
     keyPoints: [
       "Standard voices: fast, low cost",
       "Neural TTS: more natural, higher quality, higher cost",
@@ -809,10 +809,10 @@ export const flashcards: FlashCard[] = [
     question:
       "What are the two Kendra index editions and when would you choose each?",
     answer:
-      "Developer Edition: up to 10,000 documents, 4,000 queries/day, lower cost — for prototyping and small deployments. Enterprise Edition: millions of documents, 8,000 queries/day (scalable), 99.9% SLA, and HA across multiple AZs — for production enterprise workloads.",
+      "Developer Edition: up to 10,000 documents, 4,000 queries/day, lower cost — for prototyping and small deployments. Enterprise Edition: up to 100,000 documents per capacity unit (scalable by adding units), 8,000 queries/day per unit, 99.9% SLA, and HA across multiple AZs — for production enterprise workloads.",
     keyPoints: [
       "Developer Edition: max 5 data sources, 10K documents",
-      "Enterprise Edition: 50 data sources, millions of documents",
+      "Enterprise Edition: 50 data sources, 100K docs/unit (scale by adding capacity units)",
       "Only Enterprise supports high availability",
       "Enterprise required for production SLA guarantees",
     ],
@@ -1098,7 +1098,7 @@ export const flashcards: FlashCard[] = [
     answer:
       "Synchronous operations (AnalyzeDocument, DetectDocumentText) process a single-page image in real time and return results immediately. Asynchronous operations (StartDocumentAnalysis, GetDocumentAnalysis) process multi-page PDFs and larger files, returning a JobId to poll for results — required for documents with 2+ pages.",
     keyPoints: [
-      "Synchronous: single page, real-time, JPEG/PNG only for direct upload",
+      "Synchronous: single page, real-time; supports JPEG, PNG, TIFF, and single-page PDF",
       "Asynchronous: multi-page PDFs, S3 required as input",
       "Poll GetDocumentAnalysis with JobId until SUCCEEDED",
       "SNS notification available when async job completes",
@@ -1117,7 +1117,7 @@ export const flashcards: FlashCard[] = [
     keyPoints: [
       "Queries handle variable document layouts",
       "No need to parse the full document structure",
-      "Textract Medical (via HealthLake) available for clinical NLP",
+      "Amazon Comprehend Medical (not Textract) provides clinical NLP for extracting medical entities",
       "HIPAA-eligible service for PHI processing",
     ],
     tags: ["textract", "healthcare", "queries", "use-case"],
@@ -1574,12 +1574,14 @@ export const flashcards: FlashCard[] = [
     difficulty: "easy",
     question: "What is responsible AI and what are its core dimensions?",
     answer:
-      "Responsible AI is the practice of building and deploying AI systems that are fair, transparent, accountable, safe, and privacy-preserving. AWS's Responsible AI framework emphasizes fairness (no discriminatory outcomes), explainability, robustness, privacy, safety, and controllability.",
+      "Responsible AI is the practice of building and deploying AI systems that are fair, transparent, accountable, safe, and privacy-preserving. AWS's Responsible AI framework has eight dimensions: Fairness, Explainability, Robustness, Privacy & Security, Safety, Controllability, Transparency, and Veracity & Robustness.",
     keyPoints: [
       "Fairness: no discrimination based on protected attributes",
       "Explainability: understand why the model made a decision",
-      "Privacy: protect personal data used in training and inference",
+      "Privacy & Security: protect personal data used in training and inference",
       "Safety: prevent harmful outputs and real-world harms",
+      "Transparency: openness about how the AI works and when it is used",
+      "Controllability: humans can correct, adjust, or shut down AI systems",
     ],
     tags: ["responsible-ai", "fairness", "explainability", "ethics"],
   },
@@ -1715,7 +1717,7 @@ export const flashcards: FlashCard[] = [
       "Attacker uses model outputs to reconstruct training samples",
       "Higher risk when model returns confidence scores rather than just labels",
       "Mitigation: differential privacy during training, output confidence rate limiting",
-      "AWS PrivacyBridge and differential privacy techniques help mitigate",
+      "Differential privacy during training limits information an attacker can extract from outputs",
     ],
     tags: ["ai-security", "model-inversion", "privacy", "attack"],
   },
