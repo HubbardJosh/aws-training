@@ -47,6 +47,37 @@ Outputs:
 \`\`\`
 
 **Parameters** are runtime inputs that callers provide when creating or updating the stack. Types include String, Number, comma-delimited List, and AWS-specific types like \`AWS::EC2::KeyPair::KeyName\` (validated against your account) and \`AWS::SSM::Parameter::Value<String>\` (fetches the value live from SSM at deploy time). **Mappings** are static lookup tables — for example, AMI IDs per region — accessed with \`!FindInMap [MapName, Key1, Key2]\`. **Conditions** are boolean expressions built from parameter values; resources and properties can be conditionally created or set using \`!If\`. **Outputs** export values (like resource ARNs or endpoint URLs) for display after stack creation or for use by other stacks via cross-stack references.`,
+      quiz: [
+        {
+          question:
+            "Which section of a CloudFormation template is the only one that is required?",
+          options: ["Parameters", "Outputs", "Resources", "Mappings"],
+          correctIndex: 2,
+          explanation:
+            "Only the Resources section is required in a CloudFormation template. All other sections (Parameters, Mappings, Conditions, Outputs) are optional.",
+        },
+        {
+          question:
+            "Which CloudFormation parameter type fetches a live value from SSM Parameter Store at deploy time?",
+          options: [
+            "String",
+            "AWS::EC2::KeyPair::KeyName",
+            "AWS::SSM::Parameter::Value<String>",
+            "CommaDelimitedList",
+          ],
+          correctIndex: 2,
+          explanation:
+            "AWS::SSM::Parameter::Value<String> fetches the current value from SSM Parameter Store at stack deploy time. This makes templates environment-aware without hardcoding values.",
+        },
+        {
+          question:
+            "What CloudFormation section holds static lookup tables (e.g., AMI IDs per region)?",
+          options: ["Parameters", "Conditions", "Mappings", "Globals"],
+          correctIndex: 2,
+          explanation:
+            "Mappings are static lookup tables accessed with !FindInMap [MapName, Key1, Key2]. They're commonly used for region-to-AMI mappings or environment-specific configuration that doesn't change at runtime.",
+        },
+      ],
     },
     {
       heading: "Intrinsic Functions & Pseudo-Parameters",
@@ -60,6 +91,42 @@ Outputs:
 - \`{{resolve:secretsmanager:MySecret:SecretString:password}}\` fetches a specific field from Secrets Manager
 
 Dynamic references are especially powerful for database passwords — you store the password in Secrets Manager and reference it from the template, so the password never appears in the template itself.`,
+      quiz: [
+        {
+          question:
+            "Which intrinsic function retrieves a specific attribute of a CloudFormation resource, such as an S3 bucket ARN?",
+          options: ["!Ref", "!Sub", "!GetAtt", "!ImportValue"],
+          correctIndex: 2,
+          explanation:
+            "!GetAtt retrieves a specific attribute of a resource — for example, !GetAtt MyBucket.Arn returns the ARN. !Ref returns a resource's physical ID or a parameter's value.",
+        },
+        {
+          question:
+            "What CloudFormation dynamic reference syntax fetches a Secrets Manager secret field at deploy time?",
+          options: [
+            "{{resolve:ssm:/myapp/secret}}",
+            "{{resolve:secretsmanager:MySecret:SecretString:password}}",
+            "!GetAtt MySecret.SecretString",
+            "!Ref MySecret",
+          ],
+          correctIndex: 1,
+          explanation:
+            "{{resolve:secretsmanager:SecretName:SecretString:fieldKey}} fetches a specific field from a Secrets Manager secret at deploy time, keeping the actual value out of the template.",
+        },
+        {
+          question:
+            "Which pseudo-parameter resolves to the AWS account ID in which the stack is being created?",
+          options: [
+            "AWS::StackId",
+            "AWS::Region",
+            "AWS::AccountId",
+            "AWS::StackName",
+          ],
+          correctIndex: 2,
+          explanation:
+            "AWS::AccountId is a pseudo-parameter that CloudFormation automatically resolves to the account ID where the stack is deployed. It's commonly used in ARN construction with !Sub.",
+        },
+      ],
     },
     {
       heading: "Stacks & Change Sets",
@@ -70,6 +137,42 @@ Dynamic references are especially powerful for database passwords — you store 
 CloudFormation has three update behaviors: **No interruption** (resource is updated in place, no downtime), **Some interruption** (brief outage, like changing an EC2 instance type which requires a reboot), and **Replacement** (a new resource is created and the old one is deleted after the new one is healthy).
 
 **DeletionPolicy** controls what happens to a resource when the stack is deleted. The default is \`Delete\`. \`Retain\` removes the resource from CloudFormation's management but leaves it running. \`Snapshot\` takes a final snapshot before deletion (available for RDS, EBS, and Redshift). **UpdateReplacePolicy** applies the same options but to resource replacement during an update. On creation failure, CloudFormation rolls back and deletes all resources it had already created — use \`--disable-rollback\` during debugging to inspect what was created.`,
+      quiz: [
+        {
+          question:
+            "What is the safest way to review changes before applying a CloudFormation stack update?",
+          options: [
+            "Deploy directly and use rollback if something breaks",
+            "Create a Change Set to preview additions, modifications, and replacements first",
+            "Use cdk diff before deploying",
+            "Run cfn-lint to validate the template",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Change Sets let you preview exactly what CloudFormation would change — including which resources would be replaced (getting a new ARN or endpoint) — before executing the update. This is especially important to catch replacements that would break dependent systems.",
+        },
+        {
+          question:
+            "Which DeletionPolicy value takes a final backup snapshot before removing an RDS database?",
+          options: ["Delete", "Retain", "Snapshot", "Backup"],
+          correctIndex: 2,
+          explanation:
+            "DeletionPolicy: Snapshot takes a final snapshot of the resource before deletion. It's available for RDS, EBS volumes, and Redshift clusters — preserving data even when the stack is deleted.",
+        },
+        {
+          question:
+            "A CloudFormation resource update requires replacing the resource (creating a new one and deleting the old). What is the impact?",
+          options: [
+            "The resource ARN and endpoint remain the same",
+            "The resource gets a new physical ID (ARN/endpoint) — anything referencing the old one breaks",
+            "CloudFormation automatically updates all references to the new resource",
+            "The update is blocked unless you set UpdateReplacePolicy: Allow",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Resource replacement creates a new resource with a new physical ID (ARN, endpoint, etc.) and deletes the old one. Any external system holding a reference to the old ARN or endpoint will break — which is why Change Sets should be reviewed before execution.",
+        },
+      ],
     },
     {
       heading: "Nested Stacks & Stack Sets",
@@ -87,6 +190,47 @@ NetworkStack:
 Nested stacks share a lifecycle with the parent — when you delete the parent, all nested stacks are deleted too. This tight coupling is the tradeoff compared to **cross-stack references**, which use \`Outputs\` with \`Export\` names and \`!ImportValue\` in other stacks. Cross-stack references have independent lifecycles — stacks can be updated separately — but come with a constraint: you cannot delete a stack whose exports are referenced by another stack.
 
 **Stack Sets** extend deployment to multiple AWS accounts and regions simultaneously. A single Stack Set definition can deploy identical stacks across hundreds of accounts. When integrated with AWS Organizations, Stack Sets can automatically deploy to all existing accounts in an organizational unit and to any new accounts that join — making them ideal for security baselines, compliance guardrails, and landing zone configuration applied across your entire organization.`,
+      quiz: [
+        {
+          question:
+            "What is the key constraint when using cross-stack references with !ImportValue?",
+          options: [
+            "Cross-stack references only work within the same region",
+            "You cannot delete a stack whose exports are currently imported by another stack",
+            "Imported values are only updated when both stacks are deployed simultaneously",
+            "!ImportValue requires a VPC endpoint to resolve",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Cross-stack references with !ImportValue create a hard dependency — you cannot delete or update a stack's exported value while another stack is importing it. The importing stack must be updated or deleted first.",
+        },
+        {
+          question:
+            "How do Stack Sets with AWS Organizations handle new accounts that join an organizational unit?",
+          options: [
+            "New accounts must be added manually to the Stack Set",
+            "Stack Sets automatically deploy to new accounts that join the OU",
+            "New accounts receive the stack only during the next scheduled deployment",
+            "Stack Sets do not support Organizations integration",
+          ],
+          correctIndex: 1,
+          explanation:
+            "When integrated with AWS Organizations, Stack Sets automatically deploy to new accounts as they join the target organizational unit — ideal for security baselines and compliance guardrails applied org-wide.",
+        },
+        {
+          question:
+            "Nested stacks are referenced in CloudFormation using which resource type?",
+          options: [
+            "AWS::CloudFormation::NestedStack",
+            "AWS::CloudFormation::Stack",
+            "AWS::CloudFormation::Module",
+            "AWS::CloudFormation::Include",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Nested stacks are defined using the AWS::CloudFormation::Stack resource type, referencing a child template stored in S3 via the TemplateURL property.",
+        },
+      ],
     },
     {
       heading: "CloudFormation Helper Scripts & cfn-init",
@@ -120,6 +264,33 @@ MyInstance:
 \`\`\`
 
 **\`cfn-signal\`** sends a success or failure signal back to CloudFormation after initialization completes. Combined with a **CreationPolicy**, this tells CloudFormation to wait for the instance to signal success before marking the resource as created — ensuring the instance is fully configured before the stack proceeds. **\`cfn-hup\`** is a daemon that polls for metadata changes and re-runs \`cfn-init\` when the template changes, enabling config updates without replacing instances.`,
+      quiz: [
+        {
+          question:
+            "What is the purpose of cfn-signal combined with a CreationPolicy?",
+          options: [
+            "It sends CloudFormation logs to CloudWatch",
+            "It tells CloudFormation to wait for the EC2 instance to signal success before marking it as created",
+            "It installs packages on the EC2 instance",
+            "It polls for metadata changes and re-runs cfn-init",
+          ],
+          correctIndex: 1,
+          explanation:
+            "cfn-signal sends a success or failure signal back to CloudFormation. With a CreationPolicy, CloudFormation waits for the signal before marking the resource as created, ensuring the instance is fully configured before the stack continues.",
+        },
+        {
+          question: "What does cfn-hup do on an EC2 instance?",
+          options: [
+            "Sends CloudFormation signals when initialization is complete",
+            "Installs packages from the CloudFormation Init metadata",
+            "Polls for metadata changes and re-runs cfn-init when the template changes",
+            "Rotates IAM credentials on the instance",
+          ],
+          correctIndex: 2,
+          explanation:
+            "cfn-hup is a daemon that polls for changes to CloudFormation metadata and re-runs cfn-init when changes are detected, allowing configuration updates to running instances without replacing them.",
+        },
+      ],
     },
     {
       heading: "CloudFormation with Other Services",
@@ -130,6 +301,47 @@ Integrating CloudFormation with **CodePipeline** creates a safe infrastructure d
 **Custom Resources** are the escape hatch for resources or operations that CloudFormation doesn't natively support. A Lambda function receives Create, Update, and Delete events from CloudFormation and must respond to a pre-signed S3 URL with a success or failure signal. This lets you provision non-AWS resources (like DNS records in third-party providers), run database migrations, or perform any custom logic as part of a CloudFormation deployment.
 
 **Service Catalog** packages CloudFormation templates as catalog products that end users can deploy through a self-service portal without needing direct CloudFormation access — a way to offer approved, compliant infrastructure patterns to development teams.`,
+      quiz: [
+        {
+          question:
+            "A CloudFormation Custom Resource Lambda function must respond to CloudFormation how?",
+          options: [
+            "By returning a JSON response from the Lambda handler",
+            "By calling the CloudFormation API directly",
+            "By sending a success or failure signal to a pre-signed S3 URL",
+            "By writing results to a DynamoDB table",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Custom Resource Lambda functions must PUT a response (success or failure) to a pre-signed S3 URL that CloudFormation provides in the event. If no response is sent, the stack will hang until it times out.",
+        },
+        {
+          question:
+            "Which service packages CloudFormation templates as self-service catalog products for development teams?",
+          options: [
+            "AWS CDK",
+            "AWS Service Catalog",
+            "AWS Config",
+            "AWS Control Tower",
+          ],
+          correctIndex: 1,
+          explanation:
+            "AWS Service Catalog packages CloudFormation templates as catalog products that teams can deploy through a self-service portal without direct CloudFormation access, enforcing approved and compliant patterns.",
+        },
+        {
+          question:
+            "SAM templates are CloudFormation templates with what addition?",
+          options: [
+            "A special SAM: prefix on all resource types",
+            "A Transform: AWS::Serverless-2016-10-31 header",
+            "An embedded Lambda function that deploys the stack",
+            "A required Globals section",
+          ],
+          correctIndex: 1,
+          explanation:
+            "SAM templates are CloudFormation templates with Transform: AWS::Serverless-2016-10-31 at the top. This activates the SAM transform which expands SAM shorthand resource types into full CloudFormation resources before deployment.",
+        },
+      ],
     },
   ],
 
@@ -167,5 +379,97 @@ Integrating CloudFormation with **CodePipeline** creates a safe infrastructure d
     "Custom Resources: Lambda-backed — handle Create/Update/Delete and respond to pre-signed URL.",
     "SSM parameter type in Parameters: fetches live value at deploy time.",
     "Rollback on failure: CloudFormation undoes ALL changes — use change sets to preview first.",
+  ],
+
+  topicQuiz: [
+    {
+      question:
+        "Which CloudFormation section is the only one required in every template?",
+      options: ["Parameters", "Conditions", "Resources", "Outputs"],
+      correctIndex: 2,
+      explanation:
+        "Only the Resources section is required. All other sections (Parameters, Mappings, Conditions, Outputs) are optional.",
+    },
+    {
+      question:
+        "A CloudFormation stack update will replace an RDS instance, giving it a new endpoint. How do you catch this before it impacts production?",
+      options: [
+        "Deploy and roll back if it breaks",
+        "Create a Change Set and review it before executing",
+        "Use cfn-lint to detect replacements",
+        "Check CloudTrail for recent resource changes",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Change Sets show exactly what would change — including which resources would be replaced — before you execute the update. Reviewing replacements is one of the most important uses of Change Sets.",
+    },
+    {
+      question:
+        "You want to preserve an RDS database when its CloudFormation stack is deleted. Which DeletionPolicy should you use?",
+      options: ["Delete", "Retain", "Snapshot", "Archive"],
+      correctIndex: 1,
+      explanation:
+        "DeletionPolicy: Retain removes the resource from CloudFormation's management but leaves it running when the stack is deleted. DeletionPolicy: Snapshot takes a backup before deletion.",
+    },
+    {
+      question:
+        "What dynamic reference syntax fetches a Secrets Manager secret value inside a CloudFormation template?",
+      options: [
+        "!GetAtt MySecret.SecretString",
+        "{{resolve:secretsmanager:MySecret:SecretString:password}}",
+        "!Ref MySecret",
+        "{{ssm:/myapp/secret}}",
+      ],
+      correctIndex: 1,
+      explanation:
+        "{{resolve:secretsmanager:SecretName:SecretString:fieldKey}} fetches the value from Secrets Manager at deploy time without embedding the secret in the template.",
+    },
+    {
+      question:
+        "A Custom Resource Lambda function must do what to signal success to CloudFormation?",
+      options: [
+        "Return { statusCode: 200 } from the Lambda handler",
+        "PUT a response to the pre-signed S3 URL provided in the event",
+        "Call cloudformation:SignalResource",
+        "Write a success record to DynamoDB",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Custom Resource Lambda functions must PUT a JSON response to the pre-signed S3 URL in the CloudFormation event. Failure to do so causes the stack to hang until it times out.",
+    },
+    {
+      question:
+        "Stack Sets with AWS Organizations integration automatically deploy to new accounts when they:",
+      options: [
+        "Are created in the same region as the Stack Set",
+        "Join an organizational unit targeted by the Stack Set",
+        "Have the correct IAM permissions pre-configured",
+        "Request deployment via the AWS console",
+      ],
+      correctIndex: 1,
+      explanation:
+        "With Organizations integration, Stack Sets automatically deploy to any new account that joins a targeted organizational unit — enabling org-wide security baselines and compliance guardrails without manual action.",
+    },
+    {
+      question:
+        "Which intrinsic function is used to import an output value from another CloudFormation stack?",
+      options: ["!GetAtt", "!Ref", "!ImportValue", "!Sub"],
+      correctIndex: 2,
+      explanation:
+        "!ImportValue imports an exported output value from another stack. The exporting stack uses the Export/Name field in its Outputs section. The importing stack cannot be deleted while the export is referenced.",
+    },
+    {
+      question:
+        "cfn-signal combined with a CreationPolicy tells CloudFormation to:",
+      options: [
+        "Install software packages on the EC2 instance",
+        "Wait for the EC2 instance to signal success before marking it as created",
+        "Send CloudWatch metrics during instance initialization",
+        "Retry failed resource creation automatically",
+      ],
+      correctIndex: 1,
+      explanation:
+        "cfn-signal sends a success/failure signal from the instance back to CloudFormation. The CreationPolicy causes CloudFormation to wait for the signal before marking the resource as successfully created.",
+    },
   ],
 };

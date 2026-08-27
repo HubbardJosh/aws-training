@@ -201,6 +201,70 @@ export function getSortedWeakTopics(progress: UserProgress): WeakTopic[] {
   );
 }
 
+/** Remove all progress for a single guide (sections read, completed flag, weak topic entry). */
+export function resetGuideProgress(
+  progress: UserProgress,
+  guideId: string,
+  service: string,
+): UserProgress {
+  const guideProgress = { ...progress.guideProgress };
+  delete guideProgress[guideId];
+  const weakTopics = { ...progress.weakTopics };
+  delete weakTopics[service];
+  return { ...progress, guideProgress, weakTopics };
+}
+
+/** Clear all guide progress (sections read, completion flags). */
+export function resetAllGuides(progress: UserProgress): UserProgress {
+  return { ...progress, guideProgress: {} };
+}
+
+/** Clear all flashcard study status. */
+export function resetAllFlashcards(progress: UserProgress): UserProgress {
+  return { ...progress, studiedCards: {} };
+}
+
+/** Clear all quiz history and domain scores. */
+export function resetAllQuizzes(progress: UserProgress): UserProgress {
+  return {
+    ...progress,
+    quizHistory: [],
+    totalQuestionsAnswered: 0,
+    totalCorrect: 0,
+    domainScores: {
+      development: { attempted: 0, correct: 0 },
+      security: { attempted: 0, correct: 0 },
+      deployment: { attempted: 0, correct: 0 },
+      troubleshooting: { attempted: 0, correct: 0 },
+      fundamentals: { attempted: 0, correct: 0 },
+      services: { attempted: 0, correct: 0 },
+      applications: { attempted: 0, correct: 0 },
+    },
+    weakTopics: {},
+  };
+}
+
+/** Clear domain scores for a single domain (quiz accuracy only, not history). */
+export function resetDomainScore(
+  progress: UserProgress,
+  domain: Domain,
+): UserProgress {
+  const domainAttempted = progress.domainScores[domain]?.attempted ?? 0;
+  const domainCorrect = progress.domainScores[domain]?.correct ?? 0;
+  return {
+    ...progress,
+    domainScores: {
+      ...progress.domainScores,
+      [domain]: { attempted: 0, correct: 0 },
+    },
+    totalQuestionsAnswered: Math.max(
+      0,
+      progress.totalQuestionsAnswered - domainAttempted,
+    ),
+    totalCorrect: Math.max(0, progress.totalCorrect - domainCorrect),
+  };
+}
+
 export function getGuidesCompleted(progress: UserProgress): number {
   return Object.values(progress.guideProgress).filter((g) => g.completed)
     .length;

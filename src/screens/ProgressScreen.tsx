@@ -16,6 +16,11 @@ import {
   loadProgress,
   saveProgress,
   resetProgress,
+  resetGuideProgress,
+  resetAllGuides,
+  resetAllFlashcards,
+  resetAllQuizzes,
+  resetDomainScore,
   getDomainAccuracy,
   getOverallAccuracy,
   getGuidesCompleted,
@@ -73,7 +78,111 @@ export default function ProgressScreen() {
     await saveProgress(updated, certMeta.storageKey);
   };
 
+  const handleResetGuide = (guideId: string, service: string) => {
+    Alert.alert(
+      `Reset "${service}"`,
+      "Clears section progress for this topic. Quiz history and flashcard status are kept.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (!progress) return;
+            const updated = resetGuideProgress(progress, guideId, service);
+            setProgress(updated);
+            await saveProgress(updated, certMeta.storageKey);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleResetAllGuides = () => {
+    Alert.alert(
+      "Reset All Guides",
+      "Clears section progress and completion status for every guide. Quiz history and flashcards are kept.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (!progress) return;
+            const updated = resetAllGuides(progress);
+            setProgress(updated);
+            await saveProgress(updated, certMeta.storageKey);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleResetAllFlashcards = () => {
+    Alert.alert(
+      "Reset Flashcards",
+      "Marks all flashcards as unseen. Quiz history and guide progress are kept.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (!progress) return;
+            const updated = resetAllFlashcards(progress);
+            setProgress(updated);
+            await saveProgress(updated, certMeta.storageKey);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleResetAllQuizzes = () => {
+    Alert.alert(
+      "Reset Quiz History",
+      "Clears all quiz history, domain scores, and weak topics. Guide progress and flashcards are kept.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (!progress) return;
+            const updated = resetAllQuizzes(progress);
+            setProgress(updated);
+            await saveProgress(updated, certMeta.storageKey);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleResetDomain = (domain: Domain, label: string) => {
+    Alert.alert(
+      `Reset "${label}"`,
+      "Clears quiz accuracy scores for this domain. Quiz history and other data are kept.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (!progress) return;
+            const updated = resetDomainScore(progress, domain);
+            setProgress(updated);
+            await saveProgress(updated, certMeta.storageKey);
+          },
+        },
+      ],
+    );
+  };
+
   if (!progress) return null;
+
+  const topicsWithProgress = allGuides.filter(
+    (g) => progress.guideProgress[g.id] !== undefined,
+  );
 
   const overallAccuracy = getOverallAccuracy(progress);
   const weakTopics = getSortedWeakTopics(progress);
@@ -407,10 +516,167 @@ export default function ProgressScreen() {
           />
         </View>
 
-        {/* Reset */}
+        {/* ── Reset ─────────────────────────────────── */}
+        {(() => {
+          const studiedCardCount = knownCards + learningCards;
+          const domainsWithAttempts = DOMAINS.filter(
+            (d) => progress.domainScores[d].attempted > 0,
+          );
+          const hasAnyReset =
+            studiedCardCount > 0 ||
+            progress.quizHistory.length > 0 ||
+            domainsWithAttempts.length > 0 ||
+            topicsWithProgress.length > 0;
+
+          if (!hasAnyReset) return null;
+
+          return (
+            <>
+              <Text style={styles.sectionTitle}>Reset Progress</Text>
+
+              {/* Flashcards — only if any studied */}
+              {studiedCardCount > 0 && (
+                <ResetCategoryRow
+                  label="Flashcards"
+                  detail={`${studiedCardCount} of ${totalCards} studied`}
+                  icon="layers-outline"
+                  onReset={handleResetAllFlashcards}
+                />
+              )}
+
+              {/* Quizzes — only if any taken */}
+              {progress.quizHistory.length > 0 && (
+                <ResetCategoryRow
+                  label="Quiz History"
+                  detail={`${progress.quizHistory.length} quiz${progress.quizHistory.length !== 1 ? "zes" : ""} · ${progress.totalQuestionsAnswered} questions answered`}
+                  icon="help-circle-outline"
+                  onReset={handleResetAllQuizzes}
+                />
+              )}
+
+              {/* Domains — only domains with attempts */}
+              {domainsWithAttempts.length > 0 && (
+                <View style={styles.resetGroup}>
+                  <View style={styles.resetGroupHeader}>
+                    <Text style={styles.resetGroupLabel}>Domains</Text>
+                    <Text style={styles.resetGroupSub}>
+                      reset accuracy per domain
+                    </Text>
+                  </View>
+                  {domainsWithAttempts.map((domain, di) => {
+                    const meta = DOMAIN_META[domain];
+                    const { attempted, correct } =
+                      progress.domainScores[domain];
+                    return (
+                      <View
+                        key={domain}
+                        style={[
+                          styles.groupRow,
+                          di < domainsWithAttempts.length - 1 &&
+                            styles.groupRowDivider,
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.resetDomainIcon,
+                            { backgroundColor: meta.color + "22" },
+                          ]}
+                        >
+                          <Ionicons
+                            name={meta.icon as any}
+                            size={14}
+                            color={meta.color}
+                          />
+                        </View>
+                        <View style={styles.topicResetInfo}>
+                          <Text style={styles.topicResetName}>
+                            {meta.label}
+                          </Text>
+                          <Text style={styles.topicResetMeta}>
+                            {correct}/{attempted} correct
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={styles.topicResetBtn}
+                          onPress={() => handleResetDomain(domain, meta.label)}
+                        >
+                          <Ionicons
+                            name="refresh-outline"
+                            size={14}
+                            color={colors.incorrect}
+                          />
+                          <Text style={styles.topicResetBtnText}>Reset</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Guides — only topics with progress */}
+              {topicsWithProgress.length > 0 && (
+                <View style={styles.resetGroup}>
+                  <View style={styles.resetGroupHeader}>
+                    <Text style={styles.resetGroupLabel}>Guides</Text>
+                    <View style={styles.resetGroupHeaderRight}>
+                      <Text style={styles.resetGroupSub}>reset per topic</Text>
+                      <TouchableOpacity onPress={handleResetAllGuides}>
+                        <Text style={styles.resetAllLink}>Reset all</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  {topicsWithProgress.map((g, gi) => {
+                    const gp = progress.guideProgress[g.id];
+                    const completed = gp?.completed ?? false;
+                    const sectionsRead = gp?.sectionsRead.length ?? 0;
+                    return (
+                      <View
+                        key={g.id}
+                        style={[
+                          styles.groupRow,
+                          gi < topicsWithProgress.length - 1 &&
+                            styles.groupRowDivider,
+                        ]}
+                      >
+                        {completed && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={16}
+                            color={colors.correct}
+                          />
+                        )}
+                        <View style={styles.topicResetInfo}>
+                          <Text style={styles.topicResetName}>{g.service}</Text>
+                          <Text style={styles.topicResetMeta}>
+                            {completed
+                              ? "Completed"
+                              : `${sectionsRead} section${sectionsRead !== 1 ? "s" : ""} read`}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={styles.topicResetBtn}
+                          onPress={() => handleResetGuide(g.id, g.service)}
+                        >
+                          <Ionicons
+                            name="refresh-outline"
+                            size={14}
+                            color={colors.incorrect}
+                          />
+                          <Text style={styles.topicResetBtnText}>Reset</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </>
+          );
+        })()}
+
+        {/* Reset all */}
         <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
           <Ionicons name="trash-outline" size={18} color={colors.incorrect} />
-          <Text style={styles.resetBtnText}>Reset All Progress</Text>
+          <Text style={styles.resetBtnText}>Reset Everything</Text>
         </TouchableOpacity>
 
         <View style={{ height: 32 }} />
@@ -562,6 +828,32 @@ function MiniStat({
       <Ionicons name={icon as any} size={18} color={color} />
       <Text style={styles.miniStatValue}>{value}</Text>
       <Text style={styles.miniStatLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function ResetCategoryRow({
+  label,
+  detail,
+  icon,
+  onReset,
+}: {
+  label: string;
+  detail: string;
+  icon: string;
+  onReset: () => void;
+}) {
+  return (
+    <View style={styles.topicResetRow}>
+      <Ionicons name={icon as any} size={18} color={colors.textMuted} />
+      <View style={styles.topicResetInfo}>
+        <Text style={styles.topicResetName}>{label}</Text>
+        <Text style={styles.topicResetMeta}>{detail}</Text>
+      </View>
+      <TouchableOpacity style={styles.topicResetBtn} onPress={onReset}>
+        <Ionicons name="refresh-outline" size={14} color={colors.incorrect} />
+        <Text style={styles.topicResetBtnText}>Reset</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -851,6 +1143,100 @@ const styles = StyleSheet.create({
   },
   miniStatLabel: { fontSize: fontSize.xs, color: colors.textSecondary },
 
+  resetGroup: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: "hidden",
+    marginBottom: spacing.sm,
+  },
+  resetGroupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  resetGroupLabel: {
+    fontSize: fontSize.sm,
+    fontWeight: "700",
+    color: colors.textPrimary,
+  },
+  resetGroupHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  resetGroupSub: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+  },
+  resetAllLink: {
+    fontSize: fontSize.xs,
+    fontWeight: "700",
+    color: colors.incorrect,
+  },
+  resetDomainIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.sm,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  groupRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    gap: spacing.sm,
+  },
+  groupRowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  topicResetList: {
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  topicResetRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
+  },
+  topicResetInfo: { flex: 1 },
+  topicResetName: {
+    fontSize: fontSize.sm,
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+  topicResetMeta: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  topicResetBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderColor: colors.incorrect + "55",
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+  },
+  topicResetBtnText: {
+    fontSize: fontSize.xs,
+    fontWeight: "700",
+    color: colors.incorrect,
+  },
   resetBtn: {
     flexDirection: "row",
     alignItems: "center",

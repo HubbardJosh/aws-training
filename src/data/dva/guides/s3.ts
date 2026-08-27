@@ -16,6 +16,28 @@ export const s3Guide: ServiceGuide = {
 Each **object** consists of the data payload and associated metadata. Objects are immutable — you don't modify them in place, you replace them. The maximum object size is 5 TB, and objects can be as small as 0 bytes. The **key** is the object's full identifier within the bucket and is what determines partitioning for storage performance. S3 automatically distributes objects across multiple storage partitions based on key prefixes, providing at least 3,500 PUT/COPY/DELETE requests and 5,500 GET/HEAD requests per second per prefix.
 
 An important consistency change happened in December 2020: S3 now provides **strong read-after-write consistency** for all operations. New objects are immediately readable after a successful PUT. Overwrites and deletes are also strongly consistent — a subsequent GET after a DELETE will never return the deleted object. This eliminates the class of bugs where applications read stale data immediately after writing, and you no longer need to design around eventual consistency for S3.`,
+      quiz: [
+        {
+          question: "What is the maximum size of a single S3 object?",
+          options: ["5 GB", "50 GB", "5 TB", "50 TB"],
+          correctIndex: 2,
+          explanation:
+            "S3 supports objects up to 5 TB. Single-part PUT is limited to 5 GB; multipart upload is required for objects larger than 5 GB.",
+        },
+        {
+          question:
+            "Since December 2020, what consistency model does S3 provide for all operations?",
+          options: [
+            "Eventual consistency",
+            "Strong read-after-write consistency",
+            "Read-your-writes consistency for new objects only",
+            "Causal consistency",
+          ],
+          correctIndex: 1,
+          explanation:
+            "S3 now provides strong read-after-write consistency for all operations including PUTs, overwrites, and DELETEs — no stale reads after a successful write.",
+        },
+      ],
     },
     {
       heading: "Storage Classes",
@@ -26,6 +48,34 @@ An important consistency change happened in December 2020: S3 now provides **str
 The Glacier tier exists for archival at very low storage cost. **S3 Glacier Instant Retrieval** provides millisecond access (like Standard-IA) at lower storage cost, with a 90-day minimum. **S3 Glacier Flexible Retrieval** is for true archival where you accept retrieval times of minutes to hours — Expedited (1–5 min), Standard (3–5 hr), or Bulk (5–12 hr) — with a 90-day minimum. **S3 Glacier Deep Archive** is the cheapest tier: 12-hour Standard retrieval, 48-hour Bulk, and a 180-day minimum. Use it for regulatory compliance archives you might never read.
 
 **S3 Intelligent-Tiering** removes the access-pattern guesswork by automatically moving objects between tiers based on actual access patterns, charging a small per-object monitoring fee in exchange. It's the right choice when you genuinely don't know or can't predict which objects will be accessed and how often.`,
+      quiz: [
+        {
+          question:
+            "Which S3 storage class has a minimum storage duration of 180 days and 12-hour standard retrieval?",
+          options: [
+            "S3 Glacier Flexible Retrieval",
+            "S3 Glacier Instant Retrieval",
+            "S3 Glacier Deep Archive",
+            "S3 One Zone-IA",
+          ],
+          correctIndex: 2,
+          explanation:
+            "S3 Glacier Deep Archive has a 180-day minimum and 12-hour standard retrieval. It is the cheapest tier, designed for compliance archives rarely or never accessed.",
+        },
+        {
+          question:
+            "Which storage class automatically moves objects between tiers based on actual access patterns?",
+          options: [
+            "S3 Standard-IA",
+            "S3 Intelligent-Tiering",
+            "S3 One Zone-IA",
+            "S3 Glacier Instant Retrieval",
+          ],
+          correctIndex: 1,
+          explanation:
+            "S3 Intelligent-Tiering monitors access patterns and moves objects automatically — ideal when you cannot predict access frequency.",
+        },
+      ],
     },
     {
       heading: "Lifecycle Policies",
@@ -36,6 +86,34 @@ The Glacier tier exists for archival at very low storage cost. **S3 Glacier Inst
 **Expiration actions** permanently delete objects after a specified number of days, which is important for controlling costs over time. A particularly useful expiration type is aborting incomplete multipart uploads: if a client starts a multipart upload but never completes it, the uploaded parts consume storage and incur charges even though no complete object exists. A lifecycle rule aborting incomplete multipart uploads after 7 days eliminates this cost accumulation automatically.
 
 Policies can be scoped to the entire bucket or filtered by key prefix and object tags, giving you granular control. A single bucket can have multiple lifecycle rules with different conditions, making it straightforward to manage objects with different retention requirements in the same bucket.`,
+      quiz: [
+        {
+          question:
+            "What does a lifecycle rule that aborts incomplete multipart uploads prevent?",
+          options: [
+            "Accidental object overwrites",
+            "Storage charges for abandoned upload parts",
+            "Unauthorized cross-account uploads",
+            "Objects being moved to Glacier prematurely",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Incomplete multipart uploads leave parts in S3 that incur storage charges even though no complete object exists. A lifecycle rule aborting them after 7 days cleans these up automatically.",
+        },
+        {
+          question:
+            "Which lifecycle action moves objects to a cheaper storage class after a configured number of days?",
+          options: [
+            "Expiration action",
+            "Transition action",
+            "Replication action",
+            "Versioning action",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Transition actions change the storage class after N days. Expiration actions permanently delete objects.",
+        },
+      ],
     },
     {
       heading: "Upload Patterns",
@@ -48,6 +126,37 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 **S3 Transfer Acceleration** routes upload traffic through CloudFront's edge locations and the AWS backbone network rather than the public internet. This improves upload speeds for cross-continental transfers where the public internet path is congested or has high latency. You pay an additional per-GB fee and use the \`*.s3-accelerate.amazonaws.com\` endpoint.
 
 **Presigned URLs** grant time-limited access to a specific object — either for downloading (GET) or uploading (PUT) — using the credentials of the URL creator. Generated server-side and shared with clients, they let users upload directly to S3 without your application server proxying the upload. The URL expires based on the creator's session: up to 7 days for IAM users, and up to the role session duration for IAM roles (which can be shorter than 7 days).`,
+      quiz: [
+        {
+          question:
+            "Multipart upload is required for S3 objects larger than what size?",
+          options: ["100 MB", "1 GB", "5 GB", "10 GB"],
+          correctIndex: 2,
+          explanation:
+            "Single-part PUT supports objects up to 5 GB; multipart upload is required beyond that. It is recommended for objects over 100 MB for resilience and parallel upload speed.",
+        },
+        {
+          question:
+            "What is the maximum expiry duration of a presigned URL created by an IAM user?",
+          options: ["1 hour", "24 hours", "7 days", "30 days"],
+          correctIndex: 2,
+          explanation:
+            "Presigned URLs created by IAM users expire in up to 7 days. URLs created by IAM roles expire no later than the role session duration, which may be shorter.",
+        },
+        {
+          question:
+            "S3 Transfer Acceleration improves upload speed by routing traffic through which AWS service's edge locations?",
+          options: [
+            "Route 53",
+            "CloudFront",
+            "Global Accelerator",
+            "Direct Connect",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Transfer Acceleration uses CloudFront edge locations to route uploads over the AWS backbone, bypassing congested public internet paths.",
+        },
+      ],
     },
     {
       heading: "Access Control",
@@ -60,6 +169,34 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 **ACLs** are a legacy mechanism for per-object and per-bucket access control that predate bucket policies. AWS recommends disabling ACLs by setting Object Ownership to \`BucketOwnerEnforced\` — new buckets default to this. With ACLs disabled, the bucket owner owns all objects (even those uploaded by other accounts), which simplifies access management.
 
 **S3 Access Points** create named endpoints with their own access policies, useful for large shared data sets where multiple teams need different access permissions. An access point for the analytics team can allow broad read access while an access point for the application team restricts reads to a specific prefix. VPC access points further restrict access to traffic originating from a specific VPC.`,
+      quiz: [
+        {
+          question:
+            "Which S3 access control mechanism overrides both bucket policies and ACLs?",
+          options: [
+            "S3 Access Points",
+            "IAM identity policies",
+            "Block Public Access",
+            "Object Ownership",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Block Public Access is the master override — it prevents public access regardless of what bucket policies or ACLs say. It can be set at the account or bucket level.",
+        },
+        {
+          question:
+            "What is the recommended way to grant cross-account access to an S3 bucket?",
+          options: [
+            "S3 ACLs",
+            "Bucket Policy with cross-account principal",
+            "IAM role in the source account",
+            "S3 Access Points only",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Bucket policies support cross-account grants using the full IAM policy language. ACLs are a legacy mechanism AWS recommends disabling.",
+        },
+      ],
     },
     {
       heading: "Encryption",
@@ -70,6 +207,28 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 **SSE-KMS** uses a KMS key (AWS managed or customer managed) to protect the data encryption key. This adds several capabilities over SSE-S3: every encrypt and decrypt operation is logged in CloudTrail, you can control who can access the key via key policies, and you can rotate the key. The tradeoff is cost and throughput: every S3 GET or PUT against a SSE-KMS object makes a KMS API call, which counts against your KMS request quota and adds per-call cost. S3 Bucket Keys address this by generating a short-lived bucket-level key in S3 that reduces KMS calls by up to 99%.
 
 **SSE-C** transfers the key management responsibility entirely to the client. You provide the encryption key on every request, S3 uses it to encrypt or decrypt, and then discards it — S3 never stores the key. Every request must use HTTPS and include the key material. **Client-Side Encryption** means you encrypt the data before it ever reaches S3 and decrypt it after downloading — S3 stores opaque bytes and cannot access the data at all. Encryption in transit is always available via HTTPS, and you can enforce HTTPS-only access with a bucket policy that denies requests where \`aws:SecureTransport\` is false.`,
+      quiz: [
+        {
+          question:
+            "Which S3 encryption option logs every encrypt and decrypt operation in CloudTrail?",
+          options: ["SSE-S3", "SSE-KMS", "SSE-C", "Client-Side Encryption"],
+          correctIndex: 1,
+          explanation:
+            "SSE-KMS uses a KMS key, and every KMS API call (GenerateDataKey, Decrypt) is logged in CloudTrail. SSE-S3 uses S3-managed keys with no per-call audit trail.",
+        },
+        {
+          question: "What does S3 Bucket Keys do when SSE-KMS is enabled?",
+          options: [
+            "Generates a separate KMS key per object",
+            "Reduces KMS API calls by up to 99% using a short-lived bucket-level key",
+            "Enables client-side encryption automatically",
+            "Disables CloudTrail logging for KMS calls",
+          ],
+          correctIndex: 1,
+          explanation:
+            "S3 Bucket Keys generate a bucket-level data key in S3, reducing the number of KMS API calls by up to 99% and lowering cost and quota pressure.",
+        },
+      ],
     },
     {
       heading: "Versioning & Replication",
@@ -80,6 +239,34 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 **Cross-Region Replication (CRR)** asynchronously copies objects from a source bucket to a destination bucket in a different region. Both buckets must have versioning enabled. The primary uses are disaster recovery (a separate region has a copy), compliance with data residency requirements, or latency reduction for users in the destination region. **Same-Region Replication (SRR)** does the same within a single region, useful for aggregating logs from multiple source buckets or maintaining a synchronized copy in a different account for separation of concerns.
 
 An important limitation: replication only applies to new objects created after the rule is configured. Existing objects are not replicated retroactively — you must use S3 Batch Operations to copy existing objects to the destination if you need to replicate historical data. Replication rules can filter by prefix or tag and optionally change the storage class during replication.`,
+      quiz: [
+        {
+          question:
+            "What happens when you delete a versioned S3 object without specifying a version ID?",
+          options: [
+            "The object and all versions are permanently deleted",
+            "The latest version is permanently deleted",
+            "A delete marker is added; all versions remain",
+            "The bucket is locked until deletion is confirmed",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Deleting without a version ID adds a delete marker. The object appears deleted but all versions remain accessible by version ID.",
+        },
+        {
+          question:
+            "Cross-Region Replication does NOT replicate which of the following?",
+          options: [
+            "New objects created after the rule is configured",
+            "Objects encrypted with SSE-KMS",
+            "Objects that existed before the replication rule was created",
+            "Objects filtered by prefix",
+          ],
+          correctIndex: 2,
+          explanation:
+            "CRR only applies to new objects created after the rule is configured. Existing objects must be copied manually using S3 Batch Operations.",
+        },
+      ],
     },
     {
       heading: "Event Notifications",
@@ -90,6 +277,28 @@ Supported event categories include \`s3:ObjectCreated:*\` (covers PUT, POST, COP
 S3 can deliver notifications directly to three targets — SQS, SNS, and Lambda — or to **EventBridge**. Direct delivery to Lambda is the simplest path for triggering processing on uploads. SNS enables fan-out where multiple systems respond to the same upload event. SQS adds durability and backpressure: if the processor is slow, events queue up rather than being dropped. EventBridge is the most flexible option: it supports richer content-based filtering, routing to over 20 target types, cross-account delivery, and event archiving and replay.
 
 An important operational characteristic: S3 event notifications are delivered **at least once**, not exactly once. Your event processors must be idempotent — processing the same event twice should produce the same result as processing it once. This is especially important for operations like database writes or file moves that are not naturally idempotent.`,
+      quiz: [
+        {
+          question: "S3 event notifications have which delivery guarantee?",
+          options: [
+            "Exactly-once delivery",
+            "At-most-once delivery",
+            "At-least-once delivery",
+            "Ordered delivery",
+          ],
+          correctIndex: 2,
+          explanation:
+            "S3 event notifications are at-least-once — a notification may be delivered more than once. Event processors must be idempotent.",
+        },
+        {
+          question:
+            "Which S3 event notification target provides the most flexible routing, content-based filtering, and event replay?",
+          options: ["SQS", "SNS", "Lambda", "EventBridge"],
+          correctIndex: 3,
+          explanation:
+            "EventBridge supports rich content-based filtering, 20+ target types, cross-account delivery, and event archiving/replay — the most flexible option.",
+        },
+      ],
     },
     {
       heading: "Static Website Hosting & CloudFront",
@@ -98,6 +307,34 @@ An important operational characteristic: S3 event notifications are delivered **
 The recommended production pattern is **CloudFront + S3 with Origin Access Control (OAC)**. CloudFront serves content from edge locations worldwide, reducing latency for users regardless of their location. OAC configures the S3 bucket to accept requests only from your CloudFront distribution — the bucket has no public read access and cannot be accessed directly by users, only through CloudFront. This gives you HTTPS with a custom domain, WAF integration, Lambda@Edge for request manipulation, and caching at the edge, all while keeping the origin bucket private.
 
 For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which provides serverless SQL queries against data stored in S3. Partitioning your data by date, region, or other dimensions in the key prefix (for example, \`year=2024/month=08/day=15/\`) allows Athena to skip partitions that don't match your query, dramatically reducing the amount of data scanned and lowering cost. Storing data in columnar formats like Parquet or ORC — which Firehose can convert to automatically — yields additional cost reductions of 70–90% compared to JSON or CSV.`,
+      quiz: [
+        {
+          question:
+            "What is the recommended way to serve a private S3 bucket through CloudFront?",
+          options: [
+            "Enable public read on the bucket",
+            "Use Origin Access Identity (OAI)",
+            "Use Origin Access Control (OAC)",
+            "Configure a bucket policy allowing all CloudFront IPs",
+          ],
+          correctIndex: 2,
+          explanation:
+            "OAC is the current recommended mechanism. It restricts bucket access to only your CloudFront distribution, keeping the bucket private while CloudFront serves content globally.",
+        },
+        {
+          question:
+            "How does partitioning S3 data by date in key prefixes reduce Athena query costs?",
+          options: [
+            "It compresses the data automatically",
+            "It lets Athena skip entire partitions that don't match the query",
+            "It converts data to Parquet format",
+            "It enables caching of query results",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Athena charges per data scanned. Partition pruning lets Athena skip partitions that don't match the WHERE clause, dramatically reducing the data scanned.",
+        },
+      ],
     },
     {
       heading: "S3 with Other Services",
@@ -108,6 +345,34 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
 **S3 + Athena** (often with AWS Glue for schema management) enables ad-hoc analytics on large data sets without running a database or ETL pipeline. Glue crawlers can infer schema from S3 data automatically, and Athena queries it with standard SQL. This is the foundation of the serverless data lake pattern.
 
 **S3 + CodePipeline and CodeBuild** makes S3 the artifact store for CI/CD pipelines — source code bundles, build outputs, and deployment artifacts all flow through S3 between pipeline stages. **S3 + Elastic Beanstalk** works the same way: Beanstalk stores application version bundles in S3 and deploys from there. **S3 + SageMaker** stores training data sets and model artifacts — SageMaker reads training data directly from S3, making S3 the natural staging area for machine learning workflows.`,
+      quiz: [
+        {
+          question:
+            "Why use presigned URLs for client-side S3 uploads instead of routing through your application server?",
+          options: [
+            "Presigned URLs support larger file sizes",
+            "They bypass S3 encryption requirements",
+            "They save application server bandwidth and compute cost",
+            "They are required for multipart uploads",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Presigned URLs let clients upload directly to S3 without the file passing through your server, eliminating the bandwidth and compute cost of proxying large uploads.",
+        },
+        {
+          question:
+            "Which AWS service pair enables serverless SQL analytics directly on S3 data without an ETL pipeline?",
+          options: [
+            "S3 + RDS",
+            "S3 + Athena",
+            "S3 + Redshift",
+            "S3 + DynamoDB",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Athena queries S3 data directly with standard SQL at no fixed cost — you pay per data scanned. No ETL or database server required.",
+        },
+      ],
     },
   ],
 
@@ -147,5 +412,101 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
     "S3 event notifications: at-least-once delivery — processors must be idempotent.",
     "Transfer Acceleration uses CloudFront edge for faster uploads — extra cost per GB.",
     "OAC (not OAI) is the current recommended way to restrict S3 access to CloudFront.",
+  ],
+
+  topicQuiz: [
+    {
+      question:
+        "Multipart upload is required for S3 objects larger than what size?",
+      options: ["100 MB", "1 GB", "5 GB", "10 GB"],
+      correctIndex: 2,
+      explanation:
+        "Single-part PUT supports up to 5 GB. Multipart is required beyond that and recommended for objects over 100 MB.",
+    },
+    {
+      question:
+        "Which S3 storage class automatically moves objects between access tiers with no manual rules?",
+      options: [
+        "S3 Standard-IA",
+        "S3 Intelligent-Tiering",
+        "S3 Glacier Flexible Retrieval",
+        "S3 One Zone-IA",
+      ],
+      correctIndex: 1,
+      explanation:
+        "S3 Intelligent-Tiering monitors access patterns and moves objects automatically, charging a small per-object monitoring fee.",
+    },
+    {
+      question:
+        "Which access control feature overrides all bucket policies and ACLs to prevent public access?",
+      options: [
+        "S3 Access Points",
+        "Bucket versioning",
+        "Block Public Access",
+        "Object Ownership",
+      ],
+      correctIndex: 2,
+      explanation:
+        "Block Public Access is the master override. It can be set at the account level to prevent public access across all buckets regardless of other policies.",
+    },
+    {
+      question:
+        "What must both the source and destination bucket have enabled for S3 Cross-Region Replication to work?",
+      options: [
+        "Static website hosting",
+        "Versioning",
+        "Block Public Access disabled",
+        "SSE-KMS encryption",
+      ],
+      correctIndex: 1,
+      explanation:
+        "CRR and SRR both require versioning enabled on source and destination buckets.",
+    },
+    {
+      question:
+        "Which SSE option gives you full CloudTrail audit logs of every S3 encrypt/decrypt operation?",
+      options: ["SSE-S3", "SSE-C", "SSE-KMS", "Client-Side Encryption"],
+      correctIndex: 2,
+      explanation:
+        "SSE-KMS uses KMS keys. Every KMS API call is logged in CloudTrail, giving you a complete audit trail of who accessed which object.",
+    },
+    {
+      question: "S3 event notifications guarantee which delivery semantics?",
+      options: [
+        "Exactly-once",
+        "At-most-once",
+        "At-least-once",
+        "Ordered FIFO",
+      ],
+      correctIndex: 2,
+      explanation:
+        "S3 notifications are at-least-once. Processors must be idempotent to handle duplicate deliveries safely.",
+    },
+    {
+      question:
+        "What is the current recommended mechanism to restrict S3 bucket access to only a CloudFront distribution?",
+      options: [
+        "Origin Access Identity (OAI)",
+        "Origin Access Control (OAC)",
+        "Bucket policy with CloudFront IP ranges",
+        "S3 Access Points",
+      ],
+      correctIndex: 1,
+      explanation:
+        "OAC is the current recommended replacement for OAI. It keeps the bucket private and allows only your CloudFront distribution to access it.",
+    },
+    {
+      question:
+        "Which lifecycle rule type prevents accumulating storage charges from abandoned multipart uploads?",
+      options: [
+        "Transition action to Glacier",
+        "Expiration action on current versions",
+        "Abort incomplete multipart uploads",
+        "MFA Delete",
+      ],
+      correctIndex: 2,
+      explanation:
+        "Aborting incomplete multipart uploads after 7 days cleans up upload parts that were never completed, eliminating the associated storage cost.",
+    },
   ],
 };

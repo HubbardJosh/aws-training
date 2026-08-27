@@ -42,6 +42,47 @@ type Subscription {
 Each field in a Query, Mutation, or Subscription type is wired to a **resolver** that knows how to fetch or modify the data. Resolvers connect schema fields to **data sources** — AppSync supports DynamoDB, Lambda, RDS (via the RDS Data API), OpenSearch, HTTP endpoints, EventBridge, and a "None" type for local resolvers that don't call external services.
 
 **Unit resolvers** handle a single data source call. **Pipeline resolvers** chain multiple functions in sequence, allowing you to call multiple data sources, apply business logic, or perform authorization checks before and after the primary data operation.`,
+      quiz: [
+        {
+          question:
+            "Which AppSync resolver type chains multiple functions to call multiple data sources in sequence?",
+          options: [
+            "Unit resolver",
+            "Pipeline resolver",
+            "Batch resolver",
+            "Proxy resolver",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Pipeline resolvers chain multiple functions in sequence, enabling calls to multiple data sources, business logic application, and authorization checks before and after the primary operation. Unit resolvers handle a single data source call.",
+        },
+        {
+          question:
+            "What does the @aws_subscribe directive do in an AppSync schema?",
+          options: [
+            "Restricts access to authenticated users only",
+            "Links a subscription field to the mutations that trigger it",
+            "Enables caching for the subscribed field",
+            "Creates a webhook for external systems",
+          ],
+          correctIndex: 1,
+          explanation:
+            "@aws_subscribe links a subscription field to the mutations that cause real-time updates to be pushed to subscribed clients. When the listed mutations execute, AppSync pushes results over WebSocket.",
+        },
+        {
+          question:
+            "Which AppSync data source type should you use when you need custom business logic or to query a non-DynamoDB backend?",
+          options: [
+            "None (local resolver)",
+            "HTTP endpoint",
+            "Lambda",
+            "RDS Data API",
+          ],
+          correctIndex: 2,
+          explanation:
+            "A Lambda data source receives the full GraphQL context and can call any downstream service, run any business logic, or query any database — making it the most flexible option for custom requirements.",
+        },
+      ],
     },
     {
       heading: "Resolvers & Mapping Templates",
@@ -79,6 +120,42 @@ export function response(ctx) {
 \`\`\`
 
 Both approaches have access to the **\`$ctx\` context object**, which is the central data structure in every resolver. \`$ctx.args\` contains the GraphQL field arguments, \`$ctx.identity\` contains the caller's identity (Cognito claims, IAM principal, or API key), \`$ctx.result\` contains the data source response, and \`$ctx.error\` contains any error from the data source. The \`$util\` helper namespace provides utility functions for DynamoDB type conversion, time formatting, input validation, and authorization enforcement.`,
+      quiz: [
+        {
+          question:
+            "In an AppSync resolver, where do you find the caller's Cognito JWT claims?",
+          options: [
+            "$ctx.args.claims",
+            "$ctx.identity.claims",
+            "$ctx.request.headers",
+            "$ctx.source.identity",
+          ],
+          correctIndex: 1,
+          explanation:
+            "$ctx.identity contains the caller's identity information — Cognito claims, IAM principal, or API key depending on the auth mode configured. $ctx.args holds GraphQL field arguments.",
+        },
+        {
+          question:
+            "Which AppSync resolver language is currently recommended for new development?",
+          options: [
+            "VTL (Velocity Template Language)",
+            "JavaScript resolvers",
+            "Python resolvers",
+            "JSON mapping documents",
+          ],
+          correctIndex: 1,
+          explanation:
+            "JavaScript resolvers are the current recommended approach — they are more readable, easier to test locally, and familiar to most developers. VTL is the legacy approach still supported for existing resolvers.",
+        },
+        {
+          question:
+            "After a data source call, where does AppSync store the raw result for the response mapping template?",
+          options: ["$ctx.args", "$ctx.result", "$ctx.source", "$ctx.prev"],
+          correctIndex: 1,
+          explanation:
+            "$ctx.result contains the data source response after the request completes. The response mapping template transforms this into the GraphQL result shape. $ctx.error contains any error from the data source.",
+        },
+      ],
     },
     {
       heading: "Authorization",
@@ -93,6 +170,47 @@ Both approaches have access to the **\`$ctx\` context object**, which is the cen
 **Lambda (custom)** authorization invokes a Lambda function on every request. The function receives the full request context and returns an authorization decision plus any additional context to pass to resolvers. This gives you the most flexibility for complex or non-standard auth logic.
 
 Authorization can be applied at the type level with schema directives like \`@aws_auth(cognito_groups: ["Admin"])\` or at the individual field level, allowing you to expose sensitive fields only to specific auth modes or user groups.`,
+      quiz: [
+        {
+          question:
+            "An AppSync API needs to support both public (unauthenticated) access and authenticated user access with different permissions. How do you handle this?",
+          options: [
+            "Create two separate AppSync APIs",
+            "Enable multiple authorization modes simultaneously on one API",
+            "Use a Lambda authorizer to handle both cases",
+            "This is not possible with AppSync",
+          ],
+          correctIndex: 1,
+          explanation:
+            "AppSync supports enabling multiple authorization modes simultaneously on a single API. Different clients can use different modes (API Key for public, Cognito for users), and you can apply different modes at the type or field level.",
+        },
+        {
+          question:
+            "What IAM permission does a role need to call an AppSync API using IAM authorization?",
+          options: [
+            "appsync:Query",
+            "appsync:GraphQL",
+            "appsync:Invoke",
+            "execute-api:Invoke",
+          ],
+          correctIndex: 1,
+          explanation:
+            "For IAM authorization, the calling role must have appsync:GraphQL permission on the API ARN. This is analogous to execute-api:Invoke for API Gateway IAM auth.",
+        },
+        {
+          question:
+            "How do you restrict an AppSync type to only users in the 'Admin' Cognito group?",
+          options: [
+            '@aws_iam(roles: ["Admin"])',
+            '@aws_auth(cognito_groups: ["Admin"])',
+            '@aws_cognito(group: "Admin")',
+            '@aws_restrict(group: "Admin")',
+          ],
+          correctIndex: 1,
+          explanation:
+            '@aws_auth(cognito_groups: ["Admin"]) is the schema directive for type-level authorization by Cognito group. It can also be applied at the individual field level for fine-grained control.',
+        },
+      ],
     },
     {
       heading: "Subscriptions & Real-Time",
@@ -110,6 +228,34 @@ type Subscription {
 When a client subscribes to \`onTodoUpdated\`, AppSync maintains a WebSocket connection. Every time \`updateTodo\` or \`createTodo\` is called and succeeds, AppSync pushes the result to that client. The Amplify client library manages WebSocket connections, reconnection, and subscription lifecycle automatically.
 
 Server-side subscription filters let you control which events each subscriber receives — for example, a client might only want updates for todos belonging to them. Enhanced subscriptions allow publishing events from any source (EventBridge, SNS, etc.) via the AppSync Pub/Sub API, not just from GraphQL mutations. This makes AppSync suitable for collaborative applications (like real-time document editors), live dashboards, IoT status displays, and chat systems.`,
+      quiz: [
+        {
+          question:
+            "What transport protocol does AppSync use for real-time subscriptions?",
+          options: [
+            "HTTP long-polling",
+            "WebSocket",
+            "Server-Sent Events",
+            "gRPC streaming",
+          ],
+          correctIndex: 1,
+          explanation:
+            "AppSync subscriptions use WebSocket connections. The Amplify client library manages WebSocket connections, reconnection, and subscription lifecycle automatically.",
+        },
+        {
+          question:
+            "An AppSync subscription fires when a matching mutation occurs. What happens if no mutation occurs?",
+          options: [
+            "AppSync polls the data source every 30 seconds",
+            "The WebSocket connection times out immediately",
+            "Nothing — subscriptions are push-only and only fire on mutations",
+            "AppSync sends a heartbeat with the last known data",
+          ],
+          correctIndex: 2,
+          explanation:
+            "AppSync subscriptions are purely push-based. Subscribed clients only receive updates when a mutation that matches the @aws_subscribe directive executes — no polling or periodic delivery occurs.",
+        },
+      ],
     },
     {
       heading: "Caching & Performance",
@@ -118,6 +264,47 @@ Server-side subscription filters let you control which events each subscriber re
 You can configure caching at two levels. **Full request caching** (\`FULL_REQUEST_CACHING\`) caches the entire GraphQL response for identical requests — same query, same variables, same auth context. This is effective for public or lightly authenticated data. **Per-resolver caching** (\`PER_RESOLVER_CACHING\`) caches individual resolver responses. You configure TTL and cache key per resolver, which lets you cache some resolvers (like a product catalog lookup) while leaving others uncached (like a user-specific cart query).
 
 Cache TTL is configurable from 1 second to 3,600 seconds per resolver. You can scope the cache key by field arguments (to cache per-query parameters), by request headers (to cache per-user), or by both. For APIs where certain data is frequently read and rarely written, resolver caching can dramatically reduce DynamoDB read costs and improve p50 latency.`,
+      quiz: [
+        {
+          question:
+            "What backing infrastructure does AppSync use for server-side caching?",
+          options: [
+            "DynamoDB DAX",
+            "CloudFront edge caches",
+            "ElastiCache managed by AppSync",
+            "In-memory caching on the AppSync service itself",
+          ],
+          correctIndex: 2,
+          explanation:
+            "AppSync's server-side caching is backed by ElastiCache that AppSync manages for you. You get the performance benefits without provisioning or managing the cache cluster yourself.",
+        },
+        {
+          question:
+            "Which AppSync caching mode caches individual resolver responses rather than the entire API response?",
+          options: [
+            "FULL_REQUEST_CACHING",
+            "PER_RESOLVER_CACHING",
+            "SELECTIVE_CACHING",
+            "FIELD_LEVEL_CACHING",
+          ],
+          correctIndex: 1,
+          explanation:
+            "PER_RESOLVER_CACHING caches individual resolver responses with per-resolver TTL and cache key configuration. FULL_REQUEST_CACHING caches the entire GraphQL response for identical requests.",
+        },
+        {
+          question:
+            "What is the maximum TTL you can configure for AppSync resolver caching?",
+          options: [
+            "300 seconds",
+            "600 seconds",
+            "1,800 seconds",
+            "3,600 seconds",
+          ],
+          correctIndex: 3,
+          explanation:
+            "AppSync resolver cache TTL is configurable from 1 second to 3,600 seconds (1 hour). The right TTL depends on how frequently the data changes and how stale you can tolerate.",
+        },
+      ],
     },
     {
       heading: "AppSync with Other Services",
@@ -128,6 +315,34 @@ When you need custom business logic, a non-DynamoDB backend, or data aggregation
 **RDS Aurora Serverless** via the RDS Data API is the right data source when your data model is relational and you want to write SQL rather than DynamoDB access patterns. **OpenSearch** as a data source enables full-text search and analytics — a common pattern is to write to DynamoDB as the primary store, stream changes via DynamoDB Streams to OpenSearch, and serve search queries from OpenSearch through AppSync.
 
 AppSync integrates directly with **EventBridge** as a target data source, letting GraphQL mutations trigger event-driven workflows downstream. When using **Amplify**, the Data category builds on AppSync and generates a strongly typed TypeScript client, DynamoDB tables, and IAM permissions — reducing the AppSync setup to schema definition.`,
+      quiz: [
+        {
+          question:
+            "A team wants to add full-text search to their AppSync + DynamoDB app. What is the recommended pattern?",
+          options: [
+            "Use DynamoDB's built-in search feature",
+            "Write to DynamoDB, stream changes via DynamoDB Streams to OpenSearch, serve search queries from OpenSearch through AppSync",
+            "Use Lambda resolvers to scan DynamoDB on every search query",
+            "Use CloudSearch as an AppSync data source",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The recommended pattern: DynamoDB as the primary store, DynamoDB Streams to sync changes to OpenSearch, and an AppSync OpenSearch data source to serve full-text search queries.",
+        },
+        {
+          question:
+            "When using Amplify's Data category, what AWS services are automatically provisioned behind the scenes?",
+          options: [
+            "API Gateway and Lambda",
+            "AppSync and DynamoDB",
+            "ElasticSearch and Lambda",
+            "RDS and API Gateway",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Amplify's Data category provisions an AppSync GraphQL API and DynamoDB tables (one per model). It also generates a strongly typed TypeScript client and configures IAM permissions.",
+        },
+      ],
     },
   ],
 
@@ -166,5 +381,92 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
     "Pipeline resolvers: sequence of functions — use for multi-step logic.",
     "Server-side caching: reduces DynamoDB reads for frequently queried data.",
     "Per-field authorization: hide sensitive fields from certain auth modes/users.",
+  ],
+
+  topicQuiz: [
+    {
+      question:
+        "AppSync subscriptions push updates to clients when which event occurs?",
+      options: [
+        "A scheduled CloudWatch event fires",
+        "A matching mutation executes",
+        "The WebSocket TTL expires",
+        "A client polls the subscription endpoint",
+      ],
+      correctIndex: 1,
+      explanation:
+        "AppSync subscriptions are triggered by mutations. The @aws_subscribe directive links a subscription field to the mutations that cause real-time updates to be pushed over WebSocket.",
+    },
+    {
+      question:
+        "Which AppSync resolver language is currently recommended for new development?",
+      options: [
+        "VTL (Velocity Template Language)",
+        "Python",
+        "JavaScript",
+        "Java",
+      ],
+      correctIndex: 2,
+      explanation:
+        "JavaScript resolvers are the current recommended approach — more readable, easier to test locally, and familiar to most developers compared to VTL.",
+    },
+    {
+      question:
+        "An AppSync API must serve both anonymous public users and authenticated Cognito users with different data access. What is the correct configuration?",
+      options: [
+        "Create two separate AppSync APIs",
+        "Enable both API Key and Cognito User Pools authorization modes simultaneously",
+        "Use a Lambda authorizer to route between modes",
+        "Use IAM authorization with public and private roles",
+      ],
+      correctIndex: 1,
+      explanation:
+        "AppSync supports enabling multiple authorization modes simultaneously. API Key can serve anonymous users while Cognito User Pools serves authenticated users, with field-level directives controlling access.",
+    },
+    {
+      question: "A pipeline resolver in AppSync is used when you need to:",
+      options: [
+        "Cache resolver responses for better performance",
+        "Call multiple data sources or apply multi-step logic in a single resolver",
+        "Enable real-time subscriptions",
+        "Connect to an on-premises database",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Pipeline resolvers chain multiple functions in sequence, enabling calls to multiple data sources and complex business logic within a single resolver execution.",
+    },
+    {
+      question:
+        "What does $ctx.identity.claims contain in an AppSync resolver using Cognito?",
+      options: [
+        "The raw API key value",
+        "The IAM role ARN of the caller",
+        "The JWT claims from the Cognito token (sub, email, groups, etc.)",
+        "The GraphQL field arguments",
+      ],
+      correctIndex: 2,
+      explanation:
+        "$ctx.identity.claims contains the JWT claims from the Cognito token — including sub, email, cognito:groups, and custom attributes — available for authorization decisions in resolvers.",
+    },
+    {
+      question: "AppSync server-side caching is backed by which AWS service?",
+      options: ["DynamoDB DAX", "CloudFront", "ElastiCache", "Lambda@Edge"],
+      correctIndex: 2,
+      explanation:
+        "AppSync's server-side caching is backed by ElastiCache managed by AppSync. You configure TTL and caching mode without provisioning or managing the cache infrastructure yourself.",
+    },
+    {
+      question:
+        "A team stores data in DynamoDB and needs full-text search via AppSync. What data source enables search queries?",
+      options: [
+        "DynamoDB with FilterExpression",
+        "OpenSearch",
+        "RDS Data API",
+        "Lambda with Scan",
+      ],
+      correctIndex: 1,
+      explanation:
+        "OpenSearch is the AppSync data source for full-text search. The typical pattern: write to DynamoDB, stream changes via DynamoDB Streams to OpenSearch, serve search through an AppSync OpenSearch data source.",
+    },
   ],
 };

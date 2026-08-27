@@ -16,6 +16,40 @@ export const lambdaGuide: ServiceGuide = {
 Lambda is the core AWS serverless compute service. You write a **function** — a piece of code with a defined entry point called a **handler** — and Lambda executes it in response to **events**. An event might be an HTTP request through API Gateway, a file uploaded to S3, a message in an SQS queue, a timer (scheduled event), or many other triggers.
 
 Because Lambda scales automatically and you pay only for invocations and compute time (measured in milliseconds), it can dramatically reduce costs for workloads that are variable, infrequent, or event-driven.`,
+      quiz: [
+        {
+          question: "What does 'serverless' mean in the context of AWS Lambda?",
+          options: [
+            "Lambda runs code without any physical servers anywhere",
+            "You do not manage the servers — AWS handles provisioning, scaling, patching, and availability",
+            "Lambda functions run only on virtual machines, not physical servers",
+            "Serverless means the code runs in the user's browser, not on AWS servers",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Serverless does not mean there are no servers — it means you don't manage them. AWS handles all infrastructure (provisioning, scaling, patching, availability). You provide only the code, and AWS takes care of everything else.",
+        },
+        {
+          question: "What is the entry point of a Lambda function called?",
+          options: ["Trigger", "Handler", "Invoker", "Runtime"],
+          correctIndex: 1,
+          explanation:
+            "The entry point of a Lambda function is called the handler. It is a defined function in your code that Lambda calls when an event occurs. The handler receives the event data and a context object as parameters.",
+        },
+        {
+          question:
+            "Which workload type benefits most from Lambda's pay-per-use pricing model?",
+          options: [
+            "A database that must be available 24/7 with consistent query patterns",
+            "A web application with highly variable or infrequent traffic",
+            "A video transcoding system that runs at 100% CPU 24 hours a day",
+            "A relational database with complex multi-table join queries",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda's pay-per-use model (pay only for invocations and compute duration) is most cost-effective for variable or infrequent workloads. There are no idle costs — if the function isn't invoked, you pay nothing. For sustained high-traffic workloads, EC2 may be cheaper.",
+        },
+      ],
     },
     {
       heading: "How Lambda Functions Work",
@@ -26,6 +60,41 @@ If Lambda already has a warm execution environment from a previous invocation, i
 Lambda functions have configurable **memory** (128 MB to 10,240 MB), and CPU scales proportionally with memory. The maximum **timeout** is 15 minutes per invocation. For workloads longer than 15 minutes, you need to use a different service like EC2, ECS, or AWS Step Functions to orchestrate multiple Lambda calls.
 
 Lambda automatically **scales** the number of concurrent executions based on incoming event volume. There is no capacity to provision or manage — Lambda handles scaling transparently.`,
+      quiz: [
+        {
+          question: "What is a 'cold start' in AWS Lambda?",
+          options: [
+            "When Lambda fails to find the correct runtime for the function",
+            "When Lambda must initialize a new execution environment, adding latency to the invocation",
+            "When a Lambda function times out after 15 minutes of execution",
+            "When Lambda scales down to zero instances during low traffic",
+          ],
+          correctIndex: 1,
+          explanation:
+            "A cold start occurs when Lambda has no warm execution environment available and must create a new one — downloading the code, initializing the runtime, and running any initialization code. This adds latency (typically 100–500ms). Warm starts reuse existing environments and are much faster.",
+        },
+        {
+          question:
+            "What is the maximum execution timeout for a single AWS Lambda invocation?",
+          options: ["5 minutes", "15 minutes", "1 hour", "24 hours"],
+          correctIndex: 1,
+          explanation:
+            "The maximum timeout per Lambda invocation is 15 minutes. For workloads that run longer than 15 minutes, you need to use EC2, ECS, or AWS Step Functions to orchestrate multiple Lambda calls or use a long-running compute service.",
+        },
+        {
+          question:
+            "How does Lambda handle sudden increases in incoming event volume?",
+          options: [
+            "Lambda queues excess events and processes them sequentially with a fixed number of workers",
+            "Lambda automatically scales the number of concurrent executions to match incoming volume",
+            "Lambda rejects events beyond a fixed concurrency limit and returns an error",
+            "You must pre-configure the number of instances Lambda should scale to",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda automatically scales the number of concurrent executions based on incoming event volume. There is no capacity to provision or manage — Lambda handles scaling transparently, from zero to thousands of concurrent executions.",
+        },
+      ],
     },
     {
       heading: "Event Sources and Triggers",
@@ -42,6 +111,47 @@ Lambda automatically **scales** the number of concurrent executions based on inc
 **Amazon EventBridge (CloudWatch Events)** can invoke Lambda on a schedule (like a cron job) or when specific events happen in your AWS environment.
 
 The core concept is that Lambda is **event-driven** — it does nothing until an event occurs, making it a natural fit for building reactive, loosely coupled systems.`,
+      quiz: [
+        {
+          question:
+            "Which AWS service is combined with Lambda to build serverless REST APIs?",
+          options: [
+            "Amazon SQS",
+            "Amazon API Gateway",
+            "Amazon CloudFront",
+            "Amazon Route 53",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Amazon API Gateway triggers Lambda synchronously on each HTTP request. Together they form the standard serverless API architecture — API Gateway handles routing, authentication, and throttling while Lambda executes the business logic.",
+        },
+        {
+          question:
+            "A company wants to automatically generate thumbnail images whenever users upload photos to an S3 bucket. Which architecture achieves this?",
+          options: [
+            "An EC2 instance that polls S3 every minute for new objects",
+            "An S3 event trigger that invokes a Lambda function when objects are created",
+            "A CloudWatch alarm that fires when S3 bucket size increases",
+            "An EventBridge scheduled rule that processes new S3 objects every hour",
+          ],
+          correctIndex: 1,
+          explanation:
+            "S3 can trigger Lambda when objects are created, modified, or deleted. Configuring an S3 event notification to invoke Lambda on object creation is the standard event-driven pattern for processing uploads — no polling or scheduling needed.",
+        },
+        {
+          question:
+            "What makes Lambda well-suited for building reactive, loosely coupled systems?",
+          options: [
+            "Lambda functions run continuously and check for events in a tight loop",
+            "Lambda is event-driven — it does nothing until triggered by an event, then responds automatically",
+            "Lambda maintains persistent connections to all event sources simultaneously",
+            "Lambda pre-allocates compute capacity so it is always ready for any event",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda is fundamentally event-driven — it only executes when an event occurs, then terminates. This makes it a natural fit for reactive systems where components respond to events from S3, SQS, API Gateway, DynamoDB Streams, and many other sources.",
+        },
+      ],
     },
     {
       heading: "Pricing Model",
@@ -54,6 +164,46 @@ The **AWS Free Tier** permanently includes 1 million Lambda requests and 400,000
 Compare this to running an EC2 instance: a \`t3.micro\` instance running 24/7 costs roughly $8–10 per month whether it receives traffic or not. A Lambda function processing 100,000 requests per month of 200ms each costs fractions of a cent. However, for very high, sustained traffic, EC2 can be more cost-effective than Lambda.
 
 The key exam concept is that Lambda follows a **pay-per-use** model with no idle cost, making it economical for variable workloads.`,
+      quiz: [
+        {
+          question:
+            "What two dimensions does AWS charge for with Lambda functions?",
+          options: [
+            "Storage used and network bandwidth consumed",
+            "Number of requests (invocations) and duration of compute time",
+            "Memory allocated and number of concurrent executions",
+            "Data transferred and number of code deployments",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda charges for the number of requests (invocations) and the duration of compute time (measured in GB-seconds, rounded to the nearest millisecond). There are no charges when the function is not running.",
+        },
+        {
+          question:
+            "What does the AWS Lambda Free Tier permanently include each month?",
+          options: [
+            "100,000 requests and 40,000 GB-seconds",
+            "1 million requests and 400,000 GB-seconds",
+            "10 million requests and 4 million GB-seconds",
+            "Unlimited requests for functions under 128 MB memory",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The Lambda Free Tier permanently includes 1 million requests and 400,000 GB-seconds of compute time per month. This is not a 12-month trial — it is a permanent free tier that allows many small applications to run at no cost.",
+        },
+        {
+          question: "When might EC2 be more cost-effective than Lambda?",
+          options: [
+            "For workloads with unpredictable traffic spikes",
+            "For very high, sustained traffic where Lambda's per-request costs exceed EC2's hourly rate",
+            "EC2 is always more expensive than Lambda",
+            "For workloads that run for less than 15 minutes",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda's pay-per-use model is economical for variable or infrequent traffic. For very high, sustained traffic where a function runs nearly continuously, EC2's flat hourly rate may be more cost-effective than paying per-invocation with Lambda.",
+        },
+      ],
     },
     {
       heading: "Common Use Cases",
@@ -68,6 +218,47 @@ The key exam concept is that Lambda follows a **pay-per-use** model with no idle
 **Real-time Stream Processing**: Lambda processes data streams from Kinesis or DynamoDB Streams for real-time analytics, fraud detection, or data transformation.
 
 **Automation and Glue Logic**: Lambda frequently serves as the glue between AWS services — for example, triggering a CloudFormation stack update when a CodePipeline stage completes, or sending an SNS notification when a DynamoDB item changes.`,
+      quiz: [
+        {
+          question:
+            "Which combination of services represents the standard serverless API architecture on AWS?",
+          options: [
+            "EC2 + Elastic Load Balancer + RDS",
+            "API Gateway + Lambda + DynamoDB",
+            "CloudFront + S3 + Route 53",
+            "ECS + Fargate + Aurora",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The standard serverless API architecture is API Gateway (handles HTTP routing, auth, throttling) + Lambda (executes business logic) + DynamoDB (stores data). This combination scales automatically from zero to millions of requests with no server management.",
+        },
+        {
+          question:
+            "EventBridge is used with Lambda to accomplish which use case?",
+          options: [
+            "Serving static website content with low latency",
+            "Running Lambda functions on a schedule, like nightly reports or database cleanup",
+            "Processing images uploaded to S3 by users",
+            "Distributing messages from Lambda to multiple SQS queues",
+          ],
+          correctIndex: 1,
+          explanation:
+            "EventBridge scheduled rules invoke Lambda on a cron-like schedule — for example, every night at midnight to run reports, purge old records, or aggregate metrics. This replaces traditional cron jobs with a serverless, managed alternative.",
+        },
+        {
+          question:
+            "Lambda is described as 'glue logic' between AWS services. Which example best illustrates this role?",
+          options: [
+            "Lambda stores application data in DynamoDB tables",
+            "Lambda serves as the database layer for API Gateway requests",
+            "Lambda triggers an SNS notification when a DynamoDB item changes via DynamoDB Streams",
+            "Lambda manages routing rules in Amazon Route 53",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Lambda frequently connects AWS services together — like receiving DynamoDB Stream events when a table item changes and sending an SNS notification in response. This 'glue' role connects services without requiring dedicated infrastructure.",
+        },
+      ],
     },
   ],
 
@@ -102,5 +293,107 @@ The key exam concept is that Lambda follows a **pay-per-use** model with no idle
     "Use IAM execution roles on Lambda — never embed access keys in function code",
     "API Gateway + Lambda is the standard serverless API architecture",
     "Lambda is cost-effective for variable workloads; EC2 may be cheaper for sustained high traffic",
+  ],
+
+  topicQuiz: [
+    {
+      question:
+        "A company runs a function that processes expense reports submitted through a web form. The function is invoked about 500 times per month and takes 2 seconds to run. Which compute service is most cost-effective?",
+      options: [
+        "EC2 t3.micro running 24/7",
+        "AWS Lambda",
+        "Amazon ECS with Fargate",
+        "EC2 with Auto Scaling",
+      ],
+      correctIndex: 1,
+      explanation:
+        "With only 500 invocations per month, Lambda's pay-per-use model (and permanent free tier of 1 million requests/month) makes it essentially free for this workload. An EC2 instance running 24/7 would cost $8-10/month even with zero usage.",
+    },
+    {
+      question:
+        "What is the maximum amount of time a single Lambda function invocation can run?",
+      options: ["5 minutes", "15 minutes", "1 hour", "There is no limit"],
+      correctIndex: 1,
+      explanation:
+        "Lambda has a maximum timeout of 15 minutes per invocation. Workloads that require longer execution times must use EC2, ECS, or AWS Step Functions to orchestrate multiple Lambda calls or run on long-lived compute.",
+    },
+    {
+      question:
+        "Which statement correctly describes Lambda's scaling behavior?",
+      options: [
+        "You configure a minimum and maximum number of Lambda instances in advance",
+        "Lambda scales automatically based on incoming event volume — no capacity provisioning needed",
+        "Lambda is limited to 10 concurrent executions per function by default",
+        "Lambda scales by increasing the memory and CPU of the function during high traffic",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Lambda scales automatically by running more concurrent executions as event volume increases. There is no capacity to provision or pre-configure — Lambda handles scaling transparently, from zero to thousands of concurrent executions.",
+    },
+    {
+      question:
+        "A Lambda function is invoked for the first time after being idle for several hours. Users report slightly higher response times than usual. What is the likely cause?",
+      options: [
+        "Lambda throttled the request due to account-level concurrency limits",
+        "A cold start occurred — Lambda had to initialize a new execution environment",
+        "The function's memory allocation was automatically reduced during the idle period",
+        "Lambda applied additional security scanning to the first invocation after a long idle period",
+      ],
+      correctIndex: 1,
+      explanation:
+        "A cold start occurs when Lambda has no warm execution environment available and must initialize a new one. This adds latency (typically 100–500ms for interpreted languages). Subsequent invocations within the warm window are much faster (warm starts).",
+    },
+    {
+      question:
+        "Which IAM approach should be used to allow a Lambda function to write to a DynamoDB table?",
+      options: [
+        "Hardcode AWS access keys in the Lambda function's environment variables",
+        "Attach an IAM execution role with DynamoDB write permissions to the Lambda function",
+        "Create an IAM user for the Lambda function and embed the credentials in the code",
+        "Make the DynamoDB table public so Lambda can write without authentication",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Lambda functions should be granted permissions via an IAM execution role. AWS automatically provides temporary credentials to the function from the role. Embedding hardcoded access keys in Lambda code or environment variables is a security anti-pattern.",
+    },
+    {
+      question:
+        "A developer needs to run a data migration job that will take approximately 45 minutes. Can Lambda be used for this?",
+      options: [
+        "Yes — Lambda supports execution times up to 2 hours",
+        "No — Lambda's maximum timeout is 15 minutes; use EC2, ECS, or Step Functions instead",
+        "Yes — but only if the function uses more than 1 GB of memory",
+        "No — Lambda cannot be used for data migration tasks of any length",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Lambda has a hard limit of 15 minutes per invocation. A 45-minute migration cannot run in a single Lambda invocation. Alternatives include EC2, ECS/Fargate, or AWS Step Functions to orchestrate the migration across multiple Lambda invocations.",
+    },
+    {
+      question:
+        "The AWS Lambda permanent Free Tier includes which resources each month?",
+      options: [
+        "100,000 requests and 40,000 GB-seconds (available for 12 months after signup)",
+        "1 million requests and 400,000 GB-seconds (permanently, not just 12 months)",
+        "Unlimited requests for functions under 512 MB memory",
+        "1 million requests only — compute time is always charged",
+      ],
+      correctIndex: 1,
+      explanation:
+        "The Lambda Free Tier permanently includes 1 million requests and 400,000 GB-seconds of compute time per month. Unlike many Free Tier offers, this is not limited to the first 12 months after account creation — it is a permanent ongoing benefit.",
+    },
+    {
+      question:
+        "Which set of services represents event sources that can trigger Lambda functions?",
+      options: [
+        "EC2 instances, EBS volumes, and VPC subnets",
+        "API Gateway, S3, SQS, DynamoDB Streams, and EventBridge",
+        "CloudFormation, AWS Config, and AWS Organizations",
+        "IAM, KMS, and AWS Certificate Manager",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Lambda integrates with dozens of event sources including API Gateway (HTTP requests), S3 (object events), SQS (queue messages), DynamoDB Streams (table changes), and EventBridge (scheduled or AWS events). These make Lambda the glue of event-driven architectures.",
+    },
   ],
 };

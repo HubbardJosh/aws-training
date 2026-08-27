@@ -19,6 +19,32 @@ The framework is organized around **six pillars**, each representing a critical 
 The **AWS Well-Architected Tool** is a free, self-service tool in the AWS console that lets you review your workloads against the six pillars, answer questions about your architecture, and receive a report with potential issues and improvement recommendations.
 
 The framework is not a checklist you complete once — it is a living practice. As your workloads evolve and AWS introduces new services, you revisit your architecture through regular Well-Architected Reviews.`,
+      quiz: [
+        {
+          question: "What is the AWS Well-Architected Framework?",
+          options: [
+            "A compliance certification that AWS grants to customers who pass an architectural review",
+            "A set of architectural best practices organized into six pillars for evaluating and improving cloud architectures",
+            "An automated tool that enforces mandatory architecture standards for all AWS workloads",
+            "A pricing model that rewards customers who follow AWS recommended architecture patterns",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The AWS Well-Architected Framework is a set of architectural best practices developed by AWS Solutions Architects, organized into six pillars. It is not a certification or compliance standard — it provides guidance for evaluating and improving architectures over time.",
+        },
+        {
+          question: "What is the AWS Well-Architected Tool?",
+          options: [
+            "A paid consulting service where AWS architects review your infrastructure",
+            "A free self-service tool in the AWS console for reviewing workloads against the six pillars and identifying risk areas",
+            "A command-line tool that automatically remediates architectural issues in your AWS account",
+            "A compliance scanner that checks AWS resources against CIS benchmarks",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The AWS Well-Architected Tool is a free, self-service tool in the AWS console. You create a workload, answer questions about your architecture across each pillar, and the tool generates a report identifying High Risk Issues (HRIs) and Medium Risk Issues (MRIs) with improvement recommendations.",
+        },
+      ],
     },
     {
       heading: "Operational Excellence Pillar",
@@ -32,6 +58,34 @@ Key design principles include:
 - **Learn from all operational failures**: conduct post-mortems after incidents and share learnings
 
 Key AWS services for this pillar include CloudFormation (IaC), CloudWatch (monitoring), CloudTrail (audit), Config (compliance), and Systems Manager (operational management at scale).`,
+      quiz: [
+        {
+          question:
+            "Which Well-Architected pillar emphasizes using Infrastructure as Code (IaC) and making frequent, small, reversible changes to deployments?",
+          options: [
+            "Reliability — to ensure systems recover quickly from failures",
+            "Operational Excellence — to run and monitor systems with continually improving processes",
+            "Performance Efficiency — to use computing resources efficiently",
+            "Security — to protect infrastructure through automated controls",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The Operational Excellence pillar focuses on running and monitoring systems to deliver business value. Its key principles include performing operations as code (IaC), making frequent small reversible changes, anticipating failure, and learning from operational incidents.",
+        },
+        {
+          question:
+            "According to the Operational Excellence pillar, what is the benefit of making 'frequent, small, reversible changes' rather than large infrequent deployments?",
+          options: [
+            "Smaller changes cost less because they use fewer AWS resources during deployment",
+            "Smaller changes are easier to test, faster to roll back if something goes wrong, and reduce overall deployment risk",
+            "AWS charges lower data transfer fees for incremental deployments",
+            "Smaller changes bypass the need for change management approvals",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Making frequent, small, reversible changes reduces risk: each change is smaller in scope and easier to test, and if something goes wrong it can be rolled back quickly. Large infrequent releases are harder to test comprehensively and much riskier to roll back.",
+        },
+      ],
     },
     {
       heading: "Security, Reliability, and Performance Pillars",
@@ -40,6 +94,34 @@ Key AWS services for this pillar include CloudFormation (IaC), CloudWatch (monit
 The **Reliability** pillar focuses on ensuring a workload performs its intended function correctly and consistently, recovering from failures when they occur. Key principles include automatically recovering from failure, testing recovery procedures, scaling horizontally for availability, stopping guessing capacity (use Auto Scaling), and managing change through automation. Multi-AZ deployments, Auto Scaling, Elastic Load Balancing, Route 53 health checks, and RDS Multi-AZ are central reliability tools.
 
 The **Performance Efficiency** pillar focuses on using computing resources efficiently and maintaining that efficiency as demand changes and technologies evolve. Principles include democratizing advanced technologies (use managed services instead of building your own), going global in minutes (use CloudFront and multiple regions), using serverless architectures, experimenting more often, and using the mechanical sympathy (choose the right tool for the job — the right database, compute, and storage types for each workload).`,
+      quiz: [
+        {
+          question:
+            "A company deploys their application across multiple Availability Zones with Auto Scaling and Elastic Load Balancing to ensure it continues operating during failures. Which Well-Architected pillar does this primarily address?",
+          options: [
+            "Security — protecting the application from external threats",
+            "Operational Excellence — automating operational processes",
+            "Reliability — ensuring the workload performs correctly and recovers from failures",
+            "Performance Efficiency — using resources efficiently at scale",
+          ],
+          correctIndex: 2,
+          explanation:
+            "The Reliability pillar focuses on ensuring a workload performs its intended function and recovers from failures. Multi-AZ deployments, Auto Scaling, and Elastic Load Balancing are all reliability tools that help achieve high availability and automatic recovery.",
+        },
+        {
+          question:
+            "The Performance Efficiency pillar recommends 'democratizing advanced technologies' — what does this mean in practice?",
+          options: [
+            "Making AWS services available at lower cost for startups and small businesses",
+            "Using AWS managed services (like RDS, DynamoDB, SageMaker) instead of building and managing the same capabilities yourself",
+            "Open-sourcing all internal tools so other teams can benefit from them",
+            "Sharing EC2 instances across multiple teams to improve utilization",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Democratizing advanced technologies means using AWS managed services (RDS, DynamoDB, SageMaker, etc.) rather than building and managing those capabilities yourself. This lets teams focus on their application logic rather than infrastructure management, accelerating innovation.",
+        },
+      ],
     },
     {
       heading: "Cost Optimization and Sustainability Pillars",
@@ -48,6 +130,29 @@ The **Performance Efficiency** pillar focuses on using computing resources effic
 Practical cost optimization actions include using Reserved Instances and Savings Plans for sustained workloads, Spot Instances for fault-tolerant batch work, S3 Lifecycle Policies for storage tier management, Auto Scaling to avoid over-provisioning, and right-sizing EC2 instances based on actual utilization metrics from CloudWatch.
 
 The **Sustainability** pillar (added in 2021) focuses on minimizing the environmental impact of cloud workloads. Design principles include understanding your environmental impact, establishing sustainability goals, maximizing utilization (running instances near capacity rather than at low utilization), adopting more efficient hardware and software offerings, and using managed services to reduce the infrastructure needed to support your workloads. Higher utilization means fewer servers needed per workload, directly reducing energy consumption and carbon footprint.`,
+      quiz: [
+        {
+          question:
+            "A company runs EC2 instances 24/7 for the next 3 years to support a stable production workload. Which Cost Optimization approach would most reduce their compute costs?",
+          options: [
+            "Use Spot Instances for maximum savings on stable production workloads",
+            "Use On-Demand Instances and right-size them based on CloudWatch metrics",
+            "Purchase Reserved Instances or Savings Plans to commit to usage in exchange for significant discounts",
+            "Use Auto Scaling to automatically shut down instances during low-traffic periods",
+          ],
+          correctIndex: 2,
+          explanation:
+            "Reserved Instances and Savings Plans provide significant discounts (up to 72%) compared to On-Demand pricing in exchange for a commitment to a certain level of usage over 1 or 3 years. They are ideal for stable, predictable production workloads running continuously.",
+        },
+        {
+          question:
+            "The Sustainability pillar was added to the Well-Architected Framework in which year?",
+          options: ["2018", "2019", "2021", "2023"],
+          correctIndex: 2,
+          explanation:
+            "The Sustainability pillar was added as the sixth pillar to the AWS Well-Architected Framework in 2021. It focuses on minimizing the environmental impact of cloud workloads through principles like maximizing utilization, using managed services, and adopting more efficient hardware.",
+        },
+      ],
     },
     {
       heading: "Well-Architected Reviews and the Tool",
@@ -58,6 +163,33 @@ The **AWS Well-Architected Tool** in the AWS console automates this process. You
 **AWS Well-Architected Lenses** extend the framework for specific industry verticals and technology domains. Examples include the Serverless Lens, the Machine Learning Lens, the Financial Services Industry Lens, and the Healthcare Lens — each providing pillar-specific guidance for those contexts.
 
 For the Cloud Practitioner exam, you should know the names of all six pillars, their general focus area, and that the Well-Architected Framework is a set of best practices (not a service itself) for evaluating and improving AWS architectures. The Well-Architected Tool is the service that operationalizes the framework.`,
+      quiz: [
+        {
+          question: "What are AWS Well-Architected Lenses?",
+          options: [
+            "CloudWatch dashboards that visualize Well-Architected metrics for specific workloads",
+            "Extensions to the Well-Architected Framework that provide domain-specific guidance for verticals like Serverless, Machine Learning, or Financial Services",
+            "IAM permission sets that restrict access to sensitive Well-Architected Tool results",
+            "AWS Partner certifications for architects who have completed Well-Architected training",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Well-Architected Lenses extend the framework with domain-specific guidance for specific industry verticals and technology domains — such as the Serverless Lens, Machine Learning Lens, Financial Services Industry Lens, and Healthcare Lens. Each lens provides pillar-specific best practices for its domain.",
+        },
+        {
+          question:
+            "After completing a Well-Architected Review using the AWS Well-Architected Tool, what types of findings does the tool report?",
+          options: [
+            "Critical, Warning, and Informational alerts similar to AWS Trusted Advisor",
+            "High Risk Issues (HRI) and Medium Risk Issues (MRI) with improvement recommendations",
+            "Pass/Fail results for each pillar with mandatory remediation deadlines",
+            "Compliance scores mapped to specific regulatory frameworks like PCI DSS or HIPAA",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The AWS Well-Architected Tool generates a report identifying High Risk Issues (HRIs) and Medium Risk Issues (MRIs) with prioritized improvement recommendations. The tool tracks improvement status over time as issues are addressed.",
+        },
+      ],
     },
   ],
 
@@ -91,5 +223,107 @@ For the Cloud Practitioner exam, you should know the names of all six pillars, t
     "Cost Optimization pillar: Reserved Instances and Savings Plans for committed workloads; Spot for batch",
     "Performance Efficiency: use managed services and serverless rather than self-managed infrastructure",
     "Well-Architected Lenses extend the framework for specific domains (Serverless, ML, Financial Services)",
+  ],
+
+  topicQuiz: [
+    {
+      question:
+        "How many pillars does the AWS Well-Architected Framework have?",
+      options: ["Four", "Five", "Six", "Seven"],
+      correctIndex: 2,
+      explanation:
+        "The AWS Well-Architected Framework has six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. Sustainability was added as the sixth pillar in 2021.",
+    },
+    {
+      question:
+        "Which Well-Architected pillar focuses on protecting information, systems, and assets through identity management, traceability, and defense in depth?",
+      options: [
+        "Reliability",
+        "Operational Excellence",
+        "Security",
+        "Cost Optimization",
+      ],
+      correctIndex: 2,
+      explanation:
+        "The Security pillar focuses on protecting information, systems, and assets. Its key principles include implementing a strong identity foundation (IAM, MFA), enabling traceability (CloudTrail, Config), applying security at all layers (defense in depth), and protecting data in transit and at rest.",
+    },
+    {
+      question:
+        "A company wants to minimize costs by using Spot Instances for batch processing and Reserved Instances for steady-state production workloads. Which Well-Architected pillar does this practice align with?",
+      options: [
+        "Reliability — ensuring workloads run consistently without interruption",
+        "Performance Efficiency — using the right compute type for each workload",
+        "Cost Optimization — delivering business value at the lowest price point",
+        "Sustainability — maximizing resource utilization to reduce energy consumption",
+      ],
+      correctIndex: 2,
+      explanation:
+        "The Cost Optimization pillar focuses on delivering business value at the lowest price point. Using Spot Instances for fault-tolerant batch work and Reserved Instances for stable production workloads are classic Cost Optimization practices that reduce compute costs significantly.",
+    },
+    {
+      question:
+        "Which Well-Architected pillar recommends 'testing recovery procedures' and 'automatically recovering from failure'?",
+      options: [
+        "Operational Excellence",
+        "Security",
+        "Reliability",
+        "Performance Efficiency",
+      ],
+      correctIndex: 2,
+      explanation:
+        "The Reliability pillar focuses on ensuring workloads perform correctly and recover from failures. Its key principles include automatically recovering from failure, testing recovery procedures, scaling horizontally, and managing change through automation.",
+    },
+    {
+      question:
+        "What is the primary focus of the Sustainability pillar in the Well-Architected Framework?",
+      options: [
+        "Ensuring workloads can sustain high traffic loads without degradation",
+        "Minimizing the environmental impact of cloud workloads by maximizing utilization and using efficient services",
+        "Sustaining a consistent operational rhythm through automation and runbooks",
+        "Maintaining long-term cost sustainability through financial management practices",
+      ],
+      correctIndex: 1,
+      explanation:
+        "The Sustainability pillar focuses on minimizing the environmental impact of cloud workloads. Its principles include understanding environmental impact, maximizing utilization (running instances near capacity), adopting more efficient hardware and software, and using managed services to reduce the infrastructure footprint.",
+    },
+    {
+      question:
+        "The Performance Efficiency pillar recommends 'going global in minutes.' Which AWS services enable this capability?",
+      options: [
+        "AWS Organizations and Control Tower — for deploying accounts in multiple regions",
+        "Amazon CloudFront and deploying workloads across multiple AWS regions",
+        "AWS Direct Connect and Transit Gateway — for private global connectivity",
+        "Amazon Route 53 and AWS Global Accelerator — for DNS-based global routing",
+      ],
+      correctIndex: 1,
+      explanation:
+        "The Performance Efficiency principle of 'going global in minutes' refers to using Amazon CloudFront (CDN with global edge locations) and deploying application infrastructure across multiple AWS regions to serve users worldwide with low latency.",
+    },
+    {
+      question:
+        "Is the AWS Well-Architected Framework a compliance certification that AWS grants to qualifying customers?",
+      options: [
+        "Yes — customers who pass a Well-Architected Review receive an AWS compliance certification",
+        "No — it is a set of best practices and guidelines, not a compliance standard or certification",
+        "Yes — but only for Enterprise Support customers who complete annual reviews",
+        "No — it is only for internal AWS use when designing new AWS services",
+      ],
+      correctIndex: 1,
+      explanation:
+        "The AWS Well-Architected Framework is a set of best practices and guiding principles — it is NOT a compliance standard or certification. It provides guidance for evaluating and improving architectures. The Well-Architected Tool operationalizes the framework as a self-service review tool.",
+    },
+    {
+      question:
+        "A financial services company wants to apply Well-Architected best practices specifically tailored to their industry's regulatory requirements and technology patterns. What should they use?",
+      options: [
+        "The standard Well-Architected Tool with all six pillars applied equally",
+        "AWS Trusted Advisor, which has financial services-specific compliance checks",
+        "The Well-Architected Financial Services Industry Lens, which extends the framework with domain-specific guidance",
+        "AWS Artifact, which provides compliance reports for financial regulations",
+      ],
+      correctIndex: 2,
+      explanation:
+        "Well-Architected Lenses extend the framework with domain-specific guidance. The Financial Services Industry Lens provides pillar-specific best practices tailored to the regulatory requirements and technology patterns of financial services organizations, going beyond the generic framework guidance.",
+    },
   ],
 };
