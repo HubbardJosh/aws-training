@@ -86,7 +86,7 @@ export default function HomeScreen() {
             value={`${overallAccuracy}%`}
           />
           <StatCard
-            icon="book-open"
+            icon="book-outline"
             color={colors.accent}
             label="Cards Mastered"
             value={`${totalStudied}/${totalCards}`}
