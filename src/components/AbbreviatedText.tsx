@@ -9,13 +9,17 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { AIF_ABBREVIATIONS } from "../data/aif/abbreviations";
+import { CLF_ABBREVIATIONS } from "../data/clf/abbreviations";
 import { DVA_ABBREVIATIONS } from "../data/dva/abbreviations";
 import { colors, fontSize, radius, spacing } from "../utils/theme";
 
 // ─── Abbreviation registry ────────────────────────────────────────────────────
 
 const registries: Record<string, Record<string, string>> = {
-  dva: DVA_ABBREVIATIONS,
+  "dva-c02": DVA_ABBREVIATIONS,
+  "clf-c02": CLF_ABBREVIATIONS,
+  "aif-c01": AIF_ABBREVIATIONS,
 };
 
 export function registerAbbreviations(
@@ -25,7 +29,7 @@ export function registerAbbreviations(
   registries[certKey] = map;
 }
 
-let activeCertKey = "dva";
+let activeCertKey = "dva-c02";
 export function setActiveCert(key: string) {
   activeCertKey = key;
 }
