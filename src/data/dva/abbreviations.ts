@@ -148,6 +148,76 @@ export const DVA_ABBREVIATIONS: Record<string, string> = {
   CSV: "Comma-Separated Values — tabular data as plain text",
   gzip: "GNU zip — lossless data compression format",
 
+  // Encryption & key management
+  DEK: "Data Encryption Key — symmetric key that encrypts your actual data",
+  CMK: "Customer Master Key — KMS key that encrypts/decrypts your data keys",
+  "SSE-KMS":
+    "Server-Side Encryption with KMS — AWS encrypts data at rest using a KMS-managed key",
+  "SSE-S3":
+    "Server-Side Encryption with S3-Managed Keys — AWS manages the encryption key entirely",
+  "SSE-C":
+    "Server-Side Encryption with Customer-Provided Keys — you supply the key on every request",
+  "AES-256":
+    "Advanced Encryption Standard (256-bit) — symmetric block cipher used by AWS for data at rest",
+  BYOK: "Bring Your Own Key — import your own key material into KMS for regulatory compliance",
+  WORM: "Write Once Read Many — immutable storage model preventing object modification or deletion",
+
+  // Networking & infrastructure
+  VPN: "Virtual Private Network — encrypted tunnel connecting your on-premises network to a VPC",
+  CIDR: "Classless Inter-Domain Routing — notation (e.g. 10.0.0.0/16) for specifying IP address ranges",
+  CNAME:
+    "Canonical Name — DNS record that maps an alias to another domain name",
+  IOPS: "Input/Output Operations Per Second — measure of storage throughput performance",
+  IMDS: "Instance Metadata Service — EC2 endpoint (169.254.169.254) for retrieving instance metadata and credentials",
+  POSIX:
+    "Portable Operating System Interface — standard defining file system permissions and APIs (used by EFS)",
+
+  // Identity & access
+  SCP: "Service Control Policy — AWS Organizations policy that sets maximum permissions for member accounts",
+  SSO: "Single Sign-On — allows users to authenticate once and access multiple systems",
+  ABAC: "Attribute-Based Access Control — grant permissions based on tags/attributes rather than static roles",
+  PKCE: "Proof Key for Code Exchange — OAuth 2.0 extension preventing authorization code interception attacks",
+  RAM: "Resource Access Manager — AWS service for sharing resources across accounts",
+
+  // Operations & storage
+  PITR: "Point-In-Time Recovery — continuous backup that restores a table to any second within the retention window",
+  SMS: "Simple Message Service (or Short Message Service) — text messaging via SNS mobile endpoints",
+  EFO: "Enhanced Fan-Out — Kinesis Streams feature giving each consumer its own 2 MB/s read throughput",
+  KCL: "Kinesis Client Library — Java library for building Kinesis consumer applications",
+  KPL: "Kinesis Producer Library — library for efficiently batching records into Kinesis Data Streams",
+  ORC: "Optimized Row Columnar — column-oriented file format used in data lakes for efficient analytics",
+
+  // Security & web
+  XSS: "Cross-Site Scripting — web attack that injects malicious scripts into pages viewed by other users",
+  OWASP:
+    "Open Web Application Security Project — community that maintains the Top 10 web vulnerability list",
+
+  // Languages & formats
+  HTML: "HyperText Markup Language — standard language for structuring web page content",
+  NLU: "Natural Language Understanding — AI capability to interpret meaning and intent in human text",
+  TTS: "Text-to-Speech — converts written text into spoken audio (used by Amazon Polly)",
+  GZIP: "GNU Zip — lossless compression format; S3 and API Gateway support gzip-encoded responses",
+  FIPS: "Federal Information Processing Standards — US government security standards for cryptographic modules",
+  TOTP: "Time-Based One-Time Password — MFA method generating a 6-digit code that rotates every 30 seconds",
+  CAPTCHA:
+    "Completely Automated Public Turing test to tell Computers and Humans Apart — bot-detection challenge used by WAF",
+  MQTT: "Message Queuing Telemetry Transport — lightweight pub/sub protocol for IoT devices (used by AWS IoT Core)",
+  DMS: "Database Migration Service — migrates databases to AWS with minimal downtime",
+
+  // Redis / ElastiCache commands (used in DVA guides)
+  ZADD: "Sorted Set Add — Redis command to add members with scores to a sorted set",
+  ZRANK:
+    "Sorted Set Rank — Redis command to return the rank of a member in a sorted set",
+  ZRANGE:
+    "Sorted Set Range — Redis command to retrieve members by rank from a sorted set",
+  LPUSH:
+    "List Push Left — Redis command to prepend one or more values to a list",
+  LLEN: "List Length — Redis command to return the number of elements in a list",
+  HSET: "Hash Set — Redis command to set a field in a hash stored at a key",
+  INCR: "Increment — Redis command to atomically increment an integer value",
+  AOF: "Append-Only File — Redis persistence mode that logs every write operation",
+  RDB: "Redis Database Backup — Redis point-in-time snapshot persistence format",
+
   // DVA-specific patterns
   WCU: "Write Capacity Unit — unit of DynamoDB write throughput (1 WCU = 1 KB/s)",
   RCU: "Read Capacity Unit — unit of DynamoDB read throughput (1 RCU = 4 KB/s strongly consistent)",

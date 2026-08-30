@@ -107,6 +107,49 @@ export const AIF_ABBREVIATIONS: Record<string, string> = {
   PaaS: "Platform as a Service — cloud model where provider manages the platform",
   SaaS: "Software as a Service — fully managed application delivered over the internet",
 
+  // Speech & audio
+  TTS: "Text-to-Speech — converts written text into spoken audio (used by Amazon Polly)",
+  ASR: "Automatic Speech Recognition — converts spoken audio to text (used by Amazon Transcribe)",
+  SSML: "Speech Synthesis Markup Language — XML-based language to control Polly's speech output",
+  NMT: "Neural Machine Translation — deep learning approach to translating between languages",
+  NLU: "Natural Language Understanding — AI capability to interpret meaning and intent in human text",
+  OCR: "Optical Character Recognition — extracts printed or handwritten text from images",
+  RTSP: "Real-Time Streaming Protocol — network protocol for controlling streaming media servers",
+
+  // Security & compliance
+  CMK: "Customer Master Key — KMS key that encrypts/decrypts your data keys",
+  VPN: "Virtual Private Network — encrypted tunnel connecting your on-premises network to a VPC",
+  SSO: "Single Sign-On — allows users to authenticate once and access multiple systems",
+  RAM: "Resource Access Manager — AWS service for sharing resources across accounts",
+  OWASP:
+    "Open Web Application Security Project — community that maintains the Top 10 web vulnerability list",
+  XSS: "Cross-Site Scripting — web attack that injects malicious scripts into pages viewed by other users",
+  SMS: "Short Message Service — text messaging protocol used for mobile notifications",
+
+  // Data formats & audio codecs
+  ORC: "Optimized Row Columnar — column-oriented file format used in data lakes for efficient analytics",
+  HTML: "HyperText Markup Language — standard language for structuring web page content",
+  PCM: "Pulse-Code Modulation — uncompressed raw audio format used as input by Amazon Transcribe",
+  OGG: "Ogg Vorbis — open-source compressed audio format supported by Amazon Polly",
+  MP3: "MPEG Audio Layer 3 — compressed audio format supported by Amazon Polly for speech output",
+
+  // ML algorithms & architectures
+  ARIMA:
+    "AutoRegressive Integrated Moving Average — classical statistical model for time-series forecasting",
+  CNN: "Convolutional Neural Network — deep learning architecture specialised for image and signal processing",
+  BERT: "Bidirectional Encoder Representations from Transformers — pre-trained NLP model for language understanding",
+  LDA: "Latent Dirichlet Allocation — probabilistic topic modelling algorithm for text corpora",
+  WAPE: "Weighted Absolute Percentage Error — accuracy metric used by Amazon Forecast",
+  NTTS: "Neural Text-to-Speech — Polly engine that produces the most natural-sounding voices",
+
+  // Infrastructure & hardware
+  CUDA: "Compute Unified Device Architecture — NVIDIA's parallel computing platform used to train deep learning models",
+  MQTT: "Message Queuing Telemetry Transport — lightweight pub/sub protocol for IoT devices",
+
+  // Compliance & privacy
+  PHI: "Protected Health Information — individually identifiable health data regulated under HIPAA",
+  DTMF: "Dual-Tone Multi-Frequency — touch-tone signals used in telephony; Transcribe can detect them",
+
   // Responsible AI
   XAI: "Explainable AI — techniques that make model decisions interpretable to humans",
   SHAP: "SHapley Additive exPlanations — method for explaining individual model predictions",

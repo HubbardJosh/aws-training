@@ -18,6 +18,7 @@ export const CLF_ABBREVIATIONS: Record<string, string> = {
   RDS: "Relational Database Service — managed SQL databases (MySQL, PostgreSQL, etc.)",
   DDB: "DynamoDB — fully managed serverless NoSQL key-value database",
   ElastiCache: "ElastiCache — managed in-memory caching (Redis or Memcached)",
+  DAX: "DynamoDB Accelerator — in-memory cache for DynamoDB (microsecond reads)",
 
   // Networking & CDN
   VPC: "Virtual Private Cloud — logically isolated network in AWS",
@@ -75,6 +76,39 @@ export const CLF_ABBREVIATIONS: Record<string, string> = {
 
   // Shared responsibility
   AWS: "Amazon Web Services — the cloud platform providing 200+ services globally",
+
+  // Encryption & key management
+  DEK: "Data Encryption Key — symmetric key that encrypts your actual data",
+  CMK: "Customer Master Key — KMS key that encrypts/decrypts your data keys",
+  "SSE-KMS":
+    "Server-Side Encryption with KMS — AWS encrypts data at rest using a KMS-managed key",
+  "SSE-S3":
+    "Server-Side Encryption with S3-Managed Keys — AWS manages the encryption key entirely",
+  "SSE-C":
+    "Server-Side Encryption with Customer-Provided Keys — you supply the key on every request",
+  "AES-256":
+    "Advanced Encryption Standard (256-bit) — symmetric block cipher used by AWS for data at rest",
+  WORM: "Write Once Read Many — immutable storage model that prevents object modification or deletion",
+
+  // Networking fundamentals
+  VPN: "Virtual Private Network — encrypted tunnel connecting your on-premises network to a VPC",
+  CIDR: "Classless Inter-Domain Routing — notation (e.g. 10.0.0.0/16) for specifying IP address ranges",
+  CNAME:
+    "Canonical Name — DNS record that maps an alias to another domain name",
+  IOPS: "Input/Output Operations Per Second — measure of storage throughput performance",
+
+  // Identity & access
+  SCP: "Service Control Policy — AWS Organizations policy that sets maximum permissions for member accounts",
+  SSO: "Single Sign-On — allows users to authenticate once and access multiple systems",
+  RAM: "Resource Access Manager — AWS service for sharing resources across accounts",
+
+  // Operations
+  PITR: "Point-In-Time Recovery — continuous backup feature that restores a table to any second within the retention window",
+  SMS: "Server Migration Service (or Short Message Service in notification context) — migrates on-premises VMs to AWS",
+  HTML: "HyperText Markup Language — standard language for structuring web page content",
+
+  // Security
+  XSS: "Cross-Site Scripting — web attack that injects malicious scripts into pages viewed by other users",
 
   // Protocols & standards
   TLS: "Transport Layer Security — cryptographic protocol securing network communication",
