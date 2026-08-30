@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { setActiveCert } from "../components/AbbreviatedText";
 
 export type CertificationId = "dva-c02" | "clf-c02" | "aif-c01";
@@ -58,9 +58,12 @@ const CertContext = createContext<CertContextValue>({
 export function CertProvider({ children }: { children: React.ReactNode }) {
   const [certId, setCertId] = useState<CertificationId>("dva-c02");
 
+  useEffect(() => {
+    setActiveCert(certId);
+  }, [certId]);
+
   const setCert = (id: CertificationId) => {
     setCertId(id);
-    setActiveCert(id);
   };
 
   return (
