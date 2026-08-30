@@ -21,10 +21,28 @@ import { RootStackParamList } from "../navigation";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const CERTS: CertMeta[] = [
-  CERT_META["dva-c02"],
-  CERT_META["clf-c02"],
-  CERT_META["aif-c01"],
+interface CertGroup {
+  level: string;
+  description: string;
+  certs: CertMeta[];
+}
+
+const CERT_GROUPS: CertGroup[] = [
+  {
+    level: "Foundational",
+    description: "No prior cloud experience required",
+    certs: [CERT_META["clf-c02"]],
+  },
+  {
+    level: "Associate",
+    description: "Recommended 1+ year of AWS experience",
+    certs: [CERT_META["dva-c02"]],
+  },
+  {
+    level: "Specialty",
+    description: "Domain-specific expertise",
+    certs: [CERT_META["aif-c01"]],
+  },
 ];
 
 export default function CertSelectScreen() {
@@ -53,61 +71,73 @@ export default function CertSelectScreen() {
           </Text>
         </View>
 
-        {CERTS.map((cert) => {
-          const active = certId === cert.id;
-          return (
-            <TouchableOpacity
-              key={cert.id}
-              style={[
-                styles.card,
-                active && { borderColor: cert.color, borderWidth: 2 },
-              ]}
-              onPress={() => handleSelect(cert.id)}
-              activeOpacity={0.8}
-            >
-              <View
-                style={[
-                  styles.iconWrap,
-                  { backgroundColor: cert.color + "22" },
-                ]}
-              >
-                <Ionicons
-                  name={cert.icon as any}
-                  size={28}
-                  color={cert.color}
-                />
-              </View>
-              <View style={styles.cardText}>
-                <View style={styles.cardTitleRow}>
-                  <Text style={[styles.certCode, { color: cert.color }]}>
-                    {cert.name}
-                  </Text>
-                  {active && (
-                    <View
-                      style={[
-                        styles.activeBadge,
-                        { backgroundColor: cert.color + "22" },
-                      ]}
-                    >
-                      <Text
-                        style={[styles.activeBadgeText, { color: cert.color }]}
-                      >
-                        Active
+        {CERT_GROUPS.map((group) => (
+          <View key={group.level} style={styles.group}>
+            <View style={styles.groupHeader}>
+              <Text style={styles.groupLevel}>{group.level}</Text>
+              <Text style={styles.groupDesc}>{group.description}</Text>
+            </View>
+
+            {group.certs.map((cert) => {
+              const active = certId === cert.id;
+              return (
+                <TouchableOpacity
+                  key={cert.id}
+                  style={[
+                    styles.card,
+                    active && { borderColor: cert.color, borderWidth: 2 },
+                  ]}
+                  onPress={() => handleSelect(cert.id)}
+                  activeOpacity={0.8}
+                >
+                  <View
+                    style={[
+                      styles.iconWrap,
+                      { backgroundColor: cert.color + "22" },
+                    ]}
+                  >
+                    <Ionicons
+                      name={cert.icon as any}
+                      size={28}
+                      color={cert.color}
+                    />
+                  </View>
+                  <View style={styles.cardText}>
+                    <View style={styles.cardTitleRow}>
+                      <Text style={[styles.certCode, { color: cert.color }]}>
+                        {cert.name}
                       </Text>
+                      {active && (
+                        <View
+                          style={[
+                            styles.activeBadge,
+                            { backgroundColor: cert.color + "22" },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.activeBadgeText,
+                              { color: cert.color },
+                            ]}
+                          >
+                            Active
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-                <Text style={styles.certName}>{cert.fullName}</Text>
-                <Text style={styles.examInfo}>{cert.examInfo}</Text>
-              </View>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={active ? cert.color : colors.textMuted}
-              />
-            </TouchableOpacity>
-          );
-        })}
+                    <Text style={styles.certName}>{cert.fullName}</Text>
+                    <Text style={styles.examInfo}>{cert.examInfo}</Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={active ? cert.color : colors.textMuted}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
 
         <View style={styles.footer}>
           <Ionicons
@@ -156,13 +186,35 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
+  group: {
+    marginBottom: spacing.lg,
+  },
+  groupHeader: {
+    marginBottom: spacing.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    paddingLeft: spacing.sm,
+  },
+  groupLevel: {
+    fontSize: fontSize.xs,
+    fontWeight: "800",
+    color: colors.primary,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  groupDesc: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+
   card: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
     borderRadius: radius.xl,
     padding: spacing.lg,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     gap: spacing.md,
