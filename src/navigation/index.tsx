@@ -41,6 +41,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function TabNavigator() {
   return (
     <Tab.Navigator
+      initialRouteName="Guides"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
