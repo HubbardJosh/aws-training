@@ -196,7 +196,9 @@ The most common pattern is to connect DynamoDB Streams to a **Lambda function**.
 
 For the Cloud Practitioner exam, the key concept is that DynamoDB Streams enables **reactive, event-driven architectures** where other parts of your system automatically respond to database changes.
 
-DynamoDB is also commonly used with **Amazon ElastiCache** (Redis) as a caching layer. For read-heavy workloads, your application reads from ElastiCache first and only queries DynamoDB on a cache miss, reducing latency and read costs.`,
+**DynamoDB Accelerator (DAX)** is a fully managed, in-memory cache purpose-built for DynamoDB. DAX delivers **microsecond read latency** by caching DynamoDB read results in memory and serving repeated requests directly from the cache without hitting the main table. DAX is API-compatible with DynamoDB, so switching requires minimal code changes. It is ideal for read-heavy workloads like leaderboards, product catalogs, or real-time bidding systems that require the absolute lowest read latency.
+
+DynamoDB is also commonly used with **Amazon ElastiCache** (Redis) as a more general-purpose caching layer. For read-heavy workloads, your application reads from ElastiCache first and only queries DynamoDB on a cache miss, reducing latency and read costs.`,
       quiz: [
         {
           question: "What does DynamoDB Streams capture?",

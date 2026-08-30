@@ -15,7 +15,9 @@ export const rekognitionGuide: ServiceGuide = {
 
 **Object and scene detection** identifies thousands of objects, activities, and concepts in an image with confidence scores. A photo of a beach might return labels like \`Beach\`, \`Ocean\`, \`Person\`, \`Umbrella\`, each with a confidence percentage. **Unsafe content detection** identifies explicit or suggestive adult content, violent content, hate symbols, and more — organized into a taxonomy with confidence scores — making it useful for content moderation pipelines.
 
-**Celebrity recognition** identifies well-known public figures and returns their name, a confidence score, and an external URL for additional information. **Custom Labels** lets you train Rekognition on your own domain-specific images to detect objects unique to your use case — defects on a manufacturing line, specific vehicle models, branded logos — without writing any training code.`,
+**Celebrity recognition** identifies well-known public figures and returns their name, a confidence score, and an external URL for additional information. **Custom Labels** lets you train Rekognition on your own domain-specific images to detect objects unique to your use case — defects on a manufacturing line, specific vehicle models, branded logos — without writing any training code.
+
+**DetectProtectiveEquipment** is a purpose-built API for workplace safety that detects personal protective equipment (PPE) on people in images. It identifies hard hats, face covers (masks), and hand covers (gloves), annotating each detected person with whether they are wearing the required PPE and a confidence score. This API is used in manufacturing, construction, and warehouse environments to automate safety compliance monitoring without requiring a Custom Labels training project.`,
       quiz: [
         {
           question:
