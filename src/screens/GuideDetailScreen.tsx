@@ -773,7 +773,7 @@ export default function GuideDetailScreen() {
                 <View
                   style={[styles.factBullet, { backgroundColor: meta.color }]}
                 />
-                <Text style={styles.factText}>{fact}</Text>
+                <AbbreviatedText text={fact} style={styles.factText} />
               </View>
             ))}
 
@@ -819,7 +819,7 @@ export default function GuideDetailScreen() {
                 <View style={styles.tipNumber}>
                   <Text style={styles.tipNumberText}>{i + 1}</Text>
                 </View>
-                <Text style={styles.tipText}>{tip}</Text>
+                <AbbreviatedText text={tip} style={styles.tipText} />
               </View>
             ))}
           </View>
