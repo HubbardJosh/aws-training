@@ -40,7 +40,7 @@ const CERT_GROUPS: CertGroup[] = [
     certs: [
       {
         meta: CERT_META["clf-c02"],
-        next: "DVA-C02 or AIF-C01",
+        next: "DVA-C02 / SAA-C03 / AIF-C01",
       },
     ],
   },
@@ -51,7 +51,7 @@ const CERT_GROUPS: CertGroup[] = [
       {
         meta: CERT_META["dva-c02"],
         prev: "CLF-C02",
-        next: "SAP-C02 or DOP-C02",
+        next: "DOP-C02 / SAP-C02",
       },
     ],
   },
@@ -62,7 +62,7 @@ const CERT_GROUPS: CertGroup[] = [
       {
         meta: CERT_META["aif-c01"],
         prev: "CLF-C02",
-        next: "MLS-C01",
+        next: "MLS-C01 / ANS-C01",
       },
     ],
   },
@@ -154,11 +154,7 @@ export default function CertSelectScreen() {
                       <View style={styles.progressionRow}>
                         {prev && (
                           <View style={styles.progressionItem}>
-                            <Ionicons
-                              name="arrow-back-outline"
-                              size={11}
-                              color={colors.textMuted}
-                            />
+                            <Text style={styles.progressionLabel}>Prereq:</Text>
                             <Text style={styles.progressionText}>{prev}</Text>
                           </View>
                         )}
@@ -167,12 +163,8 @@ export default function CertSelectScreen() {
                         )}
                         {next && (
                           <View style={styles.progressionItem}>
+                            <Text style={styles.progressionLabel}>Next:</Text>
                             <Text style={styles.progressionText}>{next}</Text>
-                            <Ionicons
-                              name="arrow-forward-outline"
-                              size={11}
-                              color={colors.textMuted}
-                            />
                           </View>
                         )}
                       </View>
@@ -315,6 +307,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
+  },
+  progressionLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    fontWeight: "600",
   },
   progressionText: {
     fontSize: fontSize.xs,
