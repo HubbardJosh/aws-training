@@ -206,6 +206,44 @@ The key exam concept is that Lambda follows a **pay-per-use** model with no idle
       ],
     },
     {
+      heading: "Permissions and Execution Roles",
+      body: `Every Lambda function runs with an **IAM execution role** — an IAM role that grants the function permission to interact with other AWS services. For example, if your function needs to read from S3 or write to DynamoDB, the execution role must include those permissions.
+
+AWS automatically provides temporary, short-lived credentials to the function from the execution role at runtime. This means you **never need to hardcode AWS access keys** in your code or environment variables — doing so is a security anti-pattern that can expose credentials if the code is ever leaked.
+
+The execution role follows the **Principle of Least Privilege**: grant only the permissions the function actually needs, nothing more. For example, a function that only reads from one DynamoDB table should have read-only access to that specific table, not write access or access to other tables.
+
+This is the same IAM model used throughout AWS — Lambda is just one of many services that assumes a role to perform actions on your behalf.`,
+      quiz: [
+        {
+          question:
+            "How should a Lambda function be granted permission to write to a DynamoDB table?",
+          options: [
+            "Hardcode AWS access keys in the function's environment variables",
+            "Attach an IAM execution role with DynamoDB write permissions to the function",
+            "Create an IAM user for the function and embed credentials in the code",
+            "Make the DynamoDB table public so Lambda can write without authentication",
+          ],
+          correctIndex: 1,
+          explanation:
+            "Lambda functions are granted permissions via an IAM execution role. AWS automatically provides temporary credentials from the role at runtime — no hardcoded keys needed. Embedding access keys in code or environment variables is a security anti-pattern.",
+        },
+        {
+          question:
+            "What security principle should guide which permissions are added to a Lambda execution role?",
+          options: [
+            "Grant all permissions so the function never fails due to access errors",
+            "Principle of Least Privilege — grant only the permissions the function actually needs",
+            "Copy the permissions from another function in the same account",
+            "Use a single shared execution role for all Lambda functions in the account",
+          ],
+          correctIndex: 1,
+          explanation:
+            "The Principle of Least Privilege means granting only the minimum permissions required for the function to do its job. This limits the blast radius if a function is compromised and is a core AWS security best practice.",
+        },
+      ],
+    },
+    {
       heading: "Common Use Cases",
       body: `Lambda's combination of automatic scaling, event-driven execution, and pay-per-use pricing makes it ideal for a wide range of use cases.
 
@@ -342,19 +380,6 @@ The key exam concept is that Lambda follows a **pay-per-use** model with no idle
       correctIndex: 1,
       explanation:
         "A cold start occurs when Lambda has no warm execution environment available and must initialize a new one. This adds latency (typically 100–500ms for interpreted languages). Subsequent invocations within the warm window are much faster (warm starts).",
-    },
-    {
-      question:
-        "Which IAM approach should be used to allow a Lambda function to write to a DynamoDB table?",
-      options: [
-        "Hardcode AWS access keys in the Lambda function's environment variables",
-        "Attach an IAM execution role with DynamoDB write permissions to the Lambda function",
-        "Create an IAM user for the Lambda function and embed the credentials in the code",
-        "Make the DynamoDB table public so Lambda can write without authentication",
-      ],
-      correctIndex: 1,
-      explanation:
-        "Lambda functions should be granted permissions via an IAM execution role. AWS automatically provides temporary credentials to the function from the role. Embedding hardcoded access keys in Lambda code or environment variables is a security anti-pattern.",
     },
     {
       question:
