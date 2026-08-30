@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import { AbbreviatedText } from "../components/AbbreviatedText";
 import {
   QuizQuestion,
   Domain,
@@ -460,9 +461,10 @@ export default function QuizScreen() {
                         {currentQ.options[idx]}
                       </Text>
                     </View>
-                    <Text style={styles.wrongReasonText}>
-                      {currentQ.optionExplanations![idx]}
-                    </Text>
+                    <AbbreviatedText
+                      text={currentQ.optionExplanations![idx]}
+                      style={styles.wrongReasonText}
+                    />
                   </View>
                 ))}
 
@@ -479,7 +481,10 @@ export default function QuizScreen() {
                     : "Why the correct answer is right"}
                 </Text>
               </View>
-              <Text style={styles.explanationText}>{currentQ.explanation}</Text>
+              <AbbreviatedText
+                text={currentQ.explanation}
+                style={styles.explanationText}
+              />
             </View>
 
             <View style={styles.tagRow}>
