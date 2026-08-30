@@ -151,15 +151,12 @@ export default function CertSelectScreen() {
                     <Text style={styles.certName}>{cert.fullName}</Text>
                     <Text style={styles.examInfo}>{cert.examInfo}</Text>
                     {(prev || next) && (
-                      <View style={styles.progressionRow}>
+                      <View style={styles.progressionStack}>
                         {prev && (
                           <View style={styles.progressionItem}>
                             <Text style={styles.progressionLabel}>Prereq:</Text>
                             <Text style={styles.progressionText}>{prev}</Text>
                           </View>
-                        )}
-                        {prev && next && (
-                          <View style={styles.progressionDivider} />
                         )}
                         {next && (
                           <View style={styles.progressionItem}>
@@ -297,16 +294,14 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 1,
   },
-  progressionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
+  progressionStack: {
     marginTop: spacing.xs,
+    gap: 3,
   },
   progressionItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
   },
   progressionLabel: {
     fontSize: fontSize.xs,
@@ -316,11 +311,6 @@ const styles = StyleSheet.create({
   progressionText: {
     fontSize: fontSize.xs,
     color: colors.textMuted,
-  },
-  progressionDivider: {
-    width: 1,
-    height: 10,
-    backgroundColor: colors.border,
   },
 
   footer: {
