@@ -21,27 +21,50 @@ import { RootStackParamList } from "../navigation";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
+interface CertEntry {
+  meta: CertMeta;
+  prev?: string;
+  next?: string;
+}
+
 interface CertGroup {
   level: string;
   description: string;
-  certs: CertMeta[];
+  certs: CertEntry[];
 }
 
 const CERT_GROUPS: CertGroup[] = [
   {
     level: "Foundational",
     description: "No prior cloud experience required",
-    certs: [CERT_META["clf-c02"]],
+    certs: [
+      {
+        meta: CERT_META["clf-c02"],
+        next: "DVA-C02 or AIF-C01",
+      },
+    ],
   },
   {
     level: "Associate",
     description: "Recommended 1+ year of AWS experience",
-    certs: [CERT_META["dva-c02"]],
+    certs: [
+      {
+        meta: CERT_META["dva-c02"],
+        prev: "CLF-C02",
+        next: "SAP-C02 or DOP-C02",
+      },
+    ],
   },
   {
     level: "Specialty",
     description: "Domain-specific expertise",
-    certs: [CERT_META["aif-c01"]],
+    certs: [
+      {
+        meta: CERT_META["aif-c01"],
+        prev: "CLF-C02",
+        next: "MLS-C01",
+      },
+    ],
   },
 ];
 
@@ -78,7 +101,7 @@ export default function CertSelectScreen() {
               <Text style={styles.groupDesc}>{group.description}</Text>
             </View>
 
-            {group.certs.map((cert) => {
+            {group.certs.map(({ meta: cert, prev, next }) => {
               const active = certId === cert.id;
               return (
                 <TouchableOpacity
@@ -127,6 +150,33 @@ export default function CertSelectScreen() {
                     </View>
                     <Text style={styles.certName}>{cert.fullName}</Text>
                     <Text style={styles.examInfo}>{cert.examInfo}</Text>
+                    {(prev || next) && (
+                      <View style={styles.progressionRow}>
+                        {prev && (
+                          <View style={styles.progressionItem}>
+                            <Ionicons
+                              name="arrow-back-outline"
+                              size={11}
+                              color={colors.textMuted}
+                            />
+                            <Text style={styles.progressionText}>{prev}</Text>
+                          </View>
+                        )}
+                        {prev && next && (
+                          <View style={styles.progressionDivider} />
+                        )}
+                        {next && (
+                          <View style={styles.progressionItem}>
+                            <Text style={styles.progressionText}>{next}</Text>
+                            <Ionicons
+                              name="arrow-forward-outline"
+                              size={11}
+                              color={colors.textMuted}
+                            />
+                          </View>
+                        )}
+                      </View>
+                    )}
                   </View>
                   <Ionicons
                     name="chevron-forward"
@@ -254,6 +304,26 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
     color: colors.textSecondary,
     marginTop: 1,
+  },
+  progressionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  progressionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  progressionText: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+  },
+  progressionDivider: {
+    width: 1,
+    height: 10,
+    backgroundColor: colors.border,
   },
 
   footer: {
