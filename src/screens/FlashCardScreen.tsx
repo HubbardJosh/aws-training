@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import { AbbreviatedText } from "../components/AbbreviatedText";
 import { FlashCard, Domain, Difficulty, UserProgress } from "../types";
 import { loadProgress, saveProgress } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
@@ -279,9 +280,11 @@ export default function FlashCardScreen() {
                       color={meta.color}
                       style={styles.cardIcon}
                     />
-                    <Text style={styles.questionText}>
-                      {currentCard.question}
-                    </Text>
+                    <AbbreviatedText
+                      text={currentCard.question}
+                      style={styles.questionText}
+                      center
+                    />
                   </View>
 
                   <View style={styles.cardFooter}>
@@ -357,7 +360,10 @@ export default function FlashCardScreen() {
                     </View>
                   </View>
 
-                  <Text style={styles.answerText}>{currentCard.answer}</Text>
+                  <AbbreviatedText
+                    text={currentCard.answer}
+                    style={styles.answerText}
+                  />
 
                   <View style={styles.keyPointsSection}>
                     <Text style={styles.keyPointsLabel}>Key Points</Text>
@@ -369,7 +375,10 @@ export default function FlashCardScreen() {
                             { backgroundColor: meta.color },
                           ]}
                         />
-                        <Text style={styles.keyPointText}>{pt}</Text>
+                        <AbbreviatedText
+                          text={pt}
+                          style={styles.keyPointText}
+                        />
                       </View>
                     ))}
                   </View>

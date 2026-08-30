@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { AbbreviatedText } from "../components/AbbreviatedText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -895,9 +896,12 @@ function InlineText({ text }: { text: string }) {
       {parts.map((part, i) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return (
-            <Text key={i} style={mdStyles.boldInline}>
-              {part.slice(2, -2)}
-            </Text>
+            <AbbreviatedText
+              key={i}
+              text={part.slice(2, -2)}
+              style={mdStyles.boldInline}
+              bold
+            />
           );
         }
         if (part.startsWith("`") && part.endsWith("`")) {
@@ -907,7 +911,7 @@ function InlineText({ text }: { text: string }) {
             </Text>
           );
         }
-        return <Text key={i}>{part}</Text>;
+        return <AbbreviatedText key={i} text={part} />;
       })}
     </Text>
   );

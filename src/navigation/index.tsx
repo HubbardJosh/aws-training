@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../utils/theme";
 import { CertProvider } from "../context/CertContext";
+import { AbbreviationTooltipProvider } from "../components/AbbreviatedText";
 
 import CertSelectScreen from "../screens/CertSelectScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -117,9 +118,11 @@ function RootNavigator() {
 export default function Navigation() {
   return (
     <CertProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <AbbreviationTooltipProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </AbbreviationTooltipProvider>
     </CertProvider>
   );
 }
