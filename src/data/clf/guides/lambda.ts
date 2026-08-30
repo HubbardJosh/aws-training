@@ -409,6 +409,19 @@ This is the same IAM model used throughout AWS — Lambda is just one of many se
     },
     {
       question:
+        "A Lambda function needs to read objects from an S3 bucket. A developer suggests hardcoding AWS access keys in the function's environment variables. What is wrong with this approach?",
+      options: [
+        "Lambda environment variables are limited to 4 KB and cannot store access keys",
+        "Hardcoded credentials are a security risk — use an IAM execution role instead so AWS provides temporary credentials automatically",
+        "Lambda cannot read from S3 regardless of how credentials are provided",
+        "Environment variables are deleted when the function scales up, losing the credentials",
+      ],
+      correctIndex: 1,
+      explanation:
+        "Hardcoding credentials in environment variables is a security anti-pattern — if the code or config is ever exposed, the keys are compromised. The correct approach is an IAM execution role attached to the function. AWS automatically injects short-lived temporary credentials at runtime, with no keys to manage or rotate manually.",
+    },
+    {
+      question:
         "Which set of services represents event sources that can trigger Lambda functions?",
       options: [
         "EC2 instances, EBS volumes, and VPC subnets",
