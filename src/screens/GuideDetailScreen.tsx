@@ -244,7 +244,10 @@ function InlineQuiz({
             color={colors.textMuted}
             style={{ marginTop: 2 }}
           />
-          <Text style={quizStyles.explanationText}>{q.explanation}</Text>
+          <AbbreviatedText
+            text={q.explanation}
+            style={quizStyles.explanationText}
+          />
         </View>
       )}
 
@@ -485,7 +488,10 @@ function TopicQuiz({ questions, accentColor, serviceName }: TopicQuizProps) {
             color={colors.textMuted}
             style={{ marginTop: 2 }}
           />
-          <Text style={quizStyles.explanationText}>{q.explanation}</Text>
+          <AbbreviatedText
+            text={q.explanation}
+            style={quizStyles.explanationText}
+          />
         </View>
       )}
 
