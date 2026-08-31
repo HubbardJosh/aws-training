@@ -15,7 +15,25 @@ export const snsGuide: ServiceGuide = {
 
 SNS offers two topic types with different guarantees. **Standard topics** provide high throughput and at-least-once delivery with best-effort ordering — messages may arrive slightly out of order or be delivered more than once. **FIFO topics** provide exactly-once delivery and strict ordering within a message group, but only SQS FIFO queues can be subscribers.
 
-Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 256 KB), an optional subject, and optional message attributes. For structured messaging where different subscriber protocols need different formats — for example, HTTP subscribers need a different format than SQS subscribers — you can pass the \`Message\` parameter as a JSON object with protocol-specific keys (\`default\`, \`email\`, \`sqs\`, \`lambda\`, \`http\`, \`sms\`). SNS delivers the appropriate format to each subscriber type.`,
+Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 256 KB), an optional subject, and optional message attributes. For structured messaging where different subscriber protocols need different formats — for example, HTTP subscribers need a different format than SQS subscribers — you can pass the \`Message\` parameter as a JSON object with protocol-specific keys (\`default\`, \`email\`, \`sqs\`, \`lambda\`, \`http\`, \`sms\`). SNS delivers the appropriate format to each subscriber type.
+
+\`\`\`typescript
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+
+const client = new SNSClient({});
+
+// MessageAttributes are the values subscription filter policies match against
+await client.send(
+  new PublishCommand({
+    TopicArn: process.env.TOPIC_ARN,
+    Message: JSON.stringify({ orderId: "ord-123", total: 49.99 }),
+    MessageAttributes: {
+      type: { DataType: "String", StringValue: "ORDER_PLACED" },
+      region: { DataType: "String", StringValue: "us-east" },
+    },
+  })
+);
+\`\`\``,
     },
     {
       heading: "Subscription Types",

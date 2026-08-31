@@ -20,13 +20,28 @@ export const stepFunctionsGuide: ServiceGuide = {
     {
       heading: "Amazon States Language (ASL)",
       body: `State machines are defined in **Amazon States Language (ASL)** — a JSON-based declarative language. The top-level structure identifies the starting state and defines all states:
-\`\`\`
+
+\`\`\`json
 {
-  "Comment": "Description",
-  "StartAt": "FirstStateName",
+  "Comment": "Order processing workflow",
+  "StartAt": "ProcessPayment",
   "States": {
-    "FirstStateName": { ... },
-    "SecondStateName": { ... }
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ProcessPayment",
+      "ResultPath": "$.paymentResult",
+      "Retry": [{ "ErrorEquals": ["States.ALL"], "MaxAttempts": 2 }],
+      "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "PaymentFailed" }],
+      "Next": "PaymentSucceeded"
+    },
+    "PaymentSucceeded": {
+      "Type": "Succeed"
+    },
+    "PaymentFailed": {
+      "Type": "Fail",
+      "Error": "PaymentError",
+      "Cause": "Payment processing failed after retries"
+    }
   }
 }
 \`\`\`
@@ -59,27 +74,37 @@ The processing order is always: InputPath → Parameters → (task executes) →
       heading: "Error Handling",
       body: `Step Functions builds retry and error handling logic directly into the workflow definition, rather than requiring each Lambda function to implement its own retry logic. This keeps Lambda functions simple and makes retry behavior visible in the workflow definition.
 
-**Retry** automatically retries a failed Task state according to rules you specify per error type. A typical retry configuration looks like:
-\`\`\`
-"Retry": [{
-  "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"],
-  "IntervalSeconds": 2,
-  "MaxAttempts": 3,
-  "BackoffRate": 2,
-  "JitterStrategy": "FULL"
-}]
-\`\`\`
-\`IntervalSeconds\` is the wait before the first retry. \`BackoffRate\` multiplies the interval on each subsequent attempt (2 means 2s, 4s, 8s, ...). \`MaxAttempts\` limits total retries — 0 means no retries. \`JitterStrategy: FULL\` adds randomness to the calculated delay to prevent multiple parallel executions from retrying in lockstep, which would create thundering herd pressure on a downstream service.
+**Retry** automatically retries a failed Task state according to rules you specify per error type. **Catch** provides a fallback transition when all retries are exhausted. Both are declared together on the same Task state:
 
-**Catch** provides a fallback transition when all retries are exhausted or when no retry is configured for the error. A catch block routes execution to a fallback state, optionally preserving the error details in a specified path:
+\`\`\`json
+{
+  "ProcessOrder": {
+    "Type": "Task",
+    "Resource": "arn:aws:lambda:us-east-1:123:function:ProcessOrder",
+    "Retry": [
+      {
+        "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"],
+        "IntervalSeconds": 2,
+        "MaxAttempts": 3,
+        "BackoffRate": 2,
+        "JitterStrategy": "FULL"
+      }
+    ],
+    "Catch": [
+      {
+        "ErrorEquals": ["States.ALL"],
+        "Next": "HandleError",
+        "ResultPath": "$.errorInfo"
+      }
+    ],
+    "Next": "ShipOrder"
+  }
+}
 \`\`\`
-"Catch": [{
-  "ErrorEquals": ["States.ALL"],
-  "Next": "HandleError",
-  "ResultPath": "$.errorInfo"
-}]
-\`\`\`
-By putting the error information at \`$.errorInfo\`, the HandleError state has access to both the original input and the error details. Common error types you'll see on the exam include \`States.ALL\` (catches everything), \`States.Timeout\` (task exceeded its configured timeout), \`States.TaskFailed\` (task returned a failure), and \`States.Permissions\` (insufficient IAM permissions to call the target service).`,
+
+\`IntervalSeconds\` is the wait before the first retry. \`BackoffRate\` multiplies the interval on each subsequent attempt (2 means 2s, 4s, 8s...). \`MaxAttempts\` limits total retries — 0 means no retries. \`JitterStrategy: FULL\` adds randomness to prevent thundering herd when many parallel executions retry at the same time. By putting error details at \`$.errorInfo\` in the Catch block, the HandleError state receives both the original input and the error information.
+
+Common error types: \`States.ALL\` (catches everything), \`States.Timeout\` (task exceeded timeout), \`States.TaskFailed\` (task returned a failure), and \`States.Permissions\` (insufficient IAM permissions to call the target service).`,
     },
     {
       heading: "Service Integrations",

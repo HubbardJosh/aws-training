@@ -13,7 +13,20 @@ export const lambdaGuide: ServiceGuide = {
       heading: "Core Concepts",
       body: `Lambda executes **functions** — discrete units of code packaged as a ZIP archive or container image. Each function is defined by a **handler** (the entry point Lambda calls, e.g. \`index.handler\`), a **runtime** (the language environment such as Node.js 20.x, Python 3.12, or Java 21), and a **memory** allocation from 128 MB to 10,240 MB. CPU power scales proportionally with memory, so doubling memory roughly doubles compute capacity. Every function also has an **execution role** — an IAM role granting it permission to call other AWS services — and a **timeout** of up to 15 minutes per invocation.
 
-Lambda manages a fleet of **execution environments** (isolated micro-VMs). When your function is invoked, it runs inside one of these environments. Between invocations the environment may be frozen and reused — this is a **warm start**, where initialization code has already run. When no warm environment is available, Lambda must create a new one, which is a **cold start** and adds latency while the runtime initializes.`,
+Lambda manages a fleet of **execution environments** (isolated micro-VMs). When your function is invoked, it runs inside one of these environments. Between invocations the environment may be frozen and reused — this is a **warm start**, where initialization code has already run. When no warm environment is available, Lambda must create a new one, which is a **cold start** and adds latency while the runtime initializes.
+
+\`\`\`typescript
+// Basic handler signature
+export const handler = async (
+  event: unknown,
+  context: { functionName: string; awsRequestId: string }
+) => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "ok" }),
+  };
+};
+\`\`\``,
       quiz: [
         {
           question: "What is the maximum timeout for a Lambda function?",
@@ -95,7 +108,20 @@ Lambda manages a fleet of **execution environments** (isolated micro-VMs). When 
       heading: "Execution Environment & Cold Starts",
       body: `When Lambda receives an invocation with no warm environment available, it goes through an initialization sequence: it downloads your deployment package (or pulls the container image), starts the runtime process, and runs any **initialization code** — the code outside your handler function. Only then does it call your handler. Steps 1 through 3 constitute the **cold start**, which typically adds 100ms to 1 second for interpreted runtimes like Node.js or Python, and several seconds for JVM or .NET runtimes.
 
-Several strategies can reduce cold start impact. **Provisioned Concurrency** pre-warms a specified number of environments so they are always ready to handle requests with zero initialization delay — the tradeoff is that you're billed for provisioned environments even when idle. Minimizing your deployment package size reduces download time, and choosing faster runtimes (Node.js and Python start faster than Java or .NET) reduces startup time. Moving initialization code outside your handler — database connections, SDK clients, loaded config files — means that code runs once per environment rather than once per invocation, making warm starts faster and reducing the work done during cold starts.`,
+Several strategies can reduce cold start impact. **Provisioned Concurrency** pre-warms a specified number of environments so they are always ready to handle requests with zero initialization delay — the tradeoff is that you're billed for provisioned environments even when idle. Minimizing your deployment package size reduces download time, and choosing faster runtimes (Node.js and Python start faster than Java or .NET) reduces startup time. Moving initialization code outside your handler — database connections, SDK clients, loaded config files — means that code runs once per environment rather than once per invocation, making warm starts faster and reducing the work done during cold starts.
+
+\`\`\`typescript
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+// Runs once per execution environment (cold start only)
+const client = new DynamoDBClient({});
+
+export const handler = async (event: unknown) => {
+  // client is reused on every warm invocation — no reconnection overhead
+  const result = await client.send(/* ... */);
+  return result;
+};
+\`\`\``,
       quiz: [
         {
           question:
@@ -203,6 +229,32 @@ When any concurrency limit is hit, Lambda returns **429 TooManyRequestsException
 
 For secrets, the right pattern is to store them in **Secrets Manager** or **SSM Parameter Store** and fetch them at initialization time in your function's init code (outside the handler). Caching the fetched value in a module-level variable means subsequent warm invocations reuse the cached value without additional API calls. If you must encrypt environment variables, you can use a **KMS Customer Managed Key** — Lambda will encrypt the variable value at rest, and your execution role needs \`kms:Decrypt\` to read it at runtime.
 
+\`\`\`typescript
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
+
+const sm = new SecretsManagerClient({});
+let cachedSecret: string | undefined;
+
+// Fetch once per cold start; reused on warm invocations
+async function getSecret() {
+  if (!cachedSecret) {
+    const res = await sm.send(
+      new GetSecretValueCommand({ SecretId: process.env.SECRET_ARN })
+    );
+    cachedSecret = res.SecretString;
+  }
+  return cachedSecret;
+}
+
+export const handler = async () => {
+  const secret = await getSecret();
+  // use secret ...
+};
+\`\`\`
+
 **Lambda aliases** are named pointers to specific published versions (e.g. \`prod\` pointing to version 47). Aliases support **weighted traffic shifting** — you can send 10% of traffic to a new version while keeping 90% on the current one. This enables canary deployments without requiring CodeDeploy. The function ARN with an alias suffix remains stable even as you promote new versions.`,
       quiz: [
         {
@@ -234,7 +286,27 @@ For secrets, the right pattern is to store them in **Secrets Manager** or **SSM 
 
 For **asynchronous invocations**, Lambda automatically retries failed invocations twice more (three total attempts), with a 1-minute wait before the second attempt and a 2-minute wait before the third. You can configure \`Maximum Retry Attempts\` (0–2) and \`Maximum Event Age\` (60 seconds to 6 hours) to control this behavior. After exhausting retries, you can route the failed event to a **Lambda Destination** (configured per OnFailure) or a DLQ. Destinations are preferred because they include the full invocation metadata — the original event, the response, and the request context — whereas DLQ only sends the original event.
 
-For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process records in order within each shard. A failing batch blocks the shard until it succeeds or expires. The key tools for managing this are \`BisectBatchOnFunctionError\` (which splits a failing batch in half to isolate the bad record) and \`MaximumRetryAttempts\` (which limits how many times a batch is retried before routing bad records to a failure destination). For SQS event sources, failed messages return to the queue after the visibility timeout expires and are retried up to \`maxReceiveCount\` times before going to the DLQ.`,
+For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process records in order within each shard. A failing batch blocks the shard until it succeeds or expires. The key tools for managing this are \`BisectBatchOnFunctionError\` (which splits a failing batch in half to isolate the bad record) and \`MaximumRetryAttempts\` (which limits how many times a batch is retried before routing bad records to a failure destination). For SQS event sources, failed messages return to the queue after the visibility timeout expires and are retried up to \`maxReceiveCount\` times before going to the DLQ.
+
+\`\`\`typescript
+// SQS partial batch failure — only failed records go back to the queue
+export const handler = async (event: {
+  Records: Array<{ messageId: string; body: string }>;
+}) => {
+  const failures: { itemIdentifier: string }[] = [];
+
+  for (const record of event.Records) {
+    try {
+      await processMessage(record.body);
+    } catch {
+      failures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  // Return only failed IDs — successful messages are deleted automatically
+  return { batchItemFailures: failures };
+};
+\`\`\``,
       quiz: [
         {
           question:

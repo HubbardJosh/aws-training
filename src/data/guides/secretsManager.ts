@@ -49,6 +49,52 @@ Because API calls have both latency and cost implications, the recommended appro
 
 For **Lambda functions**, the pattern is to call \`GetSecretValue\` during initialization (outside the handler function) and store the credential in a module-level variable. This executes once per container lifecycle, not once per invocation, keeping both latency and API call costs low. If authentication fails inside the handler (indicating rotation occurred), refresh the cached value and retry once.
 
+\`\`\`typescript
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
+
+const sm = new SecretsManagerClient({});
+
+interface DbCredentials {
+  username: string;
+  password: string;
+  host: string;
+  port: number;
+}
+
+// Module-level cache — populated on first cold start, reused on warm invocations
+let cachedCreds: DbCredentials | undefined;
+
+async function getDbCredentials(): Promise<DbCredentials> {
+  if (!cachedCreds) {
+    const res = await sm.send(
+      new GetSecretValueCommand({ SecretId: process.env.SECRET_ARN })
+    );
+    cachedCreds = JSON.parse(res.SecretString!) as DbCredentials;
+  }
+  return cachedCreds;
+}
+
+export const handler = async () => {
+  let creds = await getDbCredentials();
+
+  try {
+    await queryDatabase(creds);
+  } catch (err) {
+    // Auth failure may mean rotation completed — refresh once and retry
+    if (isAuthError(err)) {
+      cachedCreds = undefined;
+      creds = await getDbCredentials();
+      await queryDatabase(creds);
+    } else {
+      throw err;
+    }
+  }
+};
+\`\`\`
+
 **ECS and Fargate** tasks have an even simpler integration: reference secrets in the task definition's \`secrets\` field by name or ARN, and ECS fetches and decrypts them at task launch time, injecting them as environment variables. Your application reads standard environment variables — no SDK code, no caching logic, no credential management needed. The **task execution role** (not the task role) needs \`secretsmanager:GetSecretValue\` permission, since it's the ECS infrastructure making the call on the task's behalf, not the application code.`,
     },
     {

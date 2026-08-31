@@ -59,7 +59,35 @@ For encryption, SQS offers two options. **SSE-SQS** uses SQS-managed keys and is
       heading: "SQS with Lambda",
       body: `Lambda consumes SQS messages through an **event source mapping** — Lambda manages the polling loop entirely, so you don't write any polling code. You configure the behavior through three key settings: \`BatchSize\` controls how many messages Lambda receives per invocation (1–10,000), \`MaximumBatchingWindowInSeconds\` tells Lambda to wait up to N seconds to accumulate a full batch before invoking (0–300s), and \`FunctionResponseTypes: [ReportBatchItemFailures]\` enables partial batch success.
 
-The partial batch failure pattern is important to understand. Without it, if any message in a batch fails, the entire batch returns to the queue and every message gets retried — including ones that succeeded. With \`ReportBatchItemFailures\`, your Lambda function returns a list of failed message IDs, and SQS only retries those specific messages. The successfully processed ones are deleted. This prevents unnecessary reprocessing at scale.
+The partial batch failure pattern is important to understand. Without it, if any message in a batch fails, the entire batch returns to the queue and every message gets retried — including ones that succeeded. With \`ReportBatchItemFailures\`, your Lambda function returns a list of failed message IDs, and SQS only retries those specific messages. The successfully processed ones are deleted.
+
+\`\`\`typescript
+// Event source mapping delivers records in this shape
+type SQSEvent = {
+  Records: Array<{
+    messageId: string;
+    body: string;
+    receiptHandle: string;
+    attributes: Record<string, string>;
+  }>;
+};
+
+export const handler = async (event: SQSEvent) => {
+  const failures: { itemIdentifier: string }[] = [];
+
+  for (const record of event.Records) {
+    try {
+      const payload = JSON.parse(record.body);
+      await processOrder(payload);
+    } catch {
+      // Return this ID — SQS will retry only this message
+      failures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures: failures };
+};
+\`\`\`
 
 For concurrency, Lambda scales aggressively with Standard queues — it can reach 1,000 concurrent invocations as backlog grows. FIFO queues are more constrained: Lambda creates one concurrent invocation per active message group. Always set the queue's visibility timeout to at least **6× the Lambda function timeout** to prevent messages from becoming visible while Lambda is still processing them.`,
     },

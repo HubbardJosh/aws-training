@@ -27,7 +27,49 @@ CloudWatch offers two resolution tiers. **Standard resolution** stores metrics a
 
 For EC2 instances and on-premises servers, the **CloudWatch Agent** extends what you can monitor. By default, EC2 publishes CPU, network, and disk I/O metrics — but memory utilization and disk usage at the file system level are not published by the EC2 service itself. Installing the CloudWatch Agent gives you those operating system-level metrics, plus the ability to collect application logs from files on disk.
 
-The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for Lambda. Instead of calling \`PutMetricData\` from your function, you write structured JSON to stdout that includes a special \`_aws\` envelope. The Lambda runtime (or CloudWatch Logs agent) automatically detects the EMF format and extracts the metrics, publishing them to CloudWatch without an explicit API call. This avoids adding latency to your function's response while still capturing metrics.`,
+\`\`\`typescript
+import { CloudWatchClient, PutMetricDataCommand } from "@aws-sdk/client-cloudwatch";
+
+const cw = new CloudWatchClient({});
+
+// Publish a custom metric — use your own namespace (not AWS/*)
+await cw.send(
+  new PutMetricDataCommand({
+    Namespace: "MyApp/Orders",
+    MetricData: [
+      {
+        MetricName: "OrdersProcessed",
+        Value: 1,
+        Unit: "Count",
+        Dimensions: [{ Name: "Environment", Value: "prod" }],
+      },
+    ],
+  })
+);
+\`\`\`
+
+The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for Lambda. Instead of calling \`PutMetricData\` from your function, you write structured JSON to stdout that includes a special \`_aws\` envelope. The Lambda runtime (or CloudWatch Logs agent) automatically detects the EMF format and extracts the metrics, publishing them to CloudWatch without an explicit API call. This avoids adding latency to your function's response while still capturing metrics.
+
+\`\`\`typescript
+// EMF: write structured JSON to stdout — Lambda extracts metrics automatically
+// No PutMetricData call, no added latency
+console.log(
+  JSON.stringify({
+    _aws: {
+      Timestamp: Date.now(),
+      CloudWatchMetrics: [
+        {
+          Namespace: "MyApp/Orders",
+          Dimensions: [["Environment"]],
+          Metrics: [{ Name: "OrdersProcessed", Unit: "Count" }],
+        },
+      ],
+    },
+    Environment: "prod",
+    OrdersProcessed: 1,
+  })
+);
+\`\`\``,
     },
     {
       heading: "CloudWatch Logs",

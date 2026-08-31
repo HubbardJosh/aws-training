@@ -31,6 +31,36 @@ export const elasticacheGuide: ServiceGuide = {
 
 **Lazy Loading (Cache-Aside)** is the most common pattern. The application checks the cache before querying the database. On a cache hit, the cached value is returned directly without touching the database. On a cache miss, the application queries the database, writes the result to the cache with an appropriate TTL, and returns the value. The advantages are that only requested data is cached (no wasted memory on unread data) and the application still works if the cache is empty or unavailable. The disadvantage is that the first request for any data always incurs a cache miss, and if the database is updated directly (bypassing the cache), the cached data becomes stale until the TTL expires.
 
+\`\`\`typescript
+import { createClient } from "redis";
+
+const redis = createClient({ url: process.env.REDIS_URL });
+await redis.connect();
+
+async function getProduct(productId: string) {
+  const cacheKey = \`product:\${productId}\`;
+
+  // 1. Check cache first
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  // 2. Cache miss — query the database
+  const product = await db.query("SELECT * FROM products WHERE id = $1", [productId]);
+
+  // 3. Populate cache with a TTL (300s); future reads hit cache
+  await redis.setEx(cacheKey, 300, JSON.stringify(product));
+  return product;
+}
+
+// Rate limiting with atomic INCR + EXPIRE
+async function checkRateLimit(userId: string, limitPerMinute: number) {
+  const key = \`rate:\${userId}:\${Math.floor(Date.now() / 60000)}\`;
+  const count = await redis.incr(key);
+  if (count === 1) await redis.expire(key, 60); // set expiry only on first increment
+  return count <= limitPerMinute;
+}
+\`\`\`
+
 **Write-Through** updates the cache every time the database is written. Every write is two writes: one to the database and one to the cache. This keeps the cache always fresh — there's no stale data — but at the cost of extra write latency and the risk of caching data that's never read. Write-through works best for data that's both frequently written and frequently read.
 
 **TTL (Time to Live)** is complementary to both strategies. Setting a TTL on cache keys ensures that stale data expires automatically, providing a safety net against cache-database divergence. The right TTL depends on how often the data changes and how fresh it needs to be. Too short a TTL means frequent cache misses; too long means users see stale data.

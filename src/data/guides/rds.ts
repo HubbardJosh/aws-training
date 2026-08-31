@@ -47,6 +47,32 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
 
 **Network isolation** is achieved by placing RDS instances in private subnets within a VPC DB subnet group. Security groups control which sources can reach the database port — typically only the application tier's security group, with no public internet access. **IAM Database Authentication** provides an alternative to username/password authentication for MySQL and PostgreSQL: you generate a short-lived authentication token using the AWS CLI or SDK (\`generate-db-auth-token\`), pass it as the database password, and the token expires after 15 minutes. This is particularly useful for Lambda functions and ECS tasks where storing database passwords in environment variables is undesirable.
 
+\`\`\`typescript
+import { RDSClient } from "@aws-sdk/client-rds";
+import { Signer } from "@aws-sdk/rds-signer";
+import { Client } from "pg";
+
+const signer = new Signer({
+  hostname: process.env.DB_HOST!,
+  port: 5432,
+  region: "us-east-1",
+  username: "iam_user",
+});
+
+// Token is valid for 15 minutes — generate before each connection
+const token = await signer.getAuthToken();
+
+const db = new Client({
+  host: process.env.DB_HOST,
+  port: 5432,
+  database: "mydb",
+  user: "iam_user",
+  password: token, // IAM token used as the password
+  ssl: { rejectUnauthorized: true }, // TLS required for IAM auth
+});
+await db.connect();
+\`\`\`
+
 **Secrets Manager** provides automatic credential rotation for RDS through built-in rotation Lambda functions. The application fetches credentials from Secrets Manager at startup, and Secrets Manager rotates the password on a schedule by updating both the RDS user's password and the secret value simultaneously.`,
     },
     {

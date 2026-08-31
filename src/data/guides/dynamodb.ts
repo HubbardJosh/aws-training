@@ -52,6 +52,23 @@ Both index types use **projection** to control which attributes are copied into 
 
 **GetItem** retrieves a single item by its full primary key and is the most efficient read — it consumes exactly the RCU for the item's size. **PutItem** creates or fully replaces an item. **UpdateItem** modifies specific attributes in-place without replacing the whole item; it supports atomic increment/decrement with the \`ADD\` action, which is how you implement counters without read-modify-write cycles. **DeleteItem** removes an item by primary key.
 
+\`\`\`typescript
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+
+const client = new DynamoDBClient({});
+
+// Atomic counter increment — no read-modify-write required
+await client.send(
+  new UpdateItemCommand({
+    TableName: "PageViews",
+    Key: { pageId: { S: "home" } },
+    UpdateExpression: "ADD #count :one",
+    ExpressionAttributeNames: { "#count": "count" },
+    ExpressionAttributeValues: { ":one": { N: "1" } },
+  })
+);
+\`\`\`
+
 **Query** retrieves multiple items efficiently by specifying the partition key (required) and an optional sort key condition (equals, less than, greater than, between, begins_with). It reads only from the specified partition, making it far more efficient than Scan. A **FilterExpression** can reduce the returned items further, but it does *not* reduce the RCU consumed — you pay for all items read before filtering.
 
 **Scan** reads every item in the table or index sequentially. It's expensive and slow at scale, but sometimes necessary for administrative operations. **Parallel Scan** divides the table into N segments and scans them concurrently, improving throughput at the cost of RCU.
@@ -71,6 +88,42 @@ Both index types use **projection** to control which attributes are copied into 
       body: `DynamoDB's write operations are unconditional by default — \`PutItem\` will overwrite any existing item with the same primary key. **Conditional expressions** make writes atomic and safe by requiring a condition to be true before the write proceeds. If the condition fails, DynamoDB throws \`ConditionalCheckFailedException\` and the item is unchanged.
 
 Three patterns cover most use cases. \`attribute_not_exists(pk)\` prevents overwriting an existing item — the safest way to create new items. \`attribute_exists(pk)\` ensures you're updating an item that already exists. A version check like \`#version = :expected\` implements **optimistic locking**: you read the item and note its version number, do your local computation, then write back with a condition that the version hasn't changed. If another writer modified the item between your read and write, the condition fails, and you retry from the read.
+
+\`\`\`typescript
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  UpdateItemCommand,
+} from "@aws-sdk/client-dynamodb";
+
+const client = new DynamoDBClient({});
+
+// Safe create: fails if item already exists
+await client.send(
+  new PutItemCommand({
+    TableName: "Users",
+    Item: { userId: { S: "u1" }, version: { N: "1" } },
+    ConditionExpression: "attribute_not_exists(userId)",
+  })
+);
+
+// Optimistic locking: fails if another writer changed the item
+await client.send(
+  new UpdateItemCommand({
+    TableName: "Users",
+    Key: { userId: { S: "u1" } },
+    UpdateExpression: "SET #status = :active, #version = #version + :one",
+    // #status and #name alias reserved words; :values are never interpolated
+    ExpressionAttributeNames: { "#status": "status", "#version": "version" },
+    ExpressionAttributeValues: {
+      ":active": { S: "active" },
+      ":one": { N: "1" },
+      ":expected": { N: "1" },
+    },
+    ConditionExpression: "#version = :expected",
+  })
+);
+\`\`\`
 
 When attribute names conflict with DynamoDB reserved words — and there are hundreds of them, including common words like \`name\`, \`status\`, and \`type\` — use **expression attribute names** (prefixed with \`#\`) as aliases. Always use **expression attribute values** (prefixed with \`:\`) for input values rather than string interpolation, which would create a security vulnerability and make expressions harder to read.`,
     },
@@ -104,7 +157,18 @@ DAX has clear cases where it's not appropriate. It returns cached (eventually co
 
 TTL deletes consume no WCU — they're completely free. They appear in DynamoDB Streams as normal delete events (with \`userIdentity.type = "Service"\` to identify them as TTL deletes), so you can trigger cleanup workflows or archive data as it expires.
 
-TTL is ideal for session management (user sessions that should expire after 30 minutes of inactivity), temporary tokens, caching tables where items should refresh periodically, event logs that only need to be retained for a fixed window, and any data with a natural expiration like subscription records or promotional offers. Set the TTL value as \`Math.floor(Date.now() / 1000) + ttlSeconds\`.`,
+TTL is ideal for session management (user sessions that should expire after 30 minutes of inactivity), temporary tokens, caching tables where items should refresh periodically, event logs that only need to be retained for a fixed window, and any data with a natural expiration like subscription records or promotional offers.
+
+\`\`\`typescript
+const TTL_SECONDS = 30 * 60; // 30-minute session
+
+const item = {
+  sessionId: { S: "abc123" },
+  userId: { S: "u1" },
+  // Unix epoch in seconds — DynamoDB compares this to current time
+  ttl: { N: String(Math.floor(Date.now() / 1000) + TTL_SECONDS) },
+};
+\`\`\``,
     },
     {
       heading: "Backup & Point-in-Time Recovery",

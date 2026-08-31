@@ -37,7 +37,46 @@ The encryption flow has three steps. First, call \`KMS:GenerateDataKey\` with yo
 
 Decryption reverses the process: call \`KMS:Decrypt\` with the encrypted DEK to recover the plaintext DEK, then decrypt the data locally, then discard the plaintext DEK again. The CMK never leaves KMS and is never directly applied to your data — KMS only ever decrypts the small DEK blob.
 
-The practical benefits are significant: there's no size limit on the data you encrypt, you make only one KMS API call per object (not per operation), and the encrypted DEK is useless without KMS access, so your data is protected even if the encrypted bytes are leaked. \`GenerateDataKeyWithoutPlaintext\` is a variant that returns only the encrypted DEK — useful for pre-generating keys for future encryption operations without returning plaintext material that must be immediately handled.`,
+The practical benefits are significant: there's no size limit on the data you encrypt, you make only one KMS API call per object (not per operation), and the encrypted DEK is useless without KMS access, so your data is protected even if the encrypted bytes are leaked. \`GenerateDataKeyWithoutPlaintext\` is a variant that returns only the encrypted DEK — useful for pre-generating keys for future encryption operations without returning plaintext material that must be immediately handled.
+
+\`\`\`typescript
+import { KMSClient, GenerateDataKeyCommand, DecryptCommand } from "@aws-sdk/client-kms";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+
+const kms = new KMSClient({});
+
+async function encryptData(plaintext: Buffer, cmkArn: string) {
+  // Step 1: Ask KMS for a data key — one API call regardless of data size
+  const { Plaintext: dek, CiphertextBlob: encryptedDek } = await kms.send(
+    new GenerateDataKeyCommand({ KeyId: cmkArn, KeySpec: "AES_256" })
+  );
+
+  // Step 2: Encrypt data locally — no KMS call, no size limit
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", dek!, iv);
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+
+  // Step 3: Discard plaintext DEK — store only ciphertext + encryptedDek together
+  return { ciphertext, encryptedDek, iv, authTag };
+}
+
+async function decryptData(
+  ciphertext: Buffer,
+  encryptedDek: Uint8Array,
+  iv: Buffer,
+  authTag: Buffer
+) {
+  // One KMS call to recover the plaintext DEK
+  const { Plaintext: dek } = await kms.send(
+    new DecryptCommand({ CiphertextBlob: encryptedDek })
+  );
+
+  const decipher = createDecipheriv("aes-256-gcm", dek!, iv);
+  decipher.setAuthTag(authTag);
+  return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+}
+\`\`\``,
     },
     {
       heading: "Key Policies & Access Control",

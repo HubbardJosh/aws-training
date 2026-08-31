@@ -32,6 +32,51 @@ For OAuth 2.0 flows, **Authorization Code with PKCE** is the correct choice for 
 
 The flow works in four steps: the user authenticates with their identity provider and receives a token; the app passes that token to Cognito Identity Pools \`GetId\`, which returns a Cognito Identity ID; the app then calls \`GetCredentialsForIdentity\`, which triggers an STS \`AssumeRoleWithWebIdentity\` and returns temporary AWS credentials (AccessKeyId, SecretAccessKey, SessionToken); and the app uses those credentials to call AWS services directly — for example, uploading to an S3 bucket or reading from a DynamoDB table.
 
+\`\`\`typescript
+import {
+  CognitoIdentityClient,
+  GetIdCommand,
+  GetCredentialsForIdentityCommand,
+} from "@aws-sdk/client-cognito-identity";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+const identityClient = new CognitoIdentityClient({ region: "us-east-1" });
+
+async function uploadWithFederatedCredentials(idToken: string) {
+  const IDENTITY_POOL_ID = "us-east-1:abc-123";
+  const USER_POOL_ID = "cognito-idp.us-east-1.amazonaws.com/us-east-1_XYZ";
+
+  // Step 1: exchange User Pool JWT for a Cognito Identity ID
+  const { IdentityId } = await identityClient.send(
+    new GetIdCommand({
+      IdentityPoolId: IDENTITY_POOL_ID,
+      Logins: { [USER_POOL_ID]: idToken },
+    })
+  );
+
+  // Step 2: exchange Identity ID + JWT for temporary AWS credentials
+  const { Credentials } = await identityClient.send(
+    new GetCredentialsForIdentityCommand({
+      IdentityId: IdentityId!,
+      Logins: { [USER_POOL_ID]: idToken },
+    })
+  );
+
+  // Step 3: use temporary credentials to call AWS directly from the client
+  const s3 = new S3Client({
+    credentials: {
+      accessKeyId: Credentials!.AccessKeyId!,
+      secretAccessKey: Credentials!.SecretKey!,
+      sessionToken: Credentials!.SessionToken,
+    },
+  });
+
+  await s3.send(
+    new PutObjectCommand({ Bucket: "my-bucket", Key: "file.txt", Body: "hi" })
+  );
+}
+\`\`\`
+
 Identity Pools assign different IAM roles based on authentication status. The **authenticated role** is assumed by users who have provided a valid identity provider token. The **unauthenticated role** allows limited access for guest users who haven't logged in — useful for letting anonymous users view public content stored in S3 or DynamoDB. You can also configure role-based access control that maps Cognito groups or token claims to different IAM roles, giving different tiers of users different AWS permissions.`,
     },
     {
@@ -41,6 +86,30 @@ Identity Pools assign different IAM roles based on authentication status. The **
 The **Pre-Sign-Up** trigger fires before a user is created. You can validate custom attributes, automatically confirm users (skipping the verification email), or block registrations from certain domains. The **Post-Confirmation** trigger fires after a user confirms their account — the ideal place to create a user record in DynamoDB, send a welcome email, or sync the new user to a CRM. **Pre-Authentication** lets you validate custom conditions before authentication proceeds. **Post-Authentication** fires after successful sign-in and is useful for logging events or updating timestamps.
 
 The **Pre-Token Generation** trigger is particularly powerful — it fires just before Cognito issues tokens and lets you modify the claims that appear in the ID Token and Access Token. You can inject custom attributes, add group memberships, or remove claims you don't want clients to see, all without changing your application's sign-in flow.
+
+\`\`\`typescript
+// Pre-Token Generation trigger — must respond within 5 seconds
+export const handler = async (event: {
+  request: { userAttributes: Record<string, string> };
+  response: {
+    claimsOverrideDetails?: {
+      claimsToAddOrOverride?: Record<string, string>;
+      claimsToSuppress?: string[];
+    };
+  };
+}) => {
+  // Add a custom claim to the ID token
+  event.response.claimsOverrideDetails = {
+    claimsToAddOrOverride: {
+      tier: event.request.userAttributes["custom:tier"] ?? "free",
+    },
+    // Remove phone_number from the token if not needed by clients
+    claimsToSuppress: ["phone_number"],
+  };
+
+  return event; // must return the modified event object
+};
+\`\`\`
 
 The **Custom Authentication** flow uses three triggers in sequence (DefineAuthChallenge, CreateAuthChallenge, VerifyAuthChallengeResponse) to implement completely custom authentication schemes — magic link emails, biometric verification, CAPTCHA, or custom OTP systems. The **User Migration** trigger enables transparent migration from legacy auth systems: when a user who doesn't exist in Cognito tries to sign in, the trigger fires and looks them up in the old system; if found, they're migrated to Cognito automatically without a password reset. All Lambda triggers must respond within **5 seconds** — a timeout causes the auth flow to fail.`,
     },

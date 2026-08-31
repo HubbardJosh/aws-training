@@ -47,7 +47,28 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 
 **S3 Transfer Acceleration** routes upload traffic through CloudFront's edge locations and the AWS backbone network rather than the public internet. This improves upload speeds for cross-continental transfers where the public internet path is congested or has high latency. You pay an additional per-GB fee and use the \`*.s3-accelerate.amazonaws.com\` endpoint.
 
-**Presigned URLs** grant time-limited access to a specific object — either for downloading (GET) or uploading (PUT) — using the credentials of the URL creator. Generated server-side and shared with clients, they let users upload directly to S3 without your application server proxying the upload. The URL expires based on the creator's session: up to 7 days for IAM users, and up to the role session duration for IAM roles (which can be shorter than 7 days).`,
+**Presigned URLs** grant time-limited access to a specific object — either for downloading (GET) or uploading (PUT) — using the credentials of the URL creator. Generated server-side and shared with clients, they let users upload directly to S3 without your application server proxying the upload. The URL expires based on the creator's session: up to 7 days for IAM users, and up to the role session duration for IAM roles (which can be shorter than 7 days).
+
+\`\`\`typescript
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const client = new S3Client({});
+
+// Generate a presigned PUT URL — client uploads directly to S3 (no proxy)
+const uploadUrl = await getSignedUrl(
+  client,
+  new PutObjectCommand({ Bucket: "my-bucket", Key: "uploads/photo.jpg" }),
+  { expiresIn: 300 } // 5 minutes
+);
+
+// Generate a presigned GET URL — time-limited download link
+const downloadUrl = await getSignedUrl(
+  client,
+  new GetObjectCommand({ Bucket: "my-bucket", Key: "reports/output.pdf" }),
+  { expiresIn: 3600 } // 1 hour
+);
+\`\`\``,
     },
     {
       heading: "Access Control",
@@ -88,6 +109,33 @@ An important limitation: replication only applies to new objects created after t
 Supported event categories include \`s3:ObjectCreated:*\` (covers PUT, POST, COPY, multipart complete), \`s3:ObjectRemoved:*\`, \`s3:ObjectRestore:*\`, \`s3:Replication:*\`, and more granular variants. You can configure rules that filter by prefix or suffix to narrow notifications to specific object patterns.
 
 S3 can deliver notifications directly to three targets — SQS, SNS, and Lambda — or to **EventBridge**. Direct delivery to Lambda is the simplest path for triggering processing on uploads. SNS enables fan-out where multiple systems respond to the same upload event. SQS adds durability and backpressure: if the processor is slow, events queue up rather than being dropped. EventBridge is the most flexible option: it supports richer content-based filtering, routing to over 20 target types, cross-account delivery, and event archiving and replay.
+
+\`\`\`typescript
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+
+const client = new S3Client({});
+
+// Lambda receives this event structure for S3 notifications
+export const handler = async (event: {
+  Records: Array<{
+    s3: {
+      bucket: { name: string };
+      object: { key: string; size: number };
+    };
+  }>;
+}) => {
+  for (const record of event.Records) {
+    const bucket = record.s3.bucket.name;
+    // Keys are URL-encoded — decode before use
+    const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "));
+
+    const response = await client.send(
+      new GetObjectCommand({ Bucket: bucket, Key: key })
+    );
+    // process response.Body stream ...
+  }
+};
+\`\`\`
 
 An important operational characteristic: S3 event notifications are delivered **at least once**, not exactly once. Your event processors must be idempotent — processing the same event twice should produce the same result as processing it once. This is especially important for operations like database writes or file moves that are not naturally idempotent.`,
     },

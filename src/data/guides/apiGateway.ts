@@ -25,6 +25,26 @@ export const apiGatewayGuide: ServiceGuide = {
 
 **Lambda Proxy Integration** is the most common pattern. API Gateway passes the entire HTTP request — headers, query parameters, path parameters, and body — as a structured JSON event to Lambda. Lambda returns a response object containing \`statusCode\`, \`headers\`, and \`body\`. The simplicity is the point: no mapping templates to write, no transformation logic to maintain.
 
+\`\`\`typescript
+// Lambda must return this exact shape for Proxy integration
+export const handler = async (event: {
+  httpMethod: string;
+  path: string;
+  queryStringParameters: Record<string, string> | null;
+  headers: Record<string, string>;
+  body: string | null;
+}) => {
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({ message: "ok" }),
+  };
+};
+\`\`\`
+
 **Lambda Non-Proxy (Custom) Integration** gives you more control through VTL (Velocity Template Language) mapping templates. You write a template that transforms the incoming request before Lambda sees it, and another template that transforms Lambda's response before the client receives it. This is more powerful but significantly more complex to maintain.
 
 **AWS Service Integration** lets API Gateway call AWS service APIs directly — without Lambda acting as an intermediary. For example, you can configure API Gateway to write directly to an SQS queue, trigger a Step Functions state machine, or put an item in DynamoDB. Removing the Lambda hop reduces latency and eliminates the compute cost of a passthrough function.
@@ -51,6 +71,32 @@ This lets a single API definition serve multiple environments by simply changing
 **Cognito User Pool Authorizer** validates JWTs issued by a Cognito User Pool automatically — no Lambda code required. You configure which User Pool to validate against and which token (ID token or Access token) to expect in the Authorization header. The authorizer checks the signature, expiry, and audience claim. Note that it does not validate OAuth scopes — if you need scope-based access control, you'll need a Lambda authorizer.
 
 **Lambda Authorizers** are custom functions that validate any token format — OAuth, JWT, SAML, or a proprietary scheme. There are two subtypes: token-based (receives just the token string from the Authorization header) and request-based (receives the full request context including headers and query params, giving more flexibility). The authorizer returns an IAM policy that either allows or denies access. Lambda authorizer results can be cached for up to 3,600 seconds, keyed on the token or identity source, to avoid invoking the Lambda on every request.
+
+\`\`\`typescript
+// Lambda authorizer — must return an IAM policy document
+export const handler = async (event: {
+  authorizationToken: string;
+  methodArn: string;
+}) => {
+  const isValid = validateToken(event.authorizationToken);
+
+  return {
+    principalId: "user123",
+    policyDocument: {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Action: "execute-api:Invoke",
+          Effect: isValid ? "Allow" : "Deny",
+          Resource: event.methodArn,
+        },
+      ],
+    },
+    // Optional: passed to Lambda in $context.authorizer.*
+    context: { userId: "user123", tier: "premium" },
+  };
+};
+\`\`\`
 
 **Resource Policies** are JSON policies attached to the API itself that control which principals, accounts, VPCs, or IP ranges can call the API. They're required for cross-account access and for Private APIs. **Usage Plans** combined with **API Keys** enable per-client rate limiting (requests per second and burst) and quotas (requests per day or month) — the standard mechanism for monetized APIs.`,
     },
