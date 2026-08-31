@@ -108,6 +108,23 @@ The **partition key** you assign to each record determines which shard receives 
       heading: "Producing Records",
       body: `Writing records to a Kinesis stream can be done at different levels of efficiency depending on your volume requirements. **PutRecord** sends a single record and returns its sequence number and shard ID — simple and useful for low-volume use cases but inefficient at scale. **PutRecords** batches up to 500 records in a single API call and returns individual success or failure status for each record, so you retry only the failed records rather than the whole batch.
 
+\`\`\`typescript
+import { KinesisClient, PutRecordsCommand } from "@aws-sdk/client-kinesis";
+
+const kinesis = new KinesisClient({});
+
+const result = await kinesis.send(new PutRecordsCommand({
+  StreamName: "OrderEvents",
+  Records: events.map((e) => ({
+    Data: Buffer.from(JSON.stringify(e)),
+    PartitionKey: e.userId, // high-cardinality key distributes across shards
+  })),
+}));
+
+// Retry only failed records — do not resend the whole batch
+const failed = result.Records?.filter((r) => r.ErrorCode);
+\`\`\`
+
 For high-volume producers, the **Kinesis Producer Library (KPL)** goes further by automatically aggregating multiple small records into a single Kinesis record (up to 1 MB). This aggregation dramatically increases the effective throughput per shard for applications that produce many small records. The KPL also handles retry logic, rate limiting, and CloudWatch metrics automatically. The important caveat: KPL-aggregated records must be deserialized by a KCL consumer or a deaggregation library — a standard \`GetRecords\` call will return the aggregated record as an opaque blob that your application must unpack.
 
 Every record contains the actual data payload (up to 1 MB, base64-encoded in the API), a partition key, and an optional explicit hash key that overrides the default partition-key hashing. When a shard is throttled, implement exponential backoff in your retry logic — the KPL handles this automatically, which is one of the main reasons to use it over raw API calls for high-throughput producers.`,
@@ -151,7 +168,21 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
 
 **Enhanced Fan-Out** consumers use a push model: each registered consumer gets its own dedicated 2 MB/s per shard, delivered via HTTP/2 with ~70ms latency. Adding a new EFO consumer doesn't degrade existing consumers' throughput. The limit is 20 registered EFO consumers per stream. EFO is the right choice when you're adding a third or fourth consumer to a stream, or when any consumer is latency-sensitive.
 
-**Lambda** can consume from Kinesis via event source mapping using the standard polling model (EFO for Lambda is also available but must be explicitly configured). Lambda processes records in shard order within each shard, with multiple shards executing as separate concurrent invocations. If Lambda fails to process a batch, it retries until the records expire from the stream — configuring \`BisectBatchOnFunctionError\` splits a failing batch in half to isolate the problematic record rather than blocking the entire shard.`,
+**Lambda** can consume from Kinesis via event source mapping using the standard polling model (EFO for Lambda is also available but must be explicitly configured). Lambda processes records in shard order within each shard, with multiple shards executing as separate concurrent invocations. If Lambda fails to process a batch, it retries until the records expire from the stream — configuring \`BisectBatchOnFunctionError\` splits a failing batch in half to isolate the problematic record rather than blocking the entire shard.
+
+\`\`\`typescript
+import { KinesisStreamEvent } from "aws-lambda";
+
+export const handler = async (event: KinesisStreamEvent) => {
+  for (const record of event.Records) {
+    // Data arrives base64-encoded — decode before parsing
+    const payload = Buffer.from(record.kinesis.data, "base64").toString("utf-8");
+    const data = JSON.parse(payload);
+    await processEvent(data);
+  }
+  // Returning without error checkpoints the batch; an exception retries it
+};
+\`\`\``,
       quiz: [
         {
           question:

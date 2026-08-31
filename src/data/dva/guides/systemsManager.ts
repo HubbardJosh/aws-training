@@ -17,7 +17,40 @@ Parameter Store supports three types. **String** parameters store plain text wit
 
 Parameter Store has two service tiers. The **Standard tier** is free and supports up to 10,000 parameters with values up to 4 KB — sufficient for most application configuration needs. The **Advanced tier** costs $0.05 per parameter per month and raises the value limit to 8 KB, supports up to 100,000 parameters, and adds parameter policies for expiration notifications and auto-deletion. For most teams, the Standard tier is the right starting point.
 
-\`GetParametersByPath\` retrieves all parameters under a path prefix in a single API call, which is more efficient than fetching each parameter individually. Every update creates a new version, and you can retrieve a specific version or always get the latest. A Lambda extension for Parameter Store caches parameter values locally and serves them from \`localhost\` without making API calls on every Lambda invocation, significantly reducing both latency and cost for parameter-heavy Lambda functions.`,
+\`GetParametersByPath\` retrieves all parameters under a path prefix in a single API call, which is more efficient than fetching each parameter individually. Every update creates a new version, and you can retrieve a specific version or always get the latest. A Lambda extension for Parameter Store caches parameter values locally and serves them from \`localhost\` without making API calls on every Lambda invocation, significantly reducing both latency and cost for parameter-heavy Lambda functions.
+
+\`\`\`typescript
+import { SSMClient, GetParameterCommand, GetParametersByPathCommand } from "@aws-sdk/client-ssm";
+
+const ssm = new SSMClient({});
+
+// Fetch a single SecureString (KMS-decrypted)
+const { Parameter } = await ssm.send(
+  new GetParameterCommand({
+    Name: "/myapp/prod/database/password",
+    WithDecryption: true,
+  })
+);
+const dbPassword = Parameter!.Value!;
+
+// Fetch all parameters under a path hierarchy
+const results: Record<string, string> = {};
+let nextToken: string | undefined;
+do {
+  const res = await ssm.send(
+    new GetParametersByPathCommand({
+      Path: "/myapp/prod/",
+      Recursive: true,
+      WithDecryption: true,
+      NextToken: nextToken,
+    })
+  );
+  for (const p of res.Parameters ?? []) {
+    results[p.Name!] = p.Value!;
+  }
+  nextToken = res.NextToken;
+} while (nextToken);
+\`\`\``,
       quiz: [
         {
           question:

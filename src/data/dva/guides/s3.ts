@@ -125,7 +125,28 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 
 **S3 Transfer Acceleration** routes upload traffic through CloudFront's edge locations and the AWS backbone network rather than the public internet. This improves upload speeds for cross-continental transfers where the public internet path is congested or has high latency. You pay an additional per-GB fee and use the \`*.s3-accelerate.amazonaws.com\` endpoint.
 
-**Presigned URLs** grant time-limited access to a specific object — either for downloading (GET) or uploading (PUT) — using the credentials of the URL creator. Generated server-side and shared with clients, they let users upload directly to S3 without your application server proxying the upload. The URL expires based on the creator's session: up to 7 days for IAM users, and up to the role session duration for IAM roles (which can be shorter than 7 days).`,
+**Presigned URLs** grant time-limited access to a specific object — either for downloading (GET) or uploading (PUT) — using the credentials of the URL creator. Generated server-side and shared with clients, they let users upload directly to S3 without your application server proxying the upload. The URL expires based on the creator's session: up to 7 days for IAM users, and up to the role session duration for IAM roles (which can be shorter than 7 days).
+
+\`\`\`typescript
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3 = new S3Client({ region: "us-east-1" });
+
+// Generate a presigned PUT URL — client uploads directly to S3
+const uploadUrl = await getSignedUrl(
+  s3,
+  new PutObjectCommand({ Bucket: "my-bucket", Key: \`uploads/\${userId}/photo.jpg\` }),
+  { expiresIn: 300 } // 5 minutes
+);
+
+// Generate a presigned GET URL — client downloads without needing AWS credentials
+const downloadUrl = await getSignedUrl(
+  s3,
+  new GetObjectCommand({ Bucket: "my-bucket", Key: "reports/q3.pdf" }),
+  { expiresIn: 3600 } // 1 hour
+);
+\`\`\``,
       quiz: [
         {
           question:
@@ -165,6 +186,27 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
 **Block Public Access** is the master override — four settings that prevent any public access to the bucket, regardless of what other policies or ACLs might say. It can be set at the account level (blocking public access across all buckets) or per bucket. AWS now enables all four settings by default for new buckets, and enabling Block Public Access at the account level is the most effective way to prevent accidental public exposure. It overrides both bucket policies and ACLs.
 
 **Bucket Policies** are resource-based IAM policies attached to the bucket. They're the recommended way to grant access because they support the full IAM policy language: conditions, principal matching, resource ARN patterns, and cross-account grants. A common use is restricting access to a specific VPC endpoint (using the \`aws:SourceVpce\` condition) or granting another account read access to specific prefixes.
+
+\`\`\`json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": ["arn:aws:s3:::my-bucket", "arn:aws:s3:::my-bucket/*"],
+      "Condition": { "Bool": { "aws:SecureTransport": "false" } }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "arn:aws:iam::123456789012:role/AnalyticsRole" },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-bucket/reports/*"
+    }
+  ]
+}
+\`\`\`
 
 **ACLs** are a legacy mechanism for per-object and per-bucket access control that predate bucket policies. AWS recommends disabling ACLs by setting Object Ownership to \`BucketOwnerEnforced\` — new buckets default to this. With ACLs disabled, the bucket owner owns all objects (even those uploaded by other accounts), which simplifies access management.
 

@@ -70,6 +70,24 @@ An **IAM Policy** is a JSON document that defines permissions. Policies state wh
 
 A policy document contains one or more **statements**, each with an **Effect** (Allow or Deny), an **Action** (the API operation), and a **Resource** (the ARN of the AWS resource). An optional **Condition** can restrict when the policy applies (e.g., only from a specific IP, only when MFA is used).
 
+\`\`\`json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": "arn:aws:s3:::my-app-bucket/*"
+    },
+    {
+      "Effect": "Deny",
+      "Action": "s3:DeleteObject",
+      "Resource": "*"
+    }
+  ]
+}
+\`\`\`
+
 **Managed Policies** are standalone policies you can attach to multiple users, groups, or roles. AWS provides **AWS Managed Policies** (maintained by AWS, like \`AdministratorAccess\` or \`ReadOnlyAccess\`) and you can create **Customer Managed Policies** for your specific needs.
 
 **Inline Policies** are embedded directly into a single user, group, or role. They are tightly coupled and cannot be reused, so managed policies are generally preferred.

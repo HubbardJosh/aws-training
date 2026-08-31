@@ -232,6 +232,25 @@ The \`Condition\` block supports over 40 operators and condition keys. Commonly 
 
 Every role has a **trust policy** — a resource-based policy on the role itself that specifies who is allowed to assume it. The trust policy is what makes a role assumable. For an EC2 instance to use a role, the trust policy must trust the EC2 service. For a cross-account assumption, the trust policy must trust the source account or a specific principal within it, and the source account's identity policy must grant \`sts:AssumeRole\` on the role ARN.
 
+\`\`\`json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "lambda.amazonaws.com" },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "arn:aws:iam::999999999999:root" },
+      "Action": "sts:AssumeRole",
+      "Condition": { "StringEquals": { "sts:ExternalId": "unique-partner-id" } }
+    }
+  ]
+}
+\`\`\`
+
 For third-party integrations, the **ExternalId** condition in the trust policy prevents confused deputy attacks. The third party provides an ExternalId value; you add it as a required condition on your trust policy. An attacker who discovers your role ARN cannot assume it without also knowing the ExternalId. When roles are chained — assuming a role from within another role session — the session duration is automatically capped at 1 hour regardless of the individual role settings.`,
       quiz: [
         {

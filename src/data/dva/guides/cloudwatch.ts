@@ -60,6 +60,32 @@ CloudWatch offers two resolution tiers. **Standard resolution** stores metrics a
       heading: "Custom Metrics",
       body: `You publish custom metrics using the \`PutMetricData\` API from any code that can make AWS SDK calls — Lambda functions, EC2 instances, ECS containers, or any other compute environment. Each metric data point includes a namespace, metric name, dimensions, value, unit, and an optional timestamp. Setting \`StorageResolution\` to 1 publishes a high-resolution metric at 1-second granularity.
 
+\`\`\`typescript
+import { CloudWatchClient, PutMetricDataCommand } from "@aws-sdk/client-cloudwatch";
+
+const cw = new CloudWatchClient({});
+
+await cw.send(new PutMetricDataCommand({
+  Namespace: "MyApp/Orders",
+  MetricData: [{
+    MetricName: "OrdersProcessed",
+    Value: 1,
+    Unit: "Count",
+    Dimensions: [{ Name: "Environment", Value: "prod" }],
+  }],
+}));
+
+// EMF — no API call, Lambda extracts metrics from stdout automatically
+console.log(JSON.stringify({
+  _aws: {
+    Timestamp: Date.now(),
+    CloudWatchMetrics: [{ Namespace: "MyApp/Orders", Dimensions: [["Environment"]], Metrics: [{ Name: "OrdersProcessed", Unit: "Count" }] }],
+  },
+  Environment: "prod",
+  OrdersProcessed: 1,
+}));
+\`\`\`
+
 For EC2 instances and on-premises servers, the **CloudWatch Agent** extends what you can monitor. By default, EC2 publishes CPU, network, and disk I/O metrics — but memory utilization and disk usage at the file system level are not published by the EC2 service itself. Installing the CloudWatch Agent gives you those operating system-level metrics, plus the ability to collect application logs from files on disk.
 
 The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for Lambda. Instead of calling \`PutMetricData\` from your function, you write structured JSON to stdout that includes a special \`_aws\` envelope. The Lambda runtime (or CloudWatch Logs agent) automatically detects the EMF format and extracts the metrics, publishing them to CloudWatch without an explicit API call. This avoids adding latency to your function's response while still capturing metrics.`,

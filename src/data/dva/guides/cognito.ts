@@ -107,6 +107,28 @@ For OAuth 2.0 flows, **Authorization Code with PKCE** is the correct choice for 
 
 The flow works in four steps: the user authenticates with their identity provider and receives a token; the app passes that token to Cognito Identity Pools \`GetId\`, which returns a Cognito Identity ID; the app then calls \`GetCredentialsForIdentity\`, which triggers an STS \`AssumeRoleWithWebIdentity\` and returns temporary AWS credentials (AccessKeyId, SecretAccessKey, SessionToken); and the app uses those credentials to call AWS services directly — for example, uploading to an S3 bucket or reading from a DynamoDB table.
 
+\`\`\`typescript
+import { CognitoIdentityClient, GetIdCommand, GetCredentialsForIdentityCommand } from "@aws-sdk/client-cognito-identity";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+const identity = new CognitoIdentityClient({ region: "us-east-1" });
+
+// 1. Exchange User Pool JWT for a Cognito Identity ID
+const { IdentityId } = await identity.send(new GetIdCommand({
+  IdentityPoolId: process.env.IDENTITY_POOL_ID,
+  Logins: { [\`cognito-idp.us-east-1.amazonaws.com/\${process.env.USER_POOL_ID}\`]: idToken },
+}));
+
+// 2. Exchange Identity ID for temporary AWS credentials
+const { Credentials } = await identity.send(
+  new GetCredentialsForIdentityCommand({ IdentityId: IdentityId! })
+);
+
+// 3. Use credentials to call AWS directly from the client
+const s3 = new S3Client({ credentials: { accessKeyId: Credentials!.AccessKeyId!, secretAccessKey: Credentials!.SecretKey!, sessionToken: Credentials!.SessionToken } });
+await s3.send(new PutObjectCommand({ Bucket: "user-uploads", Key: \`\${IdentityId}/photo.jpg\`, Body: fileData }));
+\`\`\`
+
 Identity Pools assign different IAM roles based on authentication status. The **authenticated role** is assumed by users who have provided a valid identity provider token. The **unauthenticated role** allows limited access for guest users who haven't logged in — useful for letting anonymous users view public content stored in S3 or DynamoDB. You can also configure role-based access control that maps Cognito groups or token claims to different IAM roles, giving different tiers of users different AWS permissions.`,
       quiz: [
         {
@@ -379,8 +401,8 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
           question:
             "In AppSync, how can you restrict a GraphQL type to users in the Admin Cognito group?",
           options: [
-            "By using the @aws_auth(cognito_groups: [\"Admin\"]) directive in the GraphQL schema",
-            'By adding a Lambda authorizer that checks the cognito:groups claim',
+            'By using the @aws_auth(cognito_groups: ["Admin"]) directive in the GraphQL schema',
+            "By adding a Lambda authorizer that checks the cognito:groups claim",
             "By filtering the resolver response based on the user's group",
             "By creating a separate AppSync API for admin users",
           ],

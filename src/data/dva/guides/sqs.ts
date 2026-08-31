@@ -296,6 +296,25 @@ For encryption, SQS offers two options. **SSE-SQS** uses SQS-managed keys and is
 
 The partial batch failure pattern is important to understand. Without it, if any message in a batch fails, the entire batch returns to the queue and every message gets retried — including ones that succeeded. With \`ReportBatchItemFailures\`, your Lambda function returns a list of failed message IDs, and SQS only retries those specific messages. The successfully processed ones are deleted. This prevents unnecessary reprocessing at scale.
 
+\`\`\`typescript
+import { SQSEvent, SQSBatchResponse } from "aws-lambda";
+
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  const failures: { itemIdentifier: string }[] = [];
+
+  for (const record of event.Records) {
+    try {
+      await processOrder(JSON.parse(record.body));
+    } catch {
+      failures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  // Only failed message IDs are returned to the queue; others are deleted
+  return { batchItemFailures: failures };
+};
+\`\`\`
+
 For concurrency, Lambda scales aggressively with Standard queues — it can reach 1,000 concurrent invocations as backlog grows. FIFO queues are more constrained: Lambda creates one concurrent invocation per active message group. Always set the queue's visibility timeout to at least **6× the Lambda function timeout** to prevent messages from becoming visible while Lambda is still processing them.`,
       quiz: [
         {

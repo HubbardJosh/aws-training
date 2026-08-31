@@ -115,6 +115,18 @@ You access objects via URLs in the format \`https://<bucket>.s3.<region>.amazona
 
 **S3 Bucket Policies** are commonly used to make a bucket publicly readable for static website hosting, or to restrict access to specific VPC endpoints or IP ranges.
 
+\`\`\`json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": "*",
+    "Action": "s3:GetObject",
+    "Resource": "arn:aws:s3:::my-static-website/*"
+  }]
+}
+\`\`\`
+
 **Server-Side Encryption** is enabled by default on all new S3 buckets. AWS encrypts each object with AES-256 using keys managed by AWS (SSE-S3), or you can use AWS KMS-managed keys (SSE-KMS) for finer control and audit trails.
 
 For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encrypted between your client and AWS.`,

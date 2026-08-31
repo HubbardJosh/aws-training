@@ -15,7 +15,23 @@ export const snsGuide: ServiceGuide = {
 
 SNS offers two topic types with different guarantees. **Standard topics** provide high throughput and at-least-once delivery with best-effort ordering — messages may arrive slightly out of order or be delivered more than once. **FIFO topics** provide exactly-once delivery and strict ordering within a message group, but only SQS FIFO queues can be subscribers.
 
-Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 256 KB), an optional subject, and optional message attributes. For structured messaging where different subscriber protocols need different formats — for example, HTTP subscribers need a different format than SQS subscribers — you can pass the \`Message\` parameter as a JSON object with protocol-specific keys (\`default\`, \`email\`, \`sqs\`, \`lambda\`, \`http\`, \`sms\`). SNS delivers the appropriate format to each subscriber type.`,
+Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 256 KB), an optional subject, and optional message attributes. For structured messaging where different subscriber protocols need different formats — for example, HTTP subscribers need a different format than SQS subscribers — you can pass the \`Message\` parameter as a JSON object with protocol-specific keys (\`default\`, \`email\`, \`sqs\`, \`lambda\`, \`http\`, \`sms\`). SNS delivers the appropriate format to each subscriber type.
+
+\`\`\`typescript
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+
+const sns = new SNSClient({});
+
+await sns.send(new PublishCommand({
+  TopicArn: process.env.TOPIC_ARN,
+  Message: JSON.stringify({ orderId: "o1", total: 49.99 }),
+  // MessageAttributes drive subscription filter policies
+  MessageAttributes: {
+    type: { DataType: "String", StringValue: "ORDER_PLACED" },
+    region: { DataType: "String", StringValue: "us-west" },
+  },
+}));
+\`\`\``,
       quiz: [
         {
           question:
@@ -111,6 +127,17 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
 Filter policies are JSON documents attached to the subscription (not the topic) that specify which \`MessageAttribute\` values must be present for the message to be delivered. Each subscriber can have a completely different filter policy — a single SNS topic can effectively route messages to different subscribers based on content, eliminating the need for multiple separate topics for different message types.
 
 Filter conditions support several matching operators: exact string match (\`["value"]\`), prefix match (\`[{"prefix": "val"}]\`), numeric comparison (\`[{"numeric": [">", 100]}]\`), existence check (\`[{"exists": true}]\`), and anything-but exclusion (\`[{"anything-but": ["value"]}]\`). A practical example: an order processing topic where the fulfillment service subscribes with \`{"type": ["ORDER_PLACED"]}\`, the billing service subscribes with \`{"type": ["ORDER_PLACED", "ORDER_REFUNDED"]}\`, and the analytics service has no filter and receives all messages. Each service declares its own interest independently, and publishers don't need to know about these routing rules at all.
+
+\`\`\`json
+// Fulfillment queue — only ORDER_PLACED events
+{ "type": ["ORDER_PLACED"] }
+
+// Billing queue — placed and refunded
+{ "type": ["ORDER_PLACED", "ORDER_REFUNDED"] }
+
+// Fraud queue — high-value orders only (numeric match)
+{ "type": ["ORDER_PLACED"], "total": [{ "numeric": [">", 1000] }] }
+\`\`\`
 
 The key constraint: filtering works on \`MessageAttributes\` — structured metadata attached to the message — not on the message body itself. If you need content-based routing based on fields within the message body, EventBridge is better suited, as it can match against any JSON field in the event payload.`,
       quiz: [

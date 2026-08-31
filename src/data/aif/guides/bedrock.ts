@@ -61,6 +61,20 @@ The service is fully serverless. You don't provision EC2 instances, manage GPU c
       heading: "Foundation Model Catalog and Invocation",
       body: `Bedrock's model catalog is accessed through the **InvokeModel** and **InvokeModelWithResponseStream** APIs. Each model has a unique **model ID** (for example, \`anthropic.claude-3-5-sonnet-20241022-v2:0\`) and a request/response schema specific to that model provider. The **Converse API** offers a unified interface that normalizes input and output formats across providers, making it easier to swap models without rewriting application code.
 
+\`\`\`typescript
+import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
+
+const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
+
+const response = await bedrock.send(new ConverseCommand({
+  modelId: "anthropic.claude-3-5-sonnet-20241022-v2:0",
+  messages: [{ role: "user", content: [{ text: "Summarize the key benefits of Amazon S3." }] }],
+  inferenceConfig: { maxTokens: 512, temperature: 0.5, topP: 0.9 },
+}));
+
+const reply = response.output?.message?.content?.[0]?.text;
+\`\`\`
+
 **Streaming responses** are critical for conversational applications: instead of waiting for the full response to generate before returning anything, the model streams tokens as they are produced, dramatically reducing perceived latency. Bedrock supports streaming natively via the \`InvokeModelWithResponseStream\` call or through the Converse API's streaming variant.
 
 You control model behavior through **inference parameters** such as \`temperature\` (randomness), \`top_p\` (nucleus sampling), \`top_k\` (vocabulary restriction), and \`maxTokens\` (output length cap). Different providers expose different subsets of these parameters, so the Converse API helps abstract away provider-specific naming.`,

@@ -847,23 +847,59 @@ export default function GuideDetailScreen() {
   );
 }
 
+type BodyToken =
+  | { kind: "line"; index: number; content: string }
+  | { kind: "codeBlock"; index: number; lines: string[] };
+
+function tokenizeBody(lines: string[]): BodyToken[] {
+  const tokens: BodyToken[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (lines[i].trim().startsWith("```")) {
+      const codeLines: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("```")) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // skip closing fence
+      tokens.push({
+        kind: "codeBlock",
+        index: tokens.length,
+        lines: codeLines,
+      });
+    } else {
+      tokens.push({ kind: "line", index: tokens.length, content: lines[i] });
+      i++;
+    }
+  }
+  return tokens;
+}
+
 function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
   const mdStyles = makeMdStyles(colors);
-  const lines = text.split("\n");
+  const tokens = tokenizeBody(text.split("\n"));
 
   return (
     <View style={{ gap: 6 }}>
-      {lines.map((line, i) => {
-        if (line.trim() === "") return <View key={i} style={{ height: 4 }} />;
-
-        if (line.trim() === "```" || line.trim().startsWith("```")) {
-          return null;
+      {tokens.map((token) => {
+        if (token.kind === "codeBlock") {
+          return (
+            <View key={token.index} style={mdStyles.codeLine}>
+              <Text style={mdStyles.codeText}>{token.lines.join("\n")}</Text>
+            </View>
+          );
         }
+
+        const line = token.content;
+
+        if (line.trim() === "")
+          return <View key={token.index} style={{ height: 4 }} />;
 
         if (line.trim().startsWith("- ")) {
           const content = line.trim().slice(2);
           return (
-            <View key={i} style={mdStyles.bulletRow}>
+            <View key={token.index} style={mdStyles.bulletRow}>
               <Text style={mdStyles.bulletDot}>•</Text>
               <InlineText text={content} colors={colors} />
             </View>
@@ -873,7 +909,7 @@ function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
         const numberedMatch = line.trim().match(/^(\d+)\.\s+(.*)/);
         if (numberedMatch) {
           return (
-            <View key={i} style={mdStyles.bulletRow}>
+            <View key={token.index} style={mdStyles.bulletRow}>
               <Text style={mdStyles.bulletDot}>{numberedMatch[1]}.</Text>
               <InlineText text={numberedMatch[2]} colors={colors} />
             </View>
@@ -882,7 +918,7 @@ function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
 
         if (line.startsWith("    ") || line.startsWith("\t")) {
           return (
-            <View key={i} style={mdStyles.codeLine}>
+            <View key={token.index} style={mdStyles.codeLine}>
               <Text style={mdStyles.codeText}>{line.trim()}</Text>
             </View>
           );
@@ -894,13 +930,13 @@ function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
           !line.includes(" ")
         ) {
           return (
-            <Text key={i} style={mdStyles.bold}>
+            <Text key={token.index} style={mdStyles.bold}>
               {line.slice(2, -2)}
             </Text>
           );
         }
 
-        return <InlineText key={i} text={line} colors={colors} />;
+        return <InlineText key={token.index} text={line} colors={colors} />;
       })}
     </View>
   );

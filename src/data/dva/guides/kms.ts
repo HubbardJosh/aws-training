@@ -113,7 +113,32 @@ The encryption flow has three steps. First, call \`KMS:GenerateDataKey\` with yo
 
 Decryption reverses the process: call \`KMS:Decrypt\` with the encrypted DEK to recover the plaintext DEK, then decrypt the data locally, then discard the plaintext DEK again. The CMK never leaves KMS and is never directly applied to your data — KMS only ever decrypts the small DEK blob.
 
-The practical benefits are significant: there's no size limit on the data you encrypt, you make only one KMS API call per object (not per operation), and the encrypted DEK is useless without KMS access, so your data is protected even if the encrypted bytes are leaked. \`GenerateDataKeyWithoutPlaintext\` is a variant that returns only the encrypted DEK — useful for pre-generating keys for future encryption operations without returning plaintext material that must be immediately handled.`,
+The practical benefits are significant: there's no size limit on the data you encrypt, you make only one KMS API call per object (not per operation), and the encrypted DEK is useless without KMS access, so your data is protected even if the encrypted bytes are leaked. \`GenerateDataKeyWithoutPlaintext\` is a variant that returns only the encrypted DEK — useful for pre-generating keys for future encryption operations without returning plaintext material that must be immediately handled.
+
+\`\`\`typescript
+import { KMSClient, GenerateDataKeyCommand, DecryptCommand } from "@aws-sdk/client-kms";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+
+const kms = new KMSClient({});
+
+// ENCRYPT
+const { Plaintext: dek, CiphertextBlob: encryptedDek } = await kms.send(
+  new GenerateDataKeyCommand({ KeyId: process.env.KMS_KEY_ID, KeySpec: "AES_256" })
+);
+const iv = randomBytes(12);
+const cipher = createCipheriv("aes-256-gcm", dek!, iv);
+const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+const tag = cipher.getAuthTag();
+// Store: encryptedDek + iv + tag + encrypted  (encryptedDek is safe to store)
+
+// DECRYPT
+const { Plaintext: plainDek } = await kms.send(
+  new DecryptCommand({ CiphertextBlob: encryptedDek })
+);
+const decipher = createDecipheriv("aes-256-gcm", plainDek!, iv);
+decipher.setAuthTag(tag);
+const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+\`\`\``,
       quiz: [
         {
           question:

@@ -165,7 +165,33 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
 
 **Network isolation** is achieved by placing RDS instances in private subnets within a VPC DB subnet group. Security groups control which sources can reach the database port — typically only the application tier's security group, with no public internet access. **IAM Database Authentication** provides an alternative to username/password authentication for MySQL and PostgreSQL: you generate a short-lived authentication token using the AWS CLI or SDK (\`generate-db-auth-token\`), pass it as the database password, and the token expires after 15 minutes. This is particularly useful for Lambda functions and ECS tasks where storing database passwords in environment variables is undesirable.
 
-**Secrets Manager** provides automatic credential rotation for RDS through built-in rotation Lambda functions. The application fetches credentials from Secrets Manager at startup, and Secrets Manager rotates the password on a schedule by updating both the RDS user's password and the secret value simultaneously.`,
+**Secrets Manager** provides automatic credential rotation for RDS through built-in rotation Lambda functions. The application fetches credentials from Secrets Manager at startup, and Secrets Manager rotates the password on a schedule by updating both the RDS user's password and the secret value simultaneously.
+
+\`\`\`typescript
+import { Signer } from "@aws-sdk/rds-signer";
+import { createConnection } from "mysql2/promise";
+
+const signer = new Signer({
+  hostname: process.env.RDS_HOST!,
+  port: 3306,
+  region: "us-east-1",
+  username: "iam_user",
+});
+
+export const handler = async () => {
+  const token = await signer.getAuthToken();
+  const conn = await createConnection({
+    host: process.env.RDS_HOST,
+    user: "iam_user",
+    password: token,
+    database: "mydb",
+    ssl: { rejectUnauthorized: true },
+  });
+  const [rows] = await conn.execute("SELECT NOW()");
+  await conn.end();
+  return rows;
+};
+\`\`\``,
       quiz: [
         {
           question:

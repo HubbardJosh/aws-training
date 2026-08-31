@@ -99,6 +99,34 @@ Because API calls have both latency and cost implications, the recommended appro
 
 For **Lambda functions**, the pattern is to call \`GetSecretValue\` during initialization (outside the handler function) and store the credential in a module-level variable. This executes once per container lifecycle, not once per invocation, keeping both latency and API call costs low. If authentication fails inside the handler (indicating rotation occurred), refresh the cached value and retry once.
 
+\`\`\`typescript
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+
+const sm = new SecretsManagerClient({});
+let cachedCreds: { username: string; password: string; host: string } | undefined;
+
+async function getCreds() {
+  if (!cachedCreds) {
+    const res = await sm.send(new GetSecretValueCommand({ SecretId: process.env.SECRET_ARN }));
+    cachedCreds = JSON.parse(res.SecretString!);
+  }
+  return cachedCreds!;
+}
+
+export const handler = async () => {
+  let creds = await getCreds();
+  try {
+    await queryDb(creds);
+  } catch (err) {
+    if (isAuthError(err)) {
+      cachedCreds = undefined;           // invalidate cache on auth failure (rotation)
+      creds = await getCreds();          // refetch current secret
+      await queryDb(creds);             // retry once
+    } else throw err;
+  }
+};
+\`\`\`
+
 **ECS and Fargate** tasks have an even simpler integration: reference secrets in the task definition's \`secrets\` field by name or ARN, and ECS fetches and decrypts them at task launch time, injecting them as environment variables. Your application reads standard environment variables — no SDK code, no caching logic, no credential management needed. The **task execution role** (not the task role) needs \`secretsmanager:GetSecretValue\` permission, since it's the ECS infrastructure making the call on the task's behalf, not the application code.`,
       quiz: [
         {

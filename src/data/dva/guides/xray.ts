@@ -76,6 +76,32 @@ def process_order(order_id):
 \`\`\`
 The \`@xray_recorder.capture\` decorator creates a named subsegment for any function, and \`xray_recorder.begin_subsegment\` / \`end_subsegment\` provides the same capability without decorators.
 
+For Node.js Lambda functions, use \`aws-xray-sdk-core\` to wrap the AWS SDK client and add annotations/metadata:
+
+\`\`\`typescript
+import AWSXRay from "aws-xray-sdk-core";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+// Wrapping the client traces all DynamoDB calls as subsegments automatically
+const db = AWSXRay.captureAWSv3Client(new DynamoDBClient({}));
+
+export const handler = async (event: { orderId: string }) => {
+  const segment = AWSXRay.getSegment()!;
+  segment.addAnnotation("orderId", event.orderId);   // indexed — filterable in console
+  segment.addMetadata("event", event);               // not indexed — only in trace detail
+
+  const sub = segment.addNewSubsegment("validateOrder");
+  try {
+    await validate(event.orderId);
+    sub.close();
+  } catch (err) {
+    sub.addError(err as Error);
+    sub.close();
+    throw err;
+  }
+};
+\`\`\`
+
 **Lambda** is the simplest integration path: enable Active Tracing in the Lambda function configuration (or set \`Tracing: Active\` in SAM/CDK), and Lambda automatically creates a segment for each invocation and passes the trace context to the X-Ray SDK. The Lambda runtime handles the daemon communication, so no sidecar is needed.
 
 **API Gateway** tracing is enabled per stage — API Gateway creates segments for each request and passes the Trace ID downstream to the integration target (Lambda or HTTP backend). **ECS and Fargate** run the X-Ray daemon as a sidecar container alongside your application container. The application SDK sends UDP segments to the daemon at \`localhost:2000\` (in \`awsvpc\` mode) or to the daemon container's IP (in \`bridge\` mode). **Elastic Beanstalk** has the daemon pre-installed and enables it via the console or \`.ebextensions\` configuration.`,

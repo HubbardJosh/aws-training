@@ -203,6 +203,28 @@ When any concurrency limit is hit, Lambda returns **429 TooManyRequestsException
 
 For secrets, the right pattern is to store them in **Secrets Manager** or **SSM Parameter Store** and fetch them at initialization time in your function's init code (outside the handler). Caching the fetched value in a module-level variable means subsequent warm invocations reuse the cached value without additional API calls. If you must encrypt environment variables, you can use a **KMS Customer Managed Key** — Lambda will encrypt the variable value at rest, and your execution role needs \`kms:Decrypt\` to read it at runtime.
 
+\`\`\`typescript
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+
+const sm = new SecretsManagerClient({});
+
+// Fetched once at init — reused on warm starts
+let dbPassword: string | undefined;
+
+async function getDbPassword(): Promise<string> {
+  if (!dbPassword) {
+    const res = await sm.send(new GetSecretValueCommand({ SecretId: process.env.SECRET_ARN }));
+    dbPassword = JSON.parse(res.SecretString!).password;
+  }
+  return dbPassword!;
+}
+
+export const handler = async () => {
+  const pwd = await getDbPassword(); // cached after first cold start
+  // use pwd to connect ...
+};
+\`\`\`
+
 **Lambda aliases** are named pointers to specific published versions (e.g. \`prod\` pointing to version 47). Aliases support **weighted traffic shifting** — you can send 10% of traffic to a new version while keeping 90% on the current one. This enables canary deployments without requiring CodeDeploy. The function ARN with an alias suffix remains stable even as you promote new versions.`,
       quiz: [
         {
@@ -234,7 +256,28 @@ For secrets, the right pattern is to store them in **Secrets Manager** or **SSM 
 
 For **asynchronous invocations**, Lambda automatically retries failed invocations twice more (three total attempts), with a 1-minute wait before the second attempt and a 2-minute wait before the third. You can configure \`Maximum Retry Attempts\` (0–2) and \`Maximum Event Age\` (60 seconds to 6 hours) to control this behavior. After exhausting retries, you can route the failed event to a **Lambda Destination** (configured per OnFailure) or a DLQ. Destinations are preferred because they include the full invocation metadata — the original event, the response, and the request context — whereas DLQ only sends the original event.
 
-For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process records in order within each shard. A failing batch blocks the shard until it succeeds or expires. The key tools for managing this are \`BisectBatchOnFunctionError\` (which splits a failing batch in half to isolate the bad record) and \`MaximumRetryAttempts\` (which limits how many times a batch is retried before routing bad records to a failure destination). For SQS event sources, failed messages return to the queue after the visibility timeout expires and are retried up to \`maxReceiveCount\` times before going to the DLQ.`,
+For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process records in order within each shard. A failing batch blocks the shard until it succeeds or expires. The key tools for managing this are \`BisectBatchOnFunctionError\` (which splits a failing batch in half to isolate the bad record) and \`MaximumRetryAttempts\` (which limits how many times a batch is retried before routing bad records to a failure destination). For SQS event sources, failed messages return to the queue after the visibility timeout expires and are retried up to \`maxReceiveCount\` times before going to the DLQ.
+
+\`\`\`typescript
+import { SQSEvent, SQSBatchResponse } from "aws-lambda";
+
+// ReportBatchItemFailures: only failed message IDs are retried
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  const failures: { itemIdentifier: string }[] = [];
+
+  for (const record of event.Records) {
+    try {
+      const body = JSON.parse(record.body);
+      await processMessage(body);
+    } catch (err) {
+      // return only this message ID — others are deleted
+      failures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures: failures };
+};
+\`\`\``,
       quiz: [
         {
           question:
