@@ -21,12 +21,12 @@ export const stepFunctionsGuide: ServiceGuide = {
           question:
             "A financial application requires that each step in an order fulfillment workflow executes exactly once, with a complete audit trail of every state transition. The workflow can run for up to 90 days. Which Step Functions workflow type should you use?",
           options: [
-            "Synchronous Express Workflow, because it waits for the result",
             "Standard Workflow, because it provides exactly-once semantics and up to 1-year execution duration",
             "Asynchronous Express Workflow, because it supports long-running processes",
             "Standard Workflow is not appropriate; you should use Lambda directly for audit requirements",
+            "Synchronous Express Workflow, because it waits for the result",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Standard Workflows provide exactly-once execution semantics and retain a full execution history (audit trail), making them the correct choice for compliance-sensitive processes. They support durations up to one year, so 90 days is well within range. Express Workflows use at-least-once semantics and have a 5-minute maximum duration.",
         },
@@ -34,12 +34,12 @@ export const stepFunctionsGuide: ServiceGuide = {
           question:
             "An IoT platform needs to process up to 50,000 short-lived device events per second, each completing within 30 seconds. Cost efficiency is critical. Which Step Functions configuration is the best fit?",
           options: [
-            "Standard Workflows, because they provide the most reliable execution guarantees",
             "Standard Workflows with CloudWatch Logs enabled for event tracking",
             "Express Workflows (Asynchronous), because they support high throughput and are priced per duration",
+            "Standard Workflows, because they provide the most reliable execution guarantees",
             "Express Workflows (Synchronous), but only if each event handler Lambda returns a result",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Express Workflows support up to 100,000 executions per second and are priced per GB-second of duration (like Lambda), making them far more cost-effective than Standard Workflows (priced per state transition) for high-volume, short-lived workloads. Asynchronous invocation is appropriate since the IoT platform fires events without waiting for a response.",
         },
@@ -47,12 +47,12 @@ export const stepFunctionsGuide: ServiceGuide = {
           question:
             "A team switches from Standard to Express Workflows to reduce cost. They notice that execution history is no longer available in the Step Functions console. What must they do to retain execution records?",
           options: [
-            "Enable X-Ray Active Tracing on the state machine",
             "Set the execution retention period to 90 days in the state machine settings",
             "Enable CloudWatch Logs on the Express Workflow, as Express Workflows do not store history in the service",
+            "Enable X-Ray Active Tracing on the state machine",
             "Create an EventBridge rule to capture state machine events and write them to DynamoDB",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Express Workflows do not store execution history in the Step Functions service — this is a deliberate design trade-off for throughput. To retain execution records you must enable CloudWatch Logs on the workflow. X-Ray provides tracing data but not the full execution history that Standard Workflows store natively.",
         },
@@ -78,12 +78,12 @@ Each state declaration includes its \`Type\` (Task, Choice, Wait, Parallel, Map,
           question:
             'In Amazon States Language (ASL), what does setting `"End": true` on a state accomplish?',
           options: [
+            "It is equivalent to adding a Fail state — the execution is marked as failed",
             "It marks the state as the starting point of the state machine",
             "It terminates the current branch in a Parallel state but allows other branches to continue",
             "It ends the execution of the state machine successfully from that state",
-            "It is equivalent to adding a Fail state — the execution is marked as failed",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             'In ASL, `"End": true` on a state signals that execution terminates successfully at that state — it is equivalent to a Succeed terminal state when used on a non-terminal state type. The alternative is to specify a `"Next"` field pointing to the next state name. `"End": true` does not indicate failure; the Fail state type is used for that purpose.',
         },
@@ -105,11 +105,11 @@ Each state declaration includes its \`Type\` (Task, Choice, Wait, Parallel, Map,
             "A developer wants to render the visual flowchart of an existing ASL state machine definition in the AWS console. Where is this visualization generated from?",
           options: [
             "A separate CloudFormation template that describes the workflow topology",
-            "X-Ray trace data collected during past executions",
             "The ASL JSON definition itself — the console renders it automatically as a flowchart",
             "An exported Workflow Studio file that must be uploaded separately",
+            "X-Ray trace data collected during past executions",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The Step Functions console automatically renders any valid ASL JSON definition as a visual flowchart — no separate file or historical execution data is required. The visual designer (Workflow Studio) can also generate ASL from drag-and-drop construction, making the two representations bi-directional.",
         },
@@ -131,12 +131,12 @@ Each state declaration includes its \`Type\` (Task, Choice, Wait, Parallel, Map,
           question:
             "A workflow needs to wait for a human manager to approve an expense report before continuing. The approval may take hours or days. Which Task state integration pattern is designed for this use case?",
           options: [
-            "Request-response, because it moves to the next state immediately after sending the notification",
-            ".sync:2, because it polls the approval service until a response is received",
             ".waitForTaskToken, because the workflow pauses indefinitely until the external system calls SendTaskSuccess or SendTaskFailure",
+            ".sync:2, because it polls the approval service until a response is received",
             "Map state with MaxConcurrency 1, iterating over pending approvals",
+            "Request-response, because it moves to the next state immediately after sending the notification",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "The `.waitForTaskToken` integration pattern is specifically designed for human-in-the-loop and external system integrations. Step Functions generates a unique task token, pauses the workflow indefinitely, and resumes only when `SendTaskSuccess` or `SendTaskFailure` is called with that token. This can wait for hours or days without consuming resources.",
         },
@@ -144,12 +144,12 @@ Each state declaration includes its \`Type\` (Task, Choice, Wait, Parallel, Map,
           question:
             "A Step Functions workflow uses a Parallel state with three branches. Branch 2 encounters an unhandled error. What happens to the overall Parallel state?",
           options: [
+            "The workflow pauses and waits for manual intervention before deciding whether to retry Branch 2",
             "The Parallel state skips Branch 2 and waits for Branches 1 and 3 to complete",
             "The Parallel state completes successfully using only the results from Branches 1 and 3",
             "The entire Parallel state fails, and any Catch blocks on the Parallel state are evaluated",
-            "The workflow pauses and waits for manual intervention before deciding whether to retry Branch 2",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "If any branch in a Parallel state fails with an uncaught error, the entire Parallel state fails immediately. Step Functions then evaluates any Catch blocks on the Parallel state itself. This behavior enforces an all-or-nothing contract — if any parallel path fails, the combined result is unavailable and the failure must be handled at the Parallel state level.",
         },
@@ -157,12 +157,12 @@ Each state declaration includes its \`Type\` (Task, Choice, Wait, Parallel, Map,
           question:
             "A developer needs to process each item in a list of 500 S3 objects, running the same sub-workflow for each. Which state type is the correct choice, and what field controls concurrency?",
           options: [
+            "Choice state with 500 rules, one per item",
             "Parallel state; add 500 branches manually in the ASL definition",
             "Map state; set MaxConcurrency to control how many items are processed simultaneously",
             "Task state with a Lambda function that loops internally over the list",
-            "Choice state with 500 rules, one per item",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The Map state is designed exactly for this pattern — it iterates over an array in the state input and runs a defined sub-workflow for each element. `MaxConcurrency` controls how many items are processed in parallel (0 means unlimited concurrency). This replaces the anti-pattern of a Lambda function looping over items internally, which loses Step Functions' retry and error handling benefits.",
         },
@@ -182,12 +182,12 @@ The processing order is always: InputPath → Parameters → (task executes) →
           question:
             "What is the correct order of data flow processing steps for a Task state in Step Functions?",
           options: [
-            "Parameters → InputPath → task executes → ResultPath → ResultSelector → OutputPath",
-            "InputPath → Parameters → task executes → ResultSelector → ResultPath → OutputPath",
             "InputPath → ResultSelector → task executes → Parameters → ResultPath → OutputPath",
             "Parameters → task executes → InputPath → ResultSelector → OutputPath → ResultPath",
+            "InputPath → Parameters → task executes → ResultSelector → ResultPath → OutputPath",
+            "Parameters → InputPath → task executes → ResultPath → ResultSelector → OutputPath",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The processing order is always InputPath → Parameters → (task executes) → ResultSelector → ResultPath → OutputPath. InputPath and Parameters shape the data before it reaches the task; ResultSelector and ResultPath place the result back into the state data; OutputPath selects what is forwarded to the next state.",
         },
@@ -195,12 +195,12 @@ The processing order is always: InputPath → Parameters → (task executes) →
           question:
             "A Task state calls a Lambda function and receives a verbose response object. The developer wants to discard the Lambda result entirely and pass the original state input unchanged to the next state. Which ResultPath value achieves this?",
           options: [
-            '`"ResultPath": "$"`',
-            '`"ResultPath": "$.lambdaResult"`',
             '`"ResultPath": null`',
-            "Omitting ResultPath entirely, which defaults to discarding the result",
+            'Omitting ResultPath entirely, which defaults to discarding the result',
+            '`"ResultPath": "$"`',
+            "`\"ResultPath\": \"$.lambdaResult\"`",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             '`"ResultPath": null` tells Step Functions to discard the task result and pass the original state input unchanged to the next state. `"ResultPath": "$"` replaces the entire input with the result; `"ResultPath": "$.lambdaResult"` appends the result as a new field. Omitting ResultPath defaults to replacing the entire input with the task output.',
         },
@@ -249,12 +249,12 @@ By putting the error information at \`$.errorInfo\`, the HandleError state has a
           question:
             "A Step Functions workflow has a Retry block with `IntervalSeconds: 2`, `BackoffRate: 2`, and `MaxAttempts: 3`. How long does Step Functions wait before the second retry (third attempt)?",
           options: [
-            "2 seconds — the interval is fixed",
+            "8 seconds — BackoffRate doubles the interval twice for the second retry",
             "4 seconds — BackoffRate doubles the interval after the first retry",
             "6 seconds — BackoffRate adds 2 seconds per attempt",
-            "8 seconds — BackoffRate doubles the interval twice for the second retry",
+            "2 seconds — the interval is fixed",
           ],
-          correctIndex: 3,
+          correctIndex: 0,
           explanation:
             "With BackoffRate: 2 and IntervalSeconds: 2, the waits are: first retry after 2s, second retry after 2×2=4s, third retry after 4×2=8s. The BackoffRate multiplies the previous interval on each subsequent attempt, producing exponential backoff. So the second retry (third total attempt) waits 8 seconds.",
         },
@@ -301,11 +301,11 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
             "A Step Functions workflow needs to fetch a parameter from SSM Parameter Store without using a Lambda function. Which Task state resource ARN format enables this?",
           options: [
             "`arn:aws:lambda:::function:ssm-getter` — a pre-built Lambda for SSM access",
+            "SSM can only be accessed from Task states via an intermediary Lambda function",
             "`arn:aws:states:::aws-sdk:ssm:getParameter` — the SDK integration ARN format",
             "`arn:aws:ssm:::parameter/myapp/config` — the parameter ARN directly",
-            "SSM can only be accessed from Task states via an intermediary Lambda function",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SDK integrations use the ARN pattern `arn:aws:states:::aws-sdk:serviceName:apiAction`. For SSM GetParameter, the resource ARN is `arn:aws:states:::aws-sdk:ssm:getParameter`. This allows Task states to call any AWS SDK method directly without a Lambda intermediary, reducing cost and complexity.",
         },
@@ -313,12 +313,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
           question:
             "A workflow starts an ECS Fargate task to process a video file, which takes 10–30 minutes. The next workflow state should only run after the ECS task completes. Which Task state integration pattern achieves this?",
           options: [
-            "Request-response — Step Functions sends the RunTask call and immediately moves on",
-            ".sync:2 — Step Functions starts the ECS task and polls until it reports completion",
-            ".waitForTaskToken — the ECS task must call SendTaskSuccess when it finishes",
             "Parallel state with ECS in one branch and a Wait state in another",
+            "Request-response — Step Functions sends the RunTask call and immediately moves on",
+            ".waitForTaskToken — the ECS task must call SendTaskSuccess when it finishes",
+            ".sync:2 — Step Functions starts the ECS task and polls until it reports completion",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The `.sync:2` integration pattern starts an ECS task and pauses the workflow until ECS reports the task has completed (succeeded or failed). This is the correct pattern when a downstream service has a long-running job and Step Functions should wait for its completion before advancing. `.waitForTaskToken` requires the ECS task itself to call back with the token, which is more complex to implement.",
         },
@@ -351,12 +351,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
           question:
             "An API Gateway endpoint must orchestrate three backend services and return the combined result to the caller within 25 seconds. Which Step Functions integration achieves this?",
           options: [
-            "API Gateway starts a Standard Workflow asynchronously and returns the execution ARN; the client polls for completion",
             "API Gateway starts a Synchronous Express Workflow and waits for the result, up to the 29-second API Gateway timeout",
-            "API Gateway cannot integrate with Step Functions — use a single Lambda function that calls all three services",
             "API Gateway starts an Asynchronous Express Workflow and pushes the result to an SQS queue for the client to consume",
+            "API Gateway cannot integrate with Step Functions — use a single Lambda function that calls all three services",
+            "API Gateway starts a Standard Workflow asynchronously and returns the execution ARN; the client polls for completion",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "API Gateway can start a Synchronous Express Workflow (`StartSyncExecution`) and block until the workflow completes, returning the result directly to the API caller. The maximum wait is bounded by API Gateway's 29-second integration timeout. This is the correct pattern for synchronous API responses that require multi-service orchestration.",
         },
@@ -364,12 +364,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
           question:
             "A team currently has Lambda function A calling Lambda function B, which calls Lambda function C, with no retry logic at any level. What is the Step Functions-recommended replacement for this pattern?",
           options: [
-            "Combine all three functions into one larger Lambda function to eliminate the call chain",
-            "Use a Standard Workflow where each Lambda function is a Task state, with Step Functions handling sequencing and retries",
             "Add SQS queues between each Lambda function for decoupling and retry behavior",
             "Use EventBridge to trigger each Lambda function in sequence based on the previous function's output",
+            "Use a Standard Workflow where each Lambda function is a Task state, with Step Functions handling sequencing and retries",
+            "Combine all three functions into one larger Lambda function to eliminate the call chain",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The 'Lambda calling Lambda' anti-pattern lacks retry logic, error handling, and observability. The Step Functions replacement is a Standard Workflow where each Lambda function becomes a Task state. Step Functions handles the sequencing, retry configuration, Catch blocks, and execution history — keeping each Lambda function simple and the orchestration logic visible in the workflow definition.",
         },
@@ -377,12 +377,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
           question:
             "An EventBridge rule detects a failed payment event and needs to trigger a dunning (retry billing) workflow. Which integration pattern supports this?",
           options: [
-            "EventBridge cannot start Step Functions executions — use a Lambda function to call StartExecution",
             "EventBridge rules can target Step Functions state machines directly, starting a new execution for each matching event",
-            "The Step Functions workflow must poll EventBridge for new events using a Wait state",
             "EventBridge can only trigger Lambda functions; Lambda must then start the Step Functions execution",
+            "The Step Functions workflow must poll EventBridge for new events using a Wait state",
+            "EventBridge cannot start Step Functions executions — use a Lambda function to call StartExecution",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "EventBridge rules support Step Functions state machines as direct targets — a matching event starts a new Step Functions execution without requiring an intermediary Lambda function. This bridges the reactive (event-driven) and procedural (workflow) patterns, allowing events to trigger multi-step orchestrated processes automatically.",
         },
@@ -444,12 +444,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
       question:
         "A developer defines a Choice state but does not include a Default transition. What happens when no rule in the Choice state matches the input?",
       options: [
+        "Step Functions retries the Choice state evaluation up to three times",
         "The workflow transitions to the first state defined in the States object",
         "The workflow ends successfully using an implicit Succeed state",
         "The execution fails with a States.NoChoiceMatched error",
-        "Step Functions retries the Choice state evaluation up to three times",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "When no rule in a Choice state matches and no Default transition is defined, the execution fails with a `States.NoChoiceMatched` error. Best practice is to always include a Default transition in every Choice state to handle unexpected input values gracefully.",
     },
@@ -483,12 +483,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
       question:
         "A workflow's Retry block has `MaxAttempts: 0`. What does this mean?",
       options: [
-        "The task will retry indefinitely until it succeeds",
-        "The task will retry up to the service default (3 times)",
-        "No retries will occur — the first failure immediately triggers Catch evaluation",
         "The retry block is disabled and has no effect on the task",
+        "The task will retry up to the service default (3 times)",
+        "The task will retry indefinitely until it succeeds",
+        "No retries will occur — the first failure immediately triggers Catch evaluation",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "`MaxAttempts: 0` means zero retries — on the first failure, Step Functions immediately moves to evaluate any Catch blocks without retrying the task. This is useful when idempotency cannot be guaranteed and retrying would cause harm, or when you want to fail fast and route to error handling immediately.",
     },
@@ -496,12 +496,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
       question:
         "An Express Workflow needs to be invoked from an API endpoint where the client expects a response body with the workflow result. Which API call and workflow type combination supports this?",
       options: [
-        "StartExecution on an Asynchronous Express Workflow; poll DescribeExecution for the result",
-        "StartSyncExecution on a Synchronous Express Workflow; the API call blocks until the workflow completes and returns the result",
         "StartExecution on a Standard Workflow; the execution ARN is returned and the client polls",
+        "StartExecution on an Asynchronous Express Workflow; poll DescribeExecution for the result",
         "Synchronous results are not possible with Express Workflows; use Standard Workflows",
+        "StartSyncExecution on a Synchronous Express Workflow; the API call blocks until the workflow completes and returns the result",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "`StartSyncExecution` is available only for Synchronous Express Workflows. The API call blocks until the workflow finishes (within the 5-minute Express maximum) and returns the execution result directly in the response body. This is the appropriate pattern for API Gateway integrations where the client needs a synchronous response.",
     },
@@ -509,12 +509,12 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
       question:
         "A Step Functions workflow needs to call the S3 ListObjectsV2 API. No Lambda function exists for this purpose. What is the simplest way to add this capability?",
       options: [
+        "Use an EventBridge rule to trigger an S3 inventory job and wait for the result with a callback token",
         "Create a Lambda function that calls `s3.listObjectsV2()` and invoke it from a Task state",
         "Use a Task state with resource ARN `arn:aws:states:::aws-sdk:s3:listObjectsV2` to call the S3 API directly",
-        "Use an EventBridge rule to trigger an S3 inventory job and wait for the result with a callback token",
         "SDK integrations only support DynamoDB and Lambda; S3 requires a Lambda intermediary",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SDK integrations allow Task states to call any AWS API using the ARN pattern `arn:aws:states:::aws-sdk:serviceName:apiAction`. For S3 ListObjectsV2, the resource is `arn:aws:states:::aws-sdk:s3:listObjectsV2`. This eliminates the need for a Lambda function whose sole purpose is making an AWS API call.",
     },
@@ -523,11 +523,11 @@ The **callback pattern** (\`.waitForTaskToken\`) is the mechanism for integratin
         "Which error type in a Catch block catches all unhandled errors, regardless of the specific error name thrown?",
       options: [
         "`States.TaskFailed` — catches all task-level failures",
-        "`Lambda.AWSLambdaException` — catches all Lambda errors",
         "`States.ALL` — matches any error type not matched by earlier Catch rules",
+        "`Lambda.AWSLambdaException` — catches all Lambda errors",
         "`States.Timeout` — catches both timeout and general failure errors",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "`States.ALL` is the catch-all error type that matches any error not handled by more specific Catch rules earlier in the array. It is best placed as the last entry in a Catch array so specific error types can be handled with tailored logic while `States.ALL` serves as the final fallback. `States.TaskFailed` only matches task failures, and `States.Timeout` only matches timeout errors.",
     },

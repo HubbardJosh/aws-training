@@ -21,11 +21,11 @@ AWS Panorama solves this by bringing ML inference to the camera. Models are depl
             "What key advantage does AWS Panorama provide over streaming camera video to the cloud for analysis?",
           options: [
             "It provides more accurate computer vision models than cloud services",
+            "It integrates with Amazon Rekognition for real-time facial recognition",
             "It reduces bandwidth, lowers latency, and keeps sensitive video data on-premises",
             "It enables training new ML models directly on the camera hardware",
-            "It integrates with Amazon Rekognition for real-time facial recognition",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Panorama brings ML inference to the edge, reducing bandwidth costs, achieving millisecond latency (vs. hundreds of milliseconds for cloud round-trips), and keeping sensitive video data on-premises for privacy.",
         },
@@ -34,11 +34,11 @@ AWS Panorama solves this by bringing ML inference to the camera. Models are depl
             "A factory wants to apply computer vision to existing IP cameras to detect defects without streaming video to AWS. Which service solves this?",
           options: [
             "Amazon Rekognition with Kinesis Video Streams",
-            "AWS Panorama with the Panorama Appliance",
             "Amazon SageMaker real-time endpoints",
             "AWS IoT Greengrass with custom inference containers",
+            "AWS Panorama with the Panorama Appliance",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS Panorama is designed exactly for this scenario — running ML inference on-premises using existing IP cameras without streaming raw video to the cloud. Only inference results are sent to AWS.",
         },
@@ -46,12 +46,12 @@ AWS Panorama solves this by bringing ML inference to the camera. Models are depl
           question:
             "What does AWS Panorama send to the cloud from its on-premises deployment?",
           options: [
-            "Raw video frames for all cameras",
             "Compressed video streams at reduced resolution",
-            "Only inference results and device telemetry",
+            "Raw video frames for all cameras",
             "Audio and video combined streams",
+            "Only inference results and device telemetry",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "A core design principle of Panorama is that only inference results (e.g., defect detected, person count) and device telemetry travel to AWS — raw video never leaves the on-premises environment.",
         },
@@ -69,12 +69,12 @@ The Panorama Appliance Developer Kit (a development board) allows you to build a
           question:
             "How does the AWS Panorama Appliance connect to existing on-premises IP cameras?",
           options: [
-            "USB direct connection to camera hardware",
             "RTSP streams over the local network",
             "HDMI capture cards on the appliance",
+            "USB direct connection to camera hardware",
             "WiFi direct peer-to-peer connection",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The Panorama Appliance connects to existing IP cameras via RTSP (Real-Time Streaming Protocol) streams over the local network. No camera replacement is needed — it works with existing camera infrastructure.",
         },
@@ -82,12 +82,12 @@ The Panorama Appliance Developer Kit (a development board) allows you to build a
           question:
             "Where are Panorama Appliances registered, configured, and monitored?",
           options: [
-            "Directly on the appliance's local web interface",
             "Through the AWS Panorama console in the cloud",
             "Via AWS Systems Manager Agent installed on the appliance",
             "Through Amazon CloudWatch Logs only",
+            "Directly on the appliance's local web interface",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Panorama Appliances are managed through the AWS Panorama console in the cloud. From there you register devices, deploy applications, update models, and monitor device health — the appliance communicates with the cloud control plane for management.",
         },
@@ -95,12 +95,12 @@ The Panorama Appliance Developer Kit (a development board) allows you to build a
           question:
             "What tool does AWS provide for developers to build and test Panorama applications before production deployment?",
           options: [
-            "AWS Panorama Simulator in SageMaker Studio",
-            "AWS Panorama Appliance Developer Kit",
-            "AWS CloudFormation Panorama stack template",
             "Amazon Rekognition Custom Labels console",
+            "AWS Panorama Simulator in SageMaker Studio",
+            "AWS CloudFormation Panorama stack template",
+            "AWS Panorama Appliance Developer Kit",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Panorama Appliance Developer Kit is a development board that allows building and testing Panorama applications locally before deploying to production appliances.",
         },
@@ -116,12 +116,12 @@ The application code (written in Python) receives video frames, preprocesses the
           question:
             "Which compilation toolchain is used to prepare ML models for deployment on the AWS Panorama Appliance?",
           options: [
+            "ONNX Runtime Optimizer",
+            "AWS Graviton compiler toolchain",
             "AWS Deep Learning Compiler (DLC)",
             "SageMaker Neo",
-            "AWS Graviton compiler toolchain",
-            "ONNX Runtime Optimizer",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SageMaker Neo compiles models for the specific hardware on the Panorama Appliance. It supports TensorFlow, PyTorch, and ONNX models and optimizes them for efficient inference on the edge device.",
         },
@@ -129,12 +129,12 @@ The application code (written in Python) receives video frames, preprocesses the
           question:
             "A Panorama application detects unsafe PPE conditions and must alert a manufacturing execution system in real time. Which output mechanism would be most appropriate?",
           options: [
-            "Writing raw video frames to Amazon S3",
             "Sending an IoT message via MQTT or AWS IoT Greengrass",
-            "Calling Amazon Rekognition APIs directly from the appliance",
             "Streaming to Amazon Kinesis Video Streams",
+            "Calling Amazon Rekognition APIs directly from the appliance",
+            "Writing raw video frames to Amazon S3",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Panorama applications can send inference results as IoT messages via MQTT or AWS IoT Greengrass. This enables real-time alerting to downstream systems like manufacturing execution systems.",
         },
@@ -142,12 +142,12 @@ The application code (written in Python) receives video frames, preprocesses the
           question:
             "Which model formats does AWS Panorama support for deployment to the appliance?",
           options: [
-            "Only SageMaker built-in algorithm artifacts",
-            "TensorFlow, PyTorch, and ONNX",
             "PyTorch and Scikit-learn only",
             "Only models exported from Amazon Rekognition Custom Labels",
+            "TensorFlow, PyTorch, and ONNX",
+            "Only SageMaker built-in algorithm artifacts",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Panorama supports TensorFlow, PyTorch, and ONNX format models. These are compiled for the appliance hardware via SageMaker Neo. Models can come from SageMaker or third-party training environments.",
         },
@@ -164,11 +164,11 @@ The application code (written in Python) receives video frames, preprocesses the
             "A company has 50 Panorama Appliances in warehouses across the country and needs to update the defect detection model. How does Panorama handle this?",
           options: [
             "A technician must physically visit each appliance to install the update",
-            "Models are updated over-the-air from the cloud console to all registered appliances",
             "Appliances pull updates from an S3 bucket on a weekly schedule",
+            "Models are updated over-the-air from the cloud console to all registered appliances",
             "Models are only updated when the appliance is rebooted",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Panorama uses an over-the-air update model. You create a deployment in the cloud console and Panorama pushes the update to all registered appliances automatically — no physical access required.",
         },
@@ -176,12 +176,12 @@ The application code (written in Python) receives video frames, preprocesses the
           question:
             "How can Panorama model deployments be rolled out cautiously to minimize risk?",
           options: [
-            "Deploy to all appliances simultaneously and roll back if errors occur",
             "Test new model versions on a subset of appliances before broad rollout",
-            "Use A/B testing within a single appliance by alternating models",
             "Deploy to cloud endpoints first, then push to appliances",
+            "Deploy to all appliances simultaneously and roll back if errors occur",
+            "Use A/B testing within a single appliance by alternating models",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Panorama supports model versioning, allowing you to deploy a new model version to a subset of appliances first — similar to a blue/green deployment. This limits risk before a full fleet rollout.",
         },
@@ -189,12 +189,12 @@ The application code (written in Python) receives video frames, preprocesses the
           question:
             "Which AWS service does Panorama integrate with to trigger downstream workflows based on inference results?",
           options: [
-            "AWS Batch",
             "Amazon Kinesis Data Firehose",
-            "AWS IoT with Lambda and Step Functions",
             "Amazon SQS only",
+            "AWS Batch",
+            "AWS IoT with Lambda and Step Functions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Panorama integrates with AWS IoT for bidirectional messaging. Inference results sent as IoT messages can trigger downstream Lambda functions or Step Functions workflows for automated responses.",
         },
@@ -223,12 +223,12 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
           question:
             "What is the primary trade-off of using AWS Panorama compared to cloud-based Rekognition?",
           options: [
+            "Panorama does not integrate with SageMaker for model training",
+            "Panorama cannot detect defects as accurately as Rekognition Custom Labels",
             "Panorama supports fewer model architectures than Rekognition",
             "Panorama requires physical hardware management and is limited to appliance compute capacity",
-            "Panorama cannot detect defects as accurately as Rekognition Custom Labels",
-            "Panorama does not integrate with SageMaker for model training",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The trade-off for Panorama's edge benefits (privacy, low latency, reduced bandwidth) is that it requires managing physical hardware and is constrained by the compute capacity of the appliance.",
         },
@@ -236,12 +236,12 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
           question:
             "Which scenario is the BEST fit for AWS Panorama rather than Amazon Rekognition?",
           options: [
-            "Analyzing images uploaded by users to an S3 bucket",
-            "Running facial recognition on pre-recorded video stored in S3",
             "Detecting safety violations in real time using cameras already installed in a factory",
+            "Running facial recognition on pre-recorded video stored in S3",
             "Moderating content in videos uploaded to a streaming platform",
+            "Analyzing images uploaded by users to an S3 bucket",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Panorama is designed for real-time on-premises inference using existing cameras. Rekognition is cloud-based and processes images/video already in AWS. Real-time factory floor analysis requiring video privacy is Panorama's sweet spot.",
         },
@@ -284,12 +284,12 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
       question:
         "What is the primary architectural difference between AWS Panorama and Amazon Rekognition?",
       options: [
-        "Panorama supports more object categories than Rekognition",
-        "Panorama runs inference on-premises at the edge; Rekognition processes images/video in the cloud",
-        "Panorama requires custom model training; Rekognition uses pre-built models only",
         "Panorama uses ONNX models only; Rekognition uses TensorFlow only",
+        "Panorama supports more object categories than Rekognition",
+        "Panorama requires custom model training; Rekognition uses pre-built models only",
+        "Panorama runs inference on-premises at the edge; Rekognition processes images/video in the cloud",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Panorama runs ML inference on-premises using the Panorama Appliance connected to local cameras. Rekognition is a cloud service that processes images and video already stored in or streamed to AWS.",
     },
@@ -324,11 +324,11 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
         "A Panorama application detects occupancy counts and must write metrics for dashboarding and alerting. Which AWS service is the natural destination for these metrics?",
       options: [
         "Amazon DynamoDB",
-        "Amazon CloudWatch",
         "Amazon Redshift",
+        "Amazon CloudWatch",
         "AWS Glue Data Catalog",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Panorama integrates with Amazon CloudWatch for monitoring appliance health, application logs, and inference metrics. CloudWatch is the natural destination for operational metrics and alerting.",
     },
@@ -337,11 +337,11 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
         "Why does AWS Panorama connect to cameras via RTSP rather than requiring proprietary hardware?",
       options: [
         "RTSP provides higher video quality than other protocols",
-        "RTSP is the only protocol supported by the SageMaker Neo compiler",
         "RTSP is a standard protocol used by most IP cameras, so no camera replacement is needed",
+        "RTSP is the only protocol supported by the SageMaker Neo compiler",
         "RTSP encrypts video streams end-to-end for security",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "RTSP (Real-Time Streaming Protocol) is a standard protocol supported by most IP cameras. By using RTSP, Panorama connects to existing camera infrastructure without requiring organizations to replace their cameras.",
     },
@@ -349,36 +349,36 @@ Panorama is distinct from Rekognition (cloud-based, works on images/video alread
       question:
         "A company wants to test a new defect detection model on 5 out of 100 factory appliances before a full rollout. How does Panorama support this?",
       options: [
+        "A separate Panorama application must be created for test appliances",
         "Panorama does not support partial rollouts — all appliances must update together",
         "Model versioning allows deploying a new version to a subset of appliances first",
-        "A separate Panorama application must be created for test appliances",
         "The Developer Kit is used to simulate production appliances before rollout",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Panorama's model versioning capability supports deploying new versions to a subset of registered appliances, similar to a blue/green deployment. This limits risk before a full fleet rollout.",
     },
     {
       question: "What does the AWS Panorama Appliance Developer Kit enable?",
       options: [
-        "Training new CV models using on-device compute",
         "Building and testing Panorama applications before deploying to production appliances",
-        "Simulating camera streams in the AWS cloud without physical hardware",
         "Converting ONNX models to Panorama-compatible format",
+        "Simulating camera streams in the AWS cloud without physical hardware",
+        "Training new CV models using on-device compute",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The Panorama Appliance Developer Kit is a development board that allows building and testing Panorama applications locally before deploying to production appliances — reducing development cycle time.",
     },
     {
       question: "Which scenario is NOT a typical AWS Panorama use case?",
       options: [
+        "Analyzing sentiment in customer service call recordings",
         "Counting foot traffic in retail stores using existing security cameras",
         "Detecting missing PPE on a factory floor in real time",
-        "Analyzing sentiment in customer service call recordings",
         "Validating package sorting on warehouse conveyor belts",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Panorama is a computer vision service for camera-based video analysis. Sentiment analysis in audio is handled by Amazon Transcribe (for speech-to-text) and Amazon Comprehend (for sentiment). Panorama has no audio analysis capability.",
     },

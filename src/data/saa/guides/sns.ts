@@ -18,11 +18,11 @@ export const snsGuide: ServiceGuide = {
             "A publisher sends a single message to an SNS topic. How many subscribers receive the message if there are five confirmed subscriptions with no filter policies?",
           options: [
             "One subscriber receives the message (round-robin delivery)",
-            "All five subscribers receive the message simultaneously",
             "Only subscribers of the same type receive the message",
             "One subscriber receives it; others receive it only if the first fails",
+            "All five subscribers receive the message simultaneously",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SNS delivers a message to all confirmed subscriptions simultaneously when no filter policies are applied. This fan-out behavior is the core value of SNS — a single publish operation reaches all subscribers at once without the publisher needing any knowledge of who subscribes.",
         },
@@ -30,12 +30,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "Which SNS subscription endpoint provides durable, reliable message delivery with persistence even when the consumer is temporarily unavailable?",
           options: [
+            "SMS phone number",
+            "SQS queue",
             "HTTP/HTTPS endpoint",
             "Email subscription",
-            "SQS queue",
-            "SMS phone number",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "An SQS queue subscription provides durable message delivery — messages persist in the queue for up to 14 days even if the consumer is temporarily unavailable or slow. HTTP/HTTPS, email, and SMS subscriptions require the endpoint to be available when SNS attempts delivery, with limited retry behavior compared to SQS's guaranteed durability.",
         },
@@ -51,10 +51,10 @@ export const snsGuide: ServiceGuide = {
           options: [
             "A single SQS queue consumed by a Lambda function that calls all three services sequentially",
             "Three separate API calls from the order service to each downstream service",
-            "SNS topic with three SQS queue subscriptions, one per service",
             "Three separate S3 event notifications, one per service",
+            "SNS topic with three SQS queue subscriptions, one per service",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The SNS fan-out pattern (SNS → multiple SQS queues) delivers the order event to all three services simultaneously and independently. Each service has its own SQS queue for durable buffering, can scale independently, and is isolated from failures in other services. The order service publishes once to SNS without knowing about downstream consumers.",
         },
@@ -81,11 +81,11 @@ export const snsGuide: ServiceGuide = {
           question: "Which subscriber types are supported for SNS FIFO topics?",
           options: [
             "Standard SQS queues and email only",
-            "FIFO SQS queues, Lambda, HTTP/HTTPS, and Kinesis Data Firehose",
             "Any SNS subscriber type, including standard SQS and email",
+            "FIFO SQS queues, Lambda, HTTP/HTTPS, and Kinesis Data Firehose",
             "Only FIFO SQS queues",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SNS FIFO topics support FIFO SQS queues, Lambda functions, HTTP/HTTPS endpoints, and Amazon Kinesis Data Firehose as subscribers. Standard SQS queues and email subscriptions are not supported for FIFO topics. This is an important exam detail — subscribing a standard SQS queue to a FIFO SNS topic is not allowed.",
         },
@@ -93,12 +93,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "A financial application requires that account balance update events are processed in the exact order they were published. Which SNS topic type should be used?",
           options: [
-            "Standard SNS topic with message attributes for sequencing",
-            "SNS FIFO topic with FIFO SQS queue subscriptions",
-            "Standard SNS topic with a timestamp-sorted SQS queue",
             "Standard SNS topic with Lambda processing that sorts by timestamp",
+            "Standard SNS topic with a timestamp-sorted SQS queue",
+            "SNS FIFO topic with FIFO SQS queue subscriptions",
+            "Standard SNS topic with message attributes for sequencing",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SNS FIFO topics guarantee strict message ordering within a message group and deliver messages to FIFO SQS queue subscriptions in the exact order they were published. This is essential for financial applications where out-of-order processing (e.g., applying a debit before a credit) could cause incorrect account balances. Standard topics provide best-effort ordering only.",
         },
@@ -125,12 +125,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "What happens to an SNS subscriber that has no filter policy configured?",
           options: [
-            "The subscriber receives no messages until a filter policy is added",
-            "The subscriber receives only messages that match the default filter",
             "The subscriber receives all messages published to the topic",
+            "The subscriber receives only messages that match the default filter",
             "The subscriber must manually pull messages from the topic",
+            "The subscriber receives no messages until a filter policy is added",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "A subscription with no filter policy receives every message published to the topic. Filter policies are opt-in — without one, the subscriber receives all messages. This allows selective subscribers (with filters) and catch-all subscribers (without filters) to coexist on the same topic.",
         },
@@ -144,12 +144,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "An SNS topic has an HTTP/HTTPS subscription endpoint that becomes permanently unavailable. After exhausting all retries, where do undeliverable messages go?",
           options: [
-            "Back to the SNS topic for redelivery",
-            "Nowhere — they are silently dropped without a DLQ configured",
-            "To an SNS subscription DLQ (SQS queue) if one is configured",
             "To an S3 bucket for archival",
+            "To an SNS subscription DLQ (SQS queue) if one is configured",
+            "Nowhere — they are silently dropped without a DLQ configured",
+            "Back to the SNS topic for redelivery",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "After SNS exhausts all delivery retries, undeliverable messages are sent to an SQS DLQ configured on the SNS subscription — but only if one has been configured. Without a DLQ, messages are silently dropped after all retries fail. This is why configuring a DLQ on the SNS subscription is important for monitoring delivery failures.",
         },
@@ -157,12 +157,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "What is the difference between an SNS subscription DLQ and an SQS queue DLQ?",
           options: [
-            "They capture the same failures — both record processing failures",
-            "SNS subscription DLQ captures delivery failures (SNS could not reach the endpoint); SQS queue DLQ captures processing failures (consumer failed to process the message)",
             "SNS DLQ is for standard topics; SQS DLQ is for FIFO queues only",
+            "They capture the same failures — both record processing failures",
             "SQS DLQ only works with Lambda; SNS DLQ works with all consumer types",
+            "SNS subscription DLQ captures delivery failures (SNS could not reach the endpoint); SQS queue DLQ captures processing failures (consumer failed to process the message)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The SNS subscription DLQ captures messages that SNS itself failed to deliver to the endpoint (e.g., the HTTP endpoint was permanently down). The SQS queue DLQ captures messages that were delivered to the SQS queue but the consumer application failed to process within the maxReceiveCount. They handle different failure modes and should both be configured for comprehensive coverage.",
         },
@@ -176,12 +176,12 @@ export const snsGuide: ServiceGuide = {
           question:
             "Microservices in multiple AWS accounts need to publish events to a central SNS topic in a monitoring account. What mechanism enables cross-account publishing without sharing credentials?",
           options: [
-            "VPC peering between all accounts and the monitoring account",
             "SNS topic resource policy granting sns:Publish permission to the source accounts",
-            "IAM roles in the monitoring account assumed by all source account services",
             "AWS Organizations SCP allowing cross-account SNS publishing",
+            "IAM roles in the monitoring account assumed by all source account services",
+            "VPC peering between all accounts and the monitoring account",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "An SNS topic resource policy can grant sns:Publish permission to specific AWS accounts or IAM principals in other accounts. Services in the source accounts can publish directly to the topic using their own account credentials without assuming a cross-account role. This is simpler than role assumption for cross-account publishing use cases.",
         },
@@ -240,12 +240,12 @@ export const snsGuide: ServiceGuide = {
       question:
         "How does SNS deliver messages to subscribers compared to how SQS delivers messages to consumers?",
       options: [
-        "Both SNS and SQS require consumers to poll for messages",
         "SNS pushes messages to all subscribers simultaneously; SQS holds messages until consumers poll",
+        "Both SNS and SQS require consumers to poll for messages",
         "SNS holds messages in a queue; SQS pushes messages to registered consumers",
         "Both SNS and SQS push messages to registered endpoints",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SNS pushes messages to all confirmed subscriptions simultaneously when a message is published — no polling required. SQS holds messages in a queue until consumers actively poll and retrieve them. This push vs. pull distinction is a fundamental architectural difference tested frequently on the SAA-C03 exam.",
     },
@@ -254,11 +254,11 @@ export const snsGuide: ServiceGuide = {
         "An order service needs to notify three downstream services (inventory, shipping, analytics) simultaneously when an order is placed. Which pattern achieves this with loose coupling?",
       options: [
         "The order service calls each downstream service API sequentially",
-        "A single SQS queue consumed by all three services",
         "SNS topic with three SQS queue subscriptions (one per service)",
         "Three separate Lambda functions triggered directly by the order service",
+        "A single SQS queue consumed by all three services",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The SNS fan-out pattern delivers a single published event to all three SQS queue subscriptions simultaneously. Each downstream service has its own durable queue for independent processing, scaling, and failure isolation. The order service is decoupled from knowing about downstream consumers — it only publishes to SNS.",
     },
@@ -279,12 +279,12 @@ export const snsGuide: ServiceGuide = {
       question:
         "A payment topic has subscribers for fraud detection (needs only declined payments) and accounting (needs all payments). How should message filtering be configured?",
       options: [
-        "Create separate SNS topics for declined and all-payment events",
         "Add a filter policy for declined status on the fraud subscription; leave the accounting subscription without a filter policy",
         "Use a Lambda function to route messages between fraud and accounting queues",
         "Configure both subscriptions with filter policies and add a catch-all third subscription",
+        "Create separate SNS topics for declined and all-payment events",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SNS filter policies are attached per subscription. The fraud team's subscription gets a filter for declined payments only; the accounting subscription has no filter and receives all messages. This eliminates topic proliferation, simplifies the publisher, and puts routing logic in SNS infrastructure rather than application code.",
     },
@@ -306,11 +306,11 @@ export const snsGuide: ServiceGuide = {
         "Services in Account B need to publish messages to an SNS topic in Account A. What is the simplest way to grant this permission?",
       options: [
         "Create an IAM role in Account A and have Account B services assume it before publishing",
-        "Configure an SNS topic resource policy in Account A granting sns:Publish to Account B",
         "Create VPC peering between Account A and Account B for direct SNS access",
+        "Configure an SNS topic resource policy in Account A granting sns:Publish to Account B",
         "Use AWS Organizations SCPs to allow cross-account SNS publishing",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "An SNS topic resource policy can grant sns:Publish permission directly to IAM principals or entire AWS accounts. Services in Account B can publish to the topic using their own credentials without role assumption. This is simpler than cross-account role assumption for publishing-only use cases.",
     },
@@ -319,11 +319,11 @@ export const snsGuide: ServiceGuide = {
         "How many retries does SNS make for failed HTTP/HTTPS endpoint deliveries, and over what time period?",
       options: [
         "3 retries over 5 minutes",
-        "10 retries over 1 hour",
         "23 retries over 23 hours with exponential backoff",
         "Unlimited retries until the endpoint becomes available",
+        "10 retries over 1 hour",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "SNS retries failed HTTP/HTTPS deliveries up to 23 times over approximately 23 hours using exponential backoff. After all retries are exhausted, the message is sent to the subscription DLQ if configured, or silently dropped. Lambda and SQS subscriptions have different retry behavior managed within their own services.",
     },
@@ -332,11 +332,11 @@ export const snsGuide: ServiceGuide = {
         "Which SNS feature allows a mobile application to send push notifications to users across iOS, Android, and Kindle devices using a single API?",
       options: [
         "SNS FIFO topic with device group subscriptions",
-        "SNS mobile push integration with APNs, FCM, and ADM",
         "SNS HTTP endpoint subscriptions targeting each device platform",
+        "SNS mobile push integration with APNs, FCM, and ADM",
         "SNS fan-out to separate SQS queues per mobile platform",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Amazon SNS integrates with Apple APNs (iOS), Google FCM (Android), Amazon ADM (Kindle), and Baidu CNS (Chinese Android) for mobile push notifications. SNS manages the platform-specific token handling and delivery protocols, allowing developers to use a single SNS API to target users across all supported mobile platforms.",
     },

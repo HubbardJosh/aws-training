@@ -33,8 +33,8 @@ A **task** is a running instance of a task definition. One task can run multiple
         {
           question:
             "What ECS component keeps a specified number of tasks running continuously and integrates with an ALB?",
-          options: ["Cluster", "Task", "Service", "Task definition"],
-          correctIndex: 2,
+          options: ["Service", "Cluster", "Task", "Task definition"],
+          correctIndex: 0,
           explanation:
             "An ECS service maintains the desired number of running tasks, automatically replacing failed tasks, and integrates with an ALB for load balancing. Services also manage rolling and blue/green deployments.",
         },
@@ -42,12 +42,12 @@ A **task** is a running instance of a task definition. One task can run multiple
           question:
             "Which IAM role does ECS use to pull container images from ECR?",
           options: [
+            "Service-linked role",
             "Task role",
             "Task execution role",
             "Cluster role",
-            "Service-linked role",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The task execution role is used by the ECS infrastructure (not your application code) to pull images from ECR, write logs to CloudWatch, and retrieve secrets from Secrets Manager at task launch time.",
         },
@@ -85,12 +85,12 @@ With **Fargate**, AWS manages all the underlying infrastructure. You define the 
         {
           question: "What billing model does AWS Fargate use?",
           options: [
+            "A flat monthly fee per ECS cluster",
+            "Per container image pulled from ECR",
             "Per EC2 instance hour, same as EC2 launch type",
             "Per second of vCPU and memory used while the task is running",
-            "Per container image pulled from ECR",
-            "A flat monthly fee per ECS cluster",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Fargate charges per second of vCPU and memory consumed while tasks are running. There is no charge when tasks are stopped, making it cost-efficient for intermittent workloads.",
         },
@@ -119,11 +119,11 @@ ECS integrates with **AWS Cloud Map** for service discovery. When awsvpc mode is
             "What networking advantage does awsvpc mode provide over bridge mode?",
           options: [
             "Higher network throughput due to direct kernel access",
-            "Each task gets its own ENI and security group for fine-grained per-task network control",
-            "Tasks can communicate across VPC peering connections",
             "No NAT is required for outbound internet access",
+            "Tasks can communicate across VPC peering connections",
+            "Each task gets its own ENI and security group for fine-grained per-task network control",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "In awsvpc mode each task gets its own ENI with its own security group. This enables fine-grained per-task security rules rather than per-host rules, and VPC flow logs capture task-level traffic.",
         },
@@ -131,12 +131,12 @@ ECS integrates with **AWS Cloud Map** for service discovery. When awsvpc mode is
           question:
             "In ECS bridge networking mode, how does the ALB route traffic to the correct container?",
           options: [
-            "By using the container's fixed IP address registered in Route 53",
-            "By using dynamic port mapping — containers bind to random host ports that the ALB tracks",
             "By sending traffic to all ports and letting the container filter",
             "By using ECS service discovery with Cloud Map",
+            "By using the container's fixed IP address registered in Route 53",
+            "By using dynamic port mapping — containers bind to random host ports that the ALB tracks",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "In bridge mode, containers bind to random host ports. The ALB uses dynamic port mapping to route traffic to the correct container on the correct random port, allowing multiple containers of the same service on the same host.",
         },
@@ -182,12 +182,12 @@ The rule of thumb: if the container's *application code* is making the AWS call,
           question:
             "A container needs to both read from S3 (application code) and have its logs sent to CloudWatch (ECS infrastructure). Which roles are needed?",
           options: [
-            "Only a task role with both S3 and CloudWatch permissions",
             "Only a task execution role with both S3 and CloudWatch permissions",
             "A task role with S3 permissions and a task execution role with CloudWatch permissions",
+            "Only a task role with both S3 and CloudWatch permissions",
             "A single combined ECS role with all permissions",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The task role grants the application code S3 access. The task execution role grants ECS infrastructure the ability to write logs to CloudWatch. These are separate roles with separate purposes.",
         },
@@ -208,11 +208,11 @@ The default **rolling update** replaces old tasks with new ones gradually. \`min
             "What does minimumHealthyPercent control in an ECS rolling update?",
           options: [
             "The percentage of new tasks that must pass health checks before old tasks stop",
-            "The floor — the minimum percentage of desired tasks that must remain healthy during deployment",
             "The maximum number of tasks that can be replaced at once",
+            "The floor — the minimum percentage of desired tasks that must remain healthy during deployment",
             "The ALB health check threshold for determining task health",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "minimumHealthyPercent sets the floor — the minimum percentage of desired tasks that must remain running and healthy during a deployment. The default is 100%, ensuring full capacity is maintained throughout.",
         },
@@ -220,12 +220,12 @@ The default **rolling update** replaces old tasks with new ones gradually. \`min
           question:
             "What is required for ECS blue/green deployments (as opposed to rolling updates)?",
           options: [
-            "Two ECS clusters with identical task definitions",
             "CodeDeploy and two ALB target groups",
-            "Fargate launch type only",
+            "Two ECS clusters with identical task definitions",
             "ECS Service Auto Scaling enabled",
+            "Fargate launch type only",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "ECS blue/green deployment requires CodeDeploy and two ALB target groups. CodeDeploy shifts traffic from the blue (original) target group to the green (new) target group after health checks pass, with instantaneous rollback available.",
         },
@@ -233,12 +233,12 @@ The default **rolling update** replaces old tasks with new ones gradually. \`min
           question:
             "What is the benefit of ECS blue/green deployment over rolling update?",
           options: [
-            "Blue/green is cheaper because it uses fewer tasks",
             "Blue/green supports instantaneous rollback by shifting traffic back to the blue target group",
             "Blue/green deploys faster than rolling update",
+            "Blue/green is cheaper because it uses fewer tasks",
             "Blue/green works without an ALB",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The key benefit of blue/green deployment is instantaneous rollback — CodeDeploy can shift traffic back to the original (blue) target group immediately if the new deployment has issues, with no need to restart containers.",
         },
@@ -268,8 +268,8 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
         {
           question:
             "Which log driver sends ECS container stdout/stderr to CloudWatch Logs?",
-          options: ["cloudwatch", "awslogs", "fluentd", "json-file"],
-          correctIndex: 1,
+          options: ["awslogs", "fluentd", "json-file", "cloudwatch"],
+          correctIndex: 0,
           explanation:
             "The awslogs log driver is configured in the task definition's logConfiguration block. It forwards all container stdout and stderr to a CloudWatch Logs log group, with each container instance creating its own log stream.",
         },
@@ -277,12 +277,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
           question:
             "What must be done to enable Container Insights for an ECS cluster?",
           options: [
-            "It is enabled by default for all ECS clusters",
-            "It must be explicitly enabled per cluster and adds additional cost",
-            "It is enabled automatically when the awslogs driver is configured",
             "It requires installing the CloudWatch agent as a sidecar container",
+            "It is enabled automatically when the awslogs driver is configured",
+            "It must be explicitly enabled per cluster and adds additional cost",
+            "It is enabled by default for all ECS clusters",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Container Insights must be explicitly enabled per ECS cluster and does add cost. It provides enhanced per-container metrics (CPU and memory per container) beyond what standard CloudWatch metrics provide.",
         },
@@ -291,11 +291,11 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
             "How does X-Ray distributed tracing work in ECS with awsvpc networking?",
           options: [
             "The X-Ray SDK sends traces directly to the X-Ray service via HTTPS",
-            "Application containers send UDP segments to the X-Ray daemon sidecar at localhost:2000",
             "ECS automatically captures traces without any configuration",
+            "Application containers send UDP segments to the X-Ray daemon sidecar at localhost:2000",
             "X-Ray traces are captured by the awslogs driver alongside application logs",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "In awsvpc mode, the application container sends UDP trace segments to the X-Ray daemon sidecar at localhost:2000. The daemon batches and forwards them to the X-Ray service. In bridge mode, the daemon's container IP is used instead.",
         },
@@ -330,12 +330,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
           question:
             "Which Step Functions integration pattern starts an ECS task and waits for it to complete?",
           options: [
+            "ECS RunTask with EventBridge notification",
+            "ECS RunTask with waitForTaskToken callback",
             "ECS RunTask with request-response pattern",
             "ECS RunTask.sync integration",
-            "ECS RunTask with waitForTaskToken callback",
-            "ECS RunTask with EventBridge notification",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Step Functions ECS RunTask.sync integration starts an ECS task and pauses the workflow until the task completes. This is the correct pattern for containerized batch jobs that must finish before the next workflow step.",
         },
@@ -343,12 +343,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
           question:
             "What ECR feature automatically removes old container image versions to control storage costs?",
           options: [
-            "Image vulnerability scanning",
             "ECR lifecycle policies",
-            "Image tag immutability",
             "Cross-region replication",
+            "Image tag immutability",
+            "Image vulnerability scanning",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "ECR lifecycle policies automatically expire and delete old image versions based on rules you configure (e.g., keep only the last 10 tagged images). This keeps storage costs in check without manual cleanup.",
         },
@@ -400,18 +400,18 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
         "A Fargate container application reads from an S3 bucket. Which IAM role must have S3 read permissions?",
       options: [
         "Task execution role",
-        "Task role",
         "ECS service-linked role",
+        "Task role",
         "Fargate cluster role",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The task role is used by application code running inside the container. S3 reads from the application require the task role. The task execution role is for ECS infrastructure operations like image pulls and log delivery.",
     },
     {
       question: "Which ECS networking mode is required for Fargate?",
-      options: ["bridge", "host", "awsvpc", "overlay"],
-      correctIndex: 2,
+      options: ["bridge", "awsvpc", "host", "overlay"],
+      correctIndex: 1,
       explanation:
         "awsvpc is the only networking mode supported by Fargate. It gives each task its own ENI with a dedicated VPC IP address and its own security group for fine-grained network control.",
     },
@@ -419,12 +419,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "A team needs zero-downtime ECS deployments with instantaneous rollback capability. Which deployment strategy should they use?",
       options: [
-        "Rolling update with minimumHealthyPercent=100",
         "Blue/green deployment via CodeDeploy with two ALB target groups",
-        "All-at-once replacement of all tasks simultaneously",
+        "Rolling update with minimumHealthyPercent=100",
         "Canary deployment with gradual task replacement",
+        "All-at-once replacement of all tasks simultaneously",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Blue/green deployment with CodeDeploy provides instantaneous rollback by shifting traffic back to the original (blue) target group. Rolling update is simpler but rollback requires re-deploying the previous version.",
     },
@@ -432,12 +432,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "How do you access a running Fargate container for interactive debugging without opening inbound ports?",
       options: [
-        "SSH to the underlying Fargate host using the task's public IP",
         "Use ECS Exec powered by SSM Session Manager",
+        "SSH to the underlying Fargate host using the task's public IP",
         "Use the ECS console's built-in log viewer",
         "Connect via RDP to the Fargate managed instance",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "ECS Exec uses SSM Session Manager to provide interactive shell access to running containers — including Fargate — without SSH, open inbound ports, or a bastion host.",
     },
@@ -445,12 +445,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "A Fargate service needs database credentials injected at startup. The application reads them as environment variables. Which ECS role needs secretsmanager:GetSecretValue?",
       options: [
-        "Task role — the application code fetches the secret",
         "Task execution role — ECS infrastructure fetches and injects the secret",
+        "Task role — the application code fetches the secret",
         "Both the task role and task execution role",
         "Neither — Fargate fetches secrets automatically without IAM permissions",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "When secrets are referenced in the task definition's secrets block, ECS infrastructure fetches them at task launch time using the task execution role. The application receives them as environment variables and needs no special IAM permissions.",
     },
@@ -458,12 +458,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "What does Fargate Spot offer compared to standard Fargate, and what is the tradeoff?",
       options: [
-        "Up to 50% savings; tasks can be interrupted with 5 minutes notice",
-        "Up to 70% savings; tasks can be interrupted with 2 minutes notice",
         "Up to 90% savings; tasks are preemptible at any time without notice",
         "Up to 30% savings; tasks have reduced CPU allocation",
+        "Up to 70% savings; tasks can be interrupted with 2 minutes notice",
+        "Up to 50% savings; tasks can be interrupted with 5 minutes notice",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Fargate Spot offers up to 70% savings over standard Fargate pricing. The tradeoff is that tasks can be interrupted with 2 minutes of notice, making it appropriate for batch jobs and fault-tolerant workloads but not production services.",
     },
@@ -471,12 +471,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "Which ECS feature provides enhanced per-container CPU and memory metrics beyond standard CloudWatch metrics?",
       options: [
-        "ECS service events in the console",
-        "Container Insights (must be enabled per cluster, adds cost)",
         "The awslogs log driver",
         "X-Ray distributed tracing",
+        "Container Insights (must be enabled per cluster, adds cost)",
+        "ECS service events in the console",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Container Insights provides enhanced per-container metrics including CPU and memory usage at the container level. It must be explicitly enabled per cluster and does add cost, but provides the visibility needed to right-size task allocations.",
     },
@@ -484,12 +484,12 @@ For distributed tracing, run the **X-Ray daemon** as a sidecar container in your
       question:
         "An ECS service has a rolling update configured with minimumHealthyPercent=50 and maximumPercent=100. What happens during deployment?",
       options: [
-        "ECS launches new tasks first, then terminates old tasks — maintaining 100% capacity throughout",
         "ECS stops half the old tasks first, then starts new tasks — temporarily running at 50% capacity",
         "All old tasks are terminated before any new tasks start",
+        "ECS launches new tasks first, then terminates old tasks — maintaining 100% capacity throughout",
         "New tasks are added to double capacity before any old tasks are removed",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "With minimumHealthyPercent=50 and maximumPercent=100, ECS stops half the old tasks before starting new ones. This temporarily reduces capacity to 50% but avoids running more than 100% of tasks simultaneously — useful in capacity-constrained environments.",
     },

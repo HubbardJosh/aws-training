@@ -34,12 +34,12 @@ export const pollyGuide: ServiceGuide = {
           question:
             "Which Amazon Polly voice engine would you choose for a customer-facing e-learning platform where listener experience is paramount?",
           options: [
+            "PCM engine — it provides uncompressed audio for the highest fidelity",
+            "Conversational engine — it is specifically designed for educational content",
             "Standard engine — it is faster and lower cost",
             "Neural engine — it produces more natural-sounding speech appropriate for customer-facing applications",
-            "Conversational engine — it is specifically designed for educational content",
-            "PCM engine — it provides uncompressed audio for the highest fidelity",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Neural TTS (NTTS) voices produce significantly more natural-sounding audio with smoother intonation and appropriate emphasis. They are the recommended choice for customer-facing applications, e-learning, and any context where listener experience matters.",
         },
@@ -57,12 +57,12 @@ For NTTS voices, AWS has introduced **brand voice** capabilities — custom voic
           question:
             "You are building a voice chatbot and want the TTS output to sound casual and conversational rather than formal. Which Amazon Polly capability supports this?",
           options: [
-            "Standard engine with a custom lexicon applied",
             "Neural TTS voices with conversational speaking style",
-            "SSML prosody tags set to an informal rate and pitch",
             "Bilingual voices configured with an informal language code",
+            "SSML prosody tags set to an informal rate and pitch",
+            "Standard engine with a custom lexicon applied",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Some Neural TTS voices support a conversational speaking style, which produces more casual, informal speech appropriate for chatbot interactions. This is a specific Neural engine feature distinct from SSML prosody adjustments.",
         },
@@ -94,11 +94,11 @@ For applications that repeatedly speak the same text, **lexicons** allow you to 
             "A pharmaceutical company wants Amazon Polly to always pronounce a proprietary drug name consistently across thousands of TTS requests. What is the most efficient solution?",
           options: [
             "Use an SSML <phoneme> tag inline in every text document submitted for synthesis",
-            "Define a Polly lexicon with the correct pronunciation and attach it to all synthesis requests",
-            "Switch to a Neural voice, which has better pronunciation of medical terminology",
             "Use the <say-as interpret-as='spell-out'> SSML tag to spell out the drug name letter by letter",
+            "Switch to a Neural voice, which has better pronunciation of medical terminology",
+            "Define a Polly lexicon with the correct pronunciation and attach it to all synthesis requests",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Lexicons are the efficient solution for consistent custom pronunciations across many requests. You define the pronunciation mapping once in a lexicon and attach it to synthesis requests, rather than embedding SSML phoneme tags in every document.",
         },
@@ -143,11 +143,11 @@ For applications that repeatedly speak the same text, **lexicons** allow you to 
             "What are the character limits for SynthesizeSpeech (synchronous) and StartSpeechSynthesisTask (asynchronous) in Amazon Polly?",
           options: [
             "SynthesizeSpeech: 1,000 characters; StartSpeechSynthesisTask: 50,000 characters",
+            "Both APIs share a 10,000 character limit per request",
             "SynthesizeSpeech: 3,000 billing characters; StartSpeechSynthesisTask: 100,000 billing characters",
             "SynthesizeSpeech: 5,000 characters; StartSpeechSynthesisTask: unlimited",
-            "Both APIs share a 10,000 character limit per request",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SynthesizeSpeech (synchronous) accepts up to 3,000 billing characters and returns an audio stream immediately. StartSpeechSynthesisTask (asynchronous) accepts up to 100,000 billing characters and stores the result in S3.",
         },
@@ -165,12 +165,12 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
           question:
             "In a voice bot architecture using Amazon Lex and Amazon Polly, what is Polly's role?",
           options: [
-            "Polly performs natural language understanding to extract intents from user speech",
             "Polly converts the bot's text responses into spoken audio that is returned to the user",
             "Polly transcribes the user's spoken input so Lex can process it as text",
+            "Polly performs natural language understanding to extract intents from user speech",
             "Polly manages conversation state and session context between turns",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "In a Lex + Polly voice bot, Lex handles NLU (understanding the user's intent) and generates a text response. Polly then synthesizes that text response into spoken audio for the user. Transcribe would handle the speech-to-text input side.",
         },
@@ -178,12 +178,12 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
           question:
             "Which output formats does Amazon Polly support for synthesized audio?",
           options: [
-            "MP3, WAV, and FLAC",
             "MP3, OGG Vorbis, and PCM",
             "AAC, MP3, and OGG Vorbis",
             "MP3, OGG Vorbis, and WebM",
+            "MP3, WAV, and FLAC",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Amazon Polly supports three output formats: MP3 (most common), OGG Vorbis, and PCM (uncompressed, commonly used for telephony systems). WAV and FLAC are not supported output formats.",
         },
@@ -227,12 +227,12 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
       question:
         "A developer is building a real-time voice notification system that converts short alert messages (under 200 characters) to audio and plays them immediately. Which Polly API should they use?",
       options: [
-        "StartSpeechSynthesisTask — it provides better quality for real-time audio",
-        "SynthesizeSpeech — it is synchronous and returns an audio stream immediately",
-        "GetSpeechSynthesisTask — it retrieves pre-synthesized audio from S3",
         "ListSpeechSynthesisTasks — it streams audio from queued synthesis jobs",
+        "GetSpeechSynthesisTask — it retrieves pre-synthesized audio from S3",
+        "SynthesizeSpeech — it is synchronous and returns an audio stream immediately",
+        "StartSpeechSynthesisTask — it provides better quality for real-time audio",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SynthesizeSpeech is the synchronous API that returns an audio stream immediately, making it ideal for real-time applications. StartSpeechSynthesisTask is asynchronous and stores results in S3, which adds latency unsuitable for real-time notifications.",
     },
@@ -240,11 +240,11 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
       question: "What is the purpose of SSML lexicons in Amazon Polly?",
       options: [
         "They define which voice and engine to use for each segment of text",
-        "They map source-language words to target-language equivalents for translation",
         "They define custom pronunciations for specific words or phrases, applied to synthesis requests",
         "They specify the output audio format and bitrate for synthesized speech",
+        "They map source-language words to target-language equivalents for translation",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Lexicons in Polly define custom pronunciation mappings — for brand names, medical terminology, abbreviations, or proper nouns that the default pronunciation model handles incorrectly. They are attached to synthesis requests and applied at synthesis time.",
     },
@@ -252,24 +252,24 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
       question:
         "Which Amazon Polly feature would you use to make a Neural TTS voice sound like a news anchor reading headlines?",
       options: [
-        "Standard engine with a <prosody rate='fast'> SSML tag",
         "Neural TTS voice with news speaking style",
-        "A custom brand voice trained on news broadcast audio",
         "The <emphasis level='strong'> SSML tag applied to every sentence",
+        "A custom brand voice trained on news broadcast audio",
+        "Standard engine with a <prosody rate='fast'> SSML tag",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Some Neural TTS voices support a news speaking style, which produces the clear, authoritative cadence typical of news anchors. This is a built-in Neural engine feature selected via the speaking style parameter.",
     },
     {
       question: "Amazon Polly is best described as which type of AI service?",
       options: [
-        "Automatic speech recognition (ASR) — converts audio to text",
         "Natural language understanding (NLU) — extracts intents from text",
         "Text-to-speech (TTS) — converts text to spoken audio",
+        "Automatic speech recognition (ASR) — converts audio to text",
         "Neural machine translation (NMT) — converts text between languages",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Amazon Polly is a text-to-speech (TTS) service. It converts written text into spoken audio. The opposite direction — speech to text — is Amazon Transcribe (ASR).",
     },
@@ -290,12 +290,12 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
       question:
         "A contact center application uses Amazon Lex for the conversational bot and needs to speak responses to callers. What is Polly's role in this architecture?",
       options: [
-        "Polly detects the caller's intent from their speech",
-        "Polly converts Lex's text responses into spoken audio for the caller",
         "Polly transcribes the caller's speech so Lex can understand it",
         "Polly manages the conversation flow and session attributes",
+        "Polly converts Lex's text responses into spoken audio for the caller",
+        "Polly detects the caller's intent from their speech",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "In a Lex + Polly integration, Lex handles conversation logic and generates text responses, and Polly synthesizes those text responses into spoken audio. Amazon Transcribe (or Lex's built-in ASR) handles the speech-to-text direction.",
     },
@@ -317,11 +317,11 @@ For **accessibility** use cases, Polly can be embedded in e-readers, web applica
         "PCM is one of the output formats supported by Amazon Polly. In which use case is PCM output most commonly used?",
       options: [
         "Streaming audio to web browsers via HTML5 audio players",
-        "Storing audio files in S3 for podcast distribution",
         "Telephony systems that require uncompressed audio for processing",
+        "Storing audio files in S3 for podcast distribution",
         "Mobile applications that need the smallest possible file size",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "PCM (Pulse-Code Modulation) is uncompressed audio commonly required by telephony systems (like Amazon Connect or traditional PSTN gateways) that process raw audio samples. MP3 and OGG Vorbis are compressed formats more suitable for streaming and storage.",
     },

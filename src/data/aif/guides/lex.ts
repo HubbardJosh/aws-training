@@ -26,8 +26,8 @@ export const lexGuide: ServiceGuide = {
         {
           question:
             "A Lex bot needs to collect a departure city, destination city, and travel date before booking a flight. What are these data requirements called?",
-          options: ["Intents", "Slots", "Utterances", "Contexts"],
-          correctIndex: 1,
+          options: ["Intents", "Utterances", "Slots", "Contexts"],
+          correctIndex: 2,
           explanation:
             "Slots are the pieces of information needed to fulfill an intent, analogous to function parameters. Lex manages the conversational loop of eliciting slot values from the user.",
         },
@@ -35,12 +35,12 @@ export const lexGuide: ServiceGuide = {
           question:
             "Which built-in Lex slot type would you use to capture a user-supplied date such as 'next Friday'?",
           options: [
-            "Custom slot type with date synonyms",
-            "A built-in date slot type",
             "A fulfillment Lambda function",
             "An output context",
+            "A built-in date slot type",
+            "Custom slot type with date synonyms",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lex provides built-in slot types for dates, times, numbers, cities, US states, and email addresses — so you do not need to create a custom slot type for common data types like dates.",
         },
@@ -58,12 +58,12 @@ Lex also supports **context**: you can define input contexts (a previous intent 
           question:
             "A Lex bot receives a travel date in the past and must reject it and re-prompt the user. Which Lambda hook should handle this per-turn validation?",
           options: [
-            "Fulfillment Lambda",
             "Dialog codehook Lambda",
-            "Input context handler",
+            "Fulfillment Lambda",
             "Slot type validation Lambda",
+            "Input context handler",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The dialog codehook fires after each user turn, before fulfillment, enabling custom slot validation, dynamic re-prompting, and mid-conversation branching based on business logic.",
         },
@@ -72,11 +72,11 @@ Lex also supports **context**: you can define input contexts (a previous intent 
             "When does the fulfillment Lambda in a Lex bot get invoked?",
           options: [
             "After every user message regardless of slot completion",
-            "Before the dialog codehook on each turn",
             "Once all required slots are filled and validated",
+            "Before the dialog codehook on each turn",
             "Only when a DTMF input is detected",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The fulfillment Lambda is triggered once all required slots for an intent are filled and validated. It executes the business logic (database queries, API calls) and returns a response to the user.",
         },
@@ -84,12 +84,12 @@ Lex also supports **context**: you can define input contexts (a previous intent 
           question:
             "In Amazon Lex, what feature allows a completed intent to influence which intents are available in the next conversational turn?",
           options: [
-            "Slot fuzzy matching",
-            "Output context",
             "Dialog codehook",
             "Session attribute override",
+            "Slot fuzzy matching",
+            "Output context",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Output contexts are attributes set after an intent completes that influence future intent routing. This enables multi-turn conversations where one intent naturally flows into related intents.",
         },
@@ -107,12 +107,12 @@ The **streaming API** supports bidirectional audio streaming, enabling voice ass
           question:
             "Which AWS service converts text bot responses into spoken audio for Lex voice interactions?",
           options: [
-            "Amazon Transcribe",
-            "Amazon Comprehend",
             "Amazon Polly",
+            "Amazon Comprehend",
+            "Amazon Transcribe",
             "Amazon Connect",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Amazon Polly integrates with Lex to convert text responses into natural-sounding audio. Transcribe does the reverse (speech-to-text), while Connect is the contact center platform.",
         },
@@ -153,8 +153,8 @@ For telephony deployments, Lex supports **DTMF (dual-tone multi-frequency)** inp
         {
           question:
             "In Lex V2, what term describes a language-specific NLU model configuration within a single bot that enables multi-language support?",
-          options: ["Intent", "Slot type", "Locale", "Session context"],
-          correctIndex: 2,
+          options: ["Locale", "Intent", "Slot type", "Session context"],
+          correctIndex: 0,
           explanation:
             "A locale in Lex V2 is a separate NLU model for a specific language and region. A single bot can contain multiple locales, enabling multi-language support without maintaining separate bots.",
         },
@@ -162,12 +162,12 @@ For telephony deployments, Lex supports **DTMF (dual-tone multi-frequency)** inp
           question:
             "What does DTMF stand for in the context of Lex telephony deployments?",
           options: [
-            "Dynamic Text Matching Framework",
             "Dual-Tone Multi-Frequency",
-            "Dialog Transfer Management Function",
+            "Dynamic Text Matching Framework",
             "Digital Telephony Modulation Format",
+            "Dialog Transfer Management Function",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "DTMF stands for dual-tone multi-frequency — the signal produced by pressing touch-tone keys on a phone keypad. Lex supports DTMF input, allowing callers to press keys instead of speaking.",
         },
@@ -175,12 +175,12 @@ For telephony deployments, Lex supports **DTMF (dual-tone multi-frequency)** inp
           question:
             "How does Lex V2 simplify deploying a chatbot that must serve customers in English, Spanish, and French?",
           options: [
-            "Automatic real-time translation between languages using Amazon Translate",
             "Multiple locales within a single bot, each with its own NLU model",
-            "Separate bot instances that share a common fulfillment Lambda",
             "A global intent model that handles all languages simultaneously",
+            "Automatic real-time translation between languages using Amazon Translate",
+            "Separate bot instances that share a common fulfillment Lambda",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Lex V2 supports multiple locales within a single bot. Each locale is a separate NLU model for a specific language, enabling multi-language deployments without maintaining completely separate bots.",
         },
@@ -211,12 +211,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
           question:
             "Which of the following are first-party channel integrations supported by Amazon Lex? (Choose the most complete answer)",
           options: [
-            "Slack and Microsoft Teams",
-            "Slack, Facebook Messenger, Twilio SMS, and Amazon Connect",
             "Facebook Messenger and WhatsApp",
             "Amazon Connect and Zoom",
+            "Slack and Microsoft Teams",
+            "Slack, Facebook Messenger, Twilio SMS, and Amazon Connect",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Lex provides first-party integrations with Slack, Facebook Messenger, Twilio SMS, and Amazon Connect. These integrations handle protocol translation so bot code remains channel-agnostic.",
         },
@@ -273,12 +273,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
       question:
         "A Lex bot must collect a product name from a list of 50 proprietary SKUs not found in any built-in slot type. What should you use?",
       options: [
+        "A dialog codehook Lambda that validates any free-text input",
         "A built-in AMAZON.Product slot type",
         "A custom slot type with the SKUs as enumerated values",
-        "A dialog codehook Lambda that validates any free-text input",
         "An output context that carries the SKU from a prior intent",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Custom slot types are used for domain-specific values like proprietary product names or order statuses. You define the enumerated values and Lex trains to recognize them, with optional synonym matching.",
     },
@@ -286,12 +286,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
       question:
         "Which technology powers Amazon Lex's ability to understand natural language and is also used by Amazon Alexa?",
       options: [
-        "Rule-based pattern matching",
-        "Statistical phrase tables",
-        "Deep learning ASR and NLU",
         "Deterministic finite automata",
+        "Deep learning ASR and NLU",
+        "Statistical phrase tables",
+        "Rule-based pattern matching",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Amazon Lex uses the same deep learning ASR and NLU technology that powers Amazon Alexa, enabling it to understand natural language even when phrasing differs from the sample utterances.",
     },
@@ -299,12 +299,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
       question:
         "What happens in a Lex conversation when the dialog codehook Lambda returns a 'Failed' dialog action?",
       options: [
-        "Lex immediately invokes the fulfillment Lambda",
-        "Lex terminates the session and closes the conversation",
         "Lex re-prompts the user for the offending slot value",
+        "Lex terminates the session and closes the conversation",
         "Lex routes the conversation to Amazon Connect",
+        "Lex immediately invokes the fulfillment Lambda",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "When the dialog codehook returns a validation failure, Lex can re-prompt the user to correct the invalid slot value. This is the standard pattern for rejecting past dates, invalid selections, or business-rule violations.",
     },
@@ -312,12 +312,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
       question:
         "A call center bot handles English and Spanish callers. Using Lex V2, what is the most efficient deployment architecture?",
       options: [
-        "Two separate Lex bots, one per language, behind an API Gateway router",
         "One Lex V2 bot with English and Spanish locales",
         "One bot with a custom Lambda that translates Spanish to English before sending to Lex",
+        "Two separate Lex bots, one per language, behind an API Gateway router",
         "Amazon Translate preprocessing all Spanish input before passing to a single-language Lex bot",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Lex V2 supports multiple locales within a single bot. Each locale has its own NLU model for that language, which is far simpler than maintaining separate bots or adding translation middleware.",
     },
@@ -325,12 +325,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
       question:
         "Which Amazon Lex integration allows a caller to press '1' for account balance or '2' for payments instead of speaking?",
       options: [
-        "Streaming barge-in API",
         "DTMF input support",
         "Custom slot type with numeric values",
         "Dialog codehook key-press detection",
+        "Streaming barge-in API",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "DTMF (dual-tone multi-frequency) support allows callers to press phone keypad keys as input. Lex interprets key sequences as slot values, enabling hybrid voice/DTMF IVR interactions.",
     },
@@ -363,12 +363,12 @@ Lex integrates with **Amazon Kendra** for FAQ-style question answering: if an ut
     {
       question: "Amazon Polly's role in a Lex voice bot is to:",
       options: [
-        "Transcribe the user's spoken audio into text for Lex to process",
         "Detect the user's intent from the transcribed text",
-        "Convert Lex's text response into spoken audio delivered to the user",
         "Route the voice call to a human agent in Amazon Connect",
+        "Transcribe the user's spoken audio into text for Lex to process",
+        "Convert Lex's text response into spoken audio delivered to the user",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Polly handles text-to-speech conversion: it takes Lex's text response and synthesizes natural-sounding audio for delivery to the user. Transcribe handles the opposite direction (speech-to-text for user input).",
     },

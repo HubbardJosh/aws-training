@@ -20,8 +20,8 @@ You access objects via URLs in the format \`https://<bucket>.s3.<region>.amazona
         {
           question:
             "What is the maximum size of a single object that can be stored in Amazon S3?",
-          options: ["1 TB", "5 TB", "10 TB", "Unlimited"],
-          correctIndex: 1,
+          options: ["1 TB", "Unlimited", "10 TB", "5 TB"],
+          correctIndex: 3,
           explanation:
             "A single S3 object can be up to 5 TB in size. The bucket itself has unlimited storage capacity and can hold any number of objects.",
         },
@@ -29,12 +29,12 @@ You access objects via URLs in the format \`https://<bucket>.s3.<region>.amazona
           question:
             "Which of the following statements about Amazon S3 bucket names is correct?",
           options: [
-            "Bucket names must be unique within a single AWS account",
-            "Bucket names must be globally unique across all AWS accounts",
             "Bucket names must be unique within an AWS region",
+            "Bucket names must be unique within a single AWS account",
             "Bucket names can be reused after a bucket is deleted after 24 hours",
+            "Bucket names must be globally unique across all AWS accounts",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 bucket names must be globally unique across all AWS accounts and all regions. Because bucket names appear in URLs used to access objects, they form part of a global namespace.",
         },
@@ -71,12 +71,12 @@ You access objects via URLs in the format \`https://<bucket>.s3.<region>.amazona
           question:
             "A company has data with unpredictable access patterns — some objects are accessed frequently, others not at all. Which S3 storage class automatically optimizes costs based on access patterns?",
           options: [
-            "S3 Standard, because it handles all access patterns well",
-            "S3 Standard-IA, because it charges only when data is retrieved",
             "S3 Intelligent-Tiering, which automatically moves objects between tiers based on access",
+            "S3 Standard, because it handles all access patterns well",
             "S3 Glacier Instant Retrieval, which provides fast access at low cost",
+            "S3 Standard-IA, because it charges only when data is retrieved",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "S3 Intelligent-Tiering automatically moves objects between access tiers based on observed access patterns. It is the best choice when access patterns are unknown or variable, as it optimizes cost without performance impact or retrieval fees.",
         },
@@ -96,12 +96,12 @@ You access objects via URLs in the format \`https://<bucket>.s3.<region>.amazona
           question:
             "What does enabling S3 Versioning do when an object is deleted?",
           options: [
-            "Permanently deletes the object and all previous versions immediately",
             "Moves the object to the Glacier storage class for cost-efficient retention",
-            "Places a delete marker on the object, preserving all previous versions for potential restoration",
             "Copies the deleted object to a designated backup bucket automatically",
+            "Permanently deletes the object and all previous versions immediately",
+            "Places a delete marker on the object, preserving all previous versions for potential restoration",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "When versioning is enabled and an object is deleted, S3 places a delete marker instead of permanently removing the data. All previous versions are preserved and can be restored at any time, protecting against accidental deletion.",
         },
@@ -123,12 +123,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
           question:
             "A developer configured a bucket policy to allow public read access, but objects are still not publicly accessible. What is the most likely cause?",
           options: [
-            "The bucket is in a region that does not support public access",
             "S3 Block Public Access is enabled on the bucket, overriding the bucket policy",
-            "Public access requires an IAM policy in addition to a bucket policy",
             "Objects must be individually marked public using ACLs",
+            "Public access requires an IAM policy in addition to a bucket policy",
+            "The bucket is in a region that does not support public access",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "S3 Block Public Access is a safety mechanism that overrides bucket policies and ACLs to prevent accidental public exposure. It is enabled by default on new buckets. To allow public access, Block Public Access must be explicitly disabled before the bucket policy takes effect.",
         },
@@ -163,12 +163,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
           question:
             "A company wants to grant a user temporary access to download a private S3 object without making it publicly accessible. What is the correct approach?",
           options: [
-            "Temporarily disable Block Public Access and re-enable it after the download",
-            "Generate a pre-signed URL that grants time-limited access to the private object",
-            "Create a public IAM policy and attach it to the requesting user",
             "Move the object to a public bucket and share the URL",
+            "Temporarily disable Block Public Access and re-enable it after the download",
+            "Create a public IAM policy and attach it to the requesting user",
+            "Generate a pre-signed URL that grants time-limited access to the private object",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Pre-signed URLs grant time-limited access to a specific private S3 object without changing the object's permissions or making it publicly readable. The URL includes an embedded expiry time after which access is revoked automatically.",
         },
@@ -250,12 +250,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question:
         "Which S3 storage class stores data in only one Availability Zone, making it lower cost but less resilient?",
       options: [
-        "S3 Standard-IA",
-        "S3 One Zone-IA",
-        "S3 Glacier Instant Retrieval",
         "S3 Intelligent-Tiering",
+        "S3 Standard-IA",
+        "S3 Glacier Instant Retrieval",
+        "S3 One Zone-IA",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "S3 One Zone-IA stores data in only one Availability Zone, making it less expensive than Standard-IA but without the multi-AZ resilience. It should only be used for data that can be reconstructed if an AZ fails.",
     },
@@ -263,12 +263,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question:
         "A company needs to replicate S3 objects automatically to a bucket in a different AWS region for disaster recovery. Which feature should they enable?",
       options: [
-        "S3 Versioning, which tracks all object versions across regions",
-        "S3 Lifecycle Policies, which move objects between regions after a set period",
         "Cross-Region Replication (CRR), which automatically copies objects to another region",
+        "S3 Lifecycle Policies, which move objects between regions after a set period",
         "S3 Multi-AZ, which stores objects in multiple regions simultaneously",
+        "S3 Versioning, which tracks all object versions across regions",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Cross-Region Replication (CRR) automatically copies objects from one S3 bucket to a bucket in a different AWS region. It requires versioning to be enabled on both the source and destination buckets.",
     },
@@ -276,12 +276,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question:
         "Which S3 feature should a company use to serve their static website HTML, CSS, and JavaScript files directly from S3?",
       options: [
-        "S3 Transfer Acceleration, which speeds up uploads and downloads",
-        "S3 Static Website Hosting, which serves static content from a bucket",
         "S3 Presigned URLs, which grant temporary access to objects",
         "S3 Replication, which copies content to edge locations",
+        "S3 Static Website Hosting, which serves static content from a bucket",
+        "S3 Transfer Acceleration, which speeds up uploads and downloads",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "S3 Static Website Hosting is a feature that lets you serve static HTML, CSS, and JavaScript files from an S3 bucket as a website. For global performance, CloudFront is typically placed in front of the S3 bucket as a CDN.",
     },
@@ -289,11 +289,11 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question: "What is the purpose of S3 Block Public Access?",
       options: [
         "To encrypt objects at rest using AWS-managed keys",
-        "To prevent accidental public exposure of bucket contents, overriding any permissive bucket policies or ACLs",
         "To block all external HTTP requests and allow only HTTPS access",
+        "To prevent accidental public exposure of bucket contents, overriding any permissive bucket policies or ACLs",
         "To limit the number of API calls that can be made to a bucket per second",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "S3 Block Public Access is a safety mechanism enabled by default on new buckets that prevents accidental public exposure. It overrides bucket policies and ACLs, ensuring objects remain private even if a policy mistakenly grants public access.",
     },
@@ -301,12 +301,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question:
         "An application needs to store large user-generated video files. The videos are accessed frequently in the first week after upload, then rarely accessed afterward. Which approach minimizes cost?",
       options: [
-        "Store all videos in S3 Glacier from the start to maximize savings",
-        "Store videos in S3 Standard and use a Lifecycle Policy to transition them to Standard-IA after 30 days",
         "Store videos in S3 One Zone-IA for lower cost from the beginning",
         "Store videos in S3 Standard permanently since retrieval fees make other classes more expensive",
+        "Store all videos in S3 Glacier from the start to maximize savings",
+        "Store videos in S3 Standard and use a Lifecycle Policy to transition them to Standard-IA after 30 days",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Using S3 Standard for the first 30 days (when videos are frequently accessed) and then transitioning them to Standard-IA via a Lifecycle Policy minimizes cost. Standard-IA is cheaper per GB stored for infrequently accessed data, though it charges a retrieval fee.",
     },
@@ -314,12 +314,12 @@ For data in transit, S3 enforces HTTPS for all API calls, ensuring data is encry
       question:
         "Which AWS analytics services can query data stored directly in S3 as part of a data lake architecture?",
       options: [
-        "Amazon RDS and Amazon Aurora",
-        "Amazon ElastiCache and Amazon MemoryDB",
         "Amazon Athena, AWS Glue, and Amazon Redshift Spectrum",
         "Amazon DynamoDB and Amazon DocumentDB",
+        "Amazon RDS and Amazon Aurora",
+        "Amazon ElastiCache and Amazon MemoryDB",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Amazon Athena, AWS Glue, and Amazon Redshift Spectrum can query data directly in S3 without requiring it to be loaded into a separate database. This makes S3 the foundation of a cost-effective data lake architecture.",
     },

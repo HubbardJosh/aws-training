@@ -59,12 +59,12 @@ Basic Support does not include access to **AWS technical support engineers** for
           question:
             "How many Trusted Advisor checks are available to AWS accounts on the Basic Support plan?",
           options: [
-            "All checks across all five categories",
-            "Twenty checks across Security and Cost Optimization",
             "Seven core checks in the Security and Service Limits categories",
+            "Twenty checks across Security and Cost Optimization",
+            "All checks across all five categories",
             "No Trusted Advisor access — Trusted Advisor requires Business Support",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Basic Support provides access to seven core Trusted Advisor checks in the Security and Service Limits categories. These cover the most critical issues like security groups with unrestricted access and service limit warnings. Full Trusted Advisor access requires Business or Enterprise Support.",
         },
@@ -102,12 +102,12 @@ The key difference between Developer and Business is the 24/7 access to Cloud Su
           question:
             "Which AWS Support plan is the first tier to provide access to ALL Trusted Advisor checks across all five categories?",
           options: [
-            "Basic Support",
-            "Developer Support",
             "Business Support",
             "Enterprise Support",
+            "Basic Support",
+            "Developer Support",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Business Support is the first tier to provide access to all Trusted Advisor checks across all five categories: Security, Performance, Cost Optimization, Fault Tolerance, and Service Limits. Basic and Developer plans only provide the seven core Security and Service Limits checks.",
         },
@@ -145,12 +145,12 @@ The **TAM** is the most distinctive feature of Enterprise Support. A TAM is not 
           question:
             "What is AWS Enterprise On-Ramp, and how does it differ from full Enterprise Support?",
           options: [
+            "It is the entry level plan for startups, with 15-minute response but no TAM",
             "It is a trial version of Enterprise Support limited to 90 days",
             "It provides a pool of TAMs (not a dedicated one) and 30-minute critical response, at a lower price than full Enterprise",
             "It provides the same features as Enterprise Support but billed hourly instead of monthly",
-            "It is the entry level plan for startups, with 15-minute response but no TAM",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Enterprise On-Ramp sits between Business and full Enterprise Support. It provides access to a pool of TAMs (rather than a single dedicated TAM), a 30-minute response for critical issues (vs 15 minutes for full Enterprise), and costs less than full Enterprise Support.",
         },
@@ -177,11 +177,11 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
             "An AWS account on the Developer Support plan wants to identify underutilized EC2 instances and unattached EBS volumes to reduce costs. Can Trusted Advisor help?",
           options: [
             "Yes — Developer Support includes full access to all Trusted Advisor checks including Cost Optimization",
+            "No — Trusted Advisor is only available with Enterprise Support",
             "No — Cost Optimization checks in Trusted Advisor require Business or Enterprise Support",
             "Yes — Trusted Advisor Cost Optimization checks are available to all support plans",
-            "No — Trusted Advisor is only available with Enterprise Support",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Cost Optimization checks in Trusted Advisor require Business or Enterprise Support. Developer Support only provides access to the seven core Trusted Advisor checks in the Security and Service Limits categories. To access Cost Optimization, Performance, and Fault Tolerance checks, the account must upgrade to at least Business Support.",
         },
@@ -239,11 +239,11 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
         "A startup is testing their first AWS application in a development environment and needs the ability to open technical support cases via email. What is the minimum support plan they need?",
       options: [
         "Basic Support — it is free and includes email support",
-        "Developer Support — the first paid plan that allows opening technical support cases",
-        "Business Support — required for any technical support case creation",
         "Enterprise Support — the only plan with guaranteed response SLAs",
+        "Business Support — required for any technical support case creation",
+        "Developer Support — the first paid plan that allows opening technical support cases",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Developer Support is the minimum plan that allows opening technical support cases via email. Basic Support does not include the ability to create technical support cases (only billing and account questions). Developer Support is suitable for development and testing environments.",
     },
@@ -264,12 +264,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "What is the response time SLA for a production system down incident under AWS Business Support?",
       options: [
-        "15 minutes with priority phone access",
-        "30 minutes via phone or chat",
         "1 hour via phone, email, or chat",
         "4 hours via email only",
+        "15 minutes with priority phone access",
+        "30 minutes via phone or chat",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Business Support guarantees a 1-hour response time for production system down scenarios via phone, email, or chat. Enterprise Support offers 15-minute response for business-critical system down; Developer Support only offers business-hours email response.",
     },
@@ -277,12 +277,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "A company's AWS account is on Basic Support. Their security team wants to use Trusted Advisor to check for IAM users without MFA and overly permissive security groups. Is this possible?",
       options: [
+        "Yes — all Trusted Advisor checks are available to all support plans",
         "No — Trusted Advisor requires at least Business Support",
         "Yes — these specific security checks are among the seven core checks available to all accounts including Basic",
-        "Yes — all Trusted Advisor checks are available to all support plans",
         "No — security checks require at least Developer Support",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The seven core Trusted Advisor checks in the Security category are available to all accounts including Basic Support. These include checks for security groups with unrestricted access, IAM users without MFA, S3 bucket public access, and root account access key existence.",
     },
@@ -290,12 +290,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "Which AWS Support plan is AWS's recommended minimum for production workloads?",
       options: [
-        "Basic Support — it is free and sufficient for most workloads",
-        "Developer Support — it provides email support at low cost",
         "Business Support — provides 24/7 access and production outage SLAs",
+        "Developer Support — it provides email support at low cost",
+        "Basic Support — it is free and sufficient for most workloads",
         "Enterprise Support — only it has SLAs appropriate for production",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Business Support is AWS's recommended minimum plan for production workloads. It provides 24/7 phone, email, and chat access to Cloud Support Engineers, a 1-hour response for production system down, and full Trusted Advisor checks.",
     },
@@ -303,12 +303,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "The AWS Trusted Advisor 'Fault Tolerance' category checks for which of the following?",
       options: [
-        "IAM users without MFA and security groups with unrestricted access",
-        "Idle EC2 instances and unused Reserved Instances",
         "EC2 instances not deployed across multiple AZs and RDS instances without Multi-AZ enabled",
+        "Idle EC2 instances and unused Reserved Instances",
+        "IAM users without MFA and security groups with unrestricted access",
         "EC2 instances with high CPU utilization and underprovisioned database IOPS",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "The Fault Tolerance category in Trusted Advisor checks for architectural issues that reduce resilience, such as EC2 instances not deployed across multiple AZs, RDS without Multi-AZ enabled, EBS volumes without recent snapshots, and Route 53 health check configuration.",
     },
@@ -316,12 +316,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "What is the key difference between AWS Enterprise Support and AWS Enterprise On-Ramp?",
       options: [
-        "Enterprise includes Trusted Advisor; Enterprise On-Ramp does not",
-        "Enterprise provides a dedicated TAM and 15-minute response; Enterprise On-Ramp provides a pool of TAMs and 30-minute response at a lower price",
-        "Enterprise On-Ramp includes Infrastructure Event Management; Enterprise does not",
         "Enterprise includes 24/7 phone support; Enterprise On-Ramp is email-only",
+        "Enterprise includes Trusted Advisor; Enterprise On-Ramp does not",
+        "Enterprise On-Ramp includes Infrastructure Event Management; Enterprise does not",
+        "Enterprise provides a dedicated TAM and 15-minute response; Enterprise On-Ramp provides a pool of TAMs and 30-minute response at a lower price",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Enterprise Support provides a single dedicated TAM and a 15-minute response for business-critical outages. Enterprise On-Ramp provides access to a pool of TAMs (not a dedicated one) and a 30-minute critical response time, at a lower price point than full Enterprise Support.",
     },
@@ -329,12 +329,12 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
       question:
         "A large enterprise on AWS Enterprise Support needs help optimizing their billing and managing their account at scale. Which Enterprise Support feature addresses this?",
       options: [
-        "The Technical Account Manager (TAM), who handles all billing queries",
-        "The AWS Concierge Support Team, which are billing and account experts for large enterprises",
-        "AWS Cost Explorer, which is only unlocked with Enterprise Support",
         "AWS Organizations, which consolidates billing across Enterprise Support accounts",
+        "The Technical Account Manager (TAM), who handles all billing queries",
+        "AWS Cost Explorer, which is only unlocked with Enterprise Support",
+        "The AWS Concierge Support Team, which are billing and account experts for large enterprises",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The AWS Concierge Support Team is a team of billing and account experts available exclusively to Enterprise Support customers. They help large enterprises manage their AWS bills, optimize costs, and navigate complex account structures.",
     },

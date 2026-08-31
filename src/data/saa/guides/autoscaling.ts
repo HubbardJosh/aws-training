@@ -64,11 +64,11 @@ export const autoscalingGuide: ServiceGuide = {
             "Which scaling policy type is recommended as the simplest and most responsive for most workloads?",
           options: [
             "Simple Scaling",
+            "Scheduled Scaling",
             "Step Scaling",
             "Target Tracking Scaling",
-            "Scheduled Scaling",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Target Tracking Scaling is the recommended policy. You specify a metric and target value (e.g., 50% CPU), and Auto Scaling continuously adjusts capacity to maintain that target without writing multiple alarm-threshold rules.",
         },
@@ -76,12 +76,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "An application experiences predictable high traffic every Monday morning. Which scaling policy eliminates the reactive lag before new instances are healthy?",
           options: [
-            "Target Tracking Scaling",
-            "Step Scaling",
             "Simple Scaling",
+            "Target Tracking Scaling",
             "Scheduled Scaling",
+            "Step Scaling",
           ],
-          correctIndex: 3,
+          correctIndex: 2,
           explanation:
             "Scheduled Scaling pre-provisions capacity at known times, so instances are already healthy and serving traffic before the predictable load arrives. Reactive policies like Target Tracking add lag because instances must launch and initialize after load increases.",
         },
@@ -107,12 +107,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "An application takes 8 minutes to boot and configure before serving traffic. The team notices users experience slowness during sudden traffic spikes. Which feature addresses this without redesigning the application?",
           options: [
-            "Predictive Scaling",
-            "Warm Pools",
             "Step Scaling with aggressive thresholds",
+            "Predictive Scaling",
             "Reserved Instances",
+            "Warm Pools",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Warm Pools maintain pre-initialized instances that can be pulled into service in seconds rather than going through the full 8-minute boot process. Predictive Scaling forecasts demand but still launches cold instances; Warm Pools solve the initialization latency directly.",
         },
@@ -120,24 +120,24 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "What distinguishes Predictive Scaling from Target Tracking Scaling?",
           options: [
-            "Predictive Scaling uses ML to forecast and pre-scale before load arrives; Target Tracking reacts to current metrics",
-            "Predictive Scaling only works with EC2; Target Tracking works with ECS and DynamoDB too",
-            "Predictive Scaling is more expensive; Target Tracking is free",
             "Predictive Scaling sets a fixed schedule; Target Tracking adjusts dynamically",
+            "Predictive Scaling is more expensive; Target Tracking is free",
+            "Predictive Scaling only works with EC2; Target Tracking works with ECS and DynamoDB too",
+            "Predictive Scaling uses ML to forecast and pre-scale before load arrives; Target Tracking reacts to current metrics",
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation:
             "Predictive Scaling analyzes historical CloudWatch data and proactively scales the ASG before anticipated load peaks, eliminating the lag of reactive scaling. Target Tracking continuously adjusts capacity based on current observed metrics.",
         },
         {
           question: "In what states can instances in a Warm Pool be kept?",
           options: [
-            "Only Running",
-            "Only Stopped",
             "Stopped, Running, or Hibernated",
             "Pending or InService only",
+            "Only Running",
+            "Only Stopped",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Warm Pool instances can be maintained in stopped, running, or hibernated states depending on cost and readiness trade-offs. Stopped instances are cheapest; running instances are most immediately available.",
         },
@@ -151,12 +151,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "What does Instance Refresh use to ensure the application remains available during a rolling AMI replacement?",
           options: [
+            "A scheduled maintenance window that pauses all traffic during the replacement",
             "A separate standby ASG that absorbs traffic while the primary is updated",
             "A minimum healthy percentage that keeps a portion of the fleet in service throughout the refresh",
             "Blue/green deployment using Route 53 weighted routing",
-            "A scheduled maintenance window that pauses all traffic during the replacement",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Instance Refresh replaces instances in batches while maintaining at least the specified minimum healthy percentage in service, preventing full outages. New instances must pass health checks before old ones are terminated.",
         },
@@ -177,12 +177,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "After updating the Launch Template with a new AMI, which feature automates the controlled replacement of all existing ASG instances without requiring a separate deployment tool?",
           options: [
-            "Warm Pools",
-            "Scheduled Scaling",
             "Instance Refresh",
+            "Warm Pools",
             "Lifecycle Hooks",
+            "Scheduled Scaling",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Instance Refresh orchestrates the rolling replacement of all ASG instances after a Launch Template update, respecting health checks and the minimum healthy percentage to achieve zero-downtime deployments.",
         },
@@ -210,11 +210,11 @@ export const autoscalingGuide: ServiceGuide = {
             "What is the purpose of the scaling cooldown period in Auto Scaling?",
           options: [
             "It delays the launch of new instances to avoid exceeding AWS service quotas",
-            "It blocks further scale-in actions for a configurable time after a scaling event so metrics can stabilize",
             "It prevents scale-out during business hours",
+            "It blocks further scale-in actions for a configurable time after a scaling event so metrics can stabilize",
             "It sets the minimum time an instance must run before it can be terminated",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The cooldown period prevents thrashing by giving metrics time to stabilize after a scaling event before another scale-in action can occur. Without it, rapidly fluctuating metrics could trigger constant scaling up and down.",
         },
@@ -222,12 +222,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "A team wants DynamoDB read and write capacity to adjust automatically without manual intervention. Which feature handles this?",
           options: [
-            "DynamoDB Streams",
-            "DynamoDB On-Demand mode",
             "DynamoDB Auto Scaling via Application Auto Scaling",
+            "DynamoDB On-Demand mode",
+            "DynamoDB Streams",
             "DAX caching",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "DynamoDB Auto Scaling, implemented through Application Auto Scaling, monitors consumed capacity and adjusts provisioned RCUs and WCUs to stay near a target utilization percentage automatically.",
         },
@@ -241,20 +241,20 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "An ASG needs to deregister instances from an external service discovery registry before they are terminated. Which ASG feature enables this?",
           options: [
-            "Target Tracking Scaling with a custom metric",
             "A termination lifecycle hook that pauses the instance in Terminating:Wait",
+            "Target Tracking Scaling with a custom metric",
             "A scheduled scaling action timed before the termination",
             "Connection draining on the associated load balancer",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A termination lifecycle hook pauses the instance in the Terminating:Wait state, giving a Lambda function or script time to perform cleanup tasks like deregistering from service discovery before the instance is actually terminated.",
         },
         {
           question:
             "What is the maximum time a lifecycle hook can hold an instance in the wait state?",
-          options: ["5 minutes", "1 hour", "48 hours", "24 hours"],
-          correctIndex: 2,
+          options: ["48 hours", "5 minutes", "1 hour", "24 hours"],
+          correctIndex: 0,
           explanation:
             "Lifecycle Hooks allow up to 48 hours for the custom action to complete before the ASG proceeds with the launch or termination. This accommodates long-running initialization or drain tasks.",
         },
@@ -262,12 +262,12 @@ export const autoscalingGuide: ServiceGuide = {
           question:
             "Which termination policy minimizes wasted On-Demand billing time during scale-in?",
           options: [
-            "OldestInstance",
-            "NewestInstance",
             "OldestLaunchTemplate",
             "ClosestToNextInstanceHour",
+            "NewestInstance",
+            "OldestInstance",
           ],
-          correctIndex: 3,
+          correctIndex: 1,
           explanation:
             "ClosestToNextInstanceHour (the default) terminates instances that are closest to the end of their billing hour, minimizing wasted cost by ending instances just before they would be billed for another hour.",
         },
@@ -328,12 +328,12 @@ export const autoscalingGuide: ServiceGuide = {
       question:
         "Which ASG health check type is more thorough for web applications running behind an ELB?",
       options: [
-        "EC2 status checks",
-        "ELB health checks",
-        "Custom CloudWatch alarm checks",
         "Systems Manager health checks",
+        "Custom CloudWatch alarm checks",
+        "ELB health checks",
+        "EC2 status checks",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "ELB health checks verify that the application is responding correctly at the HTTP/HTTPS level, not just that the underlying EC2 instance is running. This catches application-level failures that EC2 status checks miss.",
     },
@@ -341,12 +341,12 @@ export const autoscalingGuide: ServiceGuide = {
       question:
         "After updating a Launch Template to a new AMI, which feature automatically replaces all existing ASG instances in a controlled, zero-downtime manner?",
       options: [
-        "Warm Pools",
-        "Predictive Scaling",
         "Instance Refresh",
         "Lifecycle Hooks",
+        "Warm Pools",
+        "Predictive Scaling",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Instance Refresh replaces instances in batches, ensuring that the minimum healthy percentage remains in service throughout. It integrates with health checks to verify new instances before terminating old ones.",
     },
@@ -354,12 +354,12 @@ export const autoscalingGuide: ServiceGuide = {
       question:
         "A new instance in an ASG needs to run a configuration script before receiving traffic. Which feature pauses the launch process at the right point?",
       options: [
+        "A scheduled scaling action",
+        "A Warm Pool with hibernated instances",
         "A termination lifecycle hook in Terminating:Wait state",
         "A launch lifecycle hook in Pending:Wait state",
-        "A Warm Pool with hibernated instances",
-        "A scheduled scaling action",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A launch lifecycle hook pauses the instance in the Pending:Wait state before it enters InService. This window allows configuration scripts, monitoring registration, or data loading to complete before the instance receives traffic.",
     },
@@ -367,24 +367,24 @@ export const autoscalingGuide: ServiceGuide = {
       question:
         "Application Auto Scaling can manage which of the following resources? (Choose the most complete correct answer)",
       options: [
-        "EC2 Auto Scaling Groups only",
-        "ECS services, DynamoDB RCU/WCU, and Aurora replicas",
         "Lambda function concurrency and S3 request rates",
+        "EC2 Auto Scaling Groups only",
         "RDS Multi-AZ standby instances",
+        "ECS services, DynamoDB RCU/WCU, and Aurora replicas",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Application Auto Scaling extends scaling policies to ECS services, DynamoDB provisioned throughput, Aurora replicas, and other non-EC2 resources. EC2 instances are managed by EC2 Auto Scaling Groups, not Application Auto Scaling.",
     },
     {
       question: "What is the primary purpose of the scaling cooldown period?",
       options: [
-        "To delay scale-out during low-traffic periods to save cost",
-        "To prevent a new scaling action from firing before metrics stabilize after a previous scaling event",
-        "To allow lifecycle hooks to complete before the next instance launch",
         "To enforce a minimum time between scheduled scaling actions",
+        "To delay scale-out during low-traffic periods to save cost",
+        "To allow lifecycle hooks to complete before the next instance launch",
+        "To prevent a new scaling action from firing before metrics stabilize after a previous scaling event",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The cooldown period blocks further scale-in actions for a configurable duration after a scaling event, preventing metric thrashing. Without it, a metric that briefly returns to normal after scaling could immediately trigger another scale-in.",
     },
@@ -392,12 +392,12 @@ export const autoscalingGuide: ServiceGuide = {
       question:
         "Which ASG termination policy minimizes wasted EC2 billing time during scale-in events?",
       options: [
+        "ClosestToNextInstanceHour",
         "OldestInstance",
         "NewestInstance",
         "OldestLaunchTemplate",
-        "ClosestToNextInstanceHour",
       ],
-      correctIndex: 3,
+      correctIndex: 0,
       explanation:
         "ClosestToNextInstanceHour terminates instances that are about to complete their current billing hour, avoiding paying for another hour of unused compute time. This is the default termination policy.",
     },

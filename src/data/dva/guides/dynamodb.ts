@@ -20,8 +20,8 @@ Individual items are limited to **400 KB** each, but tables can grow to petabyte
       quiz: [
         {
           question: "What is the maximum size of a single DynamoDB item?",
-          options: ["1 MB", "400 KB", "64 KB", "10 MB"],
-          correctIndex: 1,
+          options: ["400 KB", "64 KB", "1 MB", "10 MB"],
+          correctIndex: 0,
           explanation:
             "Each DynamoDB item is limited to 400 KB. For larger data, store the payload in S3 and keep a reference in DynamoDB.",
         },
@@ -30,23 +30,23 @@ Individual items are limited to **400 KB** each, but tables can grow to petabyte
             "A composite primary key in DynamoDB consists of which two components?",
           options: [
             "Partition key and Global Secondary Index",
-            "Partition key and sort key",
-            "Hash key and range key are two separate systems",
             "Primary key and foreign key",
+            "Hash key and range key are two separate systems",
+            "Partition key and sort key",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A composite primary key uses a partition key (hash key) plus a sort key (range key). Multiple items can share the same partition key as long as their sort keys are unique within that partition.",
         },
         {
           question: "Which statement about DynamoDB's schema is correct?",
           options: [
-            "All items in a table must have the same attributes",
-            "DynamoDB has a fixed schema defined at table creation",
             "Different items in the same table can have completely different attributes",
+            "All items in a table must have the same attributes",
             "Attributes must be declared before writing items",
+            "DynamoDB has a fixed schema defined at table creation",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "DynamoDB has a flexible schema — different items in the same table can have completely different attributes. The only required attributes are those that form the primary key.",
         },
@@ -72,12 +72,12 @@ When you genuinely need to use a low-cardinality value as part of your access pa
           question:
             "Why is a boolean 'isActive' field a poor choice for a DynamoDB partition key?",
           options: [
+            "It creates too many partitions and increases cost",
             "Boolean attributes are not supported as partition keys",
             "It has low cardinality, concentrating all traffic into just two partitions",
-            "It creates too many partitions and increases cost",
             "DynamoDB cannot hash boolean values",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A boolean field has only two possible values (true/false), meaning all writes go to one of only two partitions. This creates hot partitions that quickly hit throughput limits and throttle.",
         },
@@ -86,11 +86,11 @@ When you genuinely need to use a low-cardinality value as part of your access pa
             "What technique distributes writes for a low-cardinality partition key across multiple logical partitions?",
           options: [
             "Provisioned Auto Scaling",
-            "Write sharding (appending a random suffix to the key value)",
-            "Creating a GSI with the same partition key",
             "Enabling DynamoDB Streams",
+            "Creating a GSI with the same partition key",
+            "Write sharding (appending a random suffix to the key value)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Write sharding appends a random or computed suffix to the partition key value (e.g., 'status#3') to distribute writes across N virtual partitions, preventing hot partition throttling.",
         },
@@ -109,8 +109,8 @@ When provisioned capacity is exceeded, DynamoDB returns \`ProvisionedThroughputE
         {
           question:
             "How many RCUs does a strongly consistent read of a 4 KB item consume?",
-          options: ["0.5 RCU", "1 RCU", "2 RCU", "4 RCU"],
-          correctIndex: 1,
+          options: ["0.5 RCU", "2 RCU", "4 RCU", "1 RCU"],
+          correctIndex: 3,
           explanation:
             "One RCU supports one strongly consistent read of up to 4 KB per second. Eventually consistent reads cost 0.5 RCU for the same size. Transactional reads cost 2 RCU per 4 KB.",
         },
@@ -118,12 +118,12 @@ When provisioned capacity is exceeded, DynamoDB returns \`ProvisionedThroughputE
           question:
             "What exception does DynamoDB throw when provisioned throughput is exceeded?",
           options: [
-            "ThrottlingException",
-            "ProvisionedThroughputExceededException",
-            "ResourceNotFoundException",
             "ConditionalCheckFailedException",
+            "ResourceNotFoundException",
+            "ProvisionedThroughputExceededException",
+            "ThrottlingException",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "DynamoDB throws ProvisionedThroughputExceededException when reads or writes exceed the provisioned capacity. The AWS SDK implements exponential backoff with jitter for retries automatically.",
         },
@@ -131,12 +131,12 @@ When provisioned capacity is exceeded, DynamoDB returns \`ProvisionedThroughputE
           question:
             "Which DynamoDB capacity mode is best for a new table with completely unknown traffic patterns?",
           options: [
-            "Provisioned mode with Auto Scaling",
-            "Provisioned mode with maximum WCU set",
-            "On-demand mode",
             "Reserved capacity mode",
+            "On-demand mode",
+            "Provisioned mode with maximum WCU set",
+            "Provisioned mode with Auto Scaling",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "On-demand mode is ideal for new tables with unknown traffic patterns. It scales instantly to any request rate without capacity planning and eliminates the risk of under-provisioning.",
         },
@@ -156,12 +156,12 @@ Both index types use **projection** to control which attributes are copied into 
           question:
             "When must a Local Secondary Index (LSI) be created on a DynamoDB table?",
           options: [
-            "At any time — LSIs can be added or removed after table creation",
             "Only at table creation time — LSIs cannot be added later",
+            "At any time — LSIs can be added or removed after table creation",
             "During the first write operation to the table",
             "Within 7 days of table creation",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "LSIs must be created at table creation time. Unlike GSIs, they cannot be added or deleted after the table exists. Plan your LSIs carefully before creating the table.",
         },
@@ -208,12 +208,12 @@ Both index types use **projection** to control which attributes are copied into 
           question:
             "A FilterExpression is applied to a DynamoDB Query that returns 500 items before filtering, reducing the result to 50. How many RCUs are consumed?",
           options: [
-            "RCUs for 50 items only",
             "RCUs for 500 items — filtering does not reduce RCU consumption",
             "RCUs for 275 items (the average)",
+            "RCUs for 50 items only",
             "No RCUs — FilterExpression is free",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "FilterExpression does NOT reduce RCU consumption. You pay for all items read before filtering. To reduce RCU, design your key schema or indexes to narrow the result set at the query level, not the filter level.",
         },
@@ -221,20 +221,20 @@ Both index types use **projection** to control which attributes are copied into 
           question:
             "Which DynamoDB operation supports atomic increment of a numeric attribute without a read-modify-write cycle?",
           options: [
-            "PutItem with a conditional expression",
             "UpdateItem with the ADD action",
-            "BatchWriteItem with increment instructions",
             "TransactWriteItems with a counter update",
+            "PutItem with a conditional expression",
+            "BatchWriteItem with increment instructions",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "UpdateItem with the ADD action atomically increments or decrements a Number attribute. This is how counters are implemented in DynamoDB without the race conditions of a read-modify-write cycle.",
         },
         {
           question:
             "What is the maximum number of items in a DynamoDB TransactWriteItems request?",
-          options: ["10 items", "25 items", "100 items", "500 items"],
-          correctIndex: 2,
+          options: ["100 items", "10 items", "500 items", "25 items"],
+          correctIndex: 0,
           explanation:
             "TransactWriteItems supports up to 100 items per transaction. Transactions provide all-or-nothing atomicity — if any item fails, the entire transaction is rolled back. Transactions cost 2× the normal RCU/WCU.",
         },
@@ -260,12 +260,12 @@ Both index types use **projection** to control which attributes are copied into 
           question:
             "Which DynamoDB index type does NOT support strongly consistent reads?",
           options: [
-            "Base table",
             "Local Secondary Index (LSI)",
-            "Global Secondary Index (GSI)",
+            "Base table",
             "Primary key reads",
+            "Global Secondary Index (GSI)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "GSIs only support eventually consistent reads. Strongly consistent reads are available on the base table and LSIs. This is a key difference between LSIs and GSIs.",
         },
@@ -273,12 +273,12 @@ Both index types use **projection** to control which attributes are copied into 
           question:
             "When should you use strongly consistent reads in DynamoDB?",
           options: [
+            "Only when reading from GSIs",
             "For all read operations to ensure data accuracy",
             "When a read immediately follows a write and must reflect the latest committed data",
-            "Only when reading from GSIs",
             "When using DynamoDB Streams",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Use strongly consistent reads when a read must immediately reflect the most recent committed write — for example, reading back a balance after an update to validate a transaction. For most workloads, eventually consistent reads are sufficient and cheaper.",
         },
@@ -296,12 +296,12 @@ When attribute names conflict with DynamoDB reserved words — and there are hun
           question:
             "Which conditional expression prevents PutItem from overwriting an existing DynamoDB item?",
           options: [
-            "attribute_exists(pk)",
             "attribute_not_exists(pk)",
-            "if_not_exists(pk)",
+            "attribute_exists(pk)",
             "item_does_not_exist(pk)",
+            "if_not_exists(pk)",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "attribute_not_exists(pk) makes PutItem fail with ConditionalCheckFailedException if an item with the same primary key already exists. This is the safest way to create new items without accidentally overwriting existing ones.",
         },
@@ -309,12 +309,12 @@ When attribute names conflict with DynamoDB reserved words — and there are hun
           question:
             "What exception does DynamoDB throw when a conditional expression check fails?",
           options: [
-            "TransactionConflictException",
             "ProvisionedThroughputExceededException",
-            "ConditionalCheckFailedException",
             "OptimisticLockException",
+            "TransactionConflictException",
+            "ConditionalCheckFailedException",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "When a conditional expression fails, DynamoDB throws ConditionalCheckFailedException and the item remains unchanged. Your application should catch this and decide whether to retry or report a conflict.",
         },
@@ -323,11 +323,11 @@ When attribute names conflict with DynamoDB reserved words — and there are hun
             "Why are expression attribute names (prefixed with #) used in DynamoDB expressions?",
           options: [
             "To improve query performance by using indexes",
-            "To avoid conflicts with DynamoDB reserved words like 'name', 'status', and 'type'",
-            "To encrypt attribute values in transit",
             "To support case-sensitive attribute name matching",
+            "To encrypt attribute values in transit",
+            "To avoid conflicts with DynamoDB reserved words like 'name', 'status', and 'type'",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Expression attribute names (prefixed with #) are aliases for attribute names that conflict with DynamoDB reserved words. There are hundreds of reserved words including common ones like 'name', 'status', and 'type'.",
         },
@@ -352,12 +352,12 @@ Lambda integrates with DynamoDB Streams via event source mapping, processing rec
           question:
             "Which DynamoDB Streams view type captures both the before and after state of a changed item?",
           options: [
+            "NEW_AND_OLD_IMAGES",
+            "OLD_IMAGE",
             "KEYS_ONLY",
             "NEW_IMAGE",
-            "OLD_IMAGE",
-            "NEW_AND_OLD_IMAGES",
           ],
-          correctIndex: 3,
+          correctIndex: 0,
           explanation:
             "NEW_AND_OLD_IMAGES captures both the item state before and after the change. This is the most useful view type for auditing, change data capture, and scenarios where you need to compare before/after states.",
         },
@@ -366,11 +366,11 @@ Lambda integrates with DynamoDB Streams via event source mapping, processing rec
             "Which AWS feature uses DynamoDB Streams internally for its replication mechanism?",
           options: [
             "DynamoDB Accelerator (DAX)",
-            "DynamoDB Global Tables",
-            "DynamoDB Point-in-Time Recovery",
             "DynamoDB on-demand capacity",
+            "DynamoDB Point-in-Time Recovery",
+            "DynamoDB Global Tables",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "DynamoDB Global Tables uses Streams internally to replicate item-level changes across regions. This is why Streams must be enabled on a table before it can be added to a Global Table.",
         },
@@ -401,12 +401,12 @@ Global Tables are appropriate for applications that need low-latency reads and w
           question:
             "What is required on a DynamoDB table before it can be added to a Global Table?",
           options: [
+            "The table must have at least one GSI",
+            "The table must use provisioned capacity only",
             "Point-in-Time Recovery must be enabled",
             "DynamoDB Streams must be enabled",
-            "The table must use provisioned capacity only",
-            "The table must have at least one GSI",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "DynamoDB Streams must be enabled because Global Tables uses Streams internally to replicate changes across regions. The table must also use on-demand mode or have Auto Scaling enabled.",
         },
@@ -414,12 +414,12 @@ Global Tables are appropriate for applications that need low-latency reads and w
           question:
             "What write capability do DynamoDB Global Tables provide across regions?",
           options: [
-            "Single-master: only one region accepts writes, others are read-only",
-            "Multi-master: any replica in any region can accept reads and writes",
-            "Active-passive: the primary region writes, secondary regions only serve reads",
             "Write quorum: a majority of regions must confirm before a write succeeds",
+            "Active-passive: the primary region writes, secondary regions only serve reads",
+            "Multi-master: any replica in any region can accept reads and writes",
+            "Single-master: only one region accepts writes, others are read-only",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Global Tables provide multi-master replication — any replica in any region can accept both reads and writes. Changes replicate to all other regions with sub-second latency in most cases.",
         },
@@ -438,11 +438,11 @@ DAX has clear cases where it's not appropriate. It returns cached (eventually co
             "What caching strategy does DAX use when writing to DynamoDB?",
           options: [
             "Lazy loading — the cache is populated only on cache misses",
+            "Cache-aside — the application manages cache invalidation",
             "Write-through — writes go to DynamoDB and the cache simultaneously",
             "Write-back — writes go to the cache first, then asynchronously to DynamoDB",
-            "Cache-aside — the application manages cache invalidation",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "DAX uses write-through caching: writes go to both DynamoDB and the cache simultaneously, keeping the cache consistent with the database for items that have been written.",
         },
@@ -451,10 +451,10 @@ DAX has clear cases where it's not appropriate. It returns cached (eventually co
           options: [
             "A leaderboard with millions of reads per hour for the same top-10 items",
             "A session store read heavily by authenticated users",
-            "A workload that requires strongly consistent reads",
             "A product catalog accessed by thousands of concurrent users",
+            "A workload that requires strongly consistent reads",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "DAX returns cached (eventually consistent) data. If your application requires strongly consistent reads, DAX is not suitable because it cannot guarantee reading the most recently written value.",
         },
@@ -462,12 +462,12 @@ DAX has clear cases where it's not appropriate. It returns cached (eventually co
           question:
             "By how much does DAX reduce DynamoDB read latency for cache hits?",
           options: [
-            "From seconds to milliseconds",
-            "From milliseconds to microseconds",
             "From minutes to seconds",
             "From microseconds to nanoseconds",
+            "From milliseconds to microseconds",
+            "From seconds to milliseconds",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "DAX reduces DynamoDB read latency from single-digit milliseconds to microseconds for cache hits. It is purpose-built for read-heavy workloads where the same items are accessed repeatedly at high frequency.",
         },
@@ -485,12 +485,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
           question:
             "What data type and format must the DynamoDB TTL attribute contain?",
           options: [
-            "A String attribute with ISO 8601 date format",
-            "A Number attribute containing a Unix epoch timestamp in seconds",
             "A Boolean attribute set to true when the item should expire",
             "A Map attribute with 'expiry' and 'timestamp' fields",
+            "A Number attribute containing a Unix epoch timestamp in seconds",
+            "A String attribute with ISO 8601 date format",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The TTL attribute must be a Number containing a Unix epoch timestamp in seconds. DynamoDB compares this value against the current time to determine which items to delete.",
         },
@@ -511,12 +511,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
           question:
             "How can you identify TTL-deleted items in DynamoDB Streams?",
           options: [
+            "They have a special 'ttl_expired' event type",
             "TTL deletes do not appear in Streams",
             "They appear with userIdentity.type = 'Service' in the stream record",
-            "They have a special 'ttl_expired' event type",
             "TTL deletes are batched into a single stream record at midnight",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "TTL deletes appear in DynamoDB Streams as normal delete events, but the stream record includes userIdentity.type = 'Service' to identify them as system-initiated TTL deletions rather than application deletes.",
         },
@@ -535,8 +535,8 @@ TTL is ideal for session management (user sessions that should expire after 30 m
         {
           question:
             "What is the retention window for DynamoDB Point-in-Time Recovery (PITR)?",
-          options: ["7 days", "14 days", "35 days", "90 days"],
-          correctIndex: 2,
+          options: ["14 days", "7 days", "90 days", "35 days"],
+          correctIndex: 3,
           explanation:
             "PITR maintains a rolling 35-day window of the table's complete change history. You can restore to any second within that window, providing continuous protection against accidental data corruption.",
         },
@@ -544,12 +544,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
           question:
             "When restoring a DynamoDB table using PITR, where does the restored data go?",
           options: [
-            "It overwrites the existing table in-place",
-            "It is restored to a new table with a different name",
-            "It is restored to the same table after a brief downtime",
             "It is exported to S3 first, then reimported",
+            "It overwrites the existing table in-place",
+            "It is restored to the same table after a brief downtime",
+            "It is restored to a new table with a different name",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "PITR restores always create a new table — you cannot restore in-place to the existing table. You then need to switch traffic from the old table to the restored one.",
         },
@@ -612,12 +612,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
       question:
         "A DynamoDB Query returns 200 items before a FilterExpression reduces the result to 10. How many RCUs are consumed?",
       options: [
-        "RCUs for 10 items — FilterExpression reduces consumption",
-        "RCUs for 200 items — FilterExpression does not reduce RCU consumption",
-        "RCUs for 105 items (the average)",
         "Zero — Query with FilterExpression is free",
+        "RCUs for 105 items (the average)",
+        "RCUs for 200 items — FilterExpression does not reduce RCU consumption",
+        "RCUs for 10 items — FilterExpression reduces consumption",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "FilterExpression does not reduce RCU consumption. You pay for all 200 items read from the partition before filtering. To reduce cost, design your key schema or indexes to narrow the result at the query level.",
     },
@@ -625,12 +625,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
       question:
         "A developer needs a DynamoDB index to support a completely different query access pattern with its own partition key. The table already exists. Which index should they create?",
       options: [
+        "LSI with a different sort key",
         "Local Secondary Index (LSI)",
         "Global Secondary Index (GSI)",
         "Composite primary key index",
-        "LSI with a different sort key",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "A GSI can have a completely different partition key and sort key from the base table and can be added at any time after table creation. LSIs must be created at table creation time and must share the table's partition key.",
     },
@@ -638,12 +638,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
       question:
         "Which DynamoDB billing mode instantly scales to any request rate without capacity planning?",
       options: [
-        "Provisioned mode with Auto Scaling",
         "On-demand mode",
-        "Reserved capacity mode",
+        "Provisioned mode with Auto Scaling",
         "Burst capacity mode",
+        "Reserved capacity mode",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "On-demand mode scales instantly to handle any request rate and charges per request. It eliminates capacity planning and is ideal for unpredictable or spiky workloads and new tables with unknown traffic patterns.",
     },
@@ -651,12 +651,12 @@ TTL is ideal for session management (user sessions that should expire after 30 m
       question:
         "What exception is thrown when a DynamoDB conditional expression check fails?",
       options: [
-        "ThrottlingException",
-        "OptimisticLockException",
         "ConditionalCheckFailedException",
+        "OptimisticLockException",
+        "ThrottlingException",
         "ProvisionedThroughputExceededException",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "DynamoDB throws ConditionalCheckFailedException when a conditional expression evaluates to false. The item remains unchanged and the application can decide to retry or report the conflict.",
     },
@@ -664,40 +664,40 @@ TTL is ideal for session management (user sessions that should expire after 30 m
       question:
         "A DynamoDB table's GSI has 100 WCU provisioned but the base table receives 500 WCU of writes. What happens?",
       options: [
-        "The GSI silently drops excess writes with no impact on the base table",
-        "Base table writes that need to propagate to the GSI are throttled, surfacing as base table write failures",
-        "The GSI automatically borrows capacity from the base table",
         "Only 100 WCU of base table writes succeed per second",
+        "The GSI automatically borrows capacity from the base table",
+        "Base table writes that need to propagate to the GSI are throttled, surfacing as base table write failures",
+        "The GSI silently drops excess writes with no impact on the base table",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "GSI throttling surfaces as base table write failures. When a GSI lacks sufficient WCU, writes to the base table that must propagate to the GSI are throttled. Always provision GSI WCU appropriately.",
     },
     {
       question:
         "Which DynamoDB Streams view type is most useful for auditing and change data capture?",
-      options: ["KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE", "NEW_AND_OLD_IMAGES"],
-      correctIndex: 3,
+      options: ["OLD_IMAGE", "KEYS_ONLY", "NEW_AND_OLD_IMAGES", "NEW_IMAGE"],
+      correctIndex: 2,
       explanation:
         "NEW_AND_OLD_IMAGES captures both the before and after state of each changed item. This is most useful for auditing, change data capture, and scenarios where you need to compare what changed.",
     },
     {
       question: "When is DAX NOT a suitable caching solution for DynamoDB?",
       options: [
-        "When the workload is read-heavy with repeated access to the same items",
-        "When strongly consistent reads are required",
-        "When the table stores session data for millions of users",
         "When the table stores a product catalog accessed by many concurrent users",
+        "When the table stores session data for millions of users",
+        "When strongly consistent reads are required",
+        "When the workload is read-heavy with repeated access to the same items",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "DAX is not suitable when strongly consistent reads are required because it returns cached (eventually consistent) data. It also does not benefit write-heavy workloads since the write path to DynamoDB is unchanged.",
     },
     {
       question:
         "How long does DynamoDB PITR retain the table's change history?",
-      options: ["7 days", "14 days", "35 days", "90 days"],
-      correctIndex: 2,
+      options: ["35 days", "14 days", "90 days", "7 days"],
+      correctIndex: 0,
       explanation:
         "PITR maintains a rolling 35-day window. You can restore to any second within that window. PITR restores always go to a new table — you cannot restore in-place to the existing table.",
     },

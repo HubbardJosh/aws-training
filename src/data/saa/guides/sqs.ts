@@ -18,12 +18,12 @@ export const sqsGuide: ServiceGuide = {
           question:
             "An application processes financial transactions where duplicate processing or out-of-order execution would cause incorrect account balances. Which SQS queue type is required?",
           options: [
-            "Standard queue with idempotent consumers",
-            "Standard queue with a deduplication Lambda function",
-            "FIFO queue with exactly-once processing and strict ordering",
             "Standard queue with high throughput mode enabled",
+            "FIFO queue with exactly-once processing and strict ordering",
+            "Standard queue with a deduplication Lambda function",
+            "Standard queue with idempotent consumers",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "FIFO queues guarantee exactly-once processing and strict ordering within a message group. For financial transactions where duplicates and out-of-order processing would cause incorrect balances, FIFO queues are required. Standard queues use at-least-once delivery with best-effort ordering, which is unsuitable for this use case.",
         },
@@ -31,12 +31,12 @@ export const sqsGuide: ServiceGuide = {
           question:
             "A high-throughput image thumbnail generation service processes millions of images per day. Occasional duplicate processing is acceptable as long as throughput is maximized. Which SQS queue type is most appropriate?",
           options: [
+            "FIFO queue with High Throughput mode",
             "FIFO queue for guaranteed delivery",
             "Standard queue for maximum throughput",
-            "FIFO queue with High Throughput mode",
             "Standard queue with a DLQ for duplicates",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Standard queues support nearly unlimited throughput with at-least-once delivery. For image thumbnail generation, duplicate processing is harmless (idempotent operation — the same thumbnail can be generated twice without corruption), making Standard queues the right choice to maximize throughput. FIFO queues have throughput limits that would constrain a high-volume workload.",
         },
@@ -44,12 +44,12 @@ export const sqsGuide: ServiceGuide = {
           question:
             "What does the MessageGroupId attribute control in an SQS FIFO queue?",
           options: [
-            "It determines which DLQ receives failed messages from the group",
-            "It groups messages for batch processing regardless of ordering",
             "It defines ordering — messages with the same MessageGroupId are processed in strict order",
             "It controls message visibility timeout per group of messages",
+            "It groups messages for batch processing regardless of ordering",
+            "It determines which DLQ receives failed messages from the group",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "In SQS FIFO queues, the MessageGroupId determines ordering: messages with the same MessageGroupId are delivered and processed in the exact order they were sent. Messages with different MessageGroupIds can be processed in parallel and independently. This enables ordering within a specific entity (e.g., all orders for customer ID 123) while allowing parallelism across entities.",
         },
@@ -63,20 +63,20 @@ export const sqsGuide: ServiceGuide = {
           question:
             "A Lambda function is processing SQS messages with a visibility timeout of 30 seconds, but some messages take up to 3 minutes to process. What is the consequence, and how should it be fixed?",
           options: [
-            "Consequence: messages are duplicated; Fix: increase visibility timeout to at least 3 minutes",
+            "Consequence: Lambda times out; Fix: increase Lambda timeout",
             "Consequence: messages are lost; Fix: enable long polling",
             "Consequence: messages are moved to the DLQ; Fix: increase maxReceiveCount",
-            "Consequence: Lambda times out; Fix: increase Lambda timeout",
+            "Consequence: messages are duplicated; Fix: increase visibility timeout to at least 3 minutes",
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation:
             "When the visibility timeout (30s) is shorter than the actual processing time (3 min), SQS makes the message visible again before the consumer finishes processing. Another consumer picks it up and processes it again — causing duplicate processing. The fix is to set the visibility timeout to at least the maximum expected processing time (3+ minutes).",
         },
         {
           question:
             "What is the maximum message retention period for Amazon SQS?",
-          options: ["1 day", "4 days", "14 days", "30 days"],
-          correctIndex: 2,
+          options: ["14 days", "30 days", "4 days", "1 day"],
+          correctIndex: 0,
           explanation:
             "The maximum message retention period for SQS is 14 days. The default is 4 days. Messages not consumed within the retention period are automatically deleted. The retention period should be set long enough to survive planned outages and consumer deployments without losing messages.",
         },
@@ -102,12 +102,12 @@ export const sqsGuide: ServiceGuide = {
         {
           question: "What type of DLQ must a FIFO SQS queue use?",
           options: [
-            "A standard SQS queue — FIFO DLQs are not supported",
             "A FIFO SQS queue — DLQ and source queue must be the same type",
-            "Any SQS queue type works for FIFO DLQs",
             "An SNS topic subscribed to by an SQS FIFO queue",
+            "Any SQS queue type works for FIFO DLQs",
+            "A standard SQS queue — FIFO DLQs are not supported",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SQS DLQs must be the same queue type as the source queue. A FIFO source queue requires a FIFO DLQ, and a standard source queue requires a standard DLQ. Mixing queue types is not supported. This is an important detail when designing FIFO-based architectures with dead-letter handling.",
         },
@@ -116,11 +116,11 @@ export const sqsGuide: ServiceGuide = {
             "Which CloudWatch metric should be monitored to alert when messages accumulate in an SQS DLQ?",
           options: [
             "NumberOfMessagesSent",
+            "NumberOfMessagesDeleted",
             "ApproximateNumberOfMessagesNotVisible",
             "ApproximateNumberOfMessagesVisible",
-            "NumberOfMessagesDeleted",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "ApproximateNumberOfMessagesVisible represents the number of messages available for retrieval from the queue. Setting a CloudWatch alarm on this metric for the DLQ provides automated alerting when messages start accumulating, indicating that the consumer is failing to process certain messages. A rising DLQ depth is a reliable signal of a consumer-side problem.",
         },
@@ -134,20 +134,20 @@ export const sqsGuide: ServiceGuide = {
           question:
             "A consumer is making frequent ReceiveMessage API calls but getting many empty responses, driving up costs. What change would reduce empty responses and lower costs?",
           options: [
-            "Switch to a FIFO queue to improve message detection",
             "Enable long polling by setting WaitTimeSeconds to up to 20 seconds",
-            "Increase the visibility timeout to reduce re-queuing",
+            "Switch to a FIFO queue to improve message detection",
             "Enable server-side encryption to improve queue performance",
+            "Increase the visibility timeout to reduce re-queuing",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Long polling (WaitTimeSeconds = 1–20) causes the ReceiveMessage call to wait for messages to arrive before returning. It queries all queue servers (not just a subset), reduces empty responses, and lowers API call frequency — all of which reduce SQS costs. It is the recommended default for almost all SQS consumers.",
         },
         {
           question:
             "What is the maximum wait time that can be configured for SQS long polling?",
-          options: ["5 seconds", "10 seconds", "20 seconds", "60 seconds"],
-          correctIndex: 2,
+          options: ["20 seconds", "60 seconds", "10 seconds", "5 seconds"],
+          correctIndex: 0,
           explanation:
             "SQS long polling supports a WaitTimeSeconds value of 1 to 20 seconds. Setting it to 20 seconds is the maximum and provides the greatest reduction in empty responses and API call costs. The ReceiveMessage call waits up to 20 seconds for at least one message before returning.",
         },
@@ -193,12 +193,12 @@ export const sqsGuide: ServiceGuide = {
           question:
             "EC2 instances in a private subnet need to send messages to SQS without routing traffic over the public internet. What enables this?",
           options: [
-            "A NAT Gateway in a public subnet",
-            "A VPC Endpoint for SQS (interface endpoint)",
             "Direct Connect to the SQS service endpoint",
             "An S3 gateway endpoint that proxies SQS traffic",
+            "A VPC Endpoint for SQS (interface endpoint)",
+            "A NAT Gateway in a public subnet",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A VPC Interface Endpoint for SQS places an ENI in the private subnet with a private IP address for the SQS service endpoint. EC2 instances and Lambda functions can send messages to SQS via this private endpoint without traffic leaving the AWS network. This eliminates the need for a NAT Gateway for SQS access from private subnets.",
         },
@@ -206,12 +206,12 @@ export const sqsGuide: ServiceGuide = {
           question:
             "Which SQS encryption option provides customer control over key rotation and CloudTrail audit logs of key usage?",
           options: [
+            "TLS encryption for messages in transit",
             "SSE-SQS with AWS-managed keys",
             "SSE-KMS with customer-managed KMS keys",
-            "TLS encryption for messages in transit",
             "Client-side encryption before enqueuing",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SSE-KMS uses customer-managed KMS keys, which log every encryption and decryption operation to CloudTrail and give you control over key rotation policies and access. SSE-SQS uses AWS-managed keys for simplicity but without customer visibility or control over key management. For compliance-driven workloads requiring audit trails, SSE-KMS is the correct choice.",
         },
@@ -282,12 +282,12 @@ export const sqsGuide: ServiceGuide = {
     {
       question: "What is the purpose of an SQS Dead Letter Queue?",
       options: [
-        "To store messages that have been successfully processed for audit purposes",
-        "To capture messages that fail to process after exceeding the maxReceiveCount",
         "To hold messages while the primary queue is at capacity",
         "To buffer messages during consumer maintenance windows",
+        "To store messages that have been successfully processed for audit purposes",
+        "To capture messages that fail to process after exceeding the maxReceiveCount",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A DLQ captures poison-pill messages that exceed the maxReceiveCount — messages that consistently fail to process. Once in the DLQ, they no longer block the main queue. Engineers can inspect DLQ messages to diagnose failures, fix the underlying bug, and replay messages using SQS DLQ Redrive.",
     },
@@ -308,12 +308,12 @@ export const sqsGuide: ServiceGuide = {
       question:
         "A Lambda function processes an SQS batch of 10 messages. Three messages fail due to a bug. How can you configure Lambda to retry only the 3 failed messages?",
       options: [
-        "Set the batch size to 1 so each message is processed individually",
         "Enable 'Report Batch Item Failures' on the Lambda event source mapping",
+        "Set the batch size to 1 so each message is processed individually",
         "Configure a DLQ on the SQS queue with maxReceiveCount of 1",
         "Use a FIFO queue so failed messages are automatically separated",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Enabling 'Report Batch Item Failures' allows the Lambda function to return a list of failed message IDs. SQS then makes only those specific messages visible again for retry, while the successfully processed messages remain deleted. Without this, the entire batch is retried, reprocessing the 7 messages that succeeded.",
     },
@@ -321,12 +321,12 @@ export const sqsGuide: ServiceGuide = {
       question:
         "What SQS queue type must be used as the DLQ for an SQS FIFO source queue?",
       options: [
-        "A standard SQS queue for maximum DLQ throughput",
         "A FIFO SQS queue — DLQ and source queue must be the same type",
+        "A standard SQS queue for maximum DLQ throughput",
         "Either type — SQS DLQs are type-agnostic",
         "An SNS topic with SQS subscriptions",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The SQS DLQ must be the same type as the source queue. A FIFO source queue requires a FIFO DLQ; a standard source queue requires a standard DLQ. Configuring a standard DLQ for a FIFO source queue is not supported.",
     },
@@ -347,12 +347,12 @@ export const sqsGuide: ServiceGuide = {
       question:
         "An EC2 instance in a private subnet needs to send messages to SQS without using a NAT Gateway. What provides private connectivity to SQS?",
       options: [
-        "A Gateway VPC endpoint for SQS",
         "An Interface VPC endpoint for SQS",
-        "Direct Connect to the SQS regional endpoint",
         "A VPN connection to the SQS service",
+        "A Gateway VPC endpoint for SQS",
+        "Direct Connect to the SQS regional endpoint",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "An Interface VPC Endpoint (powered by AWS PrivateLink) for SQS places an ENI with a private IP in the subnet. EC2 instances route SQS API calls to this private endpoint, keeping traffic within the AWS network without requiring a NAT Gateway. Note: SQS uses an Interface endpoint, not a Gateway endpoint (which is only available for S3 and DynamoDB).",
     },

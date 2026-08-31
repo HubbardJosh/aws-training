@@ -32,12 +32,12 @@ The service exposes its capabilities through synchronous single-document APIs fo
           question:
             "Which API pattern does Comprehend use for real-time single-document analysis?",
           options: [
-            "Asynchronous batch jobs with S3 output",
             "Synchronous single-document APIs",
-            "WebSocket streaming",
             "Kinesis Data Streams ingestion",
+            "WebSocket streaming",
+            "Asynchronous batch jobs with S3 output",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Comprehend exposes synchronous single-document APIs for real-time use cases where you need an immediate response for one document at a time. Asynchronous batch APIs are used for large-scale processing. Comprehend does not use WebSocket streaming or Kinesis Data Streams for its NLP analysis.",
         },
@@ -67,12 +67,12 @@ The service exposes its capabilities through synchronous single-document APIs fo
           question:
             "A hotel review reads: 'The food was excellent but the front desk staff was rude.' Standard sentiment analysis returns Mixed. Which Comprehend feature provides separate sentiment scores for 'food' and 'front desk staff' individually?",
           options: [
-            "Entity recognition",
             "Targeted sentiment",
+            "Entity recognition",
             "Key phrase extraction",
             "Syntax analysis",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Targeted sentiment identifies individual entities mentioned in text and assigns sentiment to each one separately, so 'food' can be positive while 'front desk staff' is negative in the same document. Standard sentiment gives one overall score. Entity recognition identifies entities but does not assign sentiment. Key phrase extraction identifies main ideas, not sentiment.",
         },
@@ -80,12 +80,12 @@ The service exposes its capabilities through synchronous single-document APIs fo
           question:
             "Which Comprehend capability identifies named real-world objects in text such as Person, Organization, Location, and Date?",
           options: [
-            "Sentiment analysis",
-            "Key phrase extraction",
-            "Entity recognition",
             "Dominant language detection",
+            "Key phrase extraction",
+            "Sentiment analysis",
+            "Entity recognition",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Entity recognition identifies and classifies named real-world objects — Persons, Organizations, Locations, Dates, Quantities, Events, Titles, and more. Sentiment analysis classifies emotional tone. Key phrase extraction identifies main noun phrases. Language detection identifies the document's primary language.",
         },
@@ -93,12 +93,12 @@ The service exposes its capabilities through synchronous single-document APIs fo
           question:
             "What are the four sentiment categories returned by Amazon Comprehend's sentiment analysis?",
           options: [
-            "Happy, Sad, Angry, Surprised",
             "Positive, Negative, Neutral, Mixed",
             "Good, Bad, Neutral, Ambiguous",
             "Positive, Negative, Neutral, Unknown",
+            "Happy, Sad, Angry, Surprised",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Comprehend's sentiment analysis classifies text into four categories: Positive, Negative, Neutral, and Mixed, each with a confidence score. Mixed is returned when the text contains both positive and negative signals. The other option sets use different terminology not used by Comprehend.",
         },
@@ -115,11 +115,11 @@ Critically, Comprehend can also **redact** PII by replacing detected entities wi
             "A company wants to sanitize customer support chat logs before feeding them to an LLM, replacing names, phone numbers, and SSNs with placeholders. Which Comprehend capability does this?",
           options: [
             "Entity recognition with post-processing",
+            "Custom entity recognition",
             "PII detection and redaction",
             "Topic modeling",
-            "Custom entity recognition",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Comprehend's PII detection and redaction feature automatically identifies PII entities (names, phone numbers, SSNs, etc.) and replaces them with typed placeholders like [NAME] or [SSN], producing a sanitized document. Entity recognition identifies but does not redact. Topic modeling finds themes. Custom entity recognition is for domain-specific entities, not standard PII.",
         },
@@ -127,12 +127,12 @@ Critically, Comprehend can also **redact** PII by replacing detected entities wi
           question:
             "Which Comprehend API provides a quick check to determine if a document contains any PII at all, before running full redaction?",
           options: [
-            "DetectEntities",
-            "DetectSentiment",
             "ContainsPiiEntities",
+            "DetectSentiment",
             "DetectPiiEntities",
+            "DetectEntities",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "ContainsPiiEntities is a fast first-pass API that checks whether a document contains any PII entities without doing full extraction. This is useful for filtering large volumes of documents before applying the more detailed PII detection or redaction. DetectEntities identifies general entities, not specifically PII.",
         },
@@ -161,12 +161,12 @@ This is useful for understanding a large collection of documents at scale: What 
           question:
             "Which algorithm does Amazon Comprehend use for topic modeling?",
           options: [
-            "K-Means clustering",
             "Latent Dirichlet Allocation (LDA)",
-            "BERT embeddings with k-NN clustering",
             "TF-IDF with hierarchical clustering",
+            "BERT embeddings with k-NN clustering",
+            "K-Means clustering",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Comprehend's topic modeling uses Latent Dirichlet Allocation (LDA), a probabilistic model that infers topics as distributions over words and documents as mixtures of topics. K-Means, BERT with k-NN, and TF-IDF hierarchical clustering are different approaches not used by Comprehend's topic modeling.",
         },
@@ -175,11 +175,11 @@ This is useful for understanding a large collection of documents at scale: What 
             "What does a customer need to specify when submitting a topic modeling job to Amazon Comprehend?",
           options: [
             "The exact topics and their definitions",
-            "The number of topics to infer — Comprehend discovers the topics automatically",
-            "A labeled training dataset mapping documents to topics",
             "An embedding model to use for semantic similarity",
+            "A labeled training dataset mapping documents to topics",
+            "The number of topics to infer — Comprehend discovers the topics automatically",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Topic modeling is unsupervised — you specify the number of topics you want, and Comprehend automatically discovers what those topics are from the document corpus. You do not define the topics in advance, provide labeled training data, or specify an embedding model. This is what makes it unsupervised.",
         },
@@ -187,12 +187,12 @@ This is useful for understanding a large collection of documents at scale: What 
           question:
             "What two output matrices does a Comprehend topic modeling job produce?",
           options: [
+            "A word-frequency matrix and a document-similarity matrix",
             "A sentiment matrix and an entity matrix",
             "A topic-terms matrix and a document-topics matrix",
-            "A word-frequency matrix and a document-similarity matrix",
             "A feature-importance matrix and a document-classification matrix",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Topic modeling results include a topic-terms matrix (which words most define each discovered topic) and a document-topics matrix (how strongly each document relates to each topic). These together allow you to understand both what the topics are and how your documents distribute across them.",
         },
@@ -212,10 +212,10 @@ This is useful for understanding a large collection of documents at scale: What 
           options: [
             "Custom Entity Recognition",
             "Topic modeling",
-            "Custom Classification",
             "Targeted sentiment analysis",
+            "Custom Classification",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Custom Classification trains a text classifier on labeled examples (ticket text → product category) and deploys it to a real-time endpoint or batch job for automatic routing. Custom Entity Recognition identifies specific named entities, not document-level categories. Topic modeling discovers themes unsupervised. Targeted sentiment assigns sentiment, not categories.",
         },
@@ -223,12 +223,12 @@ This is useful for understanding a large collection of documents at scale: What 
           question:
             "What type of training data is required for Comprehend Custom Entity Recognition?",
           options: [
-            "A CSV file with document text and document-level category labels",
             "Annotated documents with entity spans marked, identifying the specific text positions of custom entities",
-            "A list of entity names without annotations",
+            "A CSV file with document text and document-level category labels",
             "Unlabeled documents for unsupervised entity discovery",
+            "A list of entity names without annotations",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Custom Entity Recognition requires annotated training documents where the specific text spans of custom entity types are marked (span-level labels). This differs from Custom Classification, which uses document-level labels. Entity recognition cannot be trained on entity lists alone or unlabeled documents.",
         },
@@ -237,11 +237,11 @@ This is useful for understanding a large collection of documents at scale: What 
             "What is the key difference between Comprehend Custom Classification and Custom Entity Recognition?",
           options: [
             "Custom Classification works on images; Custom Entity Recognition works on text",
+            "Custom Classification requires more training data; Custom Entity Recognition requires less",
             "Custom Classification assigns document-level category labels; Custom Entity Recognition identifies specific entity spans within text",
             "Custom Classification is unsupervised; Custom Entity Recognition is supervised",
-            "Custom Classification requires more training data; Custom Entity Recognition requires less",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Custom Classification assigns a label to an entire document (e.g., 'this ticket belongs to the billing team'). Custom Entity Recognition identifies specific text spans within a document that match custom entity types (e.g., 'this phrase is a drug name'). Both are supervised — they require labeled training data.",
         },
@@ -285,12 +285,12 @@ This is useful for understanding a large collection of documents at scale: What 
       question:
         "A company processes thousands of customer emails and wants to identify the primary theme of each email (billing issue, technical problem, general inquiry) and route them automatically. Which Comprehend feature handles this?",
       options: [
+        "Targeted sentiment analysis",
+        "Entity recognition with post-processing rules",
         "Topic modeling with LDA",
         "Custom Classification with a trained classifier endpoint",
-        "Entity recognition with post-processing rules",
-        "Targeted sentiment analysis",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Custom Classification trains a text classifier on labeled examples (email text → category) and deploys it for real-time or batch routing. Topic modeling is unsupervised and discovers unknown themes rather than classifying into predefined categories. Entity recognition identifies named objects. Targeted sentiment assigns sentiment, not routing categories.",
     },
@@ -298,12 +298,12 @@ This is useful for understanding a large collection of documents at scale: What 
       question:
         "Which Comprehend capability would you use to discover the recurring themes across 100,000 product reviews without having predefined categories?",
       options: [
+        "Targeted sentiment",
         "Custom Classification",
         "Entity recognition",
         "Topic modeling",
-        "Targeted sentiment",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Topic modeling is the unsupervised technique for discovering hidden thematic structure across a document corpus when themes are not known in advance. You specify how many topics to find, and Comprehend (using LDA) discovers what those topics are. Custom Classification requires predefined labeled categories.",
     },
@@ -324,12 +324,12 @@ This is useful for understanding a large collection of documents at scale: What 
       question:
         "A pharmaceutical company wants Comprehend to recognize drug names and medical device identifiers that its base model does not know. What should they build?",
       options: [
-        "A Custom Classifier with drug name categories",
         "A Custom Entity Recognizer trained on annotated documents with drug name spans marked",
-        "A topic model focused on medical terminology",
         "A sentiment analyzer tuned for medical text",
+        "A Custom Classifier with drug name categories",
+        "A topic model focused on medical terminology",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Custom Entity Recognition trains a named entity recognizer on annotated documents where custom entity spans (drug names, device identifiers) are marked. This teaches Comprehend to detect entity types its base model doesn't recognize. Custom Classification assigns document-level labels, not span-level entity detection.",
     },
@@ -338,11 +338,11 @@ This is useful for understanding a large collection of documents at scale: What 
         "What does the 'Mixed' sentiment classification in Amazon Comprehend indicate?",
       options: [
         "The model is uncertain and the confidence score is below threshold",
-        "The text contains both positive and negative signals",
         "The document is written in multiple languages",
         "The text contains no clear emotional content",
+        "The text contains both positive and negative signals",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Mixed sentiment indicates that the text contains both positive and negative signals — for example, 'The food was great but the service was terrible.' It is not an uncertainty indicator, not related to multilingual content (that's language detection), and not the same as Neutral (which indicates no strong emotional signal).",
     },
@@ -363,12 +363,12 @@ This is useful for understanding a large collection of documents at scale: What 
       question:
         "Amazon Comprehend Medical is described as a separate but related service. What makes it distinct from standard Comprehend?",
       options: [
+        "Comprehend Medical uses GPT-4 while standard Comprehend uses Amazon's own models",
         "Comprehend Medical supports batch processing; standard Comprehend only supports real-time",
         "Comprehend Medical is purpose-built for medical text, including clinical notes and ICD-10 codes and medication extraction",
-        "Comprehend Medical uses GPT-4 while standard Comprehend uses Amazon's own models",
         "Comprehend Medical performs image analysis of medical scans",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Amazon Comprehend Medical is a specialized NLP service trained specifically on medical and clinical text, enabling extraction of medical conditions, medications, dosages, ICD-10 codes, and other clinical entities with higher accuracy than the general Comprehend service. Both support batch and real-time processing. It does not use GPT-4 or process medical images.",
     },
@@ -377,11 +377,11 @@ This is useful for understanding a large collection of documents at scale: What 
         "What distinguishes targeted sentiment from standard document-level sentiment analysis in Comprehend?",
       options: [
         "Targeted sentiment is faster and cheaper than document-level sentiment",
-        "Targeted sentiment identifies individual entities mentioned in the text and assigns separate sentiment scores to each",
-        "Targeted sentiment uses a neural network while document-level uses rules",
         "Targeted sentiment works on longer documents while document-level is limited to short texts",
+        "Targeted sentiment uses a neural network while document-level uses rules",
+        "Targeted sentiment identifies individual entities mentioned in the text and assigns separate sentiment scores to each",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Targeted sentiment goes beyond a single document-level score by identifying entities mentioned in the text and assigning individual sentiment scores to each. A review can be positive about 'room size' and negative about 'price' simultaneously. Document-level sentiment collapses this into one overall score.",
     },

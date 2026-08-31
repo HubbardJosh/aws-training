@@ -41,11 +41,11 @@ An **IAM Policy** is a JSON document that defines permissions. Policies state wh
             "What is the key advantage of using IAM Roles over IAM Users for applications running on AWS services?",
           options: [
             "Roles support more permission types than users",
-            "Roles issue temporary, automatically rotated credentials instead of long-term access keys",
             "Roles can be used across multiple AWS accounts while users cannot",
             "Roles have no cost while IAM users have a monthly fee",
+            "Roles issue temporary, automatically rotated credentials instead of long-term access keys",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "IAM Roles issue temporary security credentials that are automatically rotated. This is more secure than long-term access keys associated with IAM users, which can be leaked and misused indefinitely if compromised.",
         },
@@ -54,11 +54,11 @@ An **IAM Policy** is a JSON document that defines permissions. Policies state wh
             "Why should you attach policies to IAM Groups rather than directly to individual IAM Users?",
           options: [
             "Policies attached to groups have higher priority than user-level policies",
-            "It is more scalable — adding a user to a group automatically grants all group permissions",
             "User-level policies are limited to 5 statements, while group policies have no limit",
             "Group policies apply to all AWS accounts while user policies are account-specific",
+            "It is more scalable — adding a user to a group automatically grants all group permissions",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Attaching policies to groups is more scalable. Adding a user to a group automatically grants all the group's permissions. When permissions change, you update the group policy once instead of updating each individual user.",
         },
@@ -79,12 +79,12 @@ The **Principle of Least Privilege** is the foundational security concept that e
         {
           question: "What is the Principle of Least Privilege in IAM?",
           options: [
-            "Always use the root account for administrative tasks to ensure full access",
             "Grant every user Administrator access so they can do their job without being blocked",
-            "Grant users and services only the minimum permissions needed to perform their function",
             "Use only AWS Managed Policies and never create custom policies",
+            "Always use the root account for administrative tasks to ensure full access",
+            "Grant users and services only the minimum permissions needed to perform their function",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The Principle of Least Privilege states that every user or service should have only the minimum permissions necessary to perform its function. Start with no permissions and add only what is specifically required, reducing the blast radius if credentials are compromised.",
         },
@@ -92,12 +92,12 @@ The **Principle of Least Privilege** is the foundational security concept that e
           question:
             "What is the difference between an AWS Managed Policy and a Customer Managed Policy?",
           options: [
-            "AWS Managed Policies can only be attached to roles; Customer Managed Policies can be attached to users and groups",
             "AWS Managed Policies are maintained by AWS; Customer Managed Policies are created and maintained by you",
-            "AWS Managed Policies are free; Customer Managed Policies have a cost per policy",
             "AWS Managed Policies apply account-wide; Customer Managed Policies are region-specific",
+            "AWS Managed Policies can only be attached to roles; Customer Managed Policies can be attached to users and groups",
+            "AWS Managed Policies are free; Customer Managed Policies have a cost per policy",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "AWS Managed Policies are created and maintained by AWS (like AdministratorAccess or ReadOnlyAccess) and updated when services add new actions. Customer Managed Policies are created and managed by you for your specific permission requirements.",
         },
@@ -105,12 +105,12 @@ The **Principle of Least Privilege** is the foundational security concept that e
           question:
             "In an IAM policy statement, an explicit Deny and an explicit Allow exist for the same action. What is the result?",
           options: [
+            "The result depends on which policy (user or group) has higher priority",
             "Allow takes precedence because it was configured most recently",
             "Deny takes precedence — an explicit Deny always overrides any Allow",
-            "The result depends on which policy (user or group) has higher priority",
             "The action is neither allowed nor denied — it requires manual review",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "In IAM policy evaluation, an explicit Deny always overrides any Allow. This is a fundamental rule of IAM — if there is any Deny statement applicable to an action, the action is denied regardless of any Allow statements.",
         },
@@ -130,12 +130,12 @@ This pattern — **services assuming roles with least-privilege permissions** �
           question:
             "An application running on an EC2 instance needs to read objects from an S3 bucket. What is the AWS-recommended approach?",
           options: [
+            "Make the S3 bucket publicly readable to avoid authentication overhead",
+            "Create an IAM user, generate access keys, and hardcode them in the application",
             "Store AWS access keys in the application's environment variables on the EC2 instance",
             "Attach an IAM Instance Profile with an S3 read role to the EC2 instance",
-            "Create an IAM user, generate access keys, and hardcode them in the application",
-            "Make the S3 bucket publicly readable to avoid authentication overhead",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Attaching an IAM Instance Profile (with an appropriate role) to the EC2 instance is the recommended approach. The application retrieves temporary, automatically rotated credentials from the instance metadata endpoint. No hardcoded access keys are needed.",
         },
@@ -170,23 +170,23 @@ This pattern — **services assuming roles with least-privilege permissions** �
             "What should you do with the AWS root user account after initial setup?",
           options: [
             "Use it daily for all administrative tasks since it has the most permissions",
-            "Enable MFA, avoid daily use, and do not create root user access keys",
             "Delete it and use only IAM users going forward",
             "Share the credentials with your team so everyone has full account access",
+            "Enable MFA, avoid daily use, and do not create root user access keys",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS strongly recommends: enable MFA on the root user immediately, use it only for account management tasks that require it (like changing the account email), and never create root user access keys. Create IAM users or use federation for daily work.",
         },
         {
           question: "What does the IAM Credentials Report contain?",
           options: [
-            "A list of all API calls made using IAM credentials in the past 90 days",
             "An account-level report listing all IAM users and the status of their passwords, access keys, and MFA",
             "A cost report showing charges associated with IAM API calls",
+            "A list of all API calls made using IAM credentials in the past 90 days",
             "A security score for each IAM user based on their recent activity",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The IAM Credentials Report is an account-level report that lists all IAM users and the status of their credentials — including whether passwords are active, when access keys were last rotated, and whether MFA is enabled. Use it for auditing and compliance.",
         },
@@ -195,11 +195,11 @@ This pattern — **services assuming roles with least-privilege permissions** �
             "Why is Multi-Factor Authentication (MFA) important for IAM accounts?",
           options: [
             "MFA speeds up authentication by pre-verifying users",
-            "MFA adds a second authentication factor so a stolen password alone cannot grant access",
             "MFA is required by AWS to create IAM users in new accounts",
             "MFA encrypts all API calls made by the IAM user",
+            "MFA adds a second authentication factor so a stolen password alone cannot grant access",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "MFA requires a second factor (hardware token or authenticator app code) in addition to a password. If a password is stolen or leaked, an attacker still cannot access the account without the physical MFA device or app, significantly improving security.",
         },
@@ -233,12 +233,12 @@ The key insight for the exam is that you should **not create IAM users for every
           question:
             "A large organization has 5,000 employees who need AWS access. What is the recommended approach?",
           options: [
+            "Use identity federation with AWS IAM Identity Center to grant employees role-based AWS access via their existing corporate directory",
             "Create 5,000 individual IAM users, one for each employee",
             "Share a single powerful IAM user account among all employees",
-            "Use identity federation with AWS IAM Identity Center to grant employees role-based AWS access via their existing corporate directory",
             "Grant all employees root user access for simplicity",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "For large organizations, the recommended approach is identity federation using AWS IAM Identity Center (formerly AWS SSO). Employees sign in with their existing corporate credentials (Active Directory, etc.) and receive temporary, role-based access — no individual IAM users needed.",
         },
@@ -282,8 +282,8 @@ The key insight for the exam is that you should **not create IAM users for every
     {
       question:
         "Which IAM component is a collection of users that simplifies permission management?",
-      options: ["IAM Role", "IAM Policy", "IAM Group", "IAM Instance Profile"],
-      correctIndex: 2,
+      options: ["IAM Role", "IAM Group", "IAM Instance Profile", "IAM Policy"],
+      correctIndex: 1,
       explanation:
         "An IAM Group is a collection of users. By attaching policies to groups rather than individuals, you can manage permissions at scale — adding a user to a group automatically grants all group permissions, and permission changes only need to be made once.",
     },
@@ -304,12 +304,12 @@ The key insight for the exam is that you should **not create IAM users for every
       question:
         "What happens if both an explicit Allow and an explicit Deny exist for the same IAM action?",
       options: [
+        "The most recently created policy wins",
+        "Deny takes precedence — an explicit Deny always overrides any Allow",
         "Allow takes precedence — permissions always win over denials",
         "The result is undefined and must be manually resolved",
-        "Deny takes precedence — an explicit Deny always overrides any Allow",
-        "The most recently created policy wins",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "In IAM policy evaluation, explicit Deny always overrides any Allow. This is a fundamental IAM rule — if any applicable policy contains a Deny for an action, that action is denied regardless of Allow statements in other policies.",
     },
@@ -317,12 +317,12 @@ The key insight for the exam is that you should **not create IAM users for every
       question:
         "Which AWS service is the recommended solution for centrally managing employee access across dozens of AWS accounts in a large organization?",
       options: [
-        "Amazon Cognito",
-        "AWS IAM Identity Center (formerly AWS SSO)",
         "Creating individual IAM users in each account",
         "AWS CloudTrail",
+        "AWS IAM Identity Center (formerly AWS SSO)",
+        "Amazon Cognito",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "AWS IAM Identity Center (formerly AWS SSO) centrally manages access across multiple AWS accounts and applications. It integrates with existing identity providers and provides a single portal where users sign in once to access all permitted accounts.",
     },
@@ -331,11 +331,11 @@ The key insight for the exam is that you should **not create IAM users for every
         "What are the immediate security steps AWS recommends after creating a new AWS account?",
       options: [
         "Create 100 IAM users so work can be distributed immediately",
-        "Enable MFA on the root user and avoid using root for daily tasks",
         "Delete all default VPCs and security groups",
+        "Enable MFA on the root user and avoid using root for daily tasks",
         "Enable all AWS services in the account to ensure availability",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "AWS recommends immediately enabling MFA on the root user account and avoiding its use for daily tasks. The root user has unrestricted access and cannot be restricted by policies, so protecting it with MFA and using IAM users/roles for day-to-day work is critical.",
     },
@@ -343,12 +343,12 @@ The key insight for the exam is that you should **not create IAM users for every
       question:
         "What type of IAM policy is embedded directly into a single user, group, or role and cannot be reused?",
       options: [
-        "AWS Managed Policy",
-        "Customer Managed Policy",
-        "Inline Policy",
         "Service Control Policy",
+        "Inline Policy",
+        "Customer Managed Policy",
+        "AWS Managed Policy",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Inline Policies are embedded directly into a single IAM principal (user, group, or role). They are tightly coupled to that entity and cannot be attached to others. Managed policies (AWS or Customer) are standalone and can be attached to multiple principals.",
     },
@@ -356,12 +356,12 @@ The key insight for the exam is that you should **not create IAM users for every
       question:
         "The Principle of Least Privilege in IAM means which of the following?",
       options: [
-        "Use the fewest number of IAM users to minimize management overhead",
         "Grant only the minimum permissions necessary to perform a function, starting from no permissions",
         "Only AWS administrators should have access to IAM",
         "Avoid creating custom policies and rely only on AWS Managed Policies",
+        "Use the fewest number of IAM users to minimize management overhead",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The Principle of Least Privilege means starting with no permissions and granting only what is specifically needed for the task. This minimizes the damage if credentials are compromised — a restricted account can do far less harm than an over-privileged one.",
     },
@@ -369,12 +369,12 @@ The key insight for the exam is that you should **not create IAM users for every
       question:
         "Cross-account access in IAM is achieved using which mechanism?",
       options: [
-        "Sharing IAM user credentials between accounts",
         "IAM Roles — a principal in one account assumes a role in another account",
         "Merging two AWS accounts into a single organizational account",
+        "Sharing IAM user credentials between accounts",
         "Copying IAM policies from one account to another",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Cross-account access uses IAM roles. A principal in account A is granted permission to assume a role defined in account B. When they assume the role, they receive temporary credentials to access resources in account B — no credential sharing needed.",
     },

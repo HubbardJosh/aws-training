@@ -22,23 +22,23 @@ CloudFormation is AWS's native IaC service, and it is free to use — you pay on
             "What is Infrastructure as Code (IaC) in the context of AWS CloudFormation?",
           options: [
             "Writing application code that runs on AWS Lambda",
-            "Managing and provisioning cloud infrastructure through machine-readable definition files",
             "Monitoring AWS infrastructure using CloudWatch dashboards",
             "Manually configuring AWS resources through the console",
+            "Managing and provisioning cloud infrastructure through machine-readable definition files",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "IaC is the practice of managing infrastructure through definition files (like CloudFormation templates) rather than manual processes. This enables repeatability, version control, and automation.",
         },
         {
           question: "How much does AWS CloudFormation itself cost to use?",
           options: [
-            "A flat monthly fee based on the number of stacks",
             "Per-resource charge for each item it creates",
-            "Nothing — CloudFormation is free; you pay only for the resources it creates",
             "A percentage of the total cost of resources it manages",
+            "A flat monthly fee based on the number of stacks",
+            "Nothing — CloudFormation is free; you pay only for the resources it creates",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "CloudFormation itself is free. You pay only for the underlying AWS resources (EC2, S3, RDS, etc.) that CloudFormation creates on your behalf.",
         },
@@ -46,12 +46,12 @@ CloudFormation is AWS's native IaC service, and it is free to use — you pay on
           question:
             "Which benefit of Infrastructure as Code ensures that dev, staging, and production environments have identical configurations?",
           options: [
-            "Version control",
-            "Repeatability",
-            "Automation",
             "Cost optimization",
+            "Version control",
+            "Automation",
+            "Repeatability",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Repeatability means the same CloudFormation template produces identical environments every time it is deployed, eliminating configuration drift between environments.",
         },
@@ -73,28 +73,28 @@ When you deploy a template, CloudFormation creates a **stack** — a collection 
         {
           question:
             "What is the only required section in a CloudFormation template?",
-          options: ["Parameters", "Outputs", "Resources", "Conditions"],
-          correctIndex: 2,
+          options: ["Parameters", "Conditions", "Outputs", "Resources"],
+          correctIndex: 3,
           explanation:
             "The Resources section is the only required section in a CloudFormation template. It defines the AWS resources to create and their configuration. All other sections (Parameters, Outputs, Mappings, Conditions) are optional.",
         },
         {
           question: "What happens when you delete a CloudFormation stack?",
           options: [
+            "All AWS resources created by the stack are deleted simultaneously",
             "The stack is archived but resources remain running",
             "Only the template is deleted; resources continue to exist",
-            "All AWS resources created by the stack are deleted simultaneously",
             "You must manually delete each resource before deleting the stack",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Deleting a CloudFormation stack removes all the AWS resources that were created from that template simultaneously. This makes it easy to tear down entire environments cleanly.",
         },
         {
           question:
             "What CloudFormation template section allows you to pass in values like instance type or environment name when creating the stack?",
-          options: ["Outputs", "Mappings", "Conditions", "Parameters"],
-          correctIndex: 3,
+          options: ["Mappings", "Parameters", "Conditions", "Outputs"],
+          correctIndex: 1,
           explanation:
             "The Parameters section allows inputs to be supplied when creating or updating a stack, making templates reusable across different environments or configurations.",
         },
@@ -111,12 +111,12 @@ A **Change Set** is a preview of the changes that would occur if you apply a tem
         {
           question: "What is a CloudFormation Change Set used for?",
           options: [
-            "Rolling back a failed stack deployment automatically",
             "Previewing the changes that would occur if a template update is applied to a stack",
+            "Rolling back a failed stack deployment automatically",
             "Detecting resources that were manually changed outside CloudFormation",
             "Copying a stack to a different AWS region",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A Change Set previews what would change if you apply a template update to an existing stack. You review the proposed changes and approve or reject them before any modifications occur, preventing unintended changes to production resources.",
         },
@@ -124,12 +124,12 @@ A **Change Set** is a preview of the changes that would occur if you apply a tem
           question:
             "A developer manually modified an EC2 security group through the AWS Console without updating the CloudFormation template. Which CloudFormation feature would identify this discrepancy?",
           options: [
-            "Change Sets",
-            "Rollback triggers",
             "Drift Detection",
+            "Rollback triggers",
             "Stack policies",
+            "Change Sets",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Drift Detection identifies resources whose actual configuration has diverged from what the CloudFormation template specifies. It shows which resources drifted and what changed, helping enforce the practice of making all changes through CloudFormation.",
         },
@@ -148,12 +148,12 @@ A **Change Set** is a preview of the changes that would occur if you apply a tem
         {
           question: "What is the purpose of CloudFormation StackSets?",
           options: [
-            "To preview changes before applying a template update",
             "To deploy stacks across multiple AWS accounts and regions in a single operation",
+            "To preview changes before applying a template update",
             "To create reusable template modules referenced by other templates",
             "To detect configuration drift in existing resources",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "StackSets extend CloudFormation stacks across multiple AWS accounts and regions in a single operation. This is powerful for governance use cases like deploying standard security configurations to hundreds of accounts in an AWS Organization.",
         },
@@ -174,12 +174,12 @@ A **Change Set** is a preview of the changes that would occur if you apply a tem
           question:
             "What CloudFormation feature allows one template to reference and deploy other templates, promoting reuse?",
           options: [
+            "Drift Detection",
             "StackSets",
             "Nested Stacks",
             "Change Sets",
-            "Drift Detection",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Nested Stacks allow one CloudFormation template to reference and deploy other templates. This is commonly used to create reusable module templates for VPC configurations, security groups, and IAM roles.",
         },
@@ -201,12 +201,12 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
           question:
             "AWS CDK (Cloud Development Kit) is best described as which of the following?",
           options: [
-            "A replacement for CloudFormation that uses a different deployment engine",
-            "An abstraction on top of CloudFormation that lets you define infrastructure in programming languages",
-            "A multi-cloud IaC tool that competes with Terraform",
             "A tool for monitoring CloudFormation stack deployments",
+            "A replacement for CloudFormation that uses a different deployment engine",
+            "A multi-cloud IaC tool that competes with Terraform",
+            "An abstraction on top of CloudFormation that lets you define infrastructure in programming languages",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS CDK lets you define cloud infrastructure using familiar programming languages (TypeScript, Python, Java, C#). CDK synthesizes your code into CloudFormation templates, which are then deployed through CloudFormation. It is an abstraction layer on top of CloudFormation.",
         },
@@ -272,12 +272,12 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
       question:
         "A company wants to deploy identical infrastructure environments for development, staging, and production. Which AWS service is best suited for this?",
       options: [
+        "AWS Config",
         "AWS CodeDeploy",
         "Amazon CloudWatch",
         "AWS CloudFormation",
-        "AWS Config",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "AWS CloudFormation enables Infrastructure as Code, allowing the same template to repeatedly create identical environments. This ensures dev, staging, and production all have the same configuration and eliminates manual configuration errors.",
     },
@@ -309,16 +309,16 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
     {
       question:
         "An organization needs to deploy a standard security configuration to 200 AWS accounts across 5 regions simultaneously. Which CloudFormation feature enables this?",
-      options: ["Nested Stacks", "Change Sets", "Drift Detection", "StackSets"],
-      correctIndex: 3,
+      options: ["StackSets", "Drift Detection", "Change Sets", "Nested Stacks"],
+      correctIndex: 0,
       explanation:
         "CloudFormation StackSets extend stacks across multiple AWS accounts and regions in a single operation. This is ideal for governance tasks like deploying standard security configurations to all accounts in an AWS Organization.",
     },
     {
       question:
         "Which section of a CloudFormation template is the only required section?",
-      options: ["Parameters", "Outputs", "Resources", "Conditions"],
-      correctIndex: 2,
+      options: ["Resources", "Parameters", "Outputs", "Conditions"],
+      correctIndex: 0,
       explanation:
         "The Resources section is the only required section in a CloudFormation template. It defines the AWS resources to create. Parameters, Outputs, Mappings, and Conditions are all optional sections.",
     },
@@ -327,11 +327,11 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
         "What does CloudFormation do automatically if a stack creation or update fails partway through?",
       options: [
         "Leaves the partially created resources in place and sends an alert",
-        "Rolls back all changes to the last known good state",
         "Pauses the deployment and waits for manual approval to continue",
         "Retries the entire operation three times before stopping",
+        "Rolls back all changes to the last known good state",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "CloudFormation automatically rolls back all changes if it encounters an error during stack creation or update. This prevents partial deployments that leave infrastructure in an inconsistent or broken state.",
     },
@@ -340,11 +340,11 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
         "AWS CDK (Cloud Development Kit) differs from writing CloudFormation templates directly in which key way?",
       options: [
         "CDK deploys resources without using CloudFormation at all",
-        "CDK only supports Python while CloudFormation supports all languages",
         "CDK lets you define infrastructure in familiar programming languages, which synthesizes into CloudFormation templates",
         "CDK is multi-cloud while CloudFormation is AWS-only",
+        "CDK only supports Python while CloudFormation supports all languages",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "AWS CDK allows you to define cloud infrastructure using familiar programming languages (TypeScript, Python, Java, C#) instead of YAML or JSON. CDK then synthesizes the code into CloudFormation templates and deploys through CloudFormation.",
     },
@@ -352,12 +352,12 @@ For the Cloud Practitioner exam, you should know that CloudFormation enables inf
       question:
         "If an administrator manually changes an EC2 security group through the AWS Console without updating the CloudFormation template, what will CloudFormation's Drift Detection report?",
       options: [
-        "No issues — manual changes are tracked automatically",
         "The resource is in a drifted state with the changes identified",
         "The stack is invalid and must be deleted and redeployed",
         "A Change Set is automatically created to reconcile the difference",
+        "No issues — manual changes are tracked automatically",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Drift Detection identifies resources whose actual configuration has diverged from what the CloudFormation template specifies. It reports the resource as drifted and shows what changed, helping teams identify unauthorized manual changes.",
     },

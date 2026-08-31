@@ -49,11 +49,11 @@ Beyond text, generative AI encompasses **image generation** (diffusion models li
             "A foundation model is best described as which of the following?",
           options: [
             "A small, task-specific model trained on labeled data for one use case",
-            "A general-purpose capability base pre-trained on large-scale data that can be adapted through fine-tuning or prompting",
             "A rules-based system that encodes expert knowledge",
             "A model that can only be used for the task it was explicitly trained on",
+            "A general-purpose capability base pre-trained on large-scale data that can be adapted through fine-tuning or prompting",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A foundation model is a large general-purpose model pre-trained on massive data that serves as a capability base adaptable to many downstream tasks through prompting or fine-tuning. It is the opposite of a narrow task-specific model. Foundation models are probabilistic, not rules-based, and are designed for broad adaptability.",
         },
@@ -70,24 +70,24 @@ The **context window** is the maximum number of tokens a model can process in a 
         {
           question: "What does the context window of an LLM represent?",
           options: [
-            "The maximum number of parameters the model can use during inference",
             "The maximum number of tokens the model can process in a single inference call, including both input and output",
+            "The maximum number of parameters the model can use during inference",
             "The number of training examples used to build the model",
             "The time window during which the model was trained",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The context window is the maximum total token count for a single inference call, encompassing both the input prompt and the generated output. It is not related to parameter count, training examples, or the training time period. Exceeding the context window causes earlier content to be dropped.",
         },
         {
           question: "What does quantization do to a large language model?",
           options: [
-            "It increases model accuracy by adding more training data",
-            "It compresses model weights to lower numerical precision, reducing memory footprint at modest accuracy cost",
-            "It splits the model across multiple GPUs for parallel inference",
             "It removes unnecessary layers from the model to speed up inference",
+            "It splits the model across multiple GPUs for parallel inference",
+            "It compresses model weights to lower numerical precision, reducing memory footprint at modest accuracy cost",
+            "It increases model accuracy by adding more training data",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Quantization compresses model weights from high-precision floats (32-bit or 16-bit) to lower-precision integers (8-bit or lower), dramatically reducing the memory required to run the model. This enables deploying large models on smaller or fewer GPUs. It trades a modest accuracy reduction for significantly lower resource requirements.",
         },
@@ -95,12 +95,12 @@ The **context window** is the maximum number of tokens a model can process in a 
           question:
             "Approximately how many words does a single token represent in English for most LLMs?",
           options: [
-            "Exactly one word",
             "Approximately 3/4 of a word",
+            "Exactly one word",
             "Approximately 4 words",
             "Exactly one character",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A token is approximately 3/4 of a word in English on average — common short words may be one token, while longer or unusual words may be split into multiple tokens. Punctuation and spaces are also separate tokens. This means 100 tokens is roughly 75 words of English text.",
         },
@@ -120,12 +120,12 @@ Key prompt design principles: be specific and explicit, provide context, specify
           question:
             "A developer provides three example input-output pairs before asking an LLM to classify a new customer review. Which prompting technique is this?",
           options: [
-            "Zero-shot prompting",
             "Chain-of-thought prompting",
-            "Few-shot prompting",
+            "Zero-shot prompting",
             "Structured output prompting",
+            "Few-shot prompting",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Few-shot prompting provides a small number of example input-output pairs (typically 3-5) before the actual task, helping the model understand the desired format and pattern. Zero-shot provides no examples. Chain-of-thought asks the model to reason step-by-step. Structured output specifies a response format like JSON.",
         },
@@ -133,24 +133,24 @@ Key prompt design principles: be specific and explicit, provide context, specify
           question:
             "Which prompting technique is most effective for improving LLM performance on multi-step reasoning problems like math word problems?",
           options: [
-            "Zero-shot prompting",
             "Few-shot prompting with answer-only examples",
-            "Chain-of-thought (CoT) prompting",
+            "Zero-shot prompting",
             "Structured output prompting with JSON schema",
+            "Chain-of-thought (CoT) prompting",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Chain-of-thought prompting asks the model to reason step-by-step before giving a final answer, making intermediate reasoning steps explicit. This empirically improves performance on multi-step reasoning tasks (math, logic, multi-hop QA) because the explicit steps prevent reasoning errors. Zero-shot and few-shot without explicit reasoning steps are less effective for complex reasoning.",
         },
         {
           question: "What is zero-shot prompting?",
           options: [
-            "Prompting with zero system prompt context",
             "Asking the model to perform a task with no examples provided",
             "Prompting a model that has not been fine-tuned",
+            "Prompting with zero system prompt context",
             "A technique that uses temperature=0 for deterministic outputs",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Zero-shot prompting asks the model to perform a task with no examples — just the instruction and the input. It relies entirely on the model's pre-trained knowledge and instruction-following ability. It is not related to system prompts, fine-tuning status, or temperature settings.",
         },
@@ -170,12 +170,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "What is hallucination in the context of large language models?",
           options: [
-            "A model generating outputs that are too short or truncated",
             "A model generating confident-sounding but factually incorrect or fabricated content",
+            "A model generating outputs that are too short or truncated",
             "A model that refuses to answer questions outside its training domain",
             "A model producing inconsistent outputs due to high temperature settings",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Hallucination refers to the LLM tendency to generate confident, plausible-sounding content that is factually incorrect, fabricated, or inconsistent with reality. LLMs are optimized for plausibility, not verified truth. It is distinct from truncation, refusals, or randomness — it specifically involves false but confident assertions.",
         },
@@ -183,12 +183,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "Which strategy is the most widely deployed approach to reduce LLM hallucinations in production applications?",
           options: [
-            "Fine-tuning the model on factual data",
             "Retrieval-Augmented Generation (RAG)",
+            "Fine-tuning the model on factual data",
             "Setting temperature to 0",
             "Using a larger model with more parameters",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "RAG is the most widely deployed hallucination mitigation strategy — it retrieves relevant documents at query time and instructs the model to base its answer on the provided context rather than parametric memory. Fine-tuning can introduce knowledge but it becomes stale. Temperature=0 reduces randomness but doesn't prevent hallucinations. Larger models still hallucinate.",
         },
@@ -196,12 +196,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "For a factual question-answering application where accuracy is critical, what temperature range is most appropriate?",
           options: [
-            "0.7–1.0 for maximum diversity",
             "0.0–0.3 for more deterministic, factual outputs",
+            "0.7–1.0 for maximum diversity",
             "Exactly 0.5 as a balanced midpoint",
             "Temperature does not affect factual accuracy",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Lower temperatures (0.0–0.3) make the model more deterministic by favoring higher-probability tokens, reducing hallucination risk for factual tasks. Higher temperatures (0.7–1.0) increase creativity and diversity but can introduce factual errors. Temperature does meaningfully affect factual reliability.",
         },
@@ -221,12 +221,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "A company wants an LLM to consistently output responses in a specific JSON format and adopt a formal corporate tone. They have 500 examples of ideal responses. Which approach is most appropriate?",
           options: [
+            "Fine-tuning the model on the labeled examples",
             "RAG with a vector index of the example responses",
             "Zero-shot prompting with format instructions",
-            "Fine-tuning the model on the labeled examples",
             "Increasing the model's context window",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Fine-tuning is the right choice when you need consistent output formatting and style that prompting alone cannot reliably achieve, and when you have examples of desired behavior. RAG addresses knowledge retrieval, not format consistency. Zero-shot prompting is less reliable for strict formatting. Context window size is unrelated.",
         },
@@ -234,12 +234,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "A customer service application needs to answer questions about internal product manuals that change frequently and are not in any model's training data. Which approach best addresses this?",
           options: [
-            "Fine-tuning the model on product manuals quarterly",
-            "RAG — retrieving relevant manual sections at query time and injecting them into the prompt",
-            "Prompting the model to generate product information from its training data",
             "Using a larger foundation model with more recent training data",
+            "Fine-tuning the model on product manuals quarterly",
+            "Prompting the model to generate product information from its training data",
+            "RAG — retrieving relevant manual sections at query time and injecting them into the prompt",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "RAG is ideal when content is private (not in training data), frequently updated, and answers must be traceable to source documents. Fine-tuning on manuals requires retraining when content changes. Prompting the model to generate product info from training data would produce hallucinations about proprietary content. A larger model still lacks proprietary, current data.",
         },
@@ -247,12 +247,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
           question:
             "Why is fine-tuning generally NOT recommended as a solution for injecting new factual knowledge into an LLM?",
           options: [
-            "Fine-tuning is too expensive to perform more than once",
             "The knowledge embedded through fine-tuning can become stale as facts change, and RAG is better suited for dynamic information",
-            "Fine-tuning cannot modify the knowledge stored in model weights",
+            "Fine-tuning is too expensive to perform more than once",
             "Fine-tuning always reduces model performance on factual tasks",
+            "Fine-tuning cannot modify the knowledge stored in model weights",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Knowledge injected through fine-tuning becomes part of the model's static weights and cannot be updated without retraining. As facts change over time, this knowledge becomes stale. RAG retrieves current documents at query time, making it better for dynamic or frequently updated information. Fine-tuning does embed knowledge into weights — it's the staleness that's the problem.",
         },
@@ -323,11 +323,11 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
         "Which two prompting techniques can be combined to get the best performance on complex, multi-step structured tasks?",
       options: [
         "Zero-shot and temperature=0",
-        "Few-shot examples and chain-of-thought reasoning",
-        "Structured output and temperature=1.0",
         "System prompt and quantization",
+        "Structured output and temperature=1.0",
+        "Few-shot examples and chain-of-thought reasoning",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Combining few-shot examples (showing the desired format and reasoning pattern) with chain-of-thought prompting (eliciting step-by-step reasoning) is highly effective for complex structured tasks — the examples demonstrate the pattern and the CoT prompting ensures the model reasons through each step carefully. Temperature and quantization are inference parameters, not prompting techniques.",
     },
@@ -335,12 +335,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
       question:
         "A model with 7 billion parameters is compared to a model with 70 billion parameters. What is generally true, with caveats?",
       options: [
-        "The 7B model is always more capable because smaller models are more focused",
         "The 70B model generally has greater capability but requires more compute and memory",
-        "Parameter count has no relationship to model capability",
+        "The 7B model is always more capable because smaller models are more focused",
         "The 70B model is always faster because it processes more information in parallel",
+        "Parameter count has no relationship to model capability",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "More parameters generally (though not always) produce greater capability, as the model has more capacity to store patterns and knowledge. However, larger models require more memory and compute, increasing cost and latency. Modern techniques like quantization and architectural improvements mean smaller models can sometimes match larger ones on specific tasks.",
     },
@@ -348,12 +348,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
       question:
         "Why does attention computation in vanilla transformers scale quadratically with sequence length?",
       options: [
-        "Because each attention head processes input twice",
         "Because every token must attend to every other token, so attention computations grow as the square of the number of tokens",
-        "Because training requires two forward passes per batch",
         "Because the embedding dimension doubles with sequence length",
+        "Because each attention head processes input twice",
+        "Because training requires two forward passes per batch",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "In self-attention, every token computes attention scores against every other token. For a sequence of N tokens, this requires N×N attention computations — quadratic scaling. This is why longer context windows dramatically increase computational cost and why various efficient attention approximations have been developed.",
     },
@@ -361,12 +361,12 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
       question:
         "What is the key advantage of RAG over fine-tuning for incorporating new information into an LLM application?",
       options: [
-        "RAG is always cheaper to implement than fine-tuning",
-        "RAG allows knowledge to be updated by changing the document store without retraining the model",
-        "RAG improves the model's ability to follow formatting instructions",
         "RAG eliminates the need for a system prompt",
+        "RAG improves the model's ability to follow formatting instructions",
+        "RAG allows knowledge to be updated by changing the document store without retraining the model",
+        "RAG is always cheaper to implement than fine-tuning",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "RAG's key advantage is that the knowledge base (document store) can be updated independently of the model — add a new document, remove an outdated one, and the model immediately has access to current information at the next query. Fine-tuning embeds knowledge in weights that require retraining to update. RAG does not inherently improve formatting or eliminate system prompts.",
     },
@@ -375,11 +375,11 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
         "Which prompting technique is most suitable when you need to extract structured data (like a JSON object with specific fields) from unstructured model output reliably?",
       options: [
         "Chain-of-thought prompting",
-        "Structured output prompting combined with function calling (tool use)",
         "Few-shot prompting with narrative examples",
+        "Structured output prompting combined with function calling (tool use)",
         "Zero-shot prompting with high temperature",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Structured output prompting — instructing the model to format its response as JSON, XML, or a specific schema — combined with function calling/tool use enables reliable extraction of structured data. Chain-of-thought elicits reasoning steps, not structured output. Few-shot with narrative examples helps understanding but doesn't enforce schemas. High temperature increases variability, which is counterproductive for structured output.",
     },
@@ -388,11 +388,11 @@ Several strategies address hallucination. **Retrieval-Augmented Generation (RAG)
         "A creative writing assistant should generate diverse, varied story continuations. A factual medical Q&A bot should give consistent, accurate answers. How should temperature be set for each?",
       options: [
         "High temperature for both to maximize model capability",
+        "Temperature does not affect creative vs factual output quality",
         "Low temperature for both to ensure consistency",
         "High temperature for creative writing; low temperature for medical Q&A",
-        "Temperature does not affect creative vs factual output quality",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Higher temperatures (0.7–1.0) increase token sampling randomness, producing more varied and creative outputs suitable for creative writing. Lower temperatures (0.0–0.3) make the model more deterministic and factually reliable, appropriate for medical Q&A where accuracy and consistency are critical. Temperature is one of the most important inference parameters to tune per use case.",
     },

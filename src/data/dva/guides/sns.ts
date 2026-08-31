@@ -22,11 +22,11 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
             "An application needs to deliver messages to multiple downstream systems simultaneously. Some systems require strict ordering and exactly-once delivery. Which SNS topic type supports exactly-once delivery?",
           options: [
             "Standard topic with deduplication enabled",
-            "FIFO topic",
             "Standard topic with MessageGroupId set",
             "Standard topic with at-least-once delivery disabled",
+            "FIFO topic",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SNS FIFO topics guarantee exactly-once delivery and strict ordering within a message group. Standard topics provide at-least-once delivery with best-effort ordering and do not offer deduplication.",
         },
@@ -46,8 +46,8 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
         {
           question:
             "What is the maximum message size for an SNS message published via the Publish API?",
-          options: ["64 KB", "128 KB", "256 KB", "1 MB"],
-          correctIndex: 2,
+          options: ["64 KB", "128 KB", "1 MB", "256 KB"],
+          correctIndex: 3,
           explanation:
             "SNS supports a maximum message body size of 256 KB. This is consistent with SQS's message size limit, making the two services compatible in fan-out patterns.",
         },
@@ -67,12 +67,12 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
           question:
             "A team wants SNS to deliver messages to a third-party webhook endpoint. The endpoint must first verify the subscription before receiving messages. Which subscription type requires this confirmation step?",
           options: [
-            "SQS subscription",
             "Lambda subscription",
             "HTTP/HTTPS subscription",
+            "SQS subscription",
             "Email subscription",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "HTTP/HTTPS subscriptions require the endpoint to confirm the subscription by responding to a confirmation URL SNS sends during subscription creation. SQS and Lambda subscriptions do not require this manual confirmation step.",
         },
@@ -80,12 +80,12 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
           question:
             "A mobile application needs to send push notifications to iOS devices. Which SNS mobile push integration should be used?",
           options: [
-            "FCM (Firebase Cloud Messaging)",
-            "ADM (Amazon Device Messaging)",
-            "APNS (Apple Push Notification Service)",
             "SMS via Amazon Pinpoint",
+            "ADM (Amazon Device Messaging)",
+            "FCM (Firebase Cloud Messaging)",
+            "APNS (Apple Push Notification Service)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "APNS (Apple Push Notification Service) is the platform-specific push service for iOS devices. FCM is for Android and ADM is for Kindle devices. SNS manages platform endpoints through platform application resources.",
         },
@@ -93,12 +93,12 @@ Publishing uses the \`Publish\` API with the topic ARN, a message body (up to 25
           question:
             "An architecture needs SNS to deliver high-volume events to Amazon S3 for archival without writing custom consumer code. Which SNS subscription type supports this?",
           options: [
+            "Amazon Kinesis Data Firehose subscription",
             "SQS subscription with S3 event notification",
             "Lambda subscription writing to S3",
-            "Amazon Kinesis Data Firehose subscription",
             "HTTP subscription posting to an S3 pre-signed URL",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "SNS supports Amazon Kinesis Data Firehose as a subscription target. Firehose then delivers the data to S3, Redshift, or OpenSearch without any custom consumer code needed.",
         },
@@ -117,12 +117,12 @@ The key constraint: filtering works on \`MessageAttributes\` — structured meta
         {
           question: "Where is a subscription filter policy attached in SNS?",
           options: [
-            "On the SNS topic, applying to all subscribers",
             "On each individual subscription",
             "On the published message itself",
             "On the IAM policy of the subscriber",
+            "On the SNS topic, applying to all subscribers",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Filter policies are attached per subscription, not per topic. This means each subscriber can independently declare which messages it wants, and a single topic can route different message types to different subscribers.",
         },
@@ -131,11 +131,11 @@ The key constraint: filtering works on \`MessageAttributes\` — structured meta
             "A developer needs SNS to route messages to different subscribers based on fields inside the JSON message body. What is the correct approach?",
           options: [
             "Use SNS subscription filter policies with body-based matching operators",
+            "Use SNS FIFO topics which support body-based filtering",
             "Use SNS MessageAttributes and filter policies, since filtering works on attributes not the body",
             "Create separate SNS topics for each message type",
-            "Use SNS FIFO topics which support body-based filtering",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SNS subscription filter policies work on MessageAttributes — structured metadata — not on the message body. If routing must be based on JSON body fields, Amazon EventBridge is the better choice as it can match any JSON field in the event payload.",
         },
@@ -168,12 +168,12 @@ A concrete example illustrates the value: when an e-commerce order is placed, th
           question:
             "An order service publishes a single event that must be processed independently by an inventory system, a billing system, and a shipping system — each at their own pace with their own retry policies. What is the correct AWS pattern?",
           options: [
-            "One SQS queue shared by all three consumer services",
             "SNS topic with three SQS queue subscriptions (fan-out pattern)",
+            "One SQS queue shared by all three consumer services",
             "Three separate SNS topics, one per consumer service",
             "EventBridge bus with three Lambda targets",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The SNS + SQS fan-out pattern solves this: one message to an SNS topic is delivered to each subscribed SQS queue simultaneously. Each queue provides durable buffering so consumers process independently at their own pace with their own DLQ and retry configuration.",
         },
@@ -181,12 +181,12 @@ A concrete example illustrates the value: when an e-commerce order is placed, th
           question:
             "In the SNS + SQS fan-out pattern, what happens when you need to add a new downstream consumer service?",
           options: [
-            "The publisher code must be updated to send to the new consumer",
             "A new SQS queue is subscribed to the existing SNS topic — no publisher changes needed",
-            "A new SNS topic must be created for the new consumer",
             "The existing SQS queue must be reconfigured to forward to the new service",
+            "A new SNS topic must be created for the new consumer",
+            "The publisher code must be updated to send to the new consumer",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The fan-out pattern completely decouples publishers from consumers. Adding a new consumer means subscribing a new SQS queue to the SNS topic — publishers are unaware of the change and require no code modifications.",
         },
@@ -219,12 +219,12 @@ For **HTTP/HTTPS** subscriptions, SNS implements a configurable retry policy wit
           question:
             "SNS fails to deliver a message to an HTTP endpoint after all retry attempts. Where can the undelivered message be captured for later inspection?",
           options: [
+            "The message is automatically retried indefinitely",
+            "CloudWatch Logs automatically stores failed messages",
             "The SNS topic's DLQ",
             "The subscription-level DLQ (an SQS queue specified on the subscription)",
-            "CloudWatch Logs automatically stores failed messages",
-            "The message is automatically retried indefinitely",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SNS supports a subscription DLQ — an SQS queue specified at the subscription level (not the topic level). When all retry attempts for an HTTP/HTTPS subscription are exhausted, SNS routes the undelivered message to this DLQ for inspection and reprocessing.",
         },
@@ -247,10 +247,10 @@ For **HTTP/HTTPS** subscriptions, SNS implements a configurable retry policy wit
           options: [
             "SNS message archiving on FIFO topics",
             "Subscription filter policy logging",
-            "Delivery status logging to CloudWatch Logs",
             "CloudTrail logging of SNS Publish API calls",
+            "Delivery status logging to CloudWatch Logs",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Delivery status logging can be enabled per subscription type to have SNS log success and failure status for each delivery attempt to CloudWatch Logs. This provides direct visibility into SNS-side delivery behavior without needing to correlate consumer logs.",
         },
@@ -268,12 +268,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
           question:
             "An application in Account B needs to publish messages to an SNS topic owned by Account A. What access control configuration is required?",
           options: [
-            "Only an IAM policy in Account B allowing sns:Publish",
-            "Only a topic resource policy in Account A allowing Account B's principal",
             "Both: a topic resource policy in Account A allowing Account B's principal, AND an IAM policy in Account B allowing sns:Publish",
             "An SNS subscription from Account B's queue to Account A's topic",
+            "Only an IAM policy in Account B allowing sns:Publish",
+            "Only a topic resource policy in Account A allowing Account B's principal",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Cross-account SNS publishing requires both: the topic's resource-based policy in Account A must explicitly allow the Account B principal, and the IAM identity policy in Account B must grant sns:Publish. Both must allow the action for the request to succeed.",
         },
@@ -281,12 +281,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
           question:
             "A Lambda function in a private VPC subnet needs to publish SNS messages without routing traffic through the public internet. What is the correct solution?",
           options: [
-            "Configure a NAT Gateway in the VPC",
             "Create a VPC Interface Endpoint for SNS using AWS PrivateLink",
             "Deploy the Lambda function outside the VPC",
+            "Configure a NAT Gateway in the VPC",
             "Use an SNS FIFO topic which supports private routing",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SNS supports VPC Interface Endpoints via AWS PrivateLink. Creating an interface endpoint for the sns service routes all SNS API calls through the AWS private network, eliminating the need for a NAT Gateway and keeping traffic off the public internet.",
         },
@@ -294,12 +294,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
           question:
             "What benefit does SSE-KMS provide over SSE-SNS for encrypting an SNS topic?",
           options: [
-            "SSE-KMS is free while SSE-SNS has a per-message cost",
-            "SSE-KMS adds CloudTrail audit logging of every encrypt/decrypt operation and enables cross-account key sharing",
-            "SSE-KMS supports larger message sizes than SSE-SNS",
             "SSE-KMS enables FIFO topic functionality",
+            "SSE-KMS is free while SSE-SNS has a per-message cost",
+            "SSE-KMS supports larger message sizes than SSE-SNS",
+            "SSE-KMS adds CloudTrail audit logging of every encrypt/decrypt operation and enables cross-account key sharing",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SSE-KMS uses a customer managed key and adds CloudTrail audit logging of every encrypt and decrypt operation on the topic, plus enables cross-account key sharing. SSE-SNS uses an SNS-managed key and is free but lacks the audit trail and cross-account sharing capabilities.",
         },
@@ -319,12 +319,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
           question:
             "When should you choose SNS + Lambda directly over the SNS → SQS → Lambda pattern?",
           options: [
-            "When you need durable buffering and the processing must handle sustained high throughput",
-            "For real-time lightweight processing that should happen immediately with low traffic volume",
             "When exactly-once processing is required",
             "When the Lambda function has a long execution time exceeding 15 minutes",
+            "For real-time lightweight processing that should happen immediately with low traffic volume",
+            "When you need durable buffering and the processing must handle sustained high throughput",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SNS + Lambda directly is appropriate for real-time lightweight processing (e.g., sending a confirmation email, triggering a webhook) where immediate delivery matters and traffic is not sustained at high volume. For sustained high throughput, SNS → SQS → Lambda is more reliable because SQS provides durable buffering.",
         },
@@ -333,11 +333,11 @@ For VPC-private architectures where you want to publish to SNS without internet 
             "A team needs content-based event routing that matches on fields inside the JSON event payload, with delivery to more than 20 different target service types. Which service is better suited than SNS?",
           options: [
             "Amazon SQS with message attributes",
+            "AWS Step Functions",
             "Amazon Kinesis Data Streams",
             "Amazon EventBridge",
-            "AWS Step Functions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "EventBridge supports content-based filtering on any JSON field in the event payload (not just MessageAttributes), supports 20+ native target types, cross-account delivery, and event archiving. SNS filtering is limited to MessageAttributes and has fewer native target types.",
         },
@@ -418,10 +418,10 @@ For VPC-private architectures where you want to publish to SNS without internet 
       options: [
         "The SNS topic, applying globally to all subscribers",
         "The published message by the publisher",
-        "Each individual subscription",
         "The subscriber's IAM role",
+        "Each individual subscription",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Subscription filter policies are attached per subscription, not per topic. Each subscriber independently declares which messages it wants to receive based on MessageAttribute values.",
     },
@@ -455,12 +455,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
       question:
         "A developer needs to route messages to different SNS subscribers based on a field inside the JSON message body. What is the recommended approach?",
       options: [
+        "Use SNS FIFO topics which enable body-based routing",
         "Use SNS subscription filter policies with body-based matching",
         "Use Amazon EventBridge, which supports filtering on any JSON field in the event payload",
-        "Use SNS FIFO topics which enable body-based routing",
         "Add a separate SNS topic per message type",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SNS subscription filter policies work on MessageAttributes only, not on the message body. Amazon EventBridge supports content-based filtering on any JSON field in the event payload, making it the correct choice for body-based routing.",
     },
@@ -468,12 +468,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
       question:
         "A Lambda function in a private VPC subnet must publish to SNS without using a NAT Gateway. What is the solution?",
       options: [
-        "Move the Lambda function outside the VPC",
-        "Create a VPC Interface Endpoint for SNS via AWS PrivateLink",
-        "Use SNS FIFO topics which support VPC-native routing",
         "Enable SNS VPC Flow Logs to bypass NAT",
+        "Move the Lambda function outside the VPC",
+        "Use SNS FIFO topics which support VPC-native routing",
+        "Create a VPC Interface Endpoint for SNS via AWS PrivateLink",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "SNS supports VPC Interface Endpoints via AWS PrivateLink. The interface endpoint routes SNS API calls through the AWS private network, eliminating the need for a NAT Gateway and keeping traffic private.",
     },
@@ -481,12 +481,12 @@ For VPC-private architectures where you want to publish to SNS without internet 
       question:
         "Which access control components are BOTH required for cross-account SNS publishing?",
       options: [
-        "Only the SNS topic resource policy in the owning account",
         "Only the IAM policy in the publishing account",
         "SNS topic resource policy in the owning account AND IAM policy in the publishing account",
+        "Only the SNS topic resource policy in the owning account",
         "An SQS queue subscription between the two accounts",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Cross-account SNS publishing requires both: the topic's resource-based policy must explicitly allow the external account's principal, AND the publisher's IAM policy must grant sns:Publish. Both policies must allow the action for the request to succeed.",
     },

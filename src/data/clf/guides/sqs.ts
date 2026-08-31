@@ -22,11 +22,11 @@ SQS is a **pull-based** service: consumers actively poll the queue for new messa
             "How does Amazon SQS deliver messages to consumers — push or pull?",
           options: [
             "Push-based — SQS automatically pushes messages to consumer endpoints",
-            "Pull-based — consumers actively poll the queue for new messages",
             "Both — each queue can be configured for either push or pull delivery",
             "Event-driven — SQS triggers consumers via CloudWatch Events",
+            "Pull-based — consumers actively poll the queue for new messages",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SQS is pull-based: consumers actively poll the queue for new messages. This is the opposite of SNS, which is push-based. When a consumer retrieves a message, SQS makes it invisible to other consumers during processing via the visibility timeout.",
         },
@@ -59,12 +59,12 @@ For the exam: use Standard when throughput matters most and your application can
           question:
             "A payment processing system requires that transactions are processed in the exact order they are received, with no duplicate processing. Which SQS queue type should be used?",
           options: [
-            "Standard queue, because it offers higher throughput for financial workloads",
             "FIFO queue, because it guarantees strict ordering and exactly-once processing",
             "Standard queue with a Dead Letter Queue to catch any duplicates",
             "FIFO queue with long polling enabled to reduce duplicate delivery",
+            "Standard queue, because it offers higher throughput for financial workloads",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "FIFO (First In, First Out) queues guarantee strict ordering and exactly-once processing — each message is delivered and processed exactly once, in the order it was sent. This is essential for payment processing where duplicates or out-of-order transactions would cause data integrity issues.",
         },
@@ -72,12 +72,12 @@ For the exam: use Standard when throughput matters most and your application can
           question:
             "What delivery guarantee does an SQS Standard queue provide?",
           options: [
+            "Exactly-once delivery with best-effort ordering",
+            "At-least-once delivery with best-effort ordering",
             "Exactly-once delivery with strict ordering",
             "At-most-once delivery with best-effort ordering",
-            "At-least-once delivery with best-effort ordering",
-            "Exactly-once delivery with best-effort ordering",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "SQS Standard queues provide at-least-once delivery (every message is delivered at least once, but may occasionally be delivered more than once) and best-effort ordering (messages are generally in order but strict ordering is not guaranteed).",
         },
@@ -113,8 +113,8 @@ For the exam: use Standard when throughput matters most and your application can
         {
           question:
             "What is the maximum message retention period for an SQS queue?",
-          options: ["4 days", "7 days", "14 days", "30 days"],
-          correctIndex: 2,
+          options: ["4 days", "14 days", "30 days", "7 days"],
+          correctIndex: 1,
           explanation:
             "The maximum message retention period for an SQS queue is 14 days. The default is 4 days. Messages not consumed within the retention period are automatically deleted.",
         },
@@ -137,12 +137,12 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
           question:
             "A message in an SQS queue consistently causes the consumer application to crash. Without a Dead Letter Queue configured, what would happen?",
           options: [
-            "SQS would automatically detect the poison pill and discard it after 3 attempts",
-            "The message would loop indefinitely — becoming visible again after each visibility timeout expiry and consuming all processing capacity",
-            "SQS would move the message to a temporary hold queue after 5 failures",
             "The consumer would automatically skip the message and process the next one",
+            "SQS would move the message to a temporary hold queue after 5 failures",
+            "The message would loop indefinitely — becoming visible again after each visibility timeout expiry and consuming all processing capacity",
+            "SQS would automatically detect the poison pill and discard it after 3 attempts",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Without a DLQ, a poison pill message would loop indefinitely — the consumer retrieves it, crashes, the visibility timeout expires, and the process repeats. This wastes processing capacity and can block other messages from being processed. A DLQ quarantines such messages after a configured number of failures.",
         },
@@ -150,12 +150,12 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
           question:
             "What configuration determines how many times a message can be received before SQS moves it to the Dead Letter Queue?",
           options: [
+            "The message delay setting on the Dead Letter Queue",
             "The visibility timeout duration on the source queue",
             "The message retention period on the Dead Letter Queue",
             "The maxReceiveCount setting configured on the source queue's redrive policy",
-            "The message delay setting on the Dead Letter Queue",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The maxReceiveCount in the source queue's redrive policy determines how many times a message can be received without being deleted before SQS automatically moves it to the Dead Letter Queue. Once this count is exceeded, the message is quarantined in the DLQ.",
         },
@@ -177,12 +177,12 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
           question:
             "A company wants to automatically add more EC2 worker instances when the SQS queue is growing and remove them when the queue is empty. What AWS feature enables this?",
           options: [
-            "SQS Long Polling, which reduces polling frequency during low traffic",
-            "Auto Scaling with a scaling policy based on SQS queue depth (ApproximateNumberOfMessages)",
             "SQS FIFO queues, which process messages in order and signal when the queue is draining",
+            "SQS Long Polling, which reduces polling frequency during low traffic",
             "CloudWatch alarms that manually trigger EC2 launches via SNS",
+            "Auto Scaling with a scaling policy based on SQS queue depth (ApproximateNumberOfMessages)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Auto Scaling can use SQS queue depth (the ApproximateNumberOfMessages CloudWatch metric) as a scaling trigger. When the queue grows long, Auto Scaling adds EC2 workers; when the queue drains, it scales in. This creates a self-regulating, cost-efficient processing fleet.",
         },
@@ -227,12 +227,12 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
       question:
         "What is the primary purpose of Amazon SQS in a distributed system?",
       options: [
-        "To send real-time push notifications to mobile devices",
-        "To decouple producers and consumers by buffering messages in a queue",
         "To stream large volumes of data in real-time for analytics",
         "To synchronously coordinate requests between microservices",
+        "To decouple producers and consumers by buffering messages in a queue",
+        "To send real-time push notifications to mobile devices",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SQS decouples producers and consumers by buffering messages in a queue. Producers place messages in the queue and continue working; consumers read at their own pace. If a consumer is down, messages accumulate and are processed when it recovers.",
     },
@@ -241,19 +241,19 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
         "Which SQS queue type should be used when message order and exactly-once processing are required?",
       options: [
         "Standard queue with message deduplication ID",
-        "FIFO queue, which guarantees strict ordering and exactly-once processing",
         "Standard queue with visibility timeout set to maximum",
+        "FIFO queue, which guarantees strict ordering and exactly-once processing",
         "Dead Letter Queue configured as the primary queue",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SQS FIFO queues guarantee strict ordering (messages are processed in the exact order they were sent) and exactly-once processing (no duplicates). They are ideal for financial transactions, inventory updates, and any use case where order and deduplication matter.",
     },
     {
       question:
         "What is the default message retention period for an SQS queue?",
-      options: ["1 day", "4 days", "7 days", "14 days"],
-      correctIndex: 1,
+      options: ["4 days", "7 days", "14 days", "1 day"],
+      correctIndex: 0,
       explanation:
         "The default message retention period for an SQS queue is 4 days. The maximum is 14 days. Messages not consumed within the retention period are automatically deleted by SQS.",
     },
@@ -261,20 +261,20 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
       question:
         "A consumer processes SQS messages that each take 5 minutes to complete. The visibility timeout is set to 30 seconds. What problem will occur?",
       options: [
-        "Messages will be deleted automatically after 30 seconds",
-        "The consumer will be throttled and unable to receive new messages",
-        "The message will become visible again after 30 seconds, causing duplicate processing by other consumers",
         "SQS will extend the visibility timeout automatically based on processing time",
+        "The consumer will be throttled and unable to receive new messages",
+        "Messages will be deleted automatically after 30 seconds",
+        "The message will become visible again after 30 seconds, causing duplicate processing by other consumers",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "If the visibility timeout (30 seconds) is shorter than the processing time (5 minutes), the message will become visible again before processing completes. Another consumer will pick it up, causing duplicate processing. The visibility timeout should always be set longer than the expected processing time.",
     },
     {
       question:
         "What is the maximum size of a single message that can be sent to an SQS queue?",
-      options: ["64 KB", "128 KB", "256 KB", "1 MB"],
-      correctIndex: 2,
+      options: ["128 KB", "64 KB", "1 MB", "256 KB"],
+      correctIndex: 3,
       explanation:
         "The maximum SQS message size is 256 KB. For larger payloads, the recommended pattern is to store the data in S3 and put a reference to the S3 object in the SQS message (using the Extended Client Library).",
     },
@@ -282,12 +282,12 @@ DLQs should be monitored with CloudWatch alarms — messages arriving in the DLQ
       question:
         "Which SQS feature would you use to delay message delivery to consumers by up to 15 minutes after the message is published?",
       options: [
+        "Message Retention — keeps messages in the queue for an extended period before delivery",
+        "Delay Queues — postpones delivery of new messages by a configured delay",
         "Long Polling — waits up to 20 seconds before returning messages",
         "Visibility Timeout — hides messages from consumers for a configurable period",
-        "Delay Queues — postpones delivery of new messages by a configured delay",
-        "Message Retention — keeps messages in the queue for an extended period before delivery",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Delay Queues configure a delivery delay on new messages (0–15 minutes), postponing when they become visible to consumers. This is useful for scheduled or rate-limited processing where immediate delivery is not desired.",
     },

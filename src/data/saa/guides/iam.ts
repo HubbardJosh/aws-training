@@ -18,12 +18,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "An EC2 instance needs to write objects to an S3 bucket. What is the most secure way to grant this permission?",
           options: [
-            "Create an IAM user and embed the access key in the application code",
             "Store the access key in an environment variable on the EC2 instance",
-            "Attach an IAM role with the required S3 permissions to the EC2 instance",
+            "Create an IAM user and embed the access key in the application code",
             "Use the root account credentials for maximum permissions",
+            "Attach an IAM role with the required S3 permissions to the EC2 instance",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "An IAM role attached to an EC2 instance (via an instance profile) provides temporary credentials that rotate automatically and require no long-lived secrets to be stored. Embedding access keys in code or environment variables creates a credential leakage risk. Root credentials should never be used for application access.",
         },
@@ -31,12 +31,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "What is the primary advantage of IAM roles over IAM users for application access?",
           options: [
-            "Roles provide more permissions than users",
-            "Roles provide temporary credentials that rotate automatically, eliminating long-lived secrets",
             "Roles can be used by multiple regions simultaneously",
             "Roles bypass IAM policy evaluation for faster access",
+            "Roles provide temporary credentials that rotate automatically, eliminating long-lived secrets",
+            "Roles provide more permissions than users",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "IAM roles issue temporary security credentials via AWS STS that rotate automatically, leaving no persistent secrets that could be leaked or compromised. IAM users have long-term access keys that must be manually rotated and create a larger attack surface if exposed.",
         },
@@ -44,12 +44,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "Which IAM principal type can be used to group users and apply the same permissions to all members at once?",
           options: [
-            "IAM Role",
             "IAM Group",
+            "IAM Role",
             "IAM Policy",
             "AWS Organizations OU",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "IAM Groups are collections of IAM users that share the same policies. Attaching a policy to a group automatically applies it to all members, simplifying permission management at scale. Roles are for temporary access; policies are permission documents, not containers for users; OUs are in AWS Organizations.",
         },
@@ -64,11 +64,11 @@ export const iamGuide: ServiceGuide = {
             "An IAM user has a policy that allows s3:DeleteObject, but a bucket policy explicitly denies s3:DeleteObject for all principals. What is the effective permission?",
           options: [
             "Allow — the identity-based policy takes precedence over resource-based policies",
+            "Deny — resource-based policies always take precedence over identity-based policies",
             "Deny — an explicit Deny always overrides any Allow",
             "Allow — the most permissive policy wins",
-            "Deny — resource-based policies always take precedence over identity-based policies",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "An explicit Deny in any policy always overrides any Allow, regardless of where the Allow comes from. This is the most important rule in IAM policy evaluation: Deny beats Allow. The bucket policy's explicit Deny makes the effective permission a Deny, even though the identity-based policy grants Allow.",
         },
@@ -77,11 +77,11 @@ export const iamGuide: ServiceGuide = {
             "What is the difference between identity-based policies and resource-based policies?",
           options: [
             "Identity-based policies use Allow only; resource-based policies use Deny only",
+            "Identity-based policies are evaluated first; resource-based policies are only evaluated if the first allows access",
             "Identity-based policies attach to users/groups/roles; resource-based policies attach to resources and specify a Principal",
             "Resource-based policies are managed by AWS; identity-based policies are customer-managed",
-            "Identity-based policies are evaluated first; resource-based policies are only evaluated if the first allows access",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Identity-based policies are attached to IAM principals (users, groups, roles) and define what those principals can do. Resource-based policies are attached to AWS resources (S3 buckets, KMS keys, Lambda functions) and specify a Principal element to define who can access the resource. Both types are evaluated simultaneously when determining effective permissions.",
         },
@@ -108,12 +108,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "How does an EC2 instance access the IAM role credentials it has been assigned?",
           options: [
-            "Through environment variables set at launch time",
-            "Through the AWS Secrets Manager API",
             "Through the instance metadata service at 169.254.169.254",
             "Through an S3 bucket configured as a credentials store",
+            "Through environment variables set at launch time",
+            "Through the AWS Secrets Manager API",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "EC2 instances retrieve their IAM role credentials from the instance metadata service (IMDS) at the link-local address 169.254.169.254/latest/meta-data/iam/security-credentials/. The AWS SDK automatically retrieves and refreshes these temporary credentials from IMDS, so application code does not need to handle credential management explicitly.",
         },
@@ -127,24 +127,24 @@ export const iamGuide: ServiceGuide = {
           question:
             "A security team wants to allow developers to create IAM roles but prevent them from granting permissions beyond what the security team has approved. Which IAM feature should be used?",
           options: [
+            "A bucket policy that restricts IAM operations",
             "Service Control Policies applied to the developers' OU",
             "IAM Permissions Boundaries on the roles developers create",
-            "A bucket policy that restricts IAM operations",
             "AWS Config rules that alert when excessive permissions are granted",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Permissions Boundaries set the maximum permissions that can be granted by an identity-based policy. When developers create roles with permissions boundaries applied, those roles cannot exceed the permissions defined in the boundary, even if the developer tries to attach a more permissive policy. This enables safe delegation of IAM management.",
         },
         {
           question: "What does a Permissions Boundary do?",
           options: [
-            "It grants permissions to IAM principals up to the boundary limit",
             "It sets the maximum permissions an identity-based policy can grant — it does not grant permissions itself",
-            "It replaces the need for identity-based policies for the bounded principal",
             "It creates a VPC boundary that limits which resources an IAM principal can access",
+            "It grants permissions to IAM principals up to the boundary limit",
+            "It replaces the need for identity-based policies for the bounded principal",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A Permissions Boundary is a ceiling on permissions — it limits what identity-based policies can grant, but does not itself grant any permissions. The effective permissions are the intersection of what the identity-based policy allows AND what the permissions boundary allows. Both must allow an action for it to be permitted.",
         },
@@ -171,12 +171,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "An SCP attached to an OU explicitly denies the use of all AWS services in non-approved regions. An IAM administrator in a member account grants a user full AdministratorAccess. What is the effective permission for services in non-approved regions?",
           options: [
-            "Allow — IAM policies override SCPs",
             "Deny — SCPs restrict what IAM policies can allow",
             "Allow — AdministratorAccess bypasses SCPs",
+            "Allow — IAM policies override SCPs",
             "Deny — SCPs always override all IAM policies and roles",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SCPs act as permission guardrails that restrict what IAM policies can allow. Even with AdministratorAccess, a user in a member account cannot perform actions explicitly denied by an SCP. The effective permissions are the intersection of SCP permissions and IAM policy permissions — both must allow the action.",
         },
@@ -216,12 +216,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "A GitHub Actions CI/CD pipeline needs to deploy to AWS without storing long-lived access keys in GitHub secrets. Which federation mechanism enables this?",
           options: [
+            "IAM user with access key stored in GitHub Secrets",
             "SAML 2.0 federation with AWS STS",
             "OIDC federation allowing GitHub to assume an IAM role",
-            "IAM user with access key stored in GitHub Secrets",
             "AWS Cognito identity pool for GitHub Actions",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "OIDC federation allows GitHub Actions to assume an IAM role by presenting an OIDC token issued by GitHub. AWS STS validates the token and issues temporary credentials scoped to the IAM role. This eliminates the need to store long-lived access keys in GitHub, reducing credential exposure risk.",
         },
@@ -267,12 +267,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "An IAM user has an Allow policy for s3:PutObject. An SCP on the OU denies s3:PutObject. What is the effective permission?",
       options: [
-        "Allow — identity-based policies override SCPs",
-        "Deny — an SCP deny overrides IAM Allow",
         "Allow — the user's explicit Allow takes precedence",
         "Depends on whether the bucket has a resource-based policy",
+        "Allow — identity-based policies override SCPs",
+        "Deny — an SCP deny overrides IAM Allow",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "SCPs act as permission guardrails that restrict what IAM policies can grant. The effective permissions are the intersection of SCP permissions and IAM policy permissions. An SCP denial overrides any IAM Allow for principals in the affected accounts.",
     },
@@ -281,11 +281,11 @@ export const iamGuide: ServiceGuide = {
         "Which IAM feature provides temporary security credentials for AWS services like EC2, Lambda, and ECS tasks?",
       options: [
         "IAM Users with access keys",
-        "IAM Groups with shared credentials",
         "IAM Roles via AWS STS",
         "IAM Policies with time-limited conditions",
+        "IAM Groups with shared credentials",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "IAM Roles provide temporary security credentials via AWS STS. Services like EC2 (via instance profiles), Lambda (via execution roles), and ECS tasks assume roles to get automatically rotating temporary credentials, eliminating the need for long-lived access keys.",
     },
@@ -293,12 +293,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "A developer wants to allow other developers to create IAM roles but prevent them from granting more permissions than the security team has approved. Which IAM feature enforces this limit?",
       options: [
-        "SCP on the developer OU",
-        "IAM Permissions Boundaries on newly created roles",
         "AWS Config rule alerting on excessive permissions",
+        "SCP on the developer OU",
         "IAM policy with a Condition limiting actions",
+        "IAM Permissions Boundaries on newly created roles",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Permissions Boundaries set the maximum permissions that identity-based policies can grant to an IAM principal. When applied to roles that developers create, the boundary ensures those roles cannot exceed the approved permission ceiling, enabling safe delegation of IAM role creation.",
     },
@@ -306,12 +306,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "What happens when there is no explicit Allow for an IAM principal making an API call?",
       options: [
+        "The request is forwarded to the resource owner for approval",
+        "The root account's permissions are applied",
         "The request is allowed by default",
         "The request is implicitly denied",
-        "The root account's permissions are applied",
-        "The request is forwarded to the resource owner for approval",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "IAM follows a default-deny model. If no policy explicitly allows an action, the request is implicitly denied. An explicit Allow is required in an applicable policy for the request to succeed. An explicit Deny in any policy overrides any Allow.",
     },
@@ -319,12 +319,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "An organization wants employees to access multiple AWS accounts using their Okta credentials without maintaining separate IAM users. Which solution should be used?",
       options: [
-        "IAM users with rotating access keys synchronized with Okta",
         "AWS IAM Identity Center with SAML 2.0 federation to Okta",
         "Amazon Cognito User Pools with Okta integration",
         "Cross-account IAM roles with Okta-managed access keys",
+        "IAM users with rotating access keys synchronized with Okta",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AWS IAM Identity Center (formerly AWS SSO) supports SAML 2.0 federation with identity providers like Okta, allowing employees to use their existing credentials to access multiple AWS accounts through a single portal. Temporary credentials are issued automatically without requiring separate IAM users.",
     },
@@ -332,12 +332,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "Resource-based policies differ from identity-based policies in which key way?",
       options: [
+        "Resource-based policies are managed exclusively by AWS and cannot be customized",
+        "Resource-based policies are evaluated after identity-based policies in the authorization flow",
         "Resource-based policies can only contain Deny statements",
         "Resource-based policies attach to AWS resources and include a Principal element to specify who can access them",
-        "Resource-based policies are evaluated after identity-based policies in the authorization flow",
-        "Resource-based policies are managed exclusively by AWS and cannot be customized",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Resource-based policies are JSON policy documents attached directly to AWS resources (S3 buckets, KMS keys, Lambda functions, etc.) and include a Principal element specifying who can access the resource. This enables cross-account access directly without requiring the caller to have a role in the target account.",
     },
@@ -345,12 +345,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "A GitHub Actions workflow needs to deploy infrastructure to AWS. What is the most secure approach?",
       options: [
-        "Store an IAM user's access key and secret in GitHub Secrets",
         "Use OIDC federation to allow GitHub Actions to assume an IAM role without stored credentials",
         "Generate a temporary access key from the AWS console before each deployment",
         "Use AWS Cognito to authenticate GitHub Actions as an application user",
+        "Store an IAM user's access key and secret in GitHub Secrets",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "OIDC federation allows GitHub Actions to present an OIDC token to AWS STS and assume an IAM role, receiving short-lived temporary credentials without storing any access keys in GitHub. This eliminates the risk of credential exposure from stored secrets and is the AWS-recommended approach for CI/CD pipeline access.",
     },
@@ -358,12 +358,12 @@ export const iamGuide: ServiceGuide = {
       question:
         "SCPs applied to an OU restrict which entities within member accounts?",
       options: [
-        "Only IAM users, not IAM roles or the root user",
-        "All IAM principals including the root user of member accounts, but not the management account",
         "All IAM principals across all accounts including the management account",
         "Only service-linked roles and execution roles",
+        "Only IAM users, not IAM roles or the root user",
+        "All IAM principals including the root user of member accounts, but not the management account",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "SCPs restrict all IAM principals in affected member accounts, including the root user of those accounts. However, SCPs do not restrict the management account itself. This is a critical exam distinction: the management account's root user and IAM principals are exempt from SCP restrictions.",
     },

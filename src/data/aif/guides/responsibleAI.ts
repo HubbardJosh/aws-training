@@ -34,12 +34,12 @@ export const responsibleAIGuide: ServiceGuide = {
           question:
             "Which AWS responsible AI principle specifically addresses ensuring that stakeholders can understand how a model produces its outputs?",
           options: [
+            "Controllability",
             "Fairness",
             "Explainability",
-            "Controllability",
             "Transparency",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Explainability means stakeholders can understand how a model arrives at its outputs. For high-stakes decisions like loan approvals or hiring, this requires tools like SHAP or LIME to compute feature attributions that explain individual predictions.",
         },
@@ -114,12 +114,12 @@ export const responsibleAIGuide: ServiceGuide = {
           question:
             "Which AWS service provides pre-training and post-training bias detection metrics integrated with the SageMaker ML platform?",
           options: [
-            "Amazon Augmented AI (A2I)",
-            "Amazon SageMaker Clarify",
             "Amazon SageMaker Model Monitor",
             "AWS Trusted Advisor",
+            "Amazon Augmented AI (A2I)",
+            "Amazon SageMaker Clarify",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon SageMaker Clarify is the primary tool for bias detection and explainability in the AWS ML platform. It provides pre-training bias metrics (analyzing data imbalance before training) and post-training bias metrics (evaluating model prediction disparities across groups).",
         },
@@ -127,12 +127,12 @@ export const responsibleAIGuide: ServiceGuide = {
           question:
             "A post-training bias analysis shows that a credit scoring model approves loans at significantly different rates for two demographic groups with similar creditworthiness. Which post-training bias metric most directly captures this?",
           options: [
-            "Class Imbalance (CI)",
-            "Difference in Positive Proportions in Labels (DPL)",
             "Disparate Impact (DI)",
             "Jensen-Shannon Divergence",
+            "Difference in Positive Proportions in Labels (DPL)",
+            "Class Imbalance (CI)",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Disparate Impact (DI) measures the ratio of positive prediction rates between demographic groups. A DI significantly different from 1.0 indicates the model approves or denies at systematically different rates across groups — a key post-training bias metric for lending and hiring models.",
         },
@@ -154,12 +154,12 @@ For generative AI specifically, explainability takes different forms — **promp
           question:
             "What does a SHAP value represent in the context of ML model explainability?",
           options: [
-            "The overall importance of a feature across all predictions in the dataset",
             "The marginal contribution of a specific feature to a specific individual prediction",
             "The probability that a model prediction is correct for a given input",
             "The difference in model accuracy between two demographic groups",
+            "The overall importance of a feature across all predictions in the dataset",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SHAP (SHapley Additive exPlanations) values are a local explanation technique. Each SHAP value represents the marginal contribution of a specific feature to a specific individual prediction, computed by averaging over all possible feature orderings using cooperative game theory.",
         },
@@ -168,11 +168,11 @@ For generative AI specifically, explainability takes different forms — **promp
             "What is the difference between global and local model explainability?",
           options: [
             "Global explainability covers all models in production; local explainability covers a single model",
-            "Global explainability describes overall feature importance across all predictions; local explainability explains a specific prediction for a specific instance",
             "Global explainability uses SHAP values; local explainability uses feature importance",
             "Global explainability applies to neural networks; local explainability applies to tree-based models",
+            "Global explainability describes overall feature importance across all predictions; local explainability explains a specific prediction for a specific instance",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Global explainability describes overall model behavior — which features matter most across all predictions. Local explainability explains why the model made a specific decision for a specific individual instance. SHAP provides local explanations; feature importance provides global explanations.",
         },
@@ -194,12 +194,12 @@ For generative AI specifically, explainability takes different forms — **promp
           question:
             "Which AWS service provides human-in-the-loop review for ML predictions when model confidence falls below a defined threshold?",
           options: [
-            "Amazon SageMaker Clarify",
-            "Amazon SageMaker Model Monitor",
-            "Amazon Augmented AI (A2I)",
             "Amazon SageMaker Ground Truth",
+            "Amazon SageMaker Model Monitor",
+            "Amazon SageMaker Clarify",
+            "Amazon Augmented AI (A2I)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon Augmented AI (A2I) routes low-confidence ML predictions to human reviewers through a configurable workforce. It is the managed human-in-the-loop service, applicable to any ML prediction task where automated confidence is insufficient.",
         },
@@ -207,12 +207,12 @@ For generative AI specifically, explainability takes different forms — **promp
           question:
             "According to AWS's shared responsibility model applied to AI, which of the following is the CUSTOMER's responsibility?",
           options: [
-            "Security and reliability of the underlying foundation model infrastructure",
-            "Training data quality and bias characteristics built into the foundation model",
-            "Configuration, deployment, content filtering, access controls, and compliance for AI systems they deploy",
             "Publishing safety evaluations and red-team findings for foundation models",
+            "Training data quality and bias characteristics built into the foundation model",
+            "Security and reliability of the underlying foundation model infrastructure",
+            "Configuration, deployment, content filtering, access controls, and compliance for AI systems they deploy",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "In the AI shared responsibility model, AWS is responsible for the foundation model and service infrastructure. Customers are responsible for how they configure and deploy AI systems, including content filtering, access controls, compliance with applicable laws, and how they use model outputs.",
         },
@@ -270,12 +270,12 @@ For generative AI specifically, explainability takes different forms — **promp
       question:
         "A medical imaging AI performs well overall but has significantly lower accuracy for patients from certain ethnic backgrounds due to underrepresentation in training data. Which type of bias is this?",
       options: [
-        "Label bias — annotators assigned incorrect diagnoses for underrepresented groups",
-        "Feedback loop bias — the model's errors cause reduced healthcare access for those groups",
         "Selection bias — the training data is not representative of the full population the model serves",
         "Measurement bias — imaging equipment measures differently across demographic groups",
+        "Label bias — annotators assigned incorrect diagnoses for underrepresented groups",
+        "Feedback loop bias — the model's errors cause reduced healthcare access for those groups",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Selection bias occurs when training data is not representative of the population the model will serve. A medical imaging model trained predominantly on one demographic will underperform on underrepresented groups — a classic example of selection bias.",
     },
@@ -283,12 +283,12 @@ For generative AI specifically, explainability takes different forms — **promp
       question:
         "What is the purpose of model cards in responsible AI governance?",
       options: [
-        "They are credit-card-sized summaries printed for non-technical stakeholders at model launch events",
         "They document a model's intended use, training data characteristics, performance metrics, limitations, and ethical considerations",
         "They define the API contract for model endpoints including input/output schemas",
+        "They are credit-card-sized summaries printed for non-technical stakeholders at model launch events",
         "They store model weights and hyperparameters for reproducible training runs",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Model cards are a standard documentation format that captures a model's intended use, training data characteristics, evaluation methodology, performance metrics across demographic groups, known limitations, and ethical considerations — a key governance artifact in responsible AI.",
     },
@@ -348,12 +348,12 @@ For generative AI specifically, explainability takes different forms — **promp
       question:
         "Under the AWS shared responsibility model for AI, which party is responsible for ensuring content filtering and access controls are properly configured for a generative AI application?",
       options: [
-        "AWS — as the provider of the foundation model and infrastructure",
-        "The customer — who is responsible for deployment configuration, content filtering, access controls, and compliance",
         "The end user — who consents to AI-generated content through terms of service",
         "A shared responsibility split 50/50 between AWS and the customer",
+        "The customer — who is responsible for deployment configuration, content filtering, access controls, and compliance",
+        "AWS — as the provider of the foundation model and infrastructure",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "In the AI shared responsibility model, customers are responsible for how they configure, deploy, and use AI systems — including content filtering, access controls, compliance with applicable laws, and ensuring appropriate use. AWS is responsible for the foundation model infrastructure.",
     },

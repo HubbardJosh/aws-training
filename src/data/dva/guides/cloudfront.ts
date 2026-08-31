@@ -46,12 +46,12 @@ Content is served from **edge locations** — 400+ points of presence globally. 
           question:
             "Which metric best indicates how effectively CloudFront is reducing origin load?",
           options: [
+            "Number of edge locations serving the distribution",
             "4XX error rate",
             "Origin response time",
             "Cache hit ratio",
-            "Number of edge locations serving the distribution",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The cache hit ratio measures what percentage of requests are served from cache versus fetched from the origin. A higher cache hit ratio means less load on your origin and lower latency for users.",
         },
@@ -71,12 +71,12 @@ When you need to force CloudFront to stop serving stale content immediately, sub
           question:
             "What is the difference between a Cache Policy and an Origin Request Policy in CloudFront?",
           options: [
-            "Cache Policy sets TTL; Origin Request Policy sets allowed HTTP methods",
             "Cache Policy defines the cache key; Origin Request Policy forwards values to origin without adding them to the cache key",
+            "Cache Policy sets TTL; Origin Request Policy sets allowed HTTP methods",
             "Cache Policy is for S3 origins; Origin Request Policy is for ALB origins",
             "They are synonymous — both control what is included in the cache key",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A Cache Policy defines what constitutes the cache key (path, query strings, headers, cookies). An Origin Request Policy controls what CloudFront forwards to the origin without including those values in the cache key — useful for forwarding auth headers without fragmenting the cache.",
         },
@@ -84,12 +84,12 @@ When you need to force CloudFront to stop serving stale content immediately, sub
           question:
             "Which Cache-Control directive specifically controls CDN cache TTL separately from browser cache TTL?",
           options: [
-            "max-age",
             "no-cache",
-            "s-maxage",
             "stale-while-revalidate",
+            "max-age",
+            "s-maxage",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The Cache-Control: s-maxage directive is honored by shared caches (like CloudFront) and overrides max-age for CDN caching purposes. This lets you set a longer TTL in CloudFront while keeping a shorter browser cache TTL using max-age.",
         },
@@ -133,12 +133,12 @@ A single distribution can have **multiple origins and multiple cache behaviors**
         {
           question: "What does an Origin Group provide in CloudFront?",
           options: [
-            "Load balancing across multiple origins",
             "Automatic failover from a primary origin to a secondary origin on 5xx errors",
-            "Grouping cache behaviors for centralized TTL management",
             "Aggregating metrics from multiple origins into one CloudWatch dashboard",
+            "Load balancing across multiple origins",
+            "Grouping cache behaviors for centralized TTL management",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "An Origin Group provides high-availability failover: if the primary origin returns a 5xx error or times out, CloudFront automatically retries the request on the secondary origin. This is not load balancing — all traffic goes to the primary unless it fails.",
         },
@@ -160,12 +160,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
           question:
             "In which AWS region must an ACM certificate be provisioned to use with CloudFront?",
           options: [
-            "The same region as the primary origin",
-            "Any region — CloudFront replicates ACM certificates automatically",
             "us-east-1",
+            "The same region as the primary origin",
             "us-west-2",
+            "Any region — CloudFront replicates ACM certificates automatically",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "ACM certificates for CloudFront must be provisioned in us-east-1 (N. Virginia) regardless of where the distribution serves content or where origins are located. This is one of the most common exam traps.",
         },
@@ -173,12 +173,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
           question:
             "When should you use Signed Cookies instead of Signed URLs in CloudFront?",
           options: [
-            "When you need to grant access to a single specific file",
             "When you need to grant access to multiple files matching a path pattern without changing every URL",
-            "When you want to restrict access by country",
+            "When you need to grant access to a single specific file",
             "When using Lambda@Edge for request authorization",
+            "When you want to restrict access by country",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Signed Cookies are used to grant time-limited access to multiple files matching a path pattern without requiring individual signed URLs for each file. Signed URLs are for single-file access. Both provide time-limited, optionally IP-restricted access.",
         },
@@ -186,12 +186,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
           question:
             "What does Field-Level Encryption in CloudFront accomplish?",
           options: [
+            "Enables end-to-end TLS between the viewer and origin",
+            "Encrypts cache objects stored at edge locations",
             "Encrypts the entire HTTP request body at the edge",
             "Encrypts specific POST request fields at the edge using a public key so only the app with the private key can decrypt them",
-            "Encrypts cache objects stored at edge locations",
-            "Enables end-to-end TLS between the viewer and origin",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Field-Level Encryption encrypts specific POST fields at the CloudFront edge using a public key. Even CloudFront cannot read these fields — only the application holding the corresponding private key can decrypt them, providing an extra layer of protection for sensitive data.",
         },
@@ -223,11 +223,11 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
             "Where are Lambda@Edge functions deployed, and how do they reach all edge locations?",
           options: [
             "Deployed to every edge location individually by the developer",
+            "Deployed to multiple regions using Lambda global endpoints",
             "Deployed to us-east-1, and CloudFront replicates them to all edge locations automatically",
             "Deployed to the same region as the origin, then cached at edge locations",
-            "Deployed to multiple regions using Lambda global endpoints",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda@Edge functions are deployed in us-east-1. CloudFront automatically replicates them to all edge locations. Developers only manage the function in us-east-1 — the global distribution is handled by CloudFront.",
         },
@@ -235,12 +235,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
           question:
             "Which is the correct use case for CloudFront Functions over Lambda@Edge?",
           options: [
-            "Calling an external API to validate authentication tokens",
-            "Modifying response headers from the origin before caching",
             "Normalizing URL paths by removing trailing slashes for better cache hit ratios",
+            "Modifying response headers from the origin before caching",
+            "Calling an external API to validate authentication tokens",
             "Processing large request payloads exceeding 40 KB",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "CloudFront Functions are ideal for simple, fast transformations like URL normalization, header manipulation, and A/B test redirects. They run at Viewer Request/Response only. Lambda@Edge is needed for Origin triggers, external API calls, or processing larger payloads.",
         },
@@ -260,12 +260,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
           question:
             "Which type of API Gateway endpoint should be placed behind CloudFront?",
           options: [
+            "WebSocket, because HTTP APIs don't support CloudFront",
             "Edge-Optimized, because it has lower latency",
             "Regional, because Edge-Optimized already uses CloudFront internally",
             "Private, because it provides the most security",
-            "WebSocket, because HTTP APIs don't support CloudFront",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A Regional API Gateway endpoint is the correct choice to place behind CloudFront. Edge-Optimized API Gateway already uses CloudFront internally — adding another CloudFront distribution in front of it would be redundant and add unnecessary cost.",
         },
@@ -274,11 +274,11 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
             "How does the CloudFront + ALB security pattern prevent direct access to the ALB?",
           options: [
             "The ALB is placed in a private subnet with no internet gateway",
-            "CloudFront sends a secret custom header; the ALB rejects requests without that header",
             "The ALB uses IAM authentication that only CloudFront's service principal can satisfy",
             "CloudFront places the ALB behind a NAT Gateway",
+            "CloudFront sends a secret custom header; the ALB rejects requests without that header",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CloudFront is configured to add a secret custom header to all requests. The ALB (via WAF or listener rules) rejects any request that doesn't include the header. This prevents attackers who know the ALB's DNS name from bypassing CloudFront.",
         },
@@ -340,12 +340,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
       question:
         "A developer deploys a new version of a static website to S3 with the same file names. Users are still seeing the old content from CloudFront. What is the most direct solution?",
       options: [
-        "Update the Cache-Control headers on the S3 objects to max-age=0",
-        "Submit a cache invalidation request for the affected paths in CloudFront",
         "Create a new CloudFront distribution pointing to the same S3 bucket",
         "Disable the CloudFront distribution and re-enable it",
+        "Update the Cache-Control headers on the S3 objects to max-age=0",
+        "Submit a cache invalidation request for the affected paths in CloudFront",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Submitting a cache invalidation request forces CloudFront to stop serving the cached version and fetch fresh content from S3. The first 1,000 paths per month are free. Simply updating S3 objects doesn't clear CloudFront's cache — invalidation is required.",
     },
@@ -354,11 +354,11 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
         "A video streaming company needs to grant temporary, time-limited access to individual video files for paying users. Which CloudFront feature should they use?",
       options: [
         "Signed Cookies",
+        "Field-Level Encryption",
         "Signed URLs",
         "Geo Restriction",
-        "Field-Level Encryption",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Signed URLs provide time-limited (and optionally IP-restricted) access to a single specific file. Signed Cookies would be used if you need to grant access to multiple files matching a path pattern without modifying every URL.",
     },
@@ -405,12 +405,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
       question:
         "A developer needs to modify the origin request URL path based on query parameters before CloudFront forwards a cache miss to S3. Which solution allows this?",
       options: [
-        "CloudFront Functions at the Viewer Request trigger",
-        "Lambda@Edge at the Origin Request trigger",
         "Lambda@Edge at the Viewer Response trigger",
+        "CloudFront Functions at the Viewer Request trigger",
         "CloudFront Functions at the Viewer Response trigger",
+        "Lambda@Edge at the Origin Request trigger",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Lambda@Edge at the Origin Request trigger fires when CloudFront is about to forward a cache miss to the origin. This is the correct point to modify the request URL, headers, or query parameters before they reach the origin. CloudFront Functions cannot run at the Origin Request trigger.",
     },
@@ -418,12 +418,12 @@ The **Viewer Protocol Policy** controls whether CloudFront accepts HTTP, HTTPS, 
       question:
         "A company needs high availability for their CloudFront distribution, automatically failing over from a primary S3 bucket to a secondary S3 bucket in another region on errors. Which feature enables this?",
       options: [
-        "Multiple cache behaviors pointing to different origins",
-        "CloudFront Origin Group with primary and secondary origins",
-        "Route 53 health checks with failover routing",
         "S3 Cross-Region Replication with CloudFront's automatic origin selection",
+        "Route 53 health checks with failover routing",
+        "CloudFront Origin Group with primary and secondary origins",
+        "Multiple cache behaviors pointing to different origins",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "A CloudFront Origin Group defines a primary origin and a secondary failover origin. If the primary returns a 5xx error or times out, CloudFront automatically retries on the secondary. This is the built-in CloudFront failover mechanism, distinct from Route 53 health check routing.",
     },

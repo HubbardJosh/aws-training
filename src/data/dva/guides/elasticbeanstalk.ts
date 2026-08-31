@@ -21,12 +21,12 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question:
             "Where does Elastic Beanstalk store application version ZIP/WAR files?",
           options: [
-            "In a CodeCommit repository",
             "In an S3 bucket",
             "In an ECR container registry",
+            "In a CodeCommit repository",
             "In an EFS file system",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Elastic Beanstalk stores each application version as a ZIP or WAR file in S3. You can deploy any stored version to any environment, making rollbacks straightforward.",
         },
@@ -34,11 +34,11 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question: "What is the purpose of the Elastic Beanstalk Worker tier?",
           options: [
             "To handle HTTP requests from internet users via an ALB",
-            "To process background tasks from an SQS queue without a load balancer",
-            "To run database migrations before the web tier starts",
             "To host static assets separately from the application",
+            "To run database migrations before the web tier starts",
+            "To process background tasks from an SQS queue without a load balancer",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Worker tier polls an SQS queue for background tasks. Beanstalk's daemon handles message visibility and deletion. It has no load balancer and is ideal for decoupled background processing like email sending or report generation.",
         },
@@ -46,12 +46,12 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question:
             "How does rolling back a deployment work in Elastic Beanstalk?",
           options: [
-            "Beanstalk automatically reverts on any health check failure",
             "You redeploy a previous application version stored in S3",
             "You use the 'undo' button in the Beanstalk console",
+            "Beanstalk automatically reverts on any health check failure",
             "Beanstalk snapshots the environment before each deployment",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Rolling back in Elastic Beanstalk means deploying a previous application version. Since all versions are stored in S3, you can deploy any labeled version to any environment at any time.",
         },
@@ -75,12 +75,12 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question:
             "Which Elastic Beanstalk deployment policy is the safest with the easiest rollback?",
           options: [
-            "All at once",
             "Rolling",
-            "Immutable",
+            "All at once",
             "Rolling with additional batch",
+            "Immutable",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Immutable deployment launches a new Auto Scaling Group with the new version and only terminates old instances after health checks pass. Rollback is trivial — just terminate the new ASG. It is the safest option, though the slowest and most expensive.",
         },
@@ -88,12 +88,12 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question:
             "What is a key disadvantage of the 'All at once' Elastic Beanstalk deployment policy?",
           options: [
-            "It is the most expensive deployment policy",
             "The application is briefly unavailable while all instances update simultaneously",
-            "It requires double the instances during deployment",
             "It does not support rollback",
+            "It requires double the instances during deployment",
+            "It is the most expensive deployment policy",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "All at once deploys to every instance simultaneously, causing a brief period where the application is unavailable. It is the fastest and cheapest option but is not suitable for production environments.",
         },
@@ -101,12 +101,12 @@ Beanstalk supports a wide range of runtimes through **platforms**: Node.js, Pyth
           question:
             "How is Blue/Green deployment achieved in Elastic Beanstalk?",
           options: [
-            "By configuring CodeDeploy with two ALB target groups",
-            "By creating a second environment, deploying to it, and using Swap Environment URLs to swap CNAMEs",
             "By enabling traffic splitting with a 50/50 split",
+            "By configuring CodeDeploy with two ALB target groups",
             "By using immutable deployment with two simultaneous ASGs",
+            "By creating a second environment, deploying to it, and using Swap Environment URLs to swap CNAMEs",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Blue/Green in Beanstalk is a manual pattern: create a second environment, deploy and test the new version, then use Swap Environment URLs to instantly redirect traffic. The old environment becomes the rollback target.",
         },
@@ -152,12 +152,12 @@ Beanstalk uses CloudFormation under the hood for all resource management, so all
           question:
             "In what order are .ebextensions configuration files processed?",
           options: [
-            "In the order they were created (oldest first)",
             "In lexicographic (alphabetical) order by filename",
+            "In the order they were created (oldest first)",
             "In reverse alphabetical order",
             "Simultaneously — order does not matter",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Beanstalk processes .ebextensions config files in lexicographic (alphabetical) order by filename. The naming convention 01-..., 02-... makes the processing order explicit and predictable.",
         },
@@ -165,12 +165,12 @@ Beanstalk uses CloudFormation under the hood for all resource management, so all
           question:
             "What happens to CloudFormation resources added via .ebextensions when the Beanstalk environment is terminated?",
           options: [
-            "They are retained indefinitely until manually deleted",
             "They are deleted along with the environment as part of the CloudFormation stack",
-            "They are moved to a separate CloudFormation stack for retention",
             "They are exported to S3 before deletion",
+            "They are retained indefinitely until manually deleted",
+            "They are moved to a separate CloudFormation stack for retention",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Resources added via .ebextensions become part of the environment's CloudFormation stack. When the environment is terminated, all those resources are deleted as part of the stack teardown.",
         },
@@ -178,11 +178,11 @@ Beanstalk uses CloudFormation under the hood for all resource management, so all
           question: "What is a Beanstalk 'saved configuration' used for?",
           options: [
             "Saving application code versions to S3",
+            "Storing deployment history for compliance auditing",
             "Snapshotting the entire environment's settings to recreate identical environments",
             "Backing up the RDS database associated with the environment",
-            "Storing deployment history for compliance auditing",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Saved configurations snapshot the complete environment settings — instance type, capacity, load balancer settings, environment properties, and all option_settings. They are the right tool for maintaining dev/staging/prod environment parity.",
         },
@@ -202,12 +202,12 @@ The \`option_settings\` namespace system gives you access to every Beanstalk and
           question:
             "Why should database credentials NOT be stored in Elastic Beanstalk environment properties?",
           options: [
-            "Environment properties are limited to 256 characters",
             "They are visible in the Beanstalk console and stored in configuration history — not appropriate for secrets",
-            "Beanstalk environment properties are not accessible as environment variables",
             "Environment properties are deleted on each deployment",
+            "Beanstalk environment properties are not accessible as environment variables",
+            "Environment properties are limited to 256 characters",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Beanstalk environment properties are visible in the console and stored in configuration history, making them unsuitable for secrets. Use Secrets Manager or SSM Parameter Store instead, and read a secret name (not the value) from an environment property.",
         },
@@ -215,12 +215,12 @@ The \`option_settings\` namespace system gives you access to every Beanstalk and
           question:
             "What is the highest priority configuration source in Elastic Beanstalk's precedence order?",
           options: [
-            ".ebextensions config files committed to the repository",
             "Saved configurations",
-            "Settings applied directly to the environment via console or CLI",
             "Beanstalk defaults",
+            ".ebextensions config files committed to the repository",
+            "Settings applied directly to the environment via console or CLI",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Settings applied directly to the environment via the console or CLI have the highest precedence. They override saved configurations, which override .ebextensions files, which override Beanstalk defaults.",
         },
@@ -265,11 +265,11 @@ Beanstalk automatically publishes metrics to CloudWatch for each environment. Yo
             "What does a Grey health status indicate in an Elastic Beanstalk environment?",
           options: [
             "The environment has critical failures",
-            "The environment is updating",
             "The environment is degraded",
+            "The environment is updating",
             "The environment has no instances running",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Grey indicates the environment is updating (e.g., during a deployment). Green = healthy, Yellow = degraded, Red = critical failures, Grey = updating.",
         },
@@ -302,12 +302,12 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
           question:
             "What is the risk of creating an RDS instance inside an Elastic Beanstalk environment?",
           options: [
-            "RDS inside Beanstalk is not supported",
-            "The RDS instance is deleted when the environment is terminated",
             "RDS cannot be accessed from instances in the same environment",
             "The RDS instance uses a different VPC than the Beanstalk environment",
+            "RDS inside Beanstalk is not supported",
+            "The RDS instance is deleted when the environment is terminated",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "When RDS is created inside a Beanstalk environment (coupled), it becomes part of the environment's CloudFormation stack. Terminating the environment deletes the RDS instance. For production, create RDS outside Beanstalk (decoupled) so it persists independently.",
         },
@@ -315,20 +315,20 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
           question:
             "How does the Elastic Beanstalk Worker tier receive tasks to process?",
           options: [
-            "Via HTTP requests from the web tier's load balancer",
-            "By polling an SQS queue — Beanstalk's daemon handles message visibility and deletion",
-            "Via EventBridge events from the web tier",
             "By reading from a DynamoDB Streams feed",
+            "Via HTTP requests from the web tier's load balancer",
+            "Via EventBridge events from the web tier",
+            "By polling an SQS queue — Beanstalk's daemon handles message visibility and deletion",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Worker tier's EC2 instances poll an SQS queue for tasks. Beanstalk's built-in daemon manages message visibility and deletion, so your application code only needs to process the task and return a successful response.",
         },
         {
           question:
             "What infrastructure tool does Elastic Beanstalk use under the hood for all resource management?",
-          options: ["AWS CDK", "AWS SAM", "AWS CloudFormation", "AWS OpsWorks"],
-          correctIndex: 2,
+          options: ["AWS OpsWorks", "AWS CloudFormation", "AWS SAM", "AWS CDK"],
+          correctIndex: 1,
           explanation:
             "Beanstalk uses CloudFormation under the hood. All provisioned resources — EC2 instances, load balancers, ASGs, security groups — are visible in the CloudFormation console as a stack, and .ebextensions can add custom CloudFormation resources.",
         },
@@ -378,11 +378,11 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
         "A team wants to deploy a new Beanstalk application version with zero downtime and the easiest possible rollback. Which deployment policy should they choose?",
       options: [
         "All at once",
-        "Rolling",
-        "Rolling with additional batch",
         "Immutable",
+        "Rolling with additional batch",
+        "Rolling",
       ],
-      correctIndex: 3,
+      correctIndex: 1,
       explanation:
         "Immutable deployment launches a new Auto Scaling Group with the new version and only terminates the old ASG after health checks pass. Rollback is instant — just terminate the new ASG. It is the safest option with zero downtime.",
     },
@@ -390,12 +390,12 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
       question:
         "A Beanstalk environment has an RDS instance created inside it. What happens when the environment is terminated?",
       options: [
+        "The RDS instance is transferred to the default VPC",
         "The RDS instance is moved to a standalone state and preserved",
         "The RDS instance is deleted along with the environment",
         "The RDS instance is automatically backed up to S3 before deletion",
-        "The RDS instance is transferred to the default VPC",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "RDS created inside a Beanstalk environment is part of the environment's CloudFormation stack. When the environment is terminated, the RDS instance is deleted. For production, always create RDS outside Beanstalk (decoupled).",
     },
@@ -403,24 +403,24 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
       question:
         "Where should sensitive database credentials be stored for a Beanstalk application?",
       options: [
-        "In Beanstalk environment properties — they are encrypted at rest",
-        "In .ebextensions config files committed to the repository",
         "In AWS Secrets Manager or SSM Parameter Store, fetched at application startup",
+        "In .ebextensions config files committed to the repository",
+        "In Beanstalk environment properties — they are encrypted at rest",
         "In the application's web.config or application.properties file",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Secrets should be stored in Secrets Manager or SSM Parameter Store, not in Beanstalk environment properties (visible in console and configuration history). The application reads a secret name from an environment variable and fetches the actual value at startup.",
     },
     {
       question: "How is Blue/Green deployment performed in Elastic Beanstalk?",
       options: [
-        "By enabling the built-in Blue/Green deployment policy in the console",
         "By creating a second environment, deploying to it, and using Swap Environment URLs",
-        "By configuring CodeDeploy with two ALB target groups",
+        "By enabling the built-in Blue/Green deployment policy in the console",
         "By using the immutable deployment policy with a traffic split configured",
+        "By configuring CodeDeploy with two ALB target groups",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Blue/Green is a manual pattern in Beanstalk — create a second environment, deploy and test the new version there, then use Swap Environment URLs to swap CNAMEs for instant traffic redirection. The original environment remains for rollback.",
     },
@@ -441,20 +441,20 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
       question:
         "What does the Elastic Beanstalk Worker tier do with SQS messages after processing?",
       options: [
-        "The application code must manually call DeleteMessage on each processed message",
-        "Beanstalk's built-in daemon handles message visibility and deletion automatically",
-        "Messages are moved to a dead-letter queue after processing",
         "Messages expire automatically after the visibility timeout",
+        "Messages are moved to a dead-letter queue after processing",
+        "Beanstalk's built-in daemon handles message visibility and deletion automatically",
+        "The application code must manually call DeleteMessage on each processed message",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Beanstalk's built-in daemon manages SQS message visibility and deletion for the Worker tier. The application only needs to process the task and return a successful HTTP response — the daemon handles the SQS mechanics.",
     },
     {
       question:
         "Which Elastic Beanstalk health status color indicates the environment is currently updating?",
-      options: ["Green", "Yellow", "Red", "Grey"],
-      correctIndex: 3,
+      options: ["Grey", "Red", "Yellow", "Green"],
+      correctIndex: 0,
       explanation:
         "Grey indicates the environment is updating (e.g., during a deployment or configuration change). Green = healthy, Yellow = degraded, Red = critical failures, Grey = updating.",
     },
@@ -462,12 +462,12 @@ Beanstalk manages ACM certificate attachment to the load balancer through enviro
       question:
         "Which Elastic Beanstalk deployment policy temporarily reduces capacity by deploying to one batch of instances at a time without launching additional instances?",
       options: [
-        "All at once",
         "Rolling",
+        "All at once",
         "Rolling with additional batch",
         "Immutable",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Rolling deployment updates one batch at a time without creating extra instances. This temporarily reduces capacity during each batch update. Rolling with additional batch maintains full capacity by launching a new batch first before rolling through existing instances.",
     },

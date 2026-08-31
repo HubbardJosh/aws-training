@@ -18,12 +18,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "Which CloudFront feature prevents users from accessing S3 bucket content directly, bypassing the CDN?",
           options: [
-            "Signed URLs",
-            "Origin Access Control (OAC)",
-            "Geographic restrictions",
             "Field-level encryption",
+            "Geographic restrictions",
+            "Origin Access Control (OAC)",
+            "Signed URLs",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Origin Access Control (OAC) restricts S3 bucket access so that only CloudFront can retrieve objects. This prevents users from bypassing the CDN and ensures WAF and other CloudFront security features apply uniformly.",
         },
@@ -31,12 +31,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "What is the role of Regional Edge Caches in CloudFront's architecture?",
           options: [
-            "They replace edge locations in regions where CloudFront has no PoPs",
             "They sit between edge locations and origins, reducing origin load for less popular content",
             "They store only static assets and never dynamic content",
+            "They replace edge locations in regions where CloudFront has no PoPs",
             "They are used exclusively for Lambda@Edge function execution",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Regional Edge Caches are larger intermediate caches positioned between edge locations and origins. They cache content that is not popular enough to remain in edge location caches, significantly reducing origin requests.",
         },
@@ -44,12 +44,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "Which origin types can be configured for a CloudFront distribution?",
           options: [
+            "Only AWS-managed services; on-premises servers cannot be origins",
             "Only Amazon S3 buckets",
             "S3 buckets and EC2 instances only",
             "S3 buckets, ALBs, EC2 instances, API Gateway endpoints, and any HTTP server",
-            "Only AWS-managed services; on-premises servers cannot be origins",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "CloudFront supports a wide variety of origins: Amazon S3 buckets, Application Load Balancers, EC2 instances, API Gateway endpoints, or any HTTP server accessible via DNS.",
         },
@@ -63,12 +63,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "A CloudFront distribution serves both a REST API at /api/* and static assets at /static/*. How should cache behaviors be configured?",
           options: [
-            "Use a single cache behavior with a TTL of 0 to disable caching for all content",
-            "Configure /api/* with caching disabled and headers forwarded; configure /static/* with aggressive caching",
-            "Configure separate distributions — one for the API and one for static content",
             "Use Lambda@Edge to dynamically set TTL based on the request path",
+            "Configure separate distributions — one for the API and one for static content",
+            "Configure /api/* with caching disabled and headers forwarded; configure /static/* with aggressive caching",
+            "Use a single cache behavior with a TTL of 0 to disable caching for all content",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Cache behaviors map URL path patterns to different origins and caching policies. /api/* should have caching disabled with headers forwarded to the ALB, while /static/* should aggressively cache content from S3 to maximize hit rates.",
         },
@@ -78,10 +78,10 @@ export const cloudfrontGuide: ServiceGuide = {
           options: [
             "CloudFront does not support cache invalidation for JavaScript files",
             "Cache invalidation is limited to 10 paths per month; versioned names have no limit",
-            "CloudFront charges for invalidation paths beyond 1,000 per month, making versioned names more cost-effective",
             "Versioned filenames bypass CDN caching entirely, ensuring users always get the latest file",
+            "CloudFront charges for invalidation paths beyond 1,000 per month, making versioned names more cost-effective",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "CloudFront charges per invalidation path beyond the first 1,000 paths per month. Versioned filenames (e.g., app.v2.js) allow CloudFront to serve new content as a new cache object without incurring invalidation costs.",
         },
@@ -95,12 +95,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "An ACM certificate is needed for a CloudFront distribution. In which AWS region must the certificate be provisioned?",
           options: [
-            "The same region as the CloudFront origin",
             "us-west-2 (Oregon), which is the default AWS region",
             "us-east-1 (N. Virginia), regardless of the distribution region",
+            "The same region as the CloudFront origin",
             "Any region — CloudFront replicates certificates globally",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "ACM certificates used with CloudFront must be provisioned in us-east-1 (N. Virginia), regardless of where the origin or users are located. This is a common exam trap for architects working with non-US regions.",
         },
@@ -108,12 +108,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "What does Field-Level Encryption provide that standard HTTPS does not?",
           options: [
-            "End-to-end encryption between CloudFront and the origin using TLS 1.3",
-            "Encryption of specific POST fields at the edge that remains in place even within the application layer until decrypted by a designated microservice",
             "Encryption of S3 objects at rest using customer-managed KMS keys",
             "Automatic key rotation for CloudFront SSL/TLS certificates",
+            "Encryption of specific POST fields at the edge that remains in place even within the application layer until decrypted by a designated microservice",
+            "End-to-end encryption between CloudFront and the origin using TLS 1.3",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Field-level encryption encrypts specific POST fields (e.g., credit card numbers) at the edge using public key cryptography. The data remains encrypted as it passes through your application servers and is only decrypted by the designated microservice that holds the private key.",
         },
@@ -121,12 +121,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "Which CloudFront feature restricts content access based on the viewer's country?",
           options: [
-            "Signed URLs with IP restrictions",
             "Origin Access Control",
             "Geographic restrictions (geo-blocking)",
+            "Signed URLs with IP restrictions",
             "WAF IP set match rules",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Geographic restrictions (geo-blocking) allow or deny access to CloudFront content based on the country determined from the viewer's IP address using a geolocation database.",
         },
@@ -141,11 +141,11 @@ export const cloudfrontGuide: ServiceGuide = {
             "A team needs to perform JWT authentication for CloudFront requests, potentially calling an external service. Which compute-at-edge option is appropriate?",
           options: [
             "CloudFront Functions, because they run at every edge location",
-            "Lambda@Edge, because it supports full Lambda capabilities including external calls and complex logic",
             "CloudFront Functions, because they have lower latency than Lambda@Edge",
+            "Lambda@Edge, because it supports full Lambda capabilities including external calls and complex logic",
             "Neither — authentication must be handled at the origin, not the edge",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda@Edge supports full Lambda capabilities including external HTTP calls, complex logic, and multiple runtimes (Node.js, Python). It is the correct choice for authentication and authorization logic. CloudFront Functions are too limited for this use case.",
         },
@@ -153,12 +153,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "CloudFront Functions run at which layer of the CloudFront network?",
           options: [
-            "Regional Edge Caches only",
-            "The origin server",
             "Edge locations (Points of Presence) closest to the viewer",
             "AWS Global Accelerator endpoints",
+            "Regional Edge Caches only",
+            "The origin server",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "CloudFront Functions run at edge locations (Points of Presence) closest to the viewer, providing sub-millisecond execution. Lambda@Edge runs at Regional Edge Caches, which are further from the viewer but support more powerful compute.",
         },
@@ -172,12 +172,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "A streaming service needs to grant authenticated users access to an entire video course library (hundreds of files) through CloudFront. Which mechanism is most appropriate?",
           options: [
+            "Origin Access Control — it restricts S3 access to authenticated users",
+            "CloudFront Signed Cookies — they grant access to multiple objects without a unique URL per file",
             "CloudFront Signed URLs — one per file",
             "S3 Presigned URLs — they work transparently through CloudFront",
-            "CloudFront Signed Cookies — they grant access to multiple objects without a unique URL per file",
-            "Origin Access Control — it restricts S3 access to authenticated users",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "CloudFront Signed Cookies grant access to multiple objects using a single cookie, making them ideal for content libraries where generating a unique signed URL per file is impractical. S3 Presigned URLs bypass CloudFront entirely.",
         },
@@ -204,12 +204,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "What controls whether CloudFront caches API Gateway responses?",
           options: [
+            "WAF rules attached to the CloudFront distribution",
             "The CloudFront default TTL, which always overrides origin headers",
             "Cache-Control headers returned by API Gateway — no-cache prevents caching; long max-age enables it",
             "The API Gateway stage settings, not CloudFront configuration",
-            "WAF rules attached to the CloudFront distribution",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Cache-Control headers from API Gateway determine CloudFront caching behavior. Responses with Cache-Control: no-cache are never cached; responses with long max-age values are aggressively cached at the edge.",
         },
@@ -217,12 +217,12 @@ export const cloudfrontGuide: ServiceGuide = {
           question:
             "How does placing CloudFront in front of API Gateway improve security in a multi-layer architecture?",
           options: [
-            "CloudFront encrypts all traffic between API Gateway and Lambda using client-managed KMS keys",
-            "WAF rules on the CloudFront distribution filter malicious requests at the edge before they reach API Gateway",
             "CloudFront adds mutual TLS authentication between the edge and API Gateway",
+            "CloudFront encrypts all traffic between API Gateway and Lambda using client-managed KMS keys",
             "CloudFront automatically applies the OWASP Core Rule Set without WAF configuration",
+            "WAF rules on the CloudFront distribution filter malicious requests at the edge before they reach API Gateway",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Associating WAF with a CloudFront distribution protects the API at the edge, filtering malicious requests (SQL injection, XSS, rate limits) before they reach API Gateway's own WAF, providing defense in depth.",
         },
@@ -268,12 +268,12 @@ export const cloudfrontGuide: ServiceGuide = {
       question:
         "A company wants to serve private video content through CloudFront so that only paying subscribers can access individual videos. Which mechanism should be used?",
       options: [
+        "CloudFront Signed Cookies covering the entire video library",
         "S3 Presigned URLs embedded in the video player",
         "CloudFront Signed URLs with an expiration time",
-        "CloudFront Signed Cookies covering the entire video library",
         "Origin Access Control on the S3 bucket",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "CloudFront Signed URLs grant time-limited access to a specific individual object, making them appropriate for per-video access control. Signed Cookies are better for granting access to an entire library. S3 Presigned URLs bypass CloudFront entirely.",
     },
@@ -281,12 +281,12 @@ export const cloudfrontGuide: ServiceGuide = {
       question:
         "An ACM certificate is required for a new CloudFront distribution serving a European audience. Where must the certificate be provisioned?",
       options: [
+        "Any region — CloudFront automatically discovers ACM certificates",
         "eu-west-1 (Ireland) to minimize latency to European viewers",
         "us-east-1 (N. Virginia) regardless of viewer or origin location",
         "The same region as the CloudFront origin",
-        "Any region — CloudFront automatically discovers ACM certificates",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "ACM certificates for CloudFront must always be provisioned in us-east-1, regardless of the viewer or origin region. This is a frequently tested CloudFront exam fact.",
     },
@@ -295,11 +295,11 @@ export const cloudfrontGuide: ServiceGuide = {
         "What is the recommended approach for updating static assets frequently without incurring cache invalidation costs?",
       options: [
         "Set a very short TTL (e.g., 1 second) on all cache behaviors",
-        "Use versioned filenames (e.g., app.v2.js) so new content is treated as a new cache object",
         "Disable caching for static assets and always serve from S3",
+        "Use versioned filenames (e.g., app.v2.js) so new content is treated as a new cache object",
         "Use S3 Object Versioning to automatically invalidate CloudFront on each PUT",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Versioned filenames cause CloudFront to treat each deployment as a new object, avoiding invalidation costs (which are charged beyond 1,000 paths/month). Short TTLs increase origin load and do not eliminate invalidation costs.",
     },
@@ -320,12 +320,12 @@ export const cloudfrontGuide: ServiceGuide = {
       question:
         "Which CloudFront security feature encrypts specific HTTP POST form fields (e.g., credit card numbers) at the edge so they remain protected throughout the application stack?",
       options: [
+        "Field-level encryption using a public/private RSA key pair",
         "HTTPS with the Origin Protocol Policy set to HTTPS-only",
         "AWS WAF with SQL injection detection rules",
-        "Field-level encryption using a public/private RSA key pair",
         "Origin Access Control restricting access to the backend",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Field-level encryption encrypts specific POST fields at the CloudFront edge using public key cryptography. The data remains encrypted as it traverses your application stack and is only decrypted by the designated microservice holding the private key.",
     },
@@ -346,12 +346,12 @@ export const cloudfrontGuide: ServiceGuide = {
       question:
         "A website is hosted on S3 and served through CloudFront. Users accessing the site via HTTPS are getting certificate errors. What is the most likely cause?",
       options: [
+        "CloudFront does not support HTTPS for S3 origins",
         "The S3 bucket does not have versioning enabled",
         "The ACM certificate was provisioned in a region other than us-east-1",
-        "CloudFront does not support HTTPS for S3 origins",
         "The CloudFront distribution needs to be redeployed after adding the certificate",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "ACM certificates used with CloudFront must be provisioned in us-east-1. A certificate provisioned in any other region cannot be attached to a CloudFront distribution, causing HTTPS failures.",
     },
@@ -360,11 +360,11 @@ export const cloudfrontGuide: ServiceGuide = {
         "Which CloudFront configuration prevents end users from accessing S3 bucket objects by constructing direct S3 URLs?",
       options: [
         "Setting the S3 bucket to private and using Signed URLs for every request",
-        "Enabling S3 Block Public Access and configuring Origin Access Control (OAC) on the distribution",
         "Using an S3 bucket policy that allows access only from CloudFront IP ranges",
         "Configuring the Viewer Protocol Policy to HTTPS-only",
+        "Enabling S3 Block Public Access and configuring Origin Access Control (OAC) on the distribution",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Origin Access Control (OAC) restricts S3 bucket access so that only CloudFront can retrieve objects. Combined with S3 Block Public Access, this ensures all requests flow through CloudFront and direct S3 URL access is denied.",
     },

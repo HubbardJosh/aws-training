@@ -21,12 +21,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "Which ElastiCache engine supports persistence through RDB snapshots and AOF logging?",
           options: [
-            "Memcached",
-            "Redis",
             "Both Redis and Memcached",
             "Neither — ElastiCache is always in-memory only",
+            "Redis",
+            "Memcached",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Redis supports persistence through RDB (snapshot) and AOF (append-only file) logging, allowing data to survive restarts. Memcached has no persistence — all data is lost on restart.",
         },
@@ -35,11 +35,11 @@ export const elasticacheGuide: ServiceGuide = {
             "Which ElastiCache engine is multi-threaded and better for pure high-throughput object caching without advanced features?",
           options: [
             "Redis",
-            "Memcached",
             "Both are equally suited for high-throughput caching",
+            "Memcached",
             "Neither — use DynamoDB DAX for high-throughput caching",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Memcached is multi-threaded and designed for pure high-throughput key-value caching. It has no persistence, replication, or complex data structures — just raw caching throughput. Choose Memcached when those tradeoffs are acceptable.",
         },
@@ -48,11 +48,11 @@ export const elasticacheGuide: ServiceGuide = {
             "Which Redis data structure and commands are ideal for building a real-time leaderboard?",
           options: [
             "Lists with LPUSH and LRANGE",
-            "Sorted sets with ZADD, ZRANK, and ZRANGE",
             "Hashes with HSET and HGETALL",
+            "Sorted sets with ZADD, ZRANK, and ZRANGE",
             "Sets with SADD and SMEMBERS",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Redis sorted sets are purpose-built for leaderboards. ZADD adds or updates a score, ZRANK retrieves a member's rank, and ZRANGE retrieves a range of entries with scores — all in O(log N) time.",
         },
@@ -69,8 +69,8 @@ export const elasticacheGuide: ServiceGuide = {
         {
           question:
             "What is the maximum number of read replicas per shard in Redis Cluster Mode Disabled?",
-          options: ["1", "3", "5", "15"],
-          correctIndex: 2,
+          options: ["1", "3", "15", "5"],
+          correctIndex: 3,
           explanation:
             "Redis Cluster Mode Disabled (single shard) supports one primary node and up to 5 read replicas. If the primary fails, ElastiCache automatically promotes a replica.",
         },
@@ -92,11 +92,11 @@ export const elasticacheGuide: ServiceGuide = {
             "What is the primary benefit of Redis Cluster Mode Enabled over Cluster Mode Disabled?",
           options: [
             "It supports persistence through AOF logging",
-            "It enables horizontal write scaling by distributing data across multiple shard primaries",
             "It eliminates the need for read replicas",
+            "It enables horizontal write scaling by distributing data across multiple shard primaries",
             "It allows standard Redis clients without cluster awareness",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Cluster Mode Enabled distributes data across multiple shards, each with its own primary. This enables horizontal write scaling — multiple primaries handle writes for their portion of the key space instead of a single primary handling all writes.",
         },
@@ -118,12 +118,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "What is a key disadvantage of the lazy loading (cache-aside) caching strategy?",
           options: [
-            "Every write requires two operations — one to the database and one to the cache",
-            "The first request for any data always incurs a cache miss, and direct database updates cause stale cache data",
             "It requires the cache to be pre-populated before the application starts",
             "It does not support TTL-based expiration",
+            "The first request for any data always incurs a cache miss, and direct database updates cause stale cache data",
+            "Every write requires two operations — one to the database and one to the cache",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "With lazy loading, the first request for any piece of data always misses the cache (cold start). Also, if the database is updated directly without invalidating the cache, the cached value becomes stale until TTL expires.",
         },
@@ -131,12 +131,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "Which Redis eviction policy is recommended as a general default for caching workloads?",
           options: [
-            "noeviction",
-            "volatile-lru",
-            "allkeys-lru",
             "allkeys-random",
+            "allkeys-lru",
+            "volatile-lru",
+            "noeviction",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "allkeys-lru evicts the least recently used key from the entire keyspace when memory is full. It is the recommended general default for caching workloads. noeviction returns errors when memory is full and is never appropriate for a cache.",
         },
@@ -169,19 +169,19 @@ ElastiCache clusters run inside your VPC and are not publicly accessible. **Secu
           question:
             "Which ElastiCache authentication mechanism provides command-level and key namespace access control for Redis 6+?",
           options: [
-            "Redis AUTH (single password)",
             "Redis RBAC (Role-Based Access Control)",
-            "IAM-based authentication",
             "TLS client certificates",
+            "Redis AUTH (single password)",
+            "IAM-based authentication",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Redis RBAC (available in Redis 6+) creates named users with specific permissions for commands and key namespaces. It is more granular and auditable than the legacy AUTH single-password mechanism.",
         },
         {
           question: "What is the default port for Redis in ElastiCache?",
-          options: ["5432", "3306", "6379", "11211"],
-          correctIndex: 2,
+          options: ["6379", "3306", "5432", "11211"],
+          correctIndex: 0,
           explanation:
             "Redis uses port 6379 by default. Memcached uses port 11211. Security groups should restrict access to these ports to only authorized application-tier security groups.",
         },
@@ -189,12 +189,12 @@ ElastiCache clusters run inside your VPC and are not publicly accessible. **Secu
           question:
             "Encryption at rest with KMS is available for which ElastiCache engine?",
           options: [
-            "Memcached only",
             "Redis only",
-            "Both Redis and Memcached",
+            "Memcached only",
             "Neither — ElastiCache does not support KMS encryption",
+            "Both Redis and Memcached",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Encryption at rest with KMS is only available for Redis, not Memcached. It encrypts stored data including RDB snapshots and AOF files.",
         },
@@ -228,16 +228,16 @@ ElastiCache clusters run inside your VPC and are not publicly accessible. **Secu
         {
           question:
             "Which Redis command atomically increments a counter for rate limiting?",
-          options: ["SET with NX flag", "INCR", "APPEND", "HINCRBY"],
-          correctIndex: 1,
+          options: ["INCR", "SET with NX flag", "HINCRBY", "APPEND"],
+          correctIndex: 0,
           explanation:
             "Redis INCR atomically increments a counter. Combined with EXPIRE to set a time window, it implements race-condition-free rate limiting per user ID or IP address.",
         },
         {
           question:
             "What is the time complexity of Redis sorted set operations like ZADD and ZRANK?",
-          options: ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
-          correctIndex: 1,
+          options: ["O(N)", "O(N log N)", "O(1)", "O(log N)"],
+          correctIndex: 3,
           explanation:
             "Redis sorted set operations (ZADD, ZRANK, ZRANGE) run in O(log N) time. This makes them highly efficient for leaderboards even with millions of entries.",
         },
@@ -257,12 +257,12 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
           question:
             "A Lambda function needs to connect to ElastiCache Redis. What networking configuration is required?",
           options: [
-            "The Lambda function must have a public IP address to reach ElastiCache",
-            "The Lambda function must be deployed in the same VPC as the ElastiCache cluster",
             "ElastiCache must have a VPC endpoint configured for Lambda access",
             "No special configuration is needed — ElastiCache is publicly accessible",
+            "The Lambda function must have a public IP address to reach ElastiCache",
+            "The Lambda function must be deployed in the same VPC as the ElastiCache cluster",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "ElastiCache has no public endpoint — it runs inside your VPC. Lambda functions must be deployed in the same VPC (with appropriate subnet and security group configuration) to connect to ElastiCache.",
         },
@@ -270,12 +270,12 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
           question:
             "For a Lambda function connecting to ElastiCache, where should the Redis connection be initialized?",
           options: [
-            "Inside the handler function on every invocation",
             "Outside the handler function, at module initialization, to reuse the connection across warm invocations",
             "In a Lambda layer that runs before each invocation",
+            "Inside the handler function on every invocation",
             "In a separate Lambda function that manages connection pooling",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Initialize the Redis connection outside the handler function at module level. Warm Lambda invocations reuse the same execution environment and can reuse the existing connection, avoiding the latency of establishing a new TCP connection on every invocation.",
         },
@@ -284,11 +284,11 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
             "Where should Redis AUTH passwords or RBAC credentials be stored in a production architecture?",
           options: [
             "In Lambda environment variables as plaintext",
-            "In AWS Secrets Manager, fetched at application startup",
-            "Hardcoded in the application source code",
             "In an SSM Parameter Store String (unencrypted) parameter",
+            "Hardcoded in the application source code",
+            "In AWS Secrets Manager, fetched at application startup",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Store Redis credentials in Secrets Manager and fetch them at startup. This enables credential rotation without redeployment and keeps credentials out of code, environment variables, and configuration files.",
         },
@@ -377,11 +377,11 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
         "Why must a Lambda function be deployed in the same VPC as ElastiCache?",
       options: [
         "Because ElastiCache requires VPC-level IAM authentication",
-        "Because ElastiCache has no public endpoint — it is only accessible from within the VPC",
         "Because Lambda cannot make TCP connections to external services",
+        "Because ElastiCache has no public endpoint — it is only accessible from within the VPC",
         "Because ElastiCache uses a private API that only works within AWS VPCs",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "ElastiCache clusters run inside a VPC and have no public endpoint. Lambda functions must be deployed in the same VPC with the appropriate security group rules to connect to ElastiCache.",
     },
@@ -389,12 +389,12 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
       question:
         "Which Redis eviction policy is recommended for general caching workloads when memory is full?",
       options: [
+        "allkeys-random — evict a random key from the entire keyspace",
+        "allkeys-lru — evict the least recently used key from the entire keyspace",
         "noeviction — return errors rather than evicting data",
         "volatile-lru — evict only keys with TTL set",
-        "allkeys-lru — evict the least recently used key from the entire keyspace",
-        "allkeys-random — evict a random key from the entire keyspace",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "allkeys-lru is the recommended general caching eviction policy. It evicts the least recently used key when memory is full. noeviction is never appropriate for a cache as it causes errors instead of evicting old data.",
     },
@@ -403,11 +403,11 @@ For secret management, store Redis AUTH passwords or RBAC user credentials in **
         "What is the primary advantage of storing user sessions in ElastiCache Redis over storing them in application server memory?",
       options: [
         "Redis sessions are encrypted with KMS automatically",
-        "Application servers become stateless, enabling horizontal scaling without sticky sessions",
         "Redis provides faster session access than in-memory storage",
         "Redis sessions are automatically backed up to S3",
+        "Application servers become stateless, enabling horizontal scaling without sticky sessions",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Storing sessions in Redis makes application servers stateless — any server can handle any request by reading the session from Redis. This enables horizontal scaling of the web tier without requiring sticky sessions that would tie users to specific servers.",
     },

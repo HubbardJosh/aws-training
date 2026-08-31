@@ -37,12 +37,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function processes messages from an SQS queue. After deployment, the team notices that some messages are being processed multiple times. What is the MOST likely cause?",
     options: [
-      "The function execution time exceeds the SQS visibility timeout",
-      "The SQS queue is configured as a FIFO queue",
       "The Lambda function has reserved concurrency set to 0",
+      "The function execution time exceeds the SQS visibility timeout",
       "The SQS queue has long polling disabled",
+      "The SQS queue is configured as a FIFO queue",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "When a Lambda function takes longer than the SQS visibility timeout to process a message, the message becomes visible again and can be picked up by another invocation — causing duplicate processing. The fix is to set the visibility timeout to at least 6× the function timeout. FIFO queues actually prevent duplicates. Reserved concurrency of 0 would disable the function entirely. Long polling affects how fast messages are received, not duplicates.",
     optionExplanations: [
@@ -139,12 +139,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to query DynamoDB items for a specific user (partition key = userId) filtered by date range on the sort key. Which DynamoDB operation should they use?",
     options: [
+      "GetItem with projection expression",
       "Query with a KeyConditionExpression on userId and date range",
       "Scan with a FilterExpression on userId and date",
-      "GetItem with projection expression",
       "BatchGetItem with multiple user IDs",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Query is the correct operation — it requires the partition key and supports sort key conditions like BETWEEN, begins_with, and comparison operators. This reads only the relevant partition. Scan reads the entire table and is extremely inefficient and costly for this use case. GetItem retrieves a single item by full primary key. BatchGetItem retrieves multiple specific items by key.",
     optionExplanations: [
@@ -191,12 +191,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application publishes messages to an SQS Standard queue. A consumer processes messages and deletes them after successful processing. Some messages appear to be processed twice. What should the developer do to investigate?",
     options: [
+      "Enable server-side encryption on the queue",
+      "Increase the message retention period",
       "Check if the consumer processing time exceeds the visibility timeout and extend it",
       "Switch to a FIFO queue to ensure exactly-once processing",
-      "Increase the message retention period",
-      "Enable server-side encryption on the queue",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "The most common cause of duplicate processing with SQS is that the consumer takes longer to process a message than the visibility timeout, causing the message to reappear. Extending the visibility timeout (or calling ChangeMessageVisibility during processing) fixes this. While switching to FIFO adds exactly-once processing, it also limits throughput. SQS Standard inherently delivers at-least-once — idempotent consumers are the right design. Retention period and encryption are unrelated.",
     optionExplanations: [
@@ -216,12 +216,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Kinesis Data Stream has 4 shards. A producer is writing 5 MB/s of data. What will happen and what is the correct fix?",
     options: [
-      "ProvisionedThroughputExceededException will occur; add more shards via shard splitting",
-      "The stream will automatically scale to accommodate the additional throughput",
       "The data will be buffered and delivered eventually with no errors",
+      "ProvisionedThroughputExceededException will occur; add more shards via shard splitting",
       "The producer should switch to Kinesis Data Firehose instead",
+      "The stream will automatically scale to accommodate the additional throughput",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Each Kinesis shard supports 1 MB/s write throughput. 4 shards = 4 MB/s maximum write capacity. Writing 5 MB/s exceeds this and causes ProvisionedThroughputExceededException. The fix is to split shards (add capacity) to reach at least 5 shards. Kinesis Data Streams does NOT auto-scale — you must manually scale or use on-demand mode. Firehose is a different service with different use cases.",
     optionExplanations: [
@@ -241,12 +241,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to allow an unauthenticated user to upload a file directly to S3 from a browser without exposing AWS credentials. What is the BEST approach?",
     options: [
-      "Generate a pre-signed URL with PUT method and provide it to the client",
-      "Create an IAM user with S3 write permissions and embed credentials in the frontend",
       "Enable public write access on the S3 bucket",
+      "Create an IAM user with S3 write permissions and embed credentials in the frontend",
       "Use an API Gateway proxy to forward uploads to S3",
+      "Generate a pre-signed URL with PUT method and provide it to the client",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Pre-signed URLs grant temporary, time-limited access to perform a specific S3 operation (PUT for upload) without requiring the user to have AWS credentials. The server generates the URL using AWS credentials and the client uses it directly. Embedding IAM credentials in frontend code is a severe security vulnerability. Enabling public write access would allow anyone to upload anything to your bucket. API Gateway proxy adds unnecessary complexity and cost for large file uploads.",
     optionExplanations: [
@@ -266,12 +266,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to upload a 10 GB file to S3. The upload is failing midway through. Which approach ensures the MOST reliable upload?",
     options: [
-      "Use multipart upload with individual part retries on failure",
       "Compress the file to under 5 GB before uploading as a single PUT",
-      "Use S3 Transfer Acceleration for more reliable uploads",
       "Use the AWS CLI sync command which handles retries automatically",
+      "Use S3 Transfer Acceleration for more reliable uploads",
+      "Use multipart upload with individual part retries on failure",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Multipart upload is required for objects over 5 GB and strongly recommended for objects over 100 MB. It uploads the file in parts that can be retried individually on failure — you do not need to restart the entire upload. S3 Transfer Acceleration improves speed over long distances but does not change reliability for mid-upload failures. AWS CLI sync does retry, but multipart with individual part retries is the underlying mechanism that makes large uploads reliable.",
     optionExplanations: [
@@ -291,12 +291,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to use one API Gateway REST API definition across development, staging, and production environments with different Lambda function versions. What is the BEST approach?",
     options: [
-      "Use stage variables to reference different Lambda aliases per stage",
-      "Create a separate API Gateway for each environment",
       "Use query parameters to determine which Lambda version to invoke",
       "Use API Gateway canary deployments to split traffic between versions",
+      "Create a separate API Gateway for each environment",
+      "Use stage variables to reference different Lambda aliases per stage",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Stage variables allow you to parameterize the integration target per stage. For example, the Lambda function ARN can include a stage variable: arn:aws:lambda:region:account:function:myFunction:${stageVariables.lambdaAlias}. Each stage (dev/staging/prod) sets lambdaAlias to the appropriate Lambda alias. This maintains one API definition while routing to different function versions per environment. Creating separate APIs is duplication. Query parameters would require application logic changes. Canary deployments are for gradual traffic shifting, not environment isolation.",
     optionExplanations: [
@@ -341,12 +341,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application publishes order events to an SNS topic. Three different services need to process each order: inventory, billing, and shipping. Each service must receive every order. What is the BEST architecture?",
     options: [
-      "SNS topic with three SQS queue subscriptions (fan-out pattern)",
-      "Three separate SNS topics, one per service",
       "A single SQS queue with all three services polling from it",
+      "Three separate SNS topics, one per service",
       "SNS topic with three Lambda subscriptions",
+      "SNS topic with three SQS queue subscriptions (fan-out pattern)",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The fan-out pattern uses one SNS topic subscribed by three SQS queues — each queue belongs to one service. Every service gets a copy of every message. SQS queues provide buffering, retry, and decoupling. Using three separate topics would require the publisher to know about all consumers. A single SQS queue shared by three services means each message is processed by only one service (messages are consumed, not broadcast). Lambda subscriptions work but lack buffering and retry capabilities of SQS.",
     optionExplanations: [
@@ -419,12 +419,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function needs to encrypt a 50 MB file before storing it in S3. Using KMS Encrypt API directly is failing because the file exceeds the 4 KB limit. What is the correct approach?",
     options: [
-      "Use KMS GenerateDataKey to get a DEK, encrypt the file locally with the DEK, store the encrypted DEK alongside the file",
       "Split the file into 4 KB chunks and encrypt each chunk separately with KMS",
-      "Use SSE-KMS on S3 to encrypt the file automatically during upload",
+      "Use KMS GenerateDataKey to get a DEK, encrypt the file locally with the DEK, store the encrypted DEK alongside the file",
       "Base64 encode the file to work within KMS limits",
+      "Use SSE-KMS on S3 to encrypt the file automatically during upload",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "KMS Encrypt is limited to 4 KB. Envelope encryption solves this: call GenerateDataKey to get a plaintext DEK and an encrypted DEK. Use the plaintext DEK with a local encryption library (AES-256) to encrypt the large file. Discard the plaintext DEK. Store the encrypted DEK alongside the encrypted data. To decrypt: call KMS Decrypt on the encrypted DEK, then use the plaintext DEK locally. Splitting into 4 KB chunks is impractical and inefficient. SSE-KMS is for S3-managed encryption, not Lambda-side encryption.",
     optionExplanations: [
@@ -444,12 +444,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function connects to an RDS database using credentials stored in Secrets Manager. The credentials are rotated every 30 days. How should the developer write the Lambda code to handle rotation without downtime?",
     options: [
-      "Retrieve the secret from Secrets Manager at each invocation and implement retry logic for authentication failures",
       "Cache the secret in a Lambda Layer updated during rotation",
       "Store the secret in an environment variable and update it manually after each rotation",
       "Use a DynamoDB table to store credentials and update it via a rotation Lambda",
+      "Retrieve the secret from Secrets Manager at each invocation and implement retry logic for authentication failures",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The recommended pattern is to retrieve the secret from Secrets Manager on each invocation (or cache with a short TTL) and implement retry logic: if authentication fails, refresh the cached secret and retry once. This handles the brief window during rotation when old credentials are invalidated. Secrets Manager caching libraries (AWS SDK) handle this automatically. Environment variables require manual updates — defeating the purpose of auto-rotation. Lambda Layers are for code/dependencies, not runtime secrets.",
     optionExplanations: [
@@ -496,12 +496,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer in Account A needs to access resources in Account B. The developer has IAM credentials in Account A. What must be configured to allow cross-account access via role assumption?",
     options: [
+      "AWS Organizations must be enabled with both accounts in the same OU",
+      "VPC peering between Account A and Account B",
       "A trust policy on the IAM role in Account B that allows Account A principal to assume it, and the developer must call sts:AssumeRole",
       "A resource-based policy in Account B that grants the Account A user access directly",
-      "VPC peering between Account A and Account B",
-      "AWS Organizations must be enabled with both accounts in the same OU",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Cross-account role assumption requires: 1) An IAM role in Account B with a trust policy (principal = Account A user/role ARN) allowing sts:AssumeRole. 2) The Account A user's identity policy must allow sts:AssumeRole on the Account B role ARN. The developer calls sts:AssumeRole and gets temporary credentials scoped to the Account B role. Resource-based policies can grant cross-account access for some services (S3, Lambda, etc.) but not via STS. VPC peering and Organizations are unrelated.",
     optionExplanations: [
@@ -524,12 +524,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team wants to deploy a new Lambda function version where 10% of traffic goes to the new version for 5 minutes before shifting 100% of traffic. Which CodeDeploy deployment configuration achieves this?",
     options: [
-      "CodeDeployDefault.LambdaCanary10Percent5Minutes",
       "CodeDeployDefault.LambdaLinear10PercentEvery5Minutes",
-      "CodeDeployDefault.LambdaAllAtOnce",
       "CodeDeployDefault.LambdaBlueGreen",
+      "CodeDeployDefault.LambdaAllAtOnce",
+      "CodeDeployDefault.LambdaCanary10Percent5Minutes",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       'Canary deployments shift a small percentage of traffic to the new version, wait, then shift the remainder. LambdaCanary10Percent5Minutes shifts 10% for 5 minutes, then 90% at once. Linear deployments shift traffic incrementally over time (e.g., 10% every 5 minutes until 100%). AllAtOnce shifts immediately with no safety period. There is no "BlueGreen" configuration for Lambda — blue/green is used for EC2.',
     optionExplanations: [
@@ -580,12 +580,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to test a Lambda function locally before deploying to AWS. Which SAM CLI command should they use?",
     options: [
-      "sam local invoke",
+      "sam validate --local",
       "sam deploy --dry-run",
       "sam build --local",
-      "sam validate --local",
+      "sam local invoke",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "sam local invoke runs a Lambda function locally in a Docker container that simulates the Lambda runtime. You can pass an event JSON file with -e event.json. sam local start-api starts a local API Gateway. sam deploy performs actual deployment. sam build compiles/packages the application. sam validate checks the template syntax.",
     optionExplanations: [
@@ -605,12 +605,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation stack update fails and enters UPDATE_ROLLBACK_FAILED state. What should the developer do to recover?",
     options: [
-      "Use the ContinueUpdateRollback API to skip the failed resources and complete the rollback",
-      "Delete the stack and recreate it from scratch",
       "Use the stack policy to override the failed resource update",
+      "Delete the stack and recreate it from scratch",
+      "Use the ContinueUpdateRollback API to skip the failed resources and complete the rollback",
       "Manually fix the resource in the console and the stack will automatically recover",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       'UPDATE_ROLLBACK_FAILED means CloudFormation tried to roll back changes but failed. The ContinueUpdateRollback API (or "Continue rollback" in console) lets you retry the rollback, optionally skipping specific resources that cannot be rolled back. After specifying resources to skip, CloudFormation completes the rollback and the stack enters UPDATE_ROLLBACK_COMPLETE. Deleting a failed stack is possible but loses all resources. Manually fixing resources without telling CloudFormation creates drift.',
     optionExplanations: [
@@ -662,8 +662,8 @@ export const quizQuestions: QuizQuestion[] = [
     service: "AWS CDK",
     question:
       "A developer uses AWS CDK to define infrastructure. After running cdk synth, they want to preview what will change in the AWS account before deploying. Which command should they run?",
-    options: ["cdk diff", "cdk preview", "cdk plan", "cdk validate"],
-    correctIndices: [0],
+    options: ["cdk validate", "cdk preview", "cdk plan", "cdk diff"],
+    correctIndices: [3],
     explanation:
       "cdk diff compares the synthesized CloudFormation template against the currently deployed stack and shows what resources will be added, modified, or deleted — similar to terraform plan. cdk synth generates the CloudFormation template. cdk deploy deploys the changes. cdk validate is not a standard CDK command (CloudFormation has cfn validate). cdk plan and cdk preview do not exist.",
     optionExplanations: [
@@ -711,12 +711,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to track custom business data (e.g., orderId, userId) in X-Ray traces to filter and search for specific traces. Which X-Ray mechanism should they use?",
     options: [
-      "Annotations — indexed key-value pairs searchable in the X-Ray console",
       "Metadata — non-indexed key-value pairs for additional context",
       "Subsegments — child segments for capturing additional trace data",
+      "Annotations — indexed key-value pairs searchable in the X-Ray console",
       "Sampling rules — configurable trace collection rates",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "X-Ray Annotations are indexed key-value pairs that you can use to filter and search traces in the X-Ray console and API. Use annotations for data you will query (orderId, userId, environment). Metadata stores additional non-indexed information visible in trace details but not searchable. Subsegments capture timing for downstream calls. Sampling rules control what percentage of requests are traced.",
     optionExplanations: [
@@ -736,12 +736,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function is invoked thousands of times per minute. The team needs custom business metrics (e.g., orders processed per minute) without making PutMetricData API calls on every invocation, which would be too costly. What is the BEST solution?",
     options: [
+      "Use X-Ray annotations to capture metric values",
+      "Aggregate metrics in Lambda and call PutMetricData once per hour",
       "Use CloudWatch Embedded Metric Format (EMF) to embed metrics in structured log output",
       "Write metrics to DynamoDB and query them with CloudWatch",
-      "Aggregate metrics in Lambda and call PutMetricData once per hour",
-      "Use X-Ray annotations to capture metric values",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CloudWatch Embedded Metric Format (EMF) lets functions write metric data as part of structured JSON log output. CloudWatch Logs automatically extracts and publishes the metrics — no PutMetricData API call needed. This works with the existing logging infrastructure and costs nothing extra beyond log storage. Aggregating in Lambda state is not possible at scale because Lambda is stateless. X-Ray annotations are for trace filtering, not metrics.",
     optionExplanations: [
@@ -761,12 +761,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application's DynamoDB reads are causing latency. The read pattern is highly repetitive — the same items are requested frequently. Which solution provides the LOWEST latency improvement?",
     options: [
+      "Add ElastiCache Redis as an application-level cache",
       "Add a DAX (DynamoDB Accelerator) cluster in front of DynamoDB",
       "Enable DynamoDB auto-scaling to add capacity",
       "Switch to eventually consistent reads to reduce latency",
-      "Add ElastiCache Redis as an application-level cache",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "DAX provides microsecond read latency for DynamoDB and is a drop-in compatible cache — the application uses the DAX client instead of the DynamoDB client with minimal code changes. It provides lower latency than ElastiCache because it is designed specifically for DynamoDB and is API-compatible. ElastiCache Redis requires application-level cache logic (check cache → miss → read DB → write cache). Auto-scaling helps with throughput but not latency. Eventually consistent reads reduce cost but have minimal impact on latency.",
     optionExplanations: [
@@ -786,12 +786,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       'A Lambda function connected to a Kinesis Data Stream is processing data slowly. A single "poison pill" message keeps causing the function to fail, blocking all other messages in the shard. What is the BEST fix?',
     options: [
-      "Enable BisectBatchOnFunctionError and configure an OnFailure destination to route failed records to SQS",
-      "Increase the function timeout and retry the failed batch indefinitely",
-      "Switch to a Standard SQS queue as the event source",
       "Add a Dead Letter Queue to the Lambda function",
+      "Enable BisectBatchOnFunctionError and configure an OnFailure destination to route failed records to SQS",
+      "Switch to a Standard SQS queue as the event source",
+      "Increase the function timeout and retry the failed batch indefinitely",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "BisectBatchOnFunctionError splits a failing batch in half recursively to isolate the poison-pill record. Combined with an OnFailure destination (SQS or SNS), the isolated bad record is routed out of the stream so processing can continue. MaximumRetryAttempts controls how many times a batch is retried before routing to the destination. Simply increasing timeout keeps retrying the same bad message indefinitely. Lambda DLQs only apply to asynchronous invocations, not stream-based event sources.",
     optionExplanations: [
@@ -919,12 +919,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team uses AWS AppConfig to manage feature flags. After deploying a new configuration, a CloudWatch alarm fires indicating increased error rates. What does AppConfig do automatically?",
     options: [
-      "Rolls back to the previous configuration if a CloudWatch alarm is linked as a rollback trigger",
-      "Sends an SNS notification to the team but continues the deployment",
       "Pauses the deployment and waits for manual approval to continue",
+      "Rolls back to the previous configuration if a CloudWatch alarm is linked as a rollback trigger",
       "Increases the deployment interval to slow down the rollout",
+      "Sends an SNS notification to the team but continues the deployment",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "AppConfig supports CloudWatch alarm-based rollback triggers. If a linked alarm enters ALARM state during a deployment, AppConfig automatically stops the deployment and rolls back to the previously deployed configuration. This provides automated safety for configuration changes — similar to CodeDeploy rollback triggers. AppConfig does not pause and wait or adjust intervals automatically.",
     optionExplanations: [
@@ -975,12 +975,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to trigger a Lambda function every weekday at 9:00 AM UTC. Which EventBridge feature enables this?",
     options: [
-      "EventBridge Scheduler with a cron expression: cron(0 9 ? * MON-FRI *)",
+      "EventBridge Archive with a replay schedule",
       "EventBridge Rule with an event pattern matching a custom time event",
       "EventBridge Pipe connected to a CloudWatch alarm",
-      "EventBridge Archive with a replay schedule",
+      "EventBridge Scheduler with a cron expression: cron(0 9 ? * MON-FRI *)",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "EventBridge Scheduler (or EventBridge Rules with schedule expressions) supports cron and rate expressions for time-based triggers. cron(0 9 ? * MON-FRI *) fires at 9:00 AM UTC Monday through Friday. The target can be a Lambda function, SQS queue, Step Functions, or 200+ other AWS services. EventBridge Pipes connect event sources to targets with filtering and enrichment. Archives are for replaying past events.",
     optionExplanations: [
@@ -1000,12 +1000,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       'A serverless application with unpredictable traffic spikes uses Lambda functions connecting to an RDS MySQL database. During spikes, the application experiences "too many connections" errors. What is the BEST solution?',
     options: [
-      "Add an RDS Proxy between Lambda and RDS to pool and manage database connections",
       "Increase the max_connections parameter on the RDS instance",
       "Switch to DynamoDB for better serverless scaling",
       "Use connection pooling libraries in the Lambda function code",
+      "Add an RDS Proxy between Lambda and RDS to pool and manage database connections",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "RDS Proxy solves the Lambda connection exhaustion problem. Lambda can create thousands of concurrent invocations each trying to open a database connection — quickly exceeding RDS max_connections. RDS Proxy maintains a connection pool and multiplexes thousands of application connections into a smaller set of long-lived database connections. It handles connection reuse, reduces connection overhead, and improves failover time. Increasing max_connections has hard limits. Connection pooling in Lambda is limited because Lambda environments are short-lived and pooling is per-environment.",
     optionExplanations: [
@@ -1025,12 +1025,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodePipeline pipeline must not proceed to production deployment without a senior engineer approving the change. Which action type should be added between the staging and production stages?",
     options: [
-      "Manual Approval action",
-      "Lambda Invoke action with approval logic",
       "Test action with a quality gate",
       "Source action with a branch protection rule",
+      "Lambda Invoke action with approval logic",
+      "Manual Approval action",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "CodePipeline Manual Approval actions pause the pipeline and send an SNS notification to approvers. The pipeline waits (up to 7 days) for an approve or reject decision via the console, CLI, or API before proceeding. Lambda Invoke could implement custom logic but adds unnecessary complexity. Test actions run automated tests — they do not provide human approval gates. Source actions relate to code retrieval.",
     optionExplanations: [
@@ -1054,12 +1054,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function needs to access resources inside a private VPC subnet, such as an RDS database. After enabling VPC access, the team notices the function can no longer reach the internet to call an external API. What is the MOST likely cause and fix?",
     options: [
-      "VPC-connected Lambda has no internet access by default; add a NAT Gateway in a public subnet and route private subnet traffic through it",
       "Lambda cannot access the internet from a VPC; use API Gateway as a proxy instead",
-      "The Lambda execution role is missing internet access permissions",
+      "VPC-connected Lambda has no internet access by default; add a NAT Gateway in a public subnet and route private subnet traffic through it",
       "Enable the Lambda function URL to bypass VPC restrictions",
+      "The Lambda execution role is missing internet access permissions",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "When Lambda is placed inside a VPC, it loses its default internet access. The fix is a NAT Gateway deployed in a public subnet with the private subnet's route table pointing 0.0.0.0/0 to the NAT Gateway. Lambda can then reach the internet while remaining inside the VPC. Lambda execution roles control AWS service access, not internet connectivity. Lambda function URLs are inbound, not outbound. Lambda can access the internet from a VPC — it just needs NAT.",
     optionExplanations: [
@@ -1078,8 +1078,8 @@ export const quizQuestions: QuizQuestion[] = [
     service: "AWS Lambda",
     question:
       "What is the maximum execution timeout for an AWS Lambda function?",
-    options: ["15 minutes", "5 minutes", "1 hour", "30 minutes"],
-    correctIndices: [0],
+    options: ["5 minutes", "30 minutes", "15 minutes", "1 hour"],
+    correctIndices: [2],
     explanation:
       "Lambda functions have a maximum execution timeout of 15 minutes (900 seconds). The default is 3 seconds. For workloads exceeding 15 minutes, consider AWS Fargate, EC2, AWS Batch, or Step Functions to orchestrate multiple shorter Lambda executions.",
     optionExplanations: [
@@ -1126,12 +1126,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function must process events from an SQS queue. During a traffic spike, the queue depth grows to 100,000 messages. What happens to Lambda concurrency?",
     options: [
-      "Lambda automatically scales up to process messages faster, limited by the function's reserved or account concurrency limit",
-      "Lambda processes exactly one message at a time regardless of queue depth",
       "Lambda scales to exactly one concurrent execution per SQS shard",
+      "Lambda processes exactly one message at a time regardless of queue depth",
       "Lambda stops scaling after 1,000 concurrent executions for SQS triggers",
+      "Lambda automatically scales up to process messages faster, limited by the function's reserved or account concurrency limit",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "When Lambda polls SQS, it scales concurrency based on the number of in-flight message batches. As queue depth grows, Lambda adds more concurrent executions (up to 60 new instances per minute initially, then faster). Scaling is limited by the function's reserved concurrency (if set) or the account-level concurrency limit (default 1,000, adjustable). There is no SQS-specific concurrency cap at 1,000 — that is the account default which applies across all functions.",
     optionExplanations: [
@@ -1203,12 +1203,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to ensure a DynamoDB PutItem only succeeds if the item does not already exist. Which approach is correct?",
     options: [
+      "Use TransactGetItems to check existence before PutItem",
       "Use a ConditionExpression: attribute_not_exists(pk)",
       "Use a FilterExpression on the PutItem call",
-      "Use TransactGetItems to check existence before PutItem",
       "Use BatchWriteItem which automatically skips existing items",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "ConditionExpression with attribute_not_exists(pk) on PutItem causes the operation to fail with ConditionalCheckFailedException if an item with that partition key already exists. This is an atomic check-and-write — no race condition. FilterExpression is only for Query and Scan — not PutItem. TransactGetItems + PutItem would require two operations with potential race conditions. BatchWriteItem does not check for existing items — it overwrites.",
     optionExplanations: [
@@ -1226,8 +1226,8 @@ export const quizQuestions: QuizQuestion[] = [
     type: "single",
     service: "Amazon DynamoDB",
     question: "What is the maximum item size in Amazon DynamoDB?",
-    options: ["400 KB", "1 MB", "64 KB", "16 MB"],
-    correctIndices: [0],
+    options: ["1 MB", "16 MB", "400 KB", "64 KB"],
+    correctIndices: [2],
     explanation:
       "DynamoDB has a maximum item size of 400 KB, including attribute names and values. For items larger than 400 KB, store the large data in S3 and store the S3 object key in DynamoDB. This is a common pattern for documents, images, or large JSON payloads.",
     optionExplanations: [
@@ -1276,12 +1276,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to trigger a Lambda function whenever a new object is created in a specific S3 bucket prefix (/uploads/). What is the correct configuration?",
     options: [
-      "Configure an S3 Event Notification with ObjectCreated event type and prefix filter /uploads/",
-      "Create a CloudWatch Events rule that monitors S3 object creation",
       "Enable S3 Inventory and process the inventory report with Lambda",
+      "Create a CloudWatch Events rule that monitors S3 object creation",
+      "Configure an S3 Event Notification with ObjectCreated event type and prefix filter /uploads/",
       "Use S3 Access Logs to detect new object creation and trigger Lambda",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "S3 Event Notifications natively trigger Lambda (or SQS, SNS) on object events like s3:ObjectCreated:*. You can filter by prefix and suffix to target specific paths. This is the simplest and lowest-latency approach. CloudWatch Events can capture S3 API calls via CloudTrail but adds latency and complexity. S3 Inventory generates daily/weekly reports — not real-time. S3 Access Logs are for access auditing, not real-time triggers.",
     optionExplanations: [
@@ -1301,12 +1301,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An S3 bucket hosts static website content and uses CloudFront. After deploying new files, some users still see old content. The developer verified the S3 objects are updated. What is causing this?",
     options: [
-      "CloudFront is serving cached objects; the developer must create a CloudFront invalidation or use versioned file names",
-      "S3 object versioning is serving old versions to users with cached URLs",
       "The S3 bucket policy is preventing CloudFront from reading new objects",
       "CloudFront needs a redeployment to pick up new S3 content",
+      "CloudFront is serving cached objects; the developer must create a CloudFront invalidation or use versioned file names",
+      "S3 object versioning is serving old versions to users with cached URLs",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CloudFront caches objects at edge locations based on TTL. Updating the origin (S3) does not automatically push new content to edges. Solutions: 1) Create a CloudFront invalidation for the changed paths (first 1,000 paths/month free). 2) Use versioned file names (e.g., app.v2.js) so new files have new URLs — no invalidation needed. S3 versioning serves the latest version by default. Bucket policies control access, not caching. CloudFront does not need redeployment.",
     optionExplanations: [
@@ -1326,12 +1326,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to ensure all data stored in S3 is encrypted and that any PUT request without server-side encryption is rejected. How should the developer enforce this?",
     options: [
-      "Add a bucket policy with a Deny statement for s3:PutObject when aws:SecureTransport is false or SSE header is missing",
-      "Enable S3 default encryption — it automatically rejects unencrypted PUT requests",
       "Use S3 Object Lock to enforce encryption on all objects",
       "Enable S3 MFA Delete to require encryption confirmation",
+      "Add a bucket policy with a Deny statement for s3:PutObject when aws:SecureTransport is false or SSE header is missing",
+      "Enable S3 default encryption — it automatically rejects unencrypted PUT requests",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "A bucket policy with Deny + condition on the absence of the x-amz-server-side-encryption header rejects PUTs that don't specify encryption. S3 default encryption encrypts objects that arrive without encryption headers — it does NOT reject unencrypted requests; it transparently applies encryption. Object Lock prevents deletion/modification but does not enforce encryption. MFA Delete requires MFA for version deletion, unrelated to encryption enforcement.",
     optionExplanations: [
@@ -1353,12 +1353,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to ensure that messages in an SQS queue are processed in strict FIFO order and that each message is delivered exactly once. Which queue type should they use?",
     options: [
-      "SQS FIFO queue with content-based deduplication enabled",
       "SQS Standard queue with message group IDs",
-      "SQS Standard queue with a Dead Letter Queue for deduplication",
       "SQS FIFO queue without deduplication — it handles ordering automatically",
+      "SQS FIFO queue with content-based deduplication enabled",
+      "SQS Standard queue with a Dead Letter Queue for deduplication",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "SQS FIFO queues guarantee ordering and exactly-once processing. Content-based deduplication (or explicit MessageDeduplicationId) prevents duplicate messages within a 5-minute window. Standard queues guarantee at-least-once delivery and best-effort ordering only — not suitable for strict ordering or exactly-once. Message Group IDs on Standard queues do not exist (they are a FIFO feature). DLQ handles failures, not deduplication.",
     optionExplanations: [
@@ -1378,12 +1378,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An SQS queue has a visibility timeout of 30 seconds. A consumer receives a message, processes it for 25 seconds, and then calls DeleteMessage. 10 seconds later, another consumer receives the same message. What went wrong?",
     options: [
-      "Nothing went wrong — the first consumer deleted the message after 25 seconds and the second consumer received a different copy that was already in flight before the delete",
-      "The visibility timeout expired before DeleteMessage was called, allowing re-delivery",
-      "SQS delivered the message twice due to at-least-once delivery semantics",
       "The DeleteMessage API has a propagation delay of up to 10 seconds",
+      "The visibility timeout expired before DeleteMessage was called, allowing re-delivery",
+      "Nothing went wrong — the first consumer deleted the message after 25 seconds and the second consumer received a different copy that was already in flight before the delete",
+      "SQS delivered the message twice due to at-least-once delivery semantics",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "SQS Standard queues provide at-least-once delivery — a message may be delivered more than once even if successfully processed and deleted. This is a fundamental characteristic of Standard queues. The visibility timeout (30s) was not exceeded (25s < 30s) and DeleteMessage was called before expiry, but SQS can still deliver duplicate copies that were already stored internally. Applications using Standard SQS must be idempotent. Use FIFO queues if exactly-once is required.",
     optionExplanations: [
@@ -1424,12 +1424,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to send notifications to only the subset of SNS subscribers interested in 'order.cancelled' events, without creating a separate topic per event type. Which SNS feature enables this?",
     options: [
-      "SNS Message Filtering using subscription filter policies",
-      "SNS Topic partitioning by message attribute",
       "SNS Delivery policies with conditional routing",
+      "SNS Topic partitioning by message attribute",
       "SNS FIFO topics with message group IDs",
+      "SNS Message Filtering using subscription filter policies",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "SNS subscription filter policies let each subscriber define which messages it wants to receive based on message attributes (e.g., eventType = 'order.cancelled'). The publisher sets a MessageAttribute on the SNS message; SNS evaluates each subscriber's filter policy and delivers only to matching subscribers. This avoids creating one topic per event type. Topic partitioning and conditional routing are not SNS concepts. FIFO topics provide ordering, not filtering by attribute.",
     optionExplanations: [
@@ -1449,12 +1449,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An SNS topic delivers to an HTTP endpoint that is occasionally unavailable. How does SNS handle delivery failures to HTTP endpoints?",
     options: [
+      "SNS automatically switches to email delivery if HTTP delivery fails",
+      "SNS stores failed messages internally for 14 days and retries continuously",
       "SNS retries with exponential backoff according to the delivery retry policy, then moves undeliverable messages to a Dead Letter Queue if configured",
       "SNS drops the message immediately if the HTTP endpoint returns a non-200 response",
-      "SNS stores failed messages internally for 14 days and retries continuously",
-      "SNS automatically switches to email delivery if HTTP delivery fails",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "SNS has a configurable delivery retry policy for HTTP/HTTPS endpoints with up to 100,015 retries in three phases: immediate, pre-backoff, backoff (exponential), and post-backoff. After all retries are exhausted, if a Dead Letter Queue (SQS queue) is configured on the subscription, undeliverable messages are sent there. Without a DLQ, messages are permanently lost after retry exhaustion. SNS does not store failed messages internally beyond the retry window or switch delivery protocols.",
     optionExplanations: [
@@ -1501,12 +1501,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "How long does Kinesis Data Streams retain records by default, and what is the maximum extended retention period?",
     options: [
-      "24 hours default; up to 365 days with extended retention",
       "7 days default; up to 365 days with extended retention",
-      "24 hours default; up to 7 days with extended retention",
+      "24 hours default; up to 365 days with extended retention",
       "3 days default; up to 30 days with extended retention",
+      "24 hours default; up to 7 days with extended retention",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Kinesis Data Streams retains records for 24 hours by default. Extended data retention increases this to up to 7 days at additional cost. Long-term retention (up to 365 days) is available as an additional feature. Records beyond the retention period are automatically removed. This is separate from Kinesis Firehose, which delivers to destinations and does not have an independent retention period.",
     optionExplanations: [
@@ -1526,12 +1526,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Kinesis Data Firehose delivery stream must transform records before loading to S3 — specifically, convert JSON to Parquet format. How should the developer implement this?",
     options: [
+      "Process records with EMR after Firehose delivers JSON to S3",
+      "Add a Kinesis Data Analytics application between the stream and Firehose",
       "Enable Firehose record format conversion using an AWS Glue Data Catalog schema",
       "Use a Lambda transformation function in Firehose to convert each record",
-      "Add a Kinesis Data Analytics application between the stream and Firehose",
-      "Process records with EMR after Firehose delivers JSON to S3",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Kinesis Data Firehose natively supports record format conversion from JSON to Apache Parquet or ORC using an AWS Glue Data Catalog schema definition — no Lambda code required. Lambda transformation is used for custom record manipulation (filtering, enrichment, masking) before delivery, not format conversion. Kinesis Data Analytics is for SQL-based stream processing, not format conversion. EMR post-processing adds latency and complexity.",
     optionExplanations: [
@@ -1578,12 +1578,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to integrate an application with a third-party webhook that sends HTTP POST requests to an endpoint. The events should be processed by Lambda. What is the MOST direct EventBridge solution?",
     options: [
-      "EventBridge API Destinations to call the third-party service — but for inbound webhooks, use an API Gateway endpoint that publishes to EventBridge",
+      "Configure EventBridge Schema Registry to accept inbound HTTP events",
       "Create an EventBridge Pipe from SQS to Lambda and configure the webhook to send to SQS",
       "Use EventBridge to poll the third-party service's REST API on a schedule",
-      "Configure EventBridge Schema Registry to accept inbound HTTP events",
+      "EventBridge API Destinations to call the third-party service — but for inbound webhooks, use an API Gateway endpoint that publishes to EventBridge",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "For inbound webhooks (third-party → your system), the pattern is: third-party POSTs to an API Gateway endpoint → API Gateway publishes the event to EventBridge (using PutEvents) → EventBridge routes to Lambda. API Destinations are for EventBridge calling outbound to third-party APIs. EventBridge Pipes with SQS works but adds a queue hop. EventBridge does not poll third-party APIs. Schema Registry validates event schemas, not ingestion.",
     optionExplanations: [
@@ -1630,12 +1630,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An API Gateway REST API is experiencing latency spikes on frequently accessed GET endpoints that return slowly-changing data. The data changes every 5 minutes. What is the MOST efficient optimization?",
     options: [
-      "Enable API Gateway caching on the stage with a TTL of 300 seconds for the GET endpoint",
-      "Move the Lambda function to Provisioned Concurrency to reduce cold starts",
-      "Switch to HTTP API which has lower latency than REST API",
       "Use API Gateway usage plans to throttle high-frequency callers",
+      "Move the Lambda function to Provisioned Concurrency to reduce cold starts",
+      "Enable API Gateway caching on the stage with a TTL of 300 seconds for the GET endpoint",
+      "Switch to HTTP API which has lower latency than REST API",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "API Gateway REST API caching stores responses at the API Gateway level. With TTL=300s, the first request goes to Lambda, subsequent identical requests are served from the cache for 5 minutes. This eliminates Lambda cold starts and downstream database calls entirely for cached requests. Provisioned Concurrency reduces cold starts but does not eliminate the Lambda execution time. HTTP API does not support built-in response caching. Throttling limits traffic but does not improve latency for allowed requests.",
     optionExplanations: [
@@ -1682,12 +1682,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Step Functions Map state is processing 10,000 array elements. The downstream Lambda is being throttled. Which Map state configuration controls the parallelism?",
     options: [
+      "Configure the Lambda reserved concurrency to equal the array length",
       "Set MaxConcurrency on the Map state to limit parallel iterations",
       "Set MaxItems on the Map state to process a subset of elements",
-      "Configure the Lambda reserved concurrency to equal the array length",
       "Use a Parallel state instead of Map to control concurrency",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Map state's MaxConcurrency parameter controls how many iterations run simultaneously. Setting MaxConcurrency=10 processes 10 elements at a time, preventing Lambda throttling. MaxConcurrency=0 means unlimited parallelism (all 10,000 at once — which would cause throttling). MaxItems does not exist as a Map state parameter (you'd use InputPath/Parameters to slice the array). Lambda reserved concurrency limits concurrent executions but does not control the Map state's behavior.",
     optionExplanations: [
@@ -1709,12 +1709,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer creates an IAM role with a permission boundary that allows only s3:GetObject. The role's identity policy grants s3:GetObject and s3:PutObject. What can the role actually do?",
     options: [
-      "Only s3:GetObject — the permission boundary limits effective permissions to the intersection",
-      "Both s3:GetObject and s3:PutObject — the identity policy is more specific",
       "Nothing — permission boundaries and identity policies cannot both be applied",
       "s3:PutObject only — permission boundaries act as a whitelist that overrides identity policies",
+      "Both s3:GetObject and s3:PutObject — the identity policy is more specific",
+      "Only s3:GetObject — the permission boundary limits effective permissions to the intersection",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Permission boundaries set the maximum permissions a principal can have. Effective permissions are the intersection of the permission boundary and the identity policy. The boundary allows s3:GetObject only, the identity policy allows GetObject + PutObject — the intersection is s3:GetObject only. The boundary does not grant permissions on its own; it only limits. Even if the identity policy allows s3:PutObject, the boundary prevents it.",
     optionExplanations: [
@@ -1739,12 +1739,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer's IAM policy uses the condition key aws:RequestedRegion to restrict actions to us-east-1. An attacker tries to make the same API call to eu-west-1. What happens?",
     options: [
-      "The request is denied — the condition prevents actions outside us-east-1",
-      "The request succeeds — conditions only apply to console access, not API calls",
-      "The request is denied only if the attacker uses the console",
       "The condition has no effect on global AWS services like IAM and S3",
+      "The request is denied — the condition prevents actions outside us-east-1",
+      "The request is denied only if the attacker uses the console",
+      "The request succeeds — conditions only apply to console access, not API calls",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "aws:RequestedRegion is a global condition key that restricts which AWS region the API call can target. When set to us-east-1 in a Deny or as a condition on an Allow, any API call to eu-west-1 will be denied. This works for all API calls and all access methods (console, CLI, SDK). Note: global services like IAM always route to us-east-1 regardless of the region specified, so regional restrictions may not apply to IAM actions.",
     optionExplanations: [
@@ -1764,12 +1764,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "Which IAM policy type would you use to prevent ALL users in an AWS account from deleting a specific S3 bucket, even if their individual policies allow it?",
     options: [
-      "A resource-based bucket policy with an explicit Deny on s3:DeleteBucket for all principals",
-      "An SCP that denies s3:DeleteBucket for the specific bucket ARN",
-      "An IAM permission boundary applied to all users",
       "An IAM groups policy with a Deny on s3:DeleteBucket",
+      "A resource-based bucket policy with an explicit Deny on s3:DeleteBucket for all principals",
+      "An IAM permission boundary applied to all users",
+      "An SCP that denies s3:DeleteBucket for the specific bucket ARN",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "An explicit Deny in a resource-based policy (S3 bucket policy) that targets all principals (Principal: '*') with a Deny on s3:DeleteBucket wins over any identity-based policy that allows it. Explicit Deny always takes precedence. SCPs work at the account level but cannot target individual resource ARNs. Permission boundaries must be attached individually to each principal. IAM group policies apply to group members only — not all users, and can be overridden by explicit Deny.",
     optionExplanations: [
@@ -1791,12 +1791,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Cognito User Pool Lambda trigger needs to add a custom claim to the ID token before it is issued to the user. Which trigger should the developer use?",
     options: [
-      "Pre Token Generation trigger",
-      "Post Authentication trigger",
       "Pre Authentication trigger",
       "Post Confirmation trigger",
+      "Post Authentication trigger",
+      "Pre Token Generation trigger",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The Pre Token Generation Lambda trigger fires before Cognito issues ID and access tokens and allows you to add, suppress, or modify token claims. For example, you can add a custom 'role' claim based on database lookup. Post Authentication fires after sign-in but cannot modify tokens. Pre Authentication validates conditions before authentication proceeds. Post Confirmation fires after a user confirms registration — tokens haven't been issued yet.",
     optionExplanations: [
@@ -1821,12 +1821,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application uses Cognito User Pools with API Gateway. The API Gateway uses a Cognito authorizer. A user's access token has expired. What response does the user receive?",
     options: [
-      "401 Unauthorized — the token signature validates but the exp claim is in the past",
-      "403 Forbidden — expired tokens are treated as invalid permissions",
       "200 OK — API Gateway does not check token expiry",
+      "403 Forbidden — expired tokens are treated as invalid permissions",
       "The request is redirected to Cognito for re-authentication automatically",
+      "401 Unauthorized — the token signature validates but the exp claim is in the past",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "API Gateway's Cognito authorizer validates the JWT including the expiry (exp) claim. An expired token fails validation and returns 401 Unauthorized. The client must use the refresh token to obtain a new access/ID token pair from Cognito and retry. API Gateway does not automatically redirect for re-authentication. 403 would indicate valid authentication but insufficient permissions. The authorizer always checks token expiry.",
     optionExplanations: [
@@ -1848,12 +1848,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       'A developer encrypts data using a KMS CMK with an encryption context of {"application": "payments"}. When decrypting, they omit the encryption context. What happens?',
     options: [
-      "Decryption fails with InvalidCiphertextException — the encryption context must match exactly",
-      "Decryption succeeds — encryption context is optional and not validated on decrypt",
       "Decryption succeeds but the returned data is corrupted",
+      "Decryption succeeds — encryption context is optional and not validated on decrypt",
       "KMS prompts the user to provide the encryption context interactively",
+      "Decryption fails with InvalidCiphertextException — the encryption context must match exactly",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Encryption context is additional authenticated data (AAD) bound to the ciphertext. KMS requires the exact same encryption context on Decrypt that was used on Encrypt. If context is missing or different, KMS returns InvalidCiphertextException. This prevents decryption of ciphertext in a different context than intended (e.g., using a payment ciphertext in a different application). Encryption context is not stored by KMS — the caller must provide it consistently.",
     optionExplanations: [
@@ -1873,12 +1873,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to restrict KMS key usage so that only S3 in us-east-1 can use the key to decrypt objects. Which KMS condition key enforces this?",
     options: [
-      "kms:ViaService with value s3.us-east-1.amazonaws.com",
       "aws:SourceArn with the S3 bucket ARN",
-      "kms:EncryptionAlgorithm with AES-256 restriction",
+      "kms:ViaService with value s3.us-east-1.amazonaws.com",
       "aws:RequestedRegion with us-east-1",
+      "kms:EncryptionAlgorithm with AES-256 restriction",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "kms:ViaService restricts key usage to calls made by a specific AWS service on your behalf. Setting kms:ViaService to 's3.us-east-1.amazonaws.com' ensures only S3 in us-east-1 can use the key. Direct application calls to KMS would be denied. aws:SourceArn restricts based on the requesting resource ARN (useful for cross-service scenarios but not for service-level restriction). EncryptionAlgorithm restricts the algorithm used. RequestedRegion restricts where the KMS API call goes, not which service invokes it.",
     optionExplanations: [
@@ -1899,8 +1899,8 @@ export const quizQuestions: QuizQuestion[] = [
     service: "AWS Secrets Manager",
     question:
       "During Secrets Manager automatic rotation, which version staging label is applied to the new secret value while it is being tested?",
-    options: ["AWSPENDING", "AWSCURRENT", "AWSPREVIOUS", "AWSROTATING"],
-    correctIndices: [0],
+    options: ["AWSROTATING", "AWSCURRENT", "AWSPREVIOUS", "AWSPENDING"],
+    correctIndices: [3],
     explanation:
       "During rotation, the rotation Lambda creates new credentials tagged with AWSPENDING. After setting and testing the new credentials, the finishSecret phase moves AWSPENDING to AWSCURRENT and the old AWSCURRENT to AWSPREVIOUS. Applications should always request AWSCURRENT (the default) to get active credentials. AWSROTATING does not exist as a staging label.",
     optionExplanations: [
@@ -1949,12 +1949,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS Fargate task needs to write logs to CloudWatch Logs. Which component is responsible for pulling images from ECR and creating the CloudWatch log group?",
     options: [
-      "The ECS task execution role — it handles ECR authentication and CloudWatch Logs creation",
+      "The container's application code — it must authenticate separately",
       "The ECS task role — it provides all permissions the container needs",
       "The ECS cluster service role — it manages the underlying Fargate infrastructure",
-      "The container's application code — it must authenticate separately",
+      "The ECS task execution role — it handles ECR authentication and CloudWatch Logs creation",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The ECS task execution role is used by the ECS agent (not the application) for infrastructure operations: pulling images from ECR, creating CloudWatch log groups, and fetching secrets from Secrets Manager/SSM at task startup. The task role is what the application code inside the container uses to call AWS services (DynamoDB, S3, etc.). These are two separate IAM roles with different purposes. The cluster service role manages EC2 instances in EC2 launch type, not Fargate.",
     optionExplanations: [
@@ -1974,12 +1974,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS service needs to scale the number of tasks based on the number of messages in an SQS queue. When the queue depth exceeds 1,000 messages, add tasks; when below 100, remove tasks. How should auto scaling be configured?",
     options: [
-      "ECS Service Auto Scaling with a custom CloudWatch metric (ApproximateNumberOfMessagesVisible) and step scaling policy",
       "ECS Cluster Auto Scaling triggered directly by SQS queue depth",
-      "Lambda function that calls UpdateService to change desired count based on SQS metrics",
       "Application Load Balancer target tracking scaling based on request count",
+      "ECS Service Auto Scaling with a custom CloudWatch metric (ApproximateNumberOfMessagesVisible) and step scaling policy",
+      "Lambda function that calls UpdateService to change desired count based on SQS metrics",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "ECS Service Auto Scaling supports custom CloudWatch metrics. SQS publishes ApproximateNumberOfMessagesVisible as a CloudWatch metric. A step scaling policy can scale ECS tasks out when the metric exceeds 1,000 and scale in when below 100. ECS Cluster Auto Scaling scales EC2 instances (not tasks) and cannot directly trigger on SQS metrics. A Lambda workaround is possible but less efficient. ALB target tracking is for request-based metrics, not SQS queue depth.",
     optionExplanations: [
@@ -2001,12 +2001,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to connect to an RDS MySQL database from a Lambda function without storing database passwords. Which authentication method eliminates stored credentials?",
     options: [
-      "IAM Database Authentication — generate an auth token using the IAM role and use it as the password",
       "Secrets Manager with auto-rotation — store the password in Secrets Manager",
       "AWS Certificate Manager — use TLS client certificates for authentication",
       "SSM Parameter Store SecureString — store and retrieve the password at runtime",
+      "IAM Database Authentication — generate an auth token using the IAM role and use it as the password",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "IAM Database Authentication allows Lambda to authenticate to RDS using the Lambda execution role's IAM credentials. The SDK generates a temporary authentication token (valid 15 minutes) using the role's credentials, and the token is used as the database password. No stored passwords. Secrets Manager still stores a password (it rotates it, but there is a stored secret). ACM certificates are for TLS transport, not database login. SSM SecureString still stores a password — just encrypted.",
     optionExplanations: [
@@ -2053,12 +2053,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to monitor the memory utilization of EC2 instances. After checking CloudWatch, no memory metrics are available. What is the reason and fix?",
     options: [
+      "Memory metrics are only available for instances using the Nitro hypervisor",
       "EC2 does not publish memory metrics by default; install the CloudWatch Agent on each instance to collect and publish memory metrics",
       "Memory metrics require CloudWatch detailed monitoring to be enabled on the EC2 instance",
-      "Memory metrics are only available for instances using the Nitro hypervisor",
       "Memory metrics must be viewed in AWS Cost Explorer, not CloudWatch",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "EC2 publishes hypervisor-level metrics to CloudWatch by default (CPU, network, disk I/O) but cannot access OS-level metrics like memory utilization from outside the VM. The CloudWatch Agent runs inside the EC2 instance and can collect memory utilization, swap, disk space, and application-level metrics, publishing them to a custom namespace (CWAgent). Detailed monitoring increases sampling frequency for existing metrics from 5-min to 1-min but does not add memory metrics.",
     optionExplanations: [
@@ -2078,12 +2078,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudWatch alarm for Lambda error rate is triggering false positives because a brief spike triggers the alarm even though errors self-resolve within 1 minute. How should the developer configure the alarm to reduce noise?",
     options: [
-      "Set evaluation period to 5 periods of 1 minute with 'datapoints to alarm' = 3 of 5, so errors must persist across 3 consecutive periods",
+      "Set the alarm threshold higher so brief spikes don't trigger it",
       "Increase the Lambda timeout to prevent transient errors from being reported",
       "Use a CloudWatch Composite Alarm combining two error metrics with AND logic",
-      "Set the alarm threshold higher so brief spikes don't trigger it",
+      "Set evaluation period to 5 periods of 1 minute with 'datapoints to alarm' = 3 of 5, so errors must persist across 3 consecutive periods",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The 'M of N' (datapoints to alarm) configuration prevents transient spikes from triggering alarms. By requiring 3 of 5 consecutive 1-minute periods to breach the threshold, a brief 1-minute spike will not trigger the alarm — it needs to persist for at least 3 minutes. Increasing timeout reduces actual errors but doesn't fix alarm sensitivity. Composite alarms combine independent alarm states. Raising the threshold may miss real errors.",
     optionExplanations: [
@@ -2111,12 +2111,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application's X-Ray service map shows a node in red. What does this indicate?",
     options: [
-      "The service is experiencing faults (5xx errors) — server-side errors",
       "The service has high latency but no errors",
       "The service is receiving throttled requests (429)",
       "The X-Ray daemon cannot connect to the service",
+      "The service is experiencing faults (5xx errors) — server-side errors",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "X-Ray service map color coding: Green = healthy (no errors above threshold), Yellow = errors (4xx client errors or throttling), Orange = throttle (429 Too Many Requests), Red = fault (5xx server errors). A red node indicates the service is generating server-side errors. Click the node to see detailed trace data showing which requests failed and why.",
     optionExplanations: [
@@ -2196,12 +2196,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function in a private VPC subnet needs to access S3 without routing traffic through a NAT Gateway. What is the MOST cost-effective solution?",
     options: [
-      "Create an S3 VPC Gateway Endpoint — traffic routes through the endpoint for free",
       "Create an S3 VPC Interface Endpoint (PrivateLink) — private connectivity to S3",
-      "Add a NAT Gateway in the private subnet to enable S3 access",
       "Use S3 Transfer Acceleration for direct private connectivity",
+      "Add a NAT Gateway in the private subnet to enable S3 access",
+      "Create an S3 VPC Gateway Endpoint — traffic routes through the endpoint for free",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "S3 Gateway Endpoints are free — add the endpoint to the route table and Lambda traffic to S3 routes through the AWS backbone without internet or NAT. Gateway endpoints are available for S3 and DynamoDB only. Interface endpoints (PrivateLink) work for most other services but cost hourly + per-GB data charges. NAT Gateway costs $0.045/hour plus data transfer. S3 Transfer Acceleration is for faster uploads over the internet, not private VPC access.",
     optionExplanations: [
@@ -2221,12 +2221,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A security team requires all traffic to an EC2 instance to be logged, including traffic that is explicitly denied by security groups. Which VPC feature captures both ACCEPT and REJECT traffic?",
     options: [
+      "AWS Config — records security group rule changes and network ACL events",
       "VPC Flow Logs — captures all IP traffic with ACCEPT/REJECT action fields",
       "CloudTrail — logs all API calls including network traffic events",
       "Security Group flow logs — capture traffic allowed by security groups",
-      "AWS Config — records security group rule changes and network ACL events",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "VPC Flow Logs capture metadata about IP traffic flowing through network interfaces, subnets, or the entire VPC. Each log record includes srcaddr, dstaddr, ports, protocol, and an action field with ACCEPT or REJECT. REJECT entries show traffic that was denied by security groups or NACLs. CloudTrail logs API calls, not network traffic. Security groups don't have independent flow logs. AWS Config tracks configuration changes, not traffic.",
     optionExplanations: [
@@ -2248,12 +2248,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFront distribution serves private S3 content. The S3 bucket should only be accessible through CloudFront, not directly. What is the CURRENT recommended approach?",
     options: [
-      "Use Origin Access Control (OAC) — update the S3 bucket policy to allow only the CloudFront service principal",
+      "Block all public access on S3 and use signed cookies for all requests",
       "Use Origin Access Identity (OAI) — create an OAI and attach it to the distribution",
       "Enable S3 bucket versioning and restrict access by version ID",
-      "Block all public access on S3 and use signed cookies for all requests",
+      "Use Origin Access Control (OAC) — update the S3 bucket policy to allow only the CloudFront service principal",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Origin Access Control (OAC) is the current recommended method (replacing OAI) for restricting S3 bucket access to CloudFront. OAC supports all S3 regions, AWS Signature Version 4, and SSE-KMS encrypted buckets. The S3 bucket policy grants access to the CloudFront service principal with a condition on the specific distribution. OAI (Origin Access Identity) still works but is the legacy approach and has limitations with SSE-KMS. Signed cookies control user access to content but don't restrict origin access.",
     optionExplanations: [
@@ -2273,12 +2273,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to customize CloudFront responses by adding security headers (e.g., Strict-Transport-Security) to every response. The headers should be added at the edge with minimal latency. Which feature is MOST appropriate?",
     options: [
+      "API Gateway integration — add headers in the Lambda function response",
+      "CloudFront response headers policy — configure security headers in distribution settings",
       "CloudFront Functions at the viewer response event — lightweight JavaScript runs in under 1ms",
       "Lambda@Edge at the origin response event — add headers from the Lambda runtime",
-      "CloudFront response headers policy — configure security headers in distribution settings",
-      "API Gateway integration — add headers in the Lambda function response",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "CloudFront Response Headers Policies are the simplest and most efficient solution for adding security headers. You configure standard headers (HSTS, X-Content-Type-Options, X-Frame-Options, CSP, etc.) directly in CloudFront distribution settings — no code required. CloudFront adds them to every response. CloudFront Functions can also do this but require JavaScript code. Lambda@Edge adds more latency and cost. API Gateway is the origin, not the CDN edge.",
     optionExplanations: [
@@ -2300,12 +2300,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeBuild project needs to build a Docker image and push it to ECR. The build is failing with 'Cannot connect to the Docker daemon.' What must be enabled on the CodeBuild project?",
     options: [
+      "Enhanced networking — Docker builds require higher network throughput",
       "Privileged mode in the build environment — required to run Docker daemon inside CodeBuild",
       "VPC mode — Docker requires a VPC endpoint to pull base images",
-      "Enhanced networking — Docker builds require higher network throughput",
       "Docker Hub credentials in the CodeBuild environment variables",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "CodeBuild runs builds inside containers. To run Docker commands inside a build (Docker-in-Docker), the build container needs elevated privileges. Enabling 'Privileged mode' in the build environment configuration grants the necessary privileges to run the Docker daemon. Without it, Docker commands fail. VPC mode is for accessing private resources. Enhanced networking is an EC2 feature. Docker Hub credentials are needed for pulling private images, not for running the daemon.",
     optionExplanations: [
@@ -2355,12 +2355,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function in a CodePipeline Invoke action has been running for 20 minutes and the pipeline is still waiting. What is most likely wrong?",
     options: [
-      "The Lambda function has not called PutJobSuccessResult or PutJobFailureResult to signal completion back to CodePipeline",
-      "CodePipeline has a bug and is not checking the Lambda function status",
       "The Lambda function exceeded its 15-minute timeout and CodePipeline is retrying",
       "The Lambda function needs to publish a CloudWatch event when it completes",
+      "CodePipeline has a bug and is not checking the Lambda function status",
+      "The Lambda function has not called PutJobSuccessResult or PutJobFailureResult to signal completion back to CodePipeline",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "When CodePipeline invokes a Lambda function as an action, the pipeline waits for the Lambda to call either PutJobSuccessResult or PutJobFailureResult with the job ID it received. If neither is called, the pipeline hangs until the action timeout (default 1 hour). This is a common mistake — developers forget to signal completion. If Lambda times out at 15 minutes, CodePipeline would eventually time out the action, but the symptom described (still waiting at 20 minutes) points to missing signal.",
     optionExplanations: [
@@ -2407,12 +2407,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer uses 'sam sync --watch' during development. What advantage does this provide over 'sam deploy' for Lambda code changes?",
     options: [
-      "sam sync bypasses CloudFormation for code-only changes, updating the Lambda function directly in seconds instead of minutes",
       "sam sync uses CloudFormation change sets for safer deployments than sam deploy",
-      "sam sync automatically runs tests before syncing code changes",
       "sam sync provides a local preview of changes before they go to AWS",
+      "sam sync automatically runs tests before syncing code changes",
+      "sam sync bypasses CloudFormation for code-only changes, updating the Lambda function directly in seconds instead of minutes",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "sam sync --watch watches for file changes and syncs Lambda code directly using the Lambda UpdateFunctionCode API, bypassing the full CloudFormation stack update cycle. This reduces deployment time from 2-3 minutes (CloudFormation) to a few seconds. For infrastructure changes (new resources, IAM policies), sam sync still uses CloudFormation. This dramatically speeds up the inner development loop. It does not run tests or provide local preview — that's sam local.",
     optionExplanations: [
@@ -2434,12 +2434,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation template needs to create an RDS instance with a password stored in Secrets Manager without hardcoding the password in the template. Which approach should the developer use?",
     options: [
-      "Dynamic reference: {{resolve:secretsmanager:MyDBSecret:SecretString:password}}",
-      "Pass the password as a CloudFormation Parameter with NoEcho: true",
       "Use a CloudFormation Custom Resource to generate and store the password",
+      "Dynamic reference: {{resolve:secretsmanager:MyDBSecret:SecretString:password}}",
       "Reference an SSM SecureString parameter using {{resolve:ssm-secure:/db/password}}",
+      "Pass the password as a CloudFormation Parameter with NoEcho: true",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "CloudFormation dynamic references resolve values from Secrets Manager at deployment time without exposing the value in the template. The syntax {{resolve:secretsmanager:SecretName:SecretString:jsonKey}} fetches the password field from the secret. The value is never visible in CloudFormation events or the console. NoEcho parameters hide values in the console but require passing the password at deployment time. Custom Resources add complexity. SSM SecureString dynamic references also work but Secrets Manager is preferred for database passwords (auto-rotation support).",
     optionExplanations: [
@@ -2500,12 +2500,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer uses CDK to create an S3 bucket and a Lambda function. They want the Lambda to automatically receive GetObject and PutObject permissions on the bucket without writing IAM policy JSON. Which CDK method achieves this?",
     options: [
+      "new iam.ManagedPolicy(this, 'S3Policy', { statements: [...] })",
       "bucket.grantReadWrite(lambdaFunction) — CDK automatically creates the IAM policy",
       "lambdaFunction.addToRolePolicy(new iam.PolicyStatement({...})) with S3 actions",
       "lambdaFunction.addEnvironment('BUCKET_ARN', bucket.bucketArn) to pass the ARN",
-      "new iam.ManagedPolicy(this, 'S3Policy', { statements: [...] })",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "CDK L2 constructs provide grant*() methods that automatically create least-privilege IAM policy statements. bucket.grantReadWrite(lambdaFunction) adds GetObject and PutObject (and ListBucket) to the Lambda execution role — no manual IAM JSON required. addToRolePolicy works but requires writing the IAM statement manually. addEnvironment passes the ARN as a variable but doesn't grant permissions. Creating a ManagedPolicy manually is verbose and defeats the purpose of CDK abstractions.",
     optionExplanations: [
@@ -2552,12 +2552,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to run a custom shell script on all EC2 instances in an Elastic Beanstalk environment during deployment, after the application files are installed. Which mechanism enables this?",
     options: [
-      "Add a .ebextensions config file with a 'commands' or 'container_commands' section specifying the script",
       "Add the script to the application's Procfile so Beanstalk runs it at startup",
-      "Use a CodeDeploy lifecycle hook triggered by Beanstalk deployment",
+      "Add a .ebextensions config file with a 'commands' or 'container_commands' section specifying the script",
       "Configure the script in the Beanstalk environment's 'Custom Platform' settings",
+      "Use a CodeDeploy lifecycle hook triggered by Beanstalk deployment",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       ".ebextensions configuration files (YAML/JSON with .config extension) in your application bundle allow customizing the Elastic Beanstalk environment. 'commands' run before the application is installed; 'container_commands' run after the application files are extracted (with access to application source). They run as root. The Procfile defines application processes (like a web server). CodeDeploy is a separate service. Custom Platforms are for building custom AMIs, not running scripts during app deployment.",
     optionExplanations: [
@@ -2611,12 +2611,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppSync API uses Cognito User Pools for authorization. A resolver needs to restrict results so users can only see their own records. Which approach is correct?",
     options: [
+      "Enable AppSync caching and scope cache keys to the user's access token",
       "In the resolver, use $ctx.identity.sub (the user's Cognito UUID) as a filter condition in the DynamoDB query",
       "Configure AppSync field-level authorization with @aws_auth to hide other users' records",
       "Create separate AppSync APIs for each user",
-      "Enable AppSync caching and scope cache keys to the user's access token",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "When Cognito User Pools is the auth mode, $ctx.identity contains the authenticated user's claims including sub (Cognito UUID), username, and groups. In the resolver, use $ctx.identity.sub as a filter or key condition to restrict DynamoDB queries to the current user's data. @aws_auth controls which auth modes can access a type/field — it doesn't filter data by user. Separate APIs per user is unscalable. Caching doesn't handle authorization.",
     optionExplanations: [
@@ -2636,12 +2636,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppSync subscription is configured for a Mutation. A client subscribes but receives no events when the mutation fires. The mutation is succeeding. What is the MOST likely cause?",
     options: [
-      "The subscription field arguments do not match the mutation's return values — AppSync filters out non-matching events",
       "AppSync subscriptions require HTTP polling to receive events — WebSocket is not supported",
       "The client's Cognito token expired and WebSocket was silently disconnected",
+      "The subscription field arguments do not match the mutation's return values — AppSync filters out non-matching events",
       "The Lambda resolver for the subscription is not returning data",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "AppSync subscription filtering: if a subscription specifies arguments (e.g., onCreateTodo(owner: \"alice\")), AppSync only delivers events where the mutation result matches those arguments. If the mutation returns data that doesn't match the subscription filter, the event is silently dropped. This is a common source of 'no events received' bugs. AppSync uses WebSocket (not polling). Token expiry would disconnect the WebSocket (client would receive a disconnect event). Subscriptions don't have their own Lambda resolver — they piggyback on mutations.",
     optionExplanations: [
@@ -2663,12 +2663,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to run a shell script across 500 EC2 instances simultaneously to rotate a configuration file. The instances do not have SSH ports open. Which SSM feature enables this?",
     options: [
-      "SSM Run Command — executes commands on EC2 instances via the SSM Agent without SSH",
-      "SSM Session Manager — opens a shell session to each instance for the script",
-      "SSM Patch Manager — deploys configuration files as patches",
       "SSM State Manager — continuously applies the script as desired state",
+      "SSM Run Command — executes commands on EC2 instances via the SSM Agent without SSH",
+      "SSM Patch Manager — deploys configuration files as patches",
+      "SSM Session Manager — opens a shell session to each instance for the script",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "SSM Run Command executes shell scripts or PowerShell on multiple EC2 instances simultaneously without opening SSH ports. Target instances by tag, instance ID, or resource group. Results (stdout, stderr, exit codes) are logged to S3 or CloudWatch Logs. The SSM Agent on each instance handles the request securely. Session Manager opens interactive sessions (one at a time per session). Patch Manager handles OS patches. State Manager enforces ongoing desired state (periodic, not one-time).",
     optionExplanations: [
@@ -2688,12 +2688,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application reads feature flag configuration from AWS AppConfig. After updating a feature flag, the Lambda function is still reading the old value for several minutes. What is the most likely reason?",
     options: [
-      "The Lambda extension for AppConfig caches configuration locally — the cache TTL has not expired yet",
       "AppConfig deployments take up to 1 hour to propagate to all Lambda instances",
-      "Lambda environment variables are cached and override AppConfig values",
       "The AppConfig deployment strategy is set to AllAtOnce but Lambda only receives updates on cold start",
+      "Lambda environment variables are cached and override AppConfig values",
+      "The Lambda extension for AppConfig caches configuration locally — the cache TTL has not expired yet",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The AppConfig Lambda extension caches configuration locally at localhost:2772 to avoid API calls on every invocation. The cache has a configurable TTL (default varies — typically 45 seconds to several minutes). Until the TTL expires, Lambda reads from cache rather than fetching the new config. Solution: reduce the cache TTL, or force a cache refresh by calling the extension's clear-cache endpoint. AppConfig deployments propagate quickly — the cache is the delay. Lambda env vars are separate from AppConfig.",
     optionExplanations: [
@@ -2721,12 +2721,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer's IAM identity policy has Effect: Allow for s3:* on arn:aws:s3:::my-bucket/*. A bucket policy has Effect: Deny for s3:DeleteObject for Principal: * with a condition aws:PrincipalArn != arn:aws:iam::123456789:role/AdminRole. The developer tries to delete an object. What happens?",
     options: [
-      "Access denied — the bucket policy Deny applies to the developer since they are not the AdminRole",
       "Access granted — the identity policy Allow overrides the bucket policy Deny",
-      "Access granted — the condition makes the Deny only apply to the AdminRole",
+      "Access denied — the bucket policy Deny applies to the developer since they are not the AdminRole",
       "Access denied — you cannot mix identity and resource policies for S3",
+      "Access granted — the condition makes the Deny only apply to the AdminRole",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Explicit Deny always wins. The bucket policy has Deny on s3:DeleteObject for Principal: * with a condition: if the caller is NOT AdminRole, the Deny applies. The developer is not the AdminRole, so the condition evaluates to true — the Deny applies. Explicit Deny overrides any Allow in any identity or resource policy. The developer's s3:* Allow in their identity policy is irrelevant once an explicit Deny is in effect. Remember: Deny > Allow, no exceptions.",
     optionExplanations: [
@@ -2786,12 +2786,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function has reserved concurrency set to 10. The function is triggered by an API Gateway. During a traffic spike, some API requests are returning 429 errors. What is happening and what should the developer do?",
     options: [
-      "Lambda is throttling requests because concurrency = 10 is exceeded; API Gateway returns 429. Increase reserved concurrency or remove it to use account-level concurrency",
-      "API Gateway is rate limiting requests to 10 per second based on usage plan settings",
       "Lambda is hitting the 15-minute timeout and returning 429 to indicate timeout",
+      "API Gateway is rate limiting requests to 10 per second based on usage plan settings",
       "The function is out of memory and returning 429 as the error code",
+      "Lambda is throttling requests because concurrency = 10 is exceeded; API Gateway returns 429. Increase reserved concurrency or remove it to use account-level concurrency",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Reserved concurrency of 10 means only 10 concurrent executions are allowed. If the 11th request arrives while 10 are in-flight, Lambda throttles it — returns TooManyRequestsException (HTTP 429). API Gateway surfaces this as a 429 to the client. Solutions: increase reserved concurrency, remove it (use account pool), or set up retry logic with exponential backoff. Reserved concurrency both limits the function AND reserves that concurrency from the account pool. API Gateway usage plan rate limits are separate. Lambda returns 429 for throttle specifically — not for timeout or OOM.",
     optionExplanations: [
@@ -2817,12 +2817,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeDeploy in-place deployment to EC2 fails at the BeforeInstall hook. What is the state of the instances after this failure?",
     options: [
-      "The instances still run the previous application version — BeforeInstall runs before files are copied",
+      "CodeDeploy automatically rolls back and the instances run the previous version",
       "The instances have the new version partially installed and are in an indeterminate state",
       "The instances are terminated and replaced with new ones",
-      "CodeDeploy automatically rolls back and the instances run the previous version",
+      "The instances still run the previous application version — BeforeInstall runs before files are copied",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "In-place deployment lifecycle: ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService. BeforeInstall runs BEFORE the new application files are copied. If it fails, the instances still have the old application running. CodeDeploy does not automatically roll back on hook failure — you must configure automatic rollback or trigger it manually. Only Install and later hooks result in files being changed on the instance.",
     optionExplanations: [
@@ -2848,12 +2848,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An SQS message processing Lambda is configured with a batch size of 10. 3 of the 10 messages in a batch fail processing. How should the developer ensure only the 3 failed messages are retried, not all 10?",
     options: [
-      "Enable ReportBatchItemFailures and return a batchItemFailures list with only the failed message IDs",
-      "Delete the 7 successfully processed messages manually and let SQS retry the batch",
       "Set batch size to 1 so each message is processed independently",
+      "Enable ReportBatchItemFailures and return a batchItemFailures list with only the failed message IDs",
       "Use a FIFO queue which automatically retries only failed messages",
+      "Delete the 7 successfully processed messages manually and let SQS retry the batch",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Lambda's SQS event source mapping supports partial batch response (ReportBatchItemFailures). When enabled, the Lambda function can return a response with batchItemFailures listing only the message IDs that failed. Lambda deletes the successful messages and returns only the failed ones to the queue for retry. Without this, the entire batch is retried on failure. Setting batch size to 1 works but reduces throughput. FIFO queues retry from the failed message position but don't support partial batch responses the same way.",
     optionExplanations: [
@@ -2879,12 +2879,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A legacy application stores user accounts in a MySQL database. The team wants to migrate users to Cognito without requiring password resets. Which Cognito Lambda trigger enables transparent migration?",
     options: [
-      "User Migration trigger — fires when a user signs in and doesn't exist in the User Pool; look up in legacy DB and migrate",
-      "Pre Authentication trigger — validate user credentials against the legacy DB before Cognito auth",
-      "Post Confirmation trigger — migrate user data after they confirm their email",
       "Custom Authentication trigger — implement entirely custom auth flow using legacy DB",
+      "Post Confirmation trigger — migrate user data after they confirm their email",
+      "Pre Authentication trigger — validate user credentials against the legacy DB before Cognito auth",
+      "User Migration trigger — fires when a user signs in and doesn't exist in the User Pool; look up in legacy DB and migrate",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The User Migration Lambda trigger fires when a user tries to sign in to the Cognito User Pool but doesn't have an account there. The Lambda can look up the user in the legacy system, validate their password against the legacy DB, and if valid, return the user attributes to Cognito which creates the account transparently. The user doesn't know migration happened. Pre Authentication can't migrate users. Post Confirmation is after registration, not migration. Custom Auth requires a full custom flow — more work.",
     optionExplanations: [
@@ -2981,12 +2981,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An RDS Multi-AZ deployment fails over to the standby instance. Applications experience a connection interruption of about 2 minutes. What should the developer do to minimize the impact on the application?",
     options: [
-      "Implement retry logic with exponential backoff in the application and use RDS Proxy to absorb failover",
-      "Switch to a single-AZ deployment to avoid failover disruptions",
-      "Increase the Multi-AZ synchronization interval to reduce failover time",
       "Use Read Replicas instead of Multi-AZ for high availability",
+      "Increase the Multi-AZ synchronization interval to reduce failover time",
+      "Switch to a single-AZ deployment to avoid failover disruptions",
+      "Implement retry logic with exponential backoff in the application and use RDS Proxy to absorb failover",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "RDS Multi-AZ failover typically takes 60-120 seconds — the DNS record is updated to point to the standby. Applications must reconnect. Two mitigations: 1) Implement retry logic with exponential backoff to reconnect after brief failures. 2) Use RDS Proxy — the proxy absorbs the failover, maintaining the connection endpoint and reducing application-visible downtime to seconds. Single-AZ removes HA. You cannot configure synchronization intervals. Read Replicas provide read scaling — they use asynchronous replication and can't be promoted automatically without manual intervention.",
     optionExplanations: [
@@ -3006,12 +3006,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application generates events that need to be processed by a downstream system, but the downstream system is intermittently unavailable. The developer wants events to not be lost during outages. What EventBridge feature ensures delivery?",
     options: [
-      "Configure a Dead Letter Queue (SQS) on the EventBridge rule target for retry overflow, and rely on EventBridge's built-in retry with exponential backoff",
       "Use EventBridge Archive to store events and manually replay them after the outage",
-      "Increase the EventBridge event bus throughput to queue events during outages",
+      "Configure a Dead Letter Queue (SQS) on the EventBridge rule target for retry overflow, and rely on EventBridge's built-in retry with exponential backoff",
       "Use EventBridge Pipes with a buffer to hold events during downstream failures",
+      "Increase the EventBridge event bus throughput to queue events during outages",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "EventBridge retries failed target invocations with exponential backoff for up to 24 hours. If all retries are exhausted and a Dead Letter Queue (SQS) is configured on the target, the event is sent to the DLQ for later processing. This combination ensures no events are lost during transient outages. EventBridge Archive captures events for replay but requires manual replay after the outage — not automatic. EventBridge event buses don't queue events. Pipes add transformation/filtering but don't add buffering for target failures.",
     optionExplanations: [
@@ -3031,12 +3031,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation template includes an EC2 instance with cfn-init metadata. After deployment, the developer finds the instance did not run the cfn-init configuration. What is MOST likely missing?",
     options: [
-      "The UserData script is missing the cfn-init call and cfn-signal command",
-      "The cfn-init configuration requires the CloudWatch Agent to be installed first",
-      "The IAM instance profile does not have CloudFormation permissions",
       "cfn-init requires the AWS::CloudFormation::WaitCondition resource to be defined",
+      "The cfn-init configuration requires the CloudWatch Agent to be installed first",
+      "The UserData script is missing the cfn-init call and cfn-signal command",
+      "The IAM instance profile does not have CloudFormation permissions",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "cfn-init is not executed automatically — you must call it explicitly from the EC2 instance's UserData script. The UserData script runs cfn-init -v --stack StackName --resource ResourceName --region Region to pull and apply the metadata configuration. Additionally, cfn-signal is required to signal CloudFormation that initialization completed (with success or failure), especially when using CreationPolicy. Missing the UserData cfn-init call is the most common reason cfn-init never runs.",
     optionExplanations: [
@@ -3079,8 +3079,8 @@ export const quizQuestions: QuizQuestion[] = [
     type: "single",
     service: "Amazon SNS",
     question: "What is the maximum message size for Amazon SNS?",
-    options: ["256 KB", "1 MB", "64 KB", "10 MB"],
-    correctIndices: [0],
+    options: ["64 KB", "10 MB", "1 MB", "256 KB"],
+    correctIndices: [3],
     explanation:
       "Amazon SNS supports messages up to 256 KB in size. For larger payloads, use the SNS Extended Client Library which stores the actual message in S3 and sends a reference in the SNS message. This is the same pattern used with SQS Extended Client Library. SQS also has a 256 KB message size limit.",
     optionExplanations: [
@@ -3100,12 +3100,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An API Gateway WebSocket API needs to push messages to connected clients from a backend Lambda that is triggered by an SQS event (not from the client's WebSocket request). How does the backend Lambda send a message to a specific client?",
     options: [
-      "Use the API Gateway Management API (PostToConnection) with the client's connectionId to push a message",
-      "The backend Lambda cannot send to WebSocket clients — only client-initiated messages are supported",
-      "Store the message in DynamoDB and the client polls for updates via REST",
       "Use SNS to publish to a topic that the WebSocket client subscribes to directly",
+      "The backend Lambda cannot send to WebSocket clients — only client-initiated messages are supported",
+      "Use the API Gateway Management API (PostToConnection) with the client's connectionId to push a message",
+      "Store the message in DynamoDB and the client polls for updates via REST",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "API Gateway WebSocket APIs assign each connected client a connectionId. Backend services can push messages to specific clients using the API Gateway Management API endpoint: POST https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/@connections/{connectionId}. The backend Lambda stores connectionIds (typically in DynamoDB) and uses PostToConnection to push data. This enables server-initiated push. SNS does not support WebSocket clients directly.",
     optionExplanations: [
@@ -3131,12 +3131,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CMK is scheduled for deletion with a 7-day waiting period. During this period, an application tries to use the key to decrypt data. What happens?",
     options: [
-      "The decrypt operation fails with KMSInvalidStateException — keys in pending deletion state cannot be used",
-      "The decrypt operation succeeds — the key is still active during the waiting period",
       "The decrypt operation fails with AccessDeniedException — deletion removes key policy",
+      "The decrypt operation succeeds — the key is still active during the waiting period",
       "The decrypt operation is queued and executed after the deletion is cancelled",
+      "The decrypt operation fails with KMSInvalidStateException — keys in pending deletion state cannot be used",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "During the deletion waiting period (7-30 days), a KMS CMK is disabled and cannot be used for any cryptographic operations — encryption, decryption, signing, or verification will fail with KMSInvalidStateException. This is intentional — it gives you time to identify dependencies and cancel deletion if needed. The key is not yet deleted (it still exists in KMS), but it cannot be used. Cancel deletion before the waiting period ends to restore the key. After the period, the key is permanently deleted and all data encrypted with it is permanently inaccessible.",
     optionExplanations: [
@@ -3185,12 +3185,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function processes SQS messages in batches of 10. Some messages occasionally fail processing while others in the same batch succeed. How should the developer ensure only failed messages are retried?",
     options: [
-      "Return a list of failed message IDs using the ReportBatchItemFailures response type",
-      "Catch exceptions and delete successful messages manually before throwing",
-      "Set the batch size to 1 so each message is processed independently",
       "Configure a DLQ on the SQS queue with maxReceiveCount of 1",
+      "Return a list of failed message IDs using the ReportBatchItemFailures response type",
+      "Set the batch size to 1 so each message is processed independently",
+      "Catch exceptions and delete successful messages manually before throwing",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "ReportBatchItemFailures lets Lambda return a partial success response identifying which message IDs failed. SQS retries only those failed messages; successfully processed messages are deleted. Without this, any failure causes the entire batch to return to the queue.",
     optionExplanations: [
@@ -3239,12 +3239,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team wants to gradually shift traffic to a new Lambda function version without updating the API Gateway stage. What is the BEST approach?",
     options: [
-      "Use a Lambda alias with a weighted routing configuration between two versions",
-      "Create a new API Gateway stage pointing to the new Lambda version",
       "Use API Gateway canary deployments to split traffic at the stage level",
+      "Create a new API Gateway stage pointing to the new Lambda version",
+      "Use a Lambda alias with a weighted routing configuration between two versions",
       "Deploy a new API Gateway API and use Route 53 weighted routing",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "A Lambda alias supports traffic shifting — you can route a percentage of invocations to a new version while the rest go to the stable version. The API Gateway integration points to the alias ARN, so no API Gateway changes are needed. API Gateway canary deployments split traffic between stage configurations, not Lambda versions.",
     optionExplanations: [
@@ -3266,12 +3266,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to count the number of ERROR log lines emitted by a Lambda function and trigger an alarm when the count exceeds 10 in 5 minutes. What is the correct sequence of steps?",
     options: [
-      "Create a metric filter on the log group to extract a metric, then create an alarm on that metric",
-      "Enable Lambda detailed monitoring, then create an alarm on the Errors metric",
       "Use CloudWatch Logs Insights to query errors, then set an alarm on query results",
+      "Enable Lambda detailed monitoring, then create an alarm on the Errors metric",
       "Create a CloudWatch Synthetics canary that invokes the function and checks for errors",
+      "Create a metric filter on the log group to extract a metric, then create an alarm on that metric",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Metric filters parse log events matching a pattern and increment a custom CloudWatch metric. You then create an alarm on that metric. Lambda's built-in Errors metric counts invocation errors (unhandled exceptions), not log-level ERROR strings — so a metric filter is needed for log-based counting.",
     optionExplanations: [
@@ -3293,12 +3293,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer is caching database query results in ElastiCache Redis. After a cache miss, the application fetches from RDS and writes the result to Redis. What caching pattern is this, and what is its main risk?",
     options: [
-      "Lazy loading (cache-aside); the risk is serving stale data if the database is updated without invalidating the cache",
-      "Write-through; the risk is write latency on every database update",
-      "Write-behind; the risk is data loss if the cache fails before writing to the database",
       "Read-through; the risk is cache stampede on the first read of a key",
+      "Write-behind; the risk is data loss if the cache fails before writing to the database",
+      "Write-through; the risk is write latency on every database update",
+      "Lazy loading (cache-aside); the risk is serving stale data if the database is updated without invalidating the cache",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Lazy loading (cache-aside) only populates the cache on a miss — the application checks cache first, and on miss reads from DB and writes to cache. The main risk is stale data: if the underlying DB record changes, the cache still holds the old value until TTL expires or explicit invalidation occurs.",
     optionExplanations: [
@@ -3320,12 +3320,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs different downstream services to receive only the SNS messages relevant to them, without creating separate topics per service. What feature enables this?",
     options: [
-      "Subscription filter policies based on message attributes",
-      "SNS message routing rules attached to the topic",
-      "SQS queue policies that filter messages on receipt",
       "Lambda authorizers that inspect and route SNS messages",
+      "SQS queue policies that filter messages on receipt",
+      "SNS message routing rules attached to the topic",
+      "Subscription filter policies based on message attributes",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Subscription filter policies are JSON documents attached to individual subscriptions. They match against MessageAttributes on the published message and deliver only matching messages to that subscriber. Each subscriber can have a different filter, enabling content-based routing from a single topic.",
     optionExplanations: [
@@ -3372,12 +3372,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to customize the attributes added to a JWT before it is issued to a user after sign-in. Which Cognito Lambda trigger should they use?",
     options: [
-      "Pre Token Generation trigger",
-      "Post Authentication trigger",
       "Pre Authentication trigger",
+      "Pre Token Generation trigger",
       "Post Confirmation trigger",
+      "Post Authentication trigger",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "The Pre Token Generation trigger fires just before Cognito issues tokens and allows the Lambda function to add, suppress, or override claims in the ID token and access token. Post Authentication fires after sign-in but cannot modify tokens. Pre Authentication fires before credential validation.",
     optionExplanations: [
@@ -3424,12 +3424,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to encrypt data larger than 4 KB in their application using KMS. What is the correct approach?",
     options: [
-      "Use GenerateDataKey to get a plaintext data key, encrypt the data locally, then store the encrypted data key alongside the ciphertext",
       "Call the KMS Encrypt API directly with the full data payload",
-      "Split the data into 4 KB chunks and encrypt each chunk separately with KMS Encrypt",
       "Store the plaintext data key in Secrets Manager and use it to encrypt data locally",
+      "Split the data into 4 KB chunks and encrypt each chunk separately with KMS Encrypt",
+      "Use GenerateDataKey to get a plaintext data key, encrypt the data locally, then store the encrypted data key alongside the ciphertext",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "KMS Encrypt has a 4 KB limit. For larger data, use envelope encryption: GenerateDataKey returns a plaintext data key and an encrypted copy. You encrypt your data locally with the plaintext key (using AES-256), discard the plaintext key, and store the encrypted data key with the ciphertext. To decrypt, call KMS Decrypt on the encrypted data key to recover the plaintext key, then decrypt locally.",
     optionExplanations: [
@@ -3449,12 +3449,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function in Account A needs to decrypt data encrypted with a KMS Customer Managed Key in Account B. What must be configured?",
     options: [
-      "The KMS key policy in Account B must allow Account A's Lambda execution role as a principal, and Account A's IAM policy must allow kms:Decrypt on the key ARN",
       "The Lambda execution role in Account A must have an inline policy granting kms:Decrypt on all KMS keys",
-      "A KMS key grant must be created in Account A pointing to Account B's key",
+      "The KMS key policy in Account B must allow Account A's Lambda execution role as a principal, and Account A's IAM policy must allow kms:Decrypt on the key ARN",
       "The KMS key must be shared using AWS Resource Access Manager (RAM)",
+      "A KMS key grant must be created in Account A pointing to Account B's key",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Cross-account KMS access requires two things: the key policy in the key's account must explicitly allow the external principal (or account), AND the IAM policy in the caller's account must allow the kms:Decrypt action on the specific key ARN. Both must allow the action — either one alone is insufficient.",
     optionExplanations: [
@@ -3476,12 +3476,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation stack update fails and rolls back. The developer needs to understand exactly which resource change caused the failure. Where should they look?",
     options: [
-      "The stack Events tab in the CloudFormation console, filtered to FAILED status",
       "AWS CloudTrail logs for the CloudFormation API calls",
-      "The stack Outputs section which lists failed resource changes",
       "Amazon CloudWatch Logs for the CloudFormation service",
+      "The stack Events tab in the CloudFormation console, filtered to FAILED status",
+      "The stack Outputs section which lists failed resource changes",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "The CloudFormation stack Events tab shows a chronological log of every resource action during a stack operation, including the status reason for each FAILED event. This is the primary place to diagnose which resource failed and why during a stack update or rollback.",
     optionExplanations: [
@@ -3501,12 +3501,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation template needs to provision a resource type that CloudFormation does not natively support. What is the correct approach?",
     options: [
-      "Use a Custom Resource backed by a Lambda function to handle Create, Update, and Delete lifecycle events",
       "Use a CloudFormation Macro to transform the template before deployment",
-      "Use AWS CDK to wrap the unsupported resource and synthesize a template",
       "Use a CloudFormation StackSet to deploy the resource across multiple accounts",
+      "Use AWS CDK to wrap the unsupported resource and synthesize a template",
+      "Use a Custom Resource backed by a Lambda function to handle Create, Update, and Delete lifecycle events",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Custom Resources let you run arbitrary Lambda code during stack operations. CloudFormation sends Create/Update/Delete events to the Lambda function, which provisions the resource and sends a success/failure signal back via a pre-signed S3 URL. This enables managing any resource — third-party APIs, on-premises resources, unsupported AWS services.",
     optionExplanations: [
@@ -3553,12 +3553,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS task running on Fargate needs to send X-Ray trace data. The application uses the X-Ray SDK but traces are not appearing in the console. What is the MOST likely missing configuration?",
     options: [
-      "The X-Ray daemon is not running as a sidecar container in the task definition",
-      "The ECS cluster does not have X-Ray enabled at the cluster level",
       "The task definition does not specify a CloudWatch log group for X-Ray",
       "The X-Ray SDK must be replaced with the OpenTelemetry SDK on Fargate",
+      "The ECS cluster does not have X-Ray enabled at the cluster level",
+      "The X-Ray daemon is not running as a sidecar container in the task definition",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The X-Ray SDK sends trace segments to the X-Ray daemon on UDP port 2000. On ECS Fargate, there is no host daemon — you must add the X-Ray daemon as a sidecar container in the same task definition. The sidecar receives segments from the SDK and forwards them to the X-Ray service.",
     optionExplanations: [
@@ -3580,12 +3580,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to trigger a Lambda function every weekday at 9 AM UTC. What is the correct EventBridge rule configuration?",
     options: [
-      "A schedule rule using the cron expression cron(0 9 ? * MON-FRI *)",
+      "A schedule rule using cron(9 0 * * MON-FRI) in standard cron format",
       "A schedule rule using rate(1 day) with a start time of 9 AM",
       "An event pattern rule matching a custom event published at 9 AM",
-      "A schedule rule using cron(9 0 * * MON-FRI) in standard cron format",
+      "A schedule rule using the cron expression cron(0 9 ? * MON-FRI *)",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "EventBridge cron expressions use the format cron(Minutes Hours Day-of-month Month Day-of-week Year). cron(0 9 ? * MON-FRI *) means minute 0, hour 9, any day-of-month (?), any month, Monday through Friday, any year. The ? is required when specifying day-of-week to avoid conflict with day-of-month.",
     optionExplanations: [
@@ -3605,12 +3605,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application publishes custom events to EventBridge. A downstream team in a separate AWS account needs to consume these events. What must be configured to enable cross-account event delivery?",
     options: [
-      "Add a resource-based policy to the target account's event bus allowing the source account to put events, and create a rule in the source account targeting the destination event bus",
-      "Create an SNS topic as an intermediary and subscribe the target account's Lambda to it",
       "Use EventBridge Schema Registry to share event schemas across accounts",
+      "Create an SNS topic as an intermediary and subscribe the target account's Lambda to it",
       "Enable EventBridge global endpoints and configure both accounts as endpoints",
+      "Add a resource-based policy to the target account's event bus allowing the source account to put events, and create a rule in the source account targeting the destination event bus",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Cross-account EventBridge delivery requires: (1) a resource policy on the target account's event bus granting the source account permission to send events, and (2) a rule in the source account with the target account's event bus ARN as the target. Events flow directly between event buses across accounts.",
     optionExplanations: [
@@ -3632,12 +3632,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer's application connects to RDS using a username and password stored in environment variables. The security team requires credentials to rotate automatically every 30 days without application downtime. What is the BEST solution?",
     options: [
-      "Store credentials in Secrets Manager with automatic rotation enabled and use the Secrets Manager SDK to retrieve credentials at runtime",
-      "Store credentials in SSM Parameter Store SecureString and update them with a scheduled Lambda",
       "Enable RDS IAM database authentication and remove the password entirely",
       "Use an RDS Proxy to cache credentials and rotate them at the proxy layer",
+      "Store credentials in Secrets Manager with automatic rotation enabled and use the Secrets Manager SDK to retrieve credentials at runtime",
+      "Store credentials in SSM Parameter Store SecureString and update them with a scheduled Lambda",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Secrets Manager has built-in rotation support for RDS — it rotates the password on the database and in the secret automatically. Applications use the Secrets Manager API to retrieve credentials at runtime and cache them with a short TTL. When rotation occurs, the next cache miss retrieves the new credentials transparently.",
     optionExplanations: [
@@ -3657,12 +3657,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An RDS Multi-AZ deployment fails over to the standby instance. The application experiences a connection error for approximately 60 seconds after the failover. What is the BEST way to minimize the connection disruption?",
     options: [
-      "Use RDS Proxy to pool and maintain connections, which reconnects automatically during failover",
       "Increase the RDS instance size to reduce failover time",
       "Configure the application to retry connections with exponential backoff",
+      "Use RDS Proxy to pool and maintain connections, which reconnects automatically during failover",
       "Switch to RDS Aurora which has near-zero failover time",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "RDS Proxy maintains a connection pool to the database and handles failover transparently. When the primary instance fails over, the Proxy reconnects to the new primary without the application needing to re-establish connections. This reduces application-visible disruption from ~60s to a few seconds.",
     optionExplanations: [
@@ -3684,12 +3684,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Step Functions state machine needs to process 1,000 records in parallel. Each record requires an independent Lambda invocation. What state type should the developer use?",
     options: [
-      "Map state with the records as the input array and a Lambda Task as the iterator",
       "Parallel state with 1,000 branches each containing a Lambda Task",
       "A single Task state invoking a Lambda function that processes all records",
+      "Map state with the records as the input array and a Lambda Task as the iterator",
       "Choice state branching to different Lambda functions based on record count",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "The Map state dynamically iterates over an array and runs the same set of steps for each item, in parallel. It's purpose-built for processing collections. Parallel state has a fixed number of branches defined at design time — it cannot scale dynamically to 1,000 items.",
     optionExplanations: [
@@ -3709,12 +3709,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Step Functions state machine calls a third-party API that occasionally returns transient 503 errors. How should the developer configure the state machine to retry on 503 errors before failing?",
     options: [
-      "Add a Retry field to the Task state specifying the error type, max attempts, interval, and backoff rate",
       "Wrap the Task state in a Try/Catch block within the Lambda function",
-      "Add a Catch field to the Task state and route 503 errors back to the same state",
       "Use a Wait state before each API call to prevent rate limiting",
+      "Add a Retry field to the Task state specifying the error type, max attempts, interval, and backoff rate",
+      "Add a Catch field to the Task state and route 503 errors back to the same state",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Step Functions Task states support a Retry field with rules specifying ErrorEquals (error types to match), MaxAttempts, IntervalSeconds (initial wait), and BackoffRate (multiplier). This handles transient failures without Lambda-level retry logic. Catch handles errors after all retries are exhausted.",
     optionExplanations: [
@@ -3734,12 +3734,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to pause a Step Functions execution and wait for a human approval before continuing. The wait period could be up to 7 days. What pattern should they use?",
     options: [
-      "Use a Task state with .waitForTaskToken and send the token to an external system for approval",
       "Use a Wait state with a fixed duration of 7 days",
-      "Poll a DynamoDB table from a Lambda function until an approval flag is set",
+      "Use a Task state with .waitForTaskToken and send the token to an external system for approval",
       "Use an Activity task with a worker that checks for approval every minute",
+      "Poll a DynamoDB table from a Lambda function until an approval flag is set",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "The .waitForTaskToken integration pattern pauses the state machine execution indefinitely until an external system calls SendTaskSuccess or SendTaskFailure with the token. This is the correct pattern for human-in-the-loop workflows — the execution waits at zero cost until the approval arrives.",
     optionExplanations: [
@@ -3766,12 +3766,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function retrieves a database password from Secrets Manager on every invocation. The team notices high Secrets Manager API costs. What is the BEST way to reduce these costs?",
     options: [
+      "Increase the Lambda timeout so fewer cold starts occur",
       "Cache the secret in the Lambda execution environment and refresh only when a decryption error occurs or TTL expires",
       "Store the secret in an environment variable after the first retrieval",
       "Switch to SSM Parameter Store which has lower API costs",
-      "Increase the Lambda timeout so fewer cold starts occur",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Fetching the secret outside the handler (in the init code) caches it in the execution environment across warm invocations. The AWS Secrets Manager Lambda extension further automates this with a local HTTP cache. Storing in an environment variable bypasses Secrets Manager entirely and defeats its rotation and audit benefits.",
     optionExplanations: [
@@ -3791,12 +3791,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A secret in Secrets Manager is configured with automatic rotation. After rotation, some application instances start returning authentication errors. What is the MOST likely cause?",
     options: [
-      "The application cached the old secret value and has not retrieved the new version yet",
-      "The rotation Lambda function deleted the old secret version immediately after rotation",
       "Secrets Manager changed the secret ARN during rotation",
+      "The rotation Lambda function deleted the old secret version immediately after rotation",
+      "The application cached the old secret value and has not retrieved the new version yet",
       "The RDS instance rejected the new password because it does not meet complexity requirements",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "During rotation, Secrets Manager stages versions: the new secret is AWSPENDING during creation, then promoted to AWSCURRENT, while the old value moves to AWSPREVIOUS. Applications caching the old credentials will get auth errors until they refresh. The AWSPREVIOUS stage is kept for a grace period precisely to handle in-flight connections.",
     optionExplanations: [
@@ -3816,12 +3816,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS task in Account A needs to access a secret stored in Secrets Manager in Account B. What must be configured?",
     options: [
-      "The secret's resource policy in Account B must allow the ECS task role from Account A, and the task role must have secretsmanager:GetSecretValue permission",
-      "The secret must be replicated to Account A using Secrets Manager cross-region replication",
-      "A VPC peering connection must be established between the two accounts",
       "The ECS task must assume a role in Account B using STS before accessing the secret",
+      "The secret must be replicated to Account A using Secrets Manager cross-region replication",
+      "The secret's resource policy in Account B must allow the ECS task role from Account A, and the task role must have secretsmanager:GetSecretValue permission",
+      "A VPC peering connection must be established between the two accounts",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Cross-account Secrets Manager access requires a resource-based policy on the secret allowing the external principal, plus an IAM policy on the caller granting secretsmanager:GetSecretValue. The secret must also be encrypted with a KMS CMK (not the default AWS-managed key) and the key policy must allow the cross-account principal.",
     optionExplanations: [
@@ -3843,12 +3843,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeDeploy deployment to EC2 instances succeeds on some instances but fails on others. The deployment is marked as failed and a rollback begins. Where should the developer look to find the specific error on the failed instances?",
     options: [
-      "The CodeDeploy agent log at /var/log/aws/codedeploy-agent/ and the deployment lifecycle event logs in the CodeDeploy console",
+      "Amazon CloudWatch metrics for the CodeDeploy deployment",
       "AWS CloudTrail logs for the CodeDeploy API calls",
       "The CodeDeploy deployment group configuration in the console",
-      "Amazon CloudWatch metrics for the CodeDeploy deployment",
+      "The CodeDeploy agent log at /var/log/aws/codedeploy-agent/ and the deployment lifecycle event logs in the CodeDeploy console",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The CodeDeploy agent runs on each instance and writes detailed logs including lifecycle hook output, script errors, and file operation failures. The console also shows per-instance deployment status with lifecycle event details. These are the primary sources for diagnosing instance-level deployment failures.",
     optionExplanations: [
@@ -3868,12 +3868,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team uses CodeDeploy to deploy to ECS with a blue/green deployment strategy. They want to run integration tests against the new (green) task set before shifting production traffic. How should they configure this?",
     options: [
-      "Configure a BeforeAllowTraffic lifecycle hook that runs tests and calls PutLifecycleEventHookExecutionStatus to signal success or failure",
+      "Configure the deployment to use a Canary strategy and test during the initial traffic shift",
       "Add a Wait state in the deployment group configuration with a manual approval step",
       "Use the AfterAllowTraffic hook to run tests and roll back if tests fail",
-      "Configure the deployment to use a Canary strategy and test during the initial traffic shift",
+      "Configure a BeforeAllowTraffic lifecycle hook that runs tests and calls PutLifecycleEventHookExecutionStatus to signal success or failure",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "The BeforeAllowTraffic lifecycle hook fires after the green task set is registered with the test listener but before any production traffic is shifted. A Lambda function can run integration tests against the test listener endpoint and call PutLifecycleEventHookExecutionStatus with Succeeded or Failed to control whether the deployment proceeds.",
     optionExplanations: [
@@ -3893,12 +3893,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeDeploy appspec.yml for an EC2 deployment specifies a BeforeInstall lifecycle hook script. The script takes 45 seconds to run but CodeDeploy marks it as failed after 30 seconds. What should the developer change?",
     options: [
-      "Increase the timeout value for the BeforeInstall hook in the appspec.yml hooks configuration",
-      "Move the script logic to the AfterInstall hook which has a longer default timeout",
-      "Split the script into two scripts and run them in separate hooks",
       "Set the CodeDeploy deployment group timeout to 60 seconds",
+      "Move the script logic to the AfterInstall hook which has a longer default timeout",
+      "Increase the timeout value for the BeforeInstall hook in the appspec.yml hooks configuration",
+      "Split the script into two scripts and run them in separate hooks",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Each lifecycle hook in appspec.yml can specify a timeout value (in seconds). The default is 3600 seconds for most hooks, but if a custom timeout is configured and is too short, the hook will be terminated. Setting an appropriate timeout in the hooks section resolves the issue.",
     optionExplanations: [
@@ -3945,12 +3945,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team wants to use SAM to gradually shift traffic to a new Lambda version using a canary deployment, with automatic rollback if CloudWatch alarms fire. What SAM feature enables this?",
     options: [
-      "DeploymentPreference on the function resource specifying type, alarms, and hooks",
-      "AWS::Serverless::Application with a nested SAM template for canary logic",
-      "A CodeDeploy deployment group referenced in the SAM template Globals section",
       "SAM Accelerate (sam sync) with a canary flag",
+      "A CodeDeploy deployment group referenced in the SAM template Globals section",
+      "AWS::Serverless::Application with a nested SAM template for canary logic",
+      "DeploymentPreference on the function resource specifying type, alarms, and hooks",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "SAM's DeploymentPreference property on AWS::Serverless::Function integrates with CodeDeploy to shift traffic gradually (Canary, Linear, or AllAtOnce strategies). You specify Alarms to trigger automatic rollback and Hooks for pre/post-traffic Lambda functions — all configured declaratively in the SAM template.",
     optionExplanations: [
@@ -3970,12 +3970,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer wants to test a SAM Lambda function locally with a simulated API Gateway event before deploying. What command should they use?",
     options: [
-      "sam local invoke with an event JSON file, or sam local start-api to run a local HTTP server",
-      "sam build followed by sam deploy --dry-run",
-      "sam validate to check the template and simulate invocations",
       "sam logs --tail to stream logs from a locally running function",
+      "sam build followed by sam deploy --dry-run",
+      "sam local invoke with an event JSON file, or sam local start-api to run a local HTTP server",
+      "sam validate to check the template and simulate invocations",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "sam local invoke runs a Lambda function locally using Docker, passing an event from a JSON file. sam local start-api starts a local HTTP server that simulates API Gateway and invokes the function on each request. Both require Docker to be running locally.",
     optionExplanations: [
@@ -3997,12 +3997,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer runs cdk deploy for the first time in a new AWS account and region and receives an error saying the environment is not bootstrapped. What does bootstrapping create, and how is it done?",
     options: [
-      "Bootstrapping creates an S3 bucket for assets and an ECR repository plus IAM roles; run cdk bootstrap to create them",
       "Bootstrapping installs the CDK CLI in the AWS account; run aws cdk install",
       "Bootstrapping creates the CDK app's VPC and networking prerequisites; run cdk init",
+      "Bootstrapping creates an S3 bucket for assets and an ECR repository plus IAM roles; run cdk bootstrap to create them",
       "Bootstrapping configures AWS credentials for the CDK CLI; run aws configure",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CDK bootstrapping deploys a CloudFormation stack (CDKToolkit) that provisions resources CDK needs to deploy: an S3 bucket for assets (Lambda code, Docker images), an ECR repository, and IAM roles for deployment. Run cdk bootstrap aws://ACCOUNT-ID/REGION once per account/region combination.",
     optionExplanations: [
@@ -4046,12 +4046,12 @@ export const quizQuestions: QuizQuestion[] = [
     service: "AWS CDK",
     question: "What is the difference between L1, L2, and L3 CDK constructs?",
     options: [
-      "L1 are CloudFormation resource wrappers (Cfn*), L2 add defaults and helper methods, L3 (patterns) combine multiple resources into a reusable higher-level component",
+      "L1 constructs are language-specific, L2 are cross-language, and L3 are AWS-managed",
       "L1 constructs are for development, L2 for staging, and L3 for production deployments",
       "L1 are basic constructs, L2 add IAM policies, and L3 add VPC networking automatically",
-      "L1 constructs are language-specific, L2 are cross-language, and L3 are AWS-managed",
+      "L1 are CloudFormation resource wrappers (Cfn*), L2 add defaults and helper methods, L3 (patterns) combine multiple resources into a reusable higher-level component",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "CDK has three abstraction layers. L1 (Cfn*) are direct CloudFormation resource mappings with no defaults. L2 constructs add sensible defaults, security best practices, and helper methods (e.g. bucket.grantRead()). L3 constructs (patterns) like aws-ecs-patterns.ApplicationLoadBalancedFargateService combine multiple L2 resources into complete architectural patterns.",
     optionExplanations: [
@@ -4073,12 +4073,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS task definition has two containers: an application container and a sidecar. The application container must not start until the sidecar is healthy. How should the developer configure this?",
     options: [
-      "Set a dependsOn condition of HEALTHY on the sidecar in the application container's definition",
-      "Configure the application container's entryPoint to sleep until the sidecar port is open",
-      "Set the sidecar container as essential: false so it starts independently",
       "Use a Lambda function to start the application container after verifying the sidecar",
+      "Set a dependsOn condition of HEALTHY on the sidecar in the application container's definition",
+      "Set the sidecar container as essential: false so it starts independently",
+      "Configure the application container's entryPoint to sleep until the sidecar port is open",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "ECS container dependencies (dependsOn) allow you to specify startup ordering within a task. The condition HEALTHY waits for the dependency container's health check to pass before starting the dependent container. Conditions include START (just started), COMPLETE (exited 0), SUCCESS (exited 0), and HEALTHY (health check passed).",
     optionExplanations: [
@@ -4098,12 +4098,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ECS service on Fargate is consistently showing tasks in STOPPED state with the error 'CannotPullContainerError'. What are the MOST likely causes?",
     options: [
-      "The task's subnet has no route to the ECR endpoint, or the task execution role lacks ecr:GetAuthorizationToken and ecr:BatchGetImage permissions",
-      "The ECS service's desired count is set higher than the cluster's available capacity",
       "The container image tag specified in the task definition does not exist in the repository",
+      "The ECS service's desired count is set higher than the cluster's available capacity",
       "The Fargate platform version is incompatible with the container runtime",
+      "The task's subnet has no route to the ECR endpoint, or the task execution role lacks ecr:GetAuthorizationToken and ecr:BatchGetImage permissions",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "CannotPullContainerError on Fargate has two main causes: network (the task's ENI cannot reach ECR — needs a NAT Gateway, public IP, or VPC endpoint) and permissions (the task execution role needs ecr:GetAuthorizationToken, ecr:BatchGetImage, and ecr:GetDownloadUrlForLayer). The image tag not existing would show a different error.",
     optionExplanations: [
@@ -4123,12 +4123,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to pass a database connection string to an ECS container securely without storing it as a plaintext environment variable in the task definition. What is the recommended approach?",
     options: [
-      "Reference the secret ARN from Secrets Manager or SSM Parameter Store in the task definition's secrets field",
-      "Build the connection string into the container image at build time",
       "Pass the connection string as a Docker build argument in the task definition",
+      "Reference the secret ARN from Secrets Manager or SSM Parameter Store in the task definition's secrets field",
       "Store the connection string in an S3 object and have the container download it at startup",
+      "Build the connection string into the container image at build time",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "ECS supports the secrets field in container definitions, which references Secrets Manager secret ARNs or SSM Parameter Store parameter ARNs. ECS (via the task execution role) fetches the value at task startup and injects it as an environment variable — the value is never stored in plaintext in the task definition.",
     optionExplanations: [
@@ -4150,12 +4150,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFront distribution serves an S3 bucket. The developer wants to ensure users can only access the S3 content through CloudFront and not directly via the S3 URL. What should they configure?",
     options: [
-      "Origin Access Control (OAC) on the distribution and a bucket policy allowing only the CloudFront service principal",
       "S3 Block Public Access on the bucket and a signed URL requirement on CloudFront",
-      "An S3 bucket policy denying all public access and enabling CloudFront Transfer Acceleration",
       "A Lambda@Edge function that rejects requests not coming from CloudFront IP ranges",
+      "An S3 bucket policy denying all public access and enabling CloudFront Transfer Acceleration",
+      "Origin Access Control (OAC) on the distribution and a bucket policy allowing only the CloudFront service principal",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "OAC is the current recommended mechanism. It gives CloudFront an identity that can be granted access in the S3 bucket policy via the cloudfront.amazonaws.com service principal with a condition on the distribution ARN. Users who try to access the S3 URL directly are denied because the bucket has no public access policy.",
     optionExplanations: [
@@ -4175,12 +4175,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFront distribution caches API responses. After deploying a bug fix, users are still receiving stale responses. The developer needs to immediately clear the cache for a specific API path. What should they do?",
     options: [
-      "Create a CloudFront invalidation for the specific path pattern (e.g. /api/products/*)",
       "Update the CloudFront distribution configuration to set the TTL to 0 for that path",
       "Delete and recreate the CloudFront distribution to clear all cached content",
+      "Create a CloudFront invalidation for the specific path pattern (e.g. /api/products/*)",
       "Change the API Gateway stage name to force CloudFront to treat it as a new origin path",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CloudFront invalidations remove objects from edge caches before their TTL expires. You specify path patterns (e.g. /api/products/* or /*) and CloudFront propagates the invalidation to all edge locations. The first 1,000 paths per month are free; additional paths incur a charge.",
     optionExplanations: [
@@ -4200,12 +4200,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to serve premium video content via CloudFront and ensure only authenticated, paying subscribers can download the files. What CloudFront feature should they use?",
     options: [
+      "CloudFront field-level encryption to restrict access to subscriber data",
       "CloudFront signed URLs or signed cookies, generated server-side using a CloudFront key pair",
       "CloudFront Origin Access Control with subscriber-specific IAM roles",
       "S3 presigned URLs generated by a Lambda function for each request",
-      "CloudFront field-level encryption to restrict access to subscriber data",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Signed URLs grant time-limited access to a single object. Signed cookies grant access to multiple objects matching a pattern — better for streaming or multi-file subscriptions. Both are signed with a CloudFront key pair (Ed25519 or RSA) and can encode expiry, IP restrictions, and path patterns.",
     optionExplanations: [
@@ -4233,12 +4233,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeBuild project builds a Docker image and pushes it to ECR. The build is failing with 'AccessDeniedException' when pushing to ECR. What is the MOST likely cause?",
     options: [
-      "The CodeBuild service role is missing ecr:GetAuthorizationToken and ecr:BatchCheckLayerAvailability/ecr:PutImage permissions",
-      "The buildspec.yml is missing the docker login command before the push",
       "The ECR repository does not exist in the same region as the CodeBuild project",
+      "The buildspec.yml is missing the docker login command before the push",
+      "The CodeBuild service role is missing ecr:GetAuthorizationToken and ecr:BatchCheckLayerAvailability/ecr:PutImage permissions",
       "CodeBuild cannot push to ECR — a separate Lambda function must perform the push",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CodeBuild uses its service role for all AWS API calls. To push to ECR, the role needs ecr:GetAuthorizationToken (to get a login token) plus ecr:BatchCheckLayerAvailability, ecr:PutImage, and ecr:InitiateLayerUpload on the specific repository. The AWS-managed policy AmazonEC2ContainerRegistryPowerUser grants these.",
     optionExplanations: [
@@ -4258,12 +4258,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeBuild project runs npm install on every build, which takes 3 minutes. The developer wants to cache node_modules across builds to speed this up. What should they configure?",
     options: [
-      "Enable S3 caching in the CodeBuild project and specify /root/.npm or node_modules as cache paths in buildspec.yml",
       "Use a custom Docker image with node_modules pre-installed as the CodeBuild environment image",
       "Add a pre_build phase that downloads node_modules from S3 before npm install",
       "Enable CodeBuild Local Cache on the build fleet to persist node_modules between builds",
+      "Enable S3 caching in the CodeBuild project and specify /root/.npm or node_modules as cache paths in buildspec.yml",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "CodeBuild supports S3 caching for arbitrary local paths. After a build, CodeBuild zips the specified paths and stores them in S3. On subsequent builds, it restores the cache before the build phases. This is the standard way to cache package manager dependencies across builds.",
     optionExplanations: [
@@ -4308,12 +4308,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodeBuild project needs to run integration tests against an RDS database in a private subnet with no internet access. What configuration is required?",
     options: [
+      "Deploy a bastion host in the private subnet and have CodeBuild SSH through it",
+      "Use an AWS PrivateLink endpoint for CodeBuild to access the private subnet",
       "Configure the CodeBuild project to run inside the VPC by specifying the VPC ID, subnets, and security group",
       "Create a VPC peering connection between the CodeBuild service VPC and the application VPC",
-      "Use an AWS PrivateLink endpoint for CodeBuild to access the private subnet",
-      "Deploy a bastion host in the private subnet and have CodeBuild SSH through it",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CodeBuild supports VPC configuration — you specify a VPC ID, private subnets, and a security group. CodeBuild places the build environment ENIs in those subnets, giving builds direct network access to resources like RDS, ElastiCache, and internal services without internet exposure.",
     optionExplanations: [
@@ -4335,12 +4335,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to install a custom package and configure a cron job on every EC2 instance in an Elastic Beanstalk environment. What is the correct approach?",
     options: [
-      "Use .ebextensions configuration files in the application bundle to run commands and configure files during deployment",
-      "SSH into each instance and manually configure the package and cron job",
       "Create a custom AMI with the package pre-installed and configure Beanstalk to use it",
       "Use AWS Systems Manager Run Command to execute configuration scripts after deployment",
+      "Use .ebextensions configuration files in the application bundle to run commands and configure files during deployment",
+      "SSH into each instance and manually configure the package and cron job",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       ".ebextensions are YAML/JSON configuration files placed in a .ebextensions/ directory in the application bundle. They run during instance provisioning and deployment using the commands, container_commands, files, and packages keys — enabling package installation, file creation, and cron job configuration as code.",
     optionExplanations: [
@@ -4360,12 +4360,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Elastic Beanstalk environment is running a web application. During a deployment, the team wants zero downtime and the ability to instantly roll back if the new version has issues. Which deployment policy should they use?",
     options: [
-      "Immutable deployment, which launches a new set of instances and only cuts over after health checks pass",
       "Rolling deployment with batch size 1 to minimize impact during updates",
-      "All at once deployment for speed, relying on Beanstalk's automatic rollback",
       "Blue/green by using Beanstalk's environment swap (CNAME swap) after testing on a separate environment",
+      "Immutable deployment, which launches a new set of instances and only cuts over after health checks pass",
+      "All at once deployment for speed, relying on Beanstalk's automatic rollback",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Immutable deployments launch a completely new set of instances with the new version in a temporary Auto Scaling group. Only if all new instances pass health checks does traffic shift. Rollback is instant — just terminate the new instances. The old instances continue serving traffic throughout.",
     optionExplanations: [
@@ -4443,12 +4443,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodePipeline pipeline deploys to a production environment. The team wants a manual approval step before the production deployment executes. What should they add to the pipeline?",
     options: [
-      "A Manual Approval action in a stage between the build stage and the production deploy stage",
       "A CodeBuild action that sends an email and pauses until a reply is received",
+      "A Manual Approval action in a stage between the build stage and the production deploy stage",
       "A Lambda action that checks an approval DynamoDB table before proceeding",
       "A Gate condition on the production deploy action using an IAM policy",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "CodePipeline has a built-in Manual Approval action type. When the pipeline reaches this action, it pauses and sends an SNS notification. A reviewer approves or rejects via the console, CLI, or SDK. The pipeline resumes on approval or fails on rejection.",
     optionExplanations: [
@@ -4468,12 +4468,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CodePipeline pipeline has a CodeBuild stage that produces a build artifact. A later CodeDeploy stage needs to use that artifact. How are artifacts passed between stages in CodePipeline?",
     options: [
-      "CodePipeline stores artifacts in an S3 bucket and passes the artifact reference between actions; each action specifies its input and output artifacts by name",
-      "Each stage writes its output to a shared EFS file system that subsequent stages read from",
       "Artifacts are passed as environment variables between pipeline stages",
+      "Each stage writes its output to a shared EFS file system that subsequent stages read from",
+      "CodePipeline stores artifacts in an S3 bucket and passes the artifact reference between actions; each action specifies its input and output artifacts by name",
       "Each action must upload its output to a fixed S3 key that downstream actions know to read from",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "CodePipeline uses an S3 artifact bucket to pass data between actions. Each action declares InputArtifacts and OutputArtifacts by name. CodePipeline handles uploading and downloading automatically — actions access their input artifacts from the workspace without managing S3 keys directly.",
     optionExplanations: [
@@ -4518,12 +4518,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A pipeline deploys to three environments: dev, staging, and production in separate AWS accounts. What is the BEST way to structure this multi-account deployment?",
     options: [
-      "Use cross-account roles — each target account has a deployment role that the pipeline's CodePipeline role can assume, and CodeDeploy or CloudFormation executes in the target account",
-      "Create a separate CodePipeline in each account and trigger them sequentially via EventBridge",
-      "Deploy all environments to the same account and use separate VPCs for isolation",
       "Use AWS Organizations to share the CodePipeline with all member accounts",
+      "Use cross-account roles — each target account has a deployment role that the pipeline's CodePipeline role can assume, and CodeDeploy or CloudFormation executes in the target account",
+      "Deploy all environments to the same account and use separate VPCs for isolation",
+      "Create a separate CodePipeline in each account and trigger them sequentially via EventBridge",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "CodePipeline supports cross-account deployments via role assumption. The pipeline's IAM role assumes a cross-account role in each target account. CloudFormation or CodeDeploy actions run in the target account's context. The artifact S3 bucket must be accessible from all accounts (cross-account bucket policy or KMS CMK sharing).",
     optionExplanations: [
@@ -4576,12 +4576,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A security team needs to audit all network traffic entering and leaving a VPC for compliance. They need to capture source IP, destination IP, ports, protocol, and whether the traffic was accepted or rejected. What should they enable?",
     options: [
-      "VPC Flow Logs published to CloudWatch Logs or S3, which capture IP traffic metadata for network interfaces",
-      "AWS CloudTrail with data events enabled for all VPC API calls",
       "Amazon GuardDuty to analyze VPC traffic patterns and detect anomalies",
       "AWS Config rules to evaluate VPC security group configurations",
+      "AWS CloudTrail with data events enabled for all VPC API calls",
+      "VPC Flow Logs published to CloudWatch Logs or S3, which capture IP traffic metadata for network interfaces",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "VPC Flow Logs capture IP traffic metadata (not packet contents) for ENIs, subnets, or the entire VPC. Each log record includes srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, and action (ACCEPT/REJECT). Published to CloudWatch Logs or S3 for analysis.",
     optionExplanations: [
@@ -4626,12 +4626,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "Two VPCs need to communicate privately. VPC A has CIDR 10.0.0.0/16 and VPC B has CIDR 10.0.0.0/16. Which option allows private connectivity?",
     options: [
-      "Neither VPC peering nor Transit Gateway will work due to overlapping CIDRs — redesign the IP address scheme",
+      "Use VPC sharing via AWS Resource Access Manager to share subnets between VPCs",
       "Create a VPC peering connection — peering works regardless of CIDR overlap",
       "Use AWS Transit Gateway which handles overlapping CIDRs through its routing table",
-      "Use VPC sharing via AWS Resource Access Manager to share subnets between VPCs",
+      "Neither VPC peering nor Transit Gateway will work due to overlapping CIDRs — redesign the IP address scheme",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "VPC peering and Transit Gateway do not support overlapping CIDR blocks. If two VPCs have the same CIDR range (both 10.0.0.0/16), routing is ambiguous — AWS cannot determine which VPC a destination IP belongs to. The solution is to use non-overlapping CIDRs from the start.",
     optionExplanations: [
@@ -4653,12 +4653,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppSync API needs to combine data from DynamoDB and a Lambda function in a single GraphQL query response. What AppSync feature enables fetching from multiple data sources in one resolver?",
     options: [
-      "Pipeline resolvers, which chain multiple functions (each with its own data source) sequentially",
-      "Batch resolvers that parallelize requests to multiple data sources",
-      "AppSync subscriptions that aggregate data from multiple sources",
       "A Lambda resolver that orchestrates calls to DynamoDB and other services",
+      "Batch resolvers that parallelize requests to multiple data sources",
+      "Pipeline resolvers, which chain multiple functions (each with its own data source) sequentially",
+      "AppSync subscriptions that aggregate data from multiple sources",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Pipeline resolvers consist of a before mapping template, an ordered list of AppSync Functions (each with a data source), and an after mapping template. Each function can call a different data source (DynamoDB, Lambda, HTTP, etc.), and the output of one function can be passed as input to the next.",
     optionExplanations: [
@@ -4678,12 +4678,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppSync API needs to allow unauthenticated users to read public data and authenticated users to read and write their own private data. What authorization configuration supports this?",
     options: [
-      "Configure multiple authorization modes — API_KEY for unauthenticated reads and AMAZON_COGNITO_USER_POOLS for authenticated operations, using @auth directives to control access per field and type",
-      "Create two separate AppSync APIs — one public with API key auth and one private with Cognito auth",
       "Use IAM authorization for all requests and create an IAM role for unauthenticated users",
+      "Create two separate AppSync APIs — one public with API key auth and one private with Cognito auth",
+      "Configure multiple authorization modes — API_KEY for unauthenticated reads and AMAZON_COGNITO_USER_POOLS for authenticated operations, using @auth directives to control access per field and type",
       "Use Lambda authorization that checks for the presence of a Cognito token and falls back to API key access",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "AppSync supports multiple authorization modes on a single API. The primary mode handles unauthenticated requests (API_KEY). Additional modes (Cognito User Pools, IAM, Lambda, OIDC) are applied per operation. @auth directives on schema types and fields control which authorization mode is required for each operation.",
     optionExplanations: [
@@ -4728,12 +4728,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppSync resolver needs to call an existing REST API as a data source. What data source type should the developer configure?",
     options: [
-      "HTTP data source, which allows AppSync to make HTTP requests to any REST endpoint",
-      "Lambda data source, where a Lambda function proxies the HTTP call",
-      "None data source, using local resolvers to return mock data while the REST API is built",
       "RDS data source, since REST APIs return relational data",
+      "Lambda data source, where a Lambda function proxies the HTTP call",
+      "HTTP data source, which allows AppSync to make HTTP requests to any REST endpoint",
+      "None data source, using local resolvers to return mock data while the REST API is built",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "AppSync HTTP data sources allow resolvers to make signed or unsigned HTTP requests to REST endpoints. The resolver mapping template builds the HTTP request (method, path, headers, body) and maps the response to the GraphQL return type. This avoids the Lambda overhead for simple REST proxy patterns.",
     optionExplanations: [
@@ -4755,12 +4755,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to run a shell script on 50 EC2 instances simultaneously to apply a security patch. No SSH access is configured on the instances. What SSM feature should they use?",
     options: [
+      "SSM Patch Manager with a custom patch baseline that includes the security patch",
       "SSM Run Command with the AWS-RunShellScript document to execute commands on multiple instances without SSH",
       "SSM Session Manager to open a terminal session and manually run the script on each instance",
-      "SSM Patch Manager with a custom patch baseline that includes the security patch",
       "SSM Parameter Store to store the script and have instances pull and execute it on a schedule",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Run Command sends commands to managed instances via the SSM agent without requiring SSH, open inbound ports, or bastion hosts. You specify a document (AWS-RunShellScript for Linux), the command, and a target (instance IDs, tags, or all managed instances). Output is captured to CloudWatch Logs or S3.",
     optionExplanations: [
@@ -4811,12 +4811,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to securely connect to an EC2 instance in a private subnet for debugging. The subnet has no internet gateway and no inbound security group rules. What SSM feature enables this?",
     options: [
+      "SSM Fleet Manager, which provides a graphical remote desktop connection",
       "SSM Session Manager, which creates an interactive shell session via the SSM agent without requiring inbound ports or SSH keys",
       "SSM Run Command with the AWS-StartInteractiveCommand document",
       "SSM Automation with a runbook that opens a temporary SSH tunnel",
-      "SSM Fleet Manager, which provides a graphical remote desktop connection",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Session Manager connects to instances through the SSM agent's outbound HTTPS connection to the SSM service endpoint — no inbound ports needed, no SSH keys, no bastion host. The instance needs the SSM agent installed and an IAM instance profile with AmazonSSMManagedInstanceCore policy, plus outbound HTTPS (port 443) to the SSM service (or a VPC endpoint).",
     optionExplanations: [
@@ -4899,12 +4899,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A third-party company needs to access resources in your AWS account without you sharing long-term credentials. They will assume a role in your account from their own AWS account. What security measure prevents the confused deputy problem?",
     options: [
-      "Add an ExternalId condition to the role's trust policy that the third party must provide when calling AssumeRole",
-      "Require the third party to use MFA before assuming the role",
       "Limit the role's session duration to 15 minutes to reduce exposure time",
+      "Add an ExternalId condition to the role's trust policy that the third party must provide when calling AssumeRole",
       "Use a permission boundary on the role to limit what the third party can do",
+      "Require the third party to use MFA before assuming the role",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "The confused deputy problem occurs when a third party could trick another service into using your role on their behalf. ExternalId is a secret value agreed upon between you and the third party. The trust policy requires ExternalId in the AssumeRole call — an attacker who knows only the role ARN cannot assume it without the ExternalId.",
     optionExplanations: [
@@ -4949,12 +4949,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer assumes a role that has full S3 access. They also pass a session policy that allows only s3:GetObject. What actions can the developer perform with the resulting credentials?",
     options: [
-      "Only s3:GetObject — the effective permissions are the intersection of the role's policies and the session policy",
       "Full S3 access — the role's permissions override the more restrictive session policy",
+      "Only s3:GetObject — the effective permissions are the intersection of the role's policies and the session policy",
       "No permissions — passing a session policy that doesn't match the role's policies causes an error",
       "s3:GetObject plus any actions explicitly denied in the session policy",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Session policies can only restrict, never expand, permissions. The effective permissions are the intersection of the role's identity policies, permission boundaries (if any), and the session policy. The role has full S3 access but the session policy allows only GetObject — the intersection is GetObject only.",
     optionExplanations: [
@@ -4974,12 +4974,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application running on EC2 needs to access DynamoDB. A junior developer suggests embedding IAM access keys in the application code. What is the correct alternative?",
     options: [
-      "Attach an IAM role to the EC2 instance via an instance profile — the AWS SDK automatically retrieves temporary credentials from the instance metadata service",
-      "Store the access keys in the EC2 instance's /etc/environment file to keep them off the source code",
       "Encrypt the access keys with KMS and store them in the application's configuration file",
+      "Store the access keys in the EC2 instance's /etc/environment file to keep them off the source code",
       "Use a Secrets Manager secret to store the access keys and retrieve them at startup",
+      "Attach an IAM role to the EC2 instance via an instance profile — the AWS SDK automatically retrieves temporary credentials from the instance metadata service",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "EC2 instance profiles attach an IAM role to an instance. The AWS SDK's credential chain automatically calls the Instance Metadata Service (IMDS) at 169.254.169.254 to get temporary credentials. These rotate automatically — no long-term keys are needed anywhere.",
     optionExplanations: [
@@ -5001,12 +5001,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs to roll out a new feature flag to 10% of Lambda function instances initially, then expand to 100% over 30 minutes with automatic rollback if error rates increase. What AppConfig feature supports this?",
     options: [
-      "A deployment strategy with a Linear rollout type, growth factor of 10, and a CloudWatch alarm configured for automatic rollback",
       "A feature flag configuration profile with a canary percentage attribute set to 10",
-      "An AppConfig extension that integrates with Lambda aliases for traffic shifting",
       "An AppConfig environment filter that targets specific Lambda instance IDs",
+      "An AppConfig extension that integrates with Lambda aliases for traffic shifting",
+      "A deployment strategy with a Linear rollout type, growth factor of 10, and a CloudWatch alarm configured for automatic rollback",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "AppConfig deployment strategies control how configuration changes roll out. A Linear strategy with growth factor 10 and interval of 3 minutes would update 10% of clients every 3 minutes over 30 minutes. CloudWatch alarms can trigger automatic rollback if metrics (error rate, latency) breach thresholds during rollout.",
     optionExplanations: [
@@ -5051,12 +5051,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppConfig configuration change is deployed. Five minutes later, a validator Lambda function is invoked and returns a failure. What happens to the deployment?",
     options: [
-      "The deployment is rolled back to the previous configuration version automatically",
       "The deployment continues since validators only run before the deployment starts",
+      "The deployment is rolled back to the previous configuration version automatically",
       "The deployment is paused and waits for manual approval to proceed or roll back",
       "The validator failure is logged but does not affect the ongoing deployment",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "AppConfig validators can be JSON Schema validators (run before deployment) or Lambda validators (run before and during deployment). If a Lambda validator returns a failure during the deployment, AppConfig automatically rolls back to the previous known-good configuration. This is the automated rollback mechanism.",
     optionExplanations: [
@@ -5076,12 +5076,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team stores feature flags in AppConfig and wants to prevent a bad configuration (e.g. invalid JSON or a missing required key) from being deployed. What AppConfig feature prevents invalid configurations from reaching production?",
     options: [
-      "Validators — either a JSON Schema validator that checks structure and types, or a Lambda validator with custom logic",
-      "AppConfig deployment strategies that include a validation phase before traffic shifts",
       "AppConfig environment variables that enforce schema constraints on configuration values",
       "AWS Config rules that evaluate AppConfig configuration profiles for compliance",
+      "AppConfig deployment strategies that include a validation phase before traffic shifts",
+      "Validators — either a JSON Schema validator that checks structure and types, or a Lambda validator with custom logic",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "AppConfig supports two validator types on configuration profiles. JSON Schema validators automatically reject configurations that don't match the schema before deployment begins. Lambda validators run custom validation logic — checking business rules, required keys, value ranges, etc. — and fail the deployment if validation fails.",
     optionExplanations: [
@@ -5101,12 +5101,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An AppConfig configuration profile stores a JSON document with database connection settings. The team wants the connection string value to be stored securely and referenced dynamically at deploy time rather than stored plaintext in AppConfig. What configuration profile type supports this?",
     options: [
+      "A Lambda data source that retrieves the connection string from RDS Secrets Manager at runtime",
       "An AWS SSM Parameter Store or Secrets Manager sourced configuration profile that retrieves the value from Parameter Store or Secrets Manager at deployment time",
       "A hosted configuration profile with the value encrypted using AppConfig's built-in encryption",
       "A feature flag configuration profile with the secret stored as a boolean flag",
-      "A Lambda data source that retrieves the connection string from RDS Secrets Manager at runtime",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "AppConfig supports configuration profiles sourced from SSM Parameter Store and Secrets Manager. Instead of storing sensitive values in the AppConfig hosted configuration, you reference the Parameter Store path or Secrets Manager ARN. AppConfig retrieves the current value at deployment time. This keeps secrets out of AppConfig's storage.",
     optionExplanations: [
@@ -5128,12 +5128,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A team uses AWS Amplify Hosting to deploy a React app. They want the main branch to deploy to production and feature branches to automatically deploy to unique preview URLs. What Amplify feature enables this?",
     options: [
-      "Amplify's branch-based deployments — each connected branch gets its own URL, and feature branch deployments are isolated from production",
-      "Amplify's manual deployment mode where developers upload build artifacts for each branch",
       "AWS CodePipeline integration that creates a separate Amplify app per branch",
       "CloudFront's multi-origin routing rules to serve different branches from different S3 buckets",
+      "Amplify's manual deployment mode where developers upload build artifacts for each branch",
+      "Amplify's branch-based deployments — each connected branch gets its own URL, and feature branch deployments are isolated from production",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Amplify Hosting auto-detects new branches when connected to a Git repository and deploys each branch to a unique URL (https://branch-name.app-id.amplifyapp.com). Pull request previews create ephemeral environments for each PR. Production uses the main/master branch URL. No extra configuration needed for branch deployments.",
     optionExplanations: [
@@ -5178,12 +5178,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Amplify Gen 2 app uses Amplify's backend to define a DynamoDB-backed GraphQL API. A developer adds a new field to a data model. What happens when they run npx ampx sandbox?",
     options: [
-      "Amplify synthesizes a CloudFormation stack from the TypeScript backend definition and deploys the changes to a personal cloud sandbox environment",
       "Amplify generates a new GraphQL schema and requires manual deployment to CloudFormation",
       "Amplify updates the local mock server with the new field without touching AWS resources",
+      "Amplify synthesizes a CloudFormation stack from the TypeScript backend definition and deploys the changes to a personal cloud sandbox environment",
       "Amplify creates a new DynamoDB table for the updated model and deletes the old one",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Amplify Gen 2 uses TypeScript to define backend resources (data models, auth, storage). npx ampx sandbox synthesizes CloudFormation from the TypeScript definitions and deploys a personal sandbox environment in AWS — a real cloud environment isolated per developer. Changes to data models update the DynamoDB table and AppSync schema.",
     optionExplanations: [
@@ -5203,12 +5203,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Amplify app needs to store user profile images so each user can only read and write their own files. What Amplify Storage access level provides this?",
     options: [
+      "Custom access level defined in an S3 bucket policy based on Cognito user attributes",
+      "Public access level with IAM conditions restricting writes to the file owner",
       "Private access level, which scopes files to the authenticated user's identity and prevents other users from accessing them",
       "Protected access level, which allows authenticated users to read each other's files but only write their own",
-      "Public access level with IAM conditions restricting writes to the file owner",
-      "Custom access level defined in an S3 bucket policy based on Cognito user attributes",
     ],
-    correctIndices: [0],
+    correctIndices: [2],
     explanation:
       "Amplify Storage has three access levels: Public (all users read/write), Protected (all authenticated users can read, only owner can write), and Private (only the owner can read and write). Private is correct for profile images where users should only access their own files.",
     optionExplanations: [
@@ -5228,12 +5228,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Amplify app uses DataStore for offline data synchronization. When the app comes back online after being offline, a conflict is detected between the local version and the server version of the same record. What is the default conflict resolution strategy?",
     options: [
-      "Auto Merge — Amplify attempts to merge non-conflicting fields; if fields conflict, the server version wins (last writer wins based on server timestamp)",
-      "Client wins — the local offline changes always overwrite the server version",
-      "Server wins — the server version always overwrites local offline changes",
       "Manual resolution — the app must implement a custom conflict handler function",
+      "Auto Merge — Amplify attempts to merge non-conflicting fields; if fields conflict, the server version wins (last writer wins based on server timestamp)",
+      "Server wins — the server version always overwrites local offline changes",
+      "Client wins — the local offline changes always overwrite the server version",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Amplify DataStore's default conflict resolution is Auto Merge. It compares the local and server versions field by field. Non-conflicting field changes are merged. For conflicting fields (both sides changed the same field), the server version takes precedence based on the _version counter. Custom handlers can override this behavior.",
     optionExplanations: [

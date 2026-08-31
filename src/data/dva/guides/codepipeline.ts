@@ -33,12 +33,12 @@ Stages represent the logical phases of your delivery process — Source, Build, 
           question:
             "What happens when you disable a pipeline transition between stages?",
           options: [
-            "The pipeline is permanently deleted",
             "The pipeline pauses at that stage, acting as a manual gate",
-            "All running executions are rolled back",
             "Artifacts from prior stages are deleted",
+            "All running executions are rolled back",
+            "The pipeline is permanently deleted",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Disabling a pipeline transition pauses the pipeline at that point without stopping it entirely. This creates a manual gate that lets you control when changes proceed to the next stage.",
         },
@@ -46,12 +46,12 @@ Stages represent the logical phases of your delivery process — Source, Build, 
           question:
             "Within a single CodePipeline stage, how can actions be ordered?",
           options: [
-            "Actions in a stage always run sequentially in declaration order",
             "Actions can run in parallel or sequentially based on their run order group",
             "Actions always run in parallel within a stage",
             "Only one action per stage is allowed",
+            "Actions in a stage always run sequentially in declaration order",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Within a stage, actions are assigned run order numbers. Actions with the same run order number execute in parallel; actions with higher numbers wait for lower-numbered actions to complete first.",
         },
@@ -70,11 +70,11 @@ The source action produces an output artifact containing the source code as a ZI
             "What is the recommended source detection method in CodePipeline for near-instant pipeline triggers?",
           options: [
             "Polling the repository every minute",
-            "EventBridge (CloudWatch Events) detection",
             "Webhook from the CodePipeline console",
             "Scheduled CloudWatch Events rule",
+            "EventBridge (CloudWatch Events) detection",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EventBridge detection triggers the pipeline nearly instantly when a repository change occurs. The legacy polling method checks every minute and adds unnecessary latency.",
         },
@@ -83,11 +83,11 @@ The source action produces an output artifact containing the source code as a ZI
             "What is required on an S3 bucket for it to be used as a CodePipeline source?",
           options: [
             "The bucket must be publicly accessible",
+            "The bucket must have a lifecycle policy configured",
             "Object versioning must be enabled on the bucket",
             "The bucket must be in the same region as the pipeline",
-            "The bucket must have a lifecycle policy configured",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "When using S3 as a CodePipeline source, object versioning must be enabled. CodePipeline detects new object versions and uses them to trigger the pipeline.",
         },
@@ -95,12 +95,12 @@ The source action produces an output artifact containing the source code as a ZI
           question:
             "How does CodePipeline connect to third-party source providers like GitHub, Bitbucket, and GitLab?",
           options: [
+            "By polling the provider's API with an IAM access key",
             "By storing repository credentials in Secrets Manager",
             "Via CodeStar Connections, which manage authentication once for reuse across pipelines",
-            "By polling the provider's API with an IAM access key",
             "Through a dedicated VPN tunnel to the provider",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "CodeStar Connections provide managed OAuth connections to third-party source providers. You configure the connection once and reference it across multiple pipelines without storing credentials.",
         },
@@ -148,11 +148,11 @@ The build output artifact — a JAR, ZIP, Docker image digest, or whatever your 
             "What are CodePipeline pipeline variables used for in a CodeBuild action?",
           options: [
             "To configure the pipeline's IAM role permissions",
-            "To pass values from earlier stages to customize the build (e.g., commit SHA for image tags)",
             "To define which S3 bucket stores artifacts",
             "To set the CodeBuild environment type",
+            "To pass values from earlier stages to customize the build (e.g., commit SHA for image tags)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Pipeline variables allow values from earlier stages — such as the source commit SHA or a version number — to be passed into CodeBuild so the build can be customized without hardcoding values.",
         },
@@ -188,11 +188,11 @@ The **Lambda Invoke** action invokes a Lambda function at any point in the pipel
             "What must a Lambda function invoked by a CodePipeline Lambda Invoke action do to prevent the pipeline from hanging?",
           options: [
             "Return an HTTP 200 status code within 30 seconds",
-            "Call PutJobSuccessResult or PutJobFailureResult with the job ID",
-            "Write a success marker to the CodePipeline S3 artifact bucket",
             "Publish a success message to the pipeline's SNS topic",
+            "Write a success marker to the CodePipeline S3 artifact bucket",
+            "Call PutJobSuccessResult or PutJobFailureResult with the job ID",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A Lambda function invoked by CodePipeline must call PutJobSuccessResult or PutJobFailureResult with the job ID it receives. If it doesn't, CodePipeline waits indefinitely until the action times out.",
         },
@@ -200,20 +200,20 @@ The **Lambda Invoke** action invokes a Lambda function at any point in the pipel
           question:
             "What is the safest CloudFormation deploy pattern in CodePipeline for infrastructure changes?",
           options: [
-            "CREATE_UPDATE directly on every push",
             "CHANGE_SET_CREATE, then Manual Approval, then CHANGE_SET_EXECUTE",
             "DELETE_STACK followed by CREATE_UPDATE",
             "Deploy directly to production using a Lambda function",
+            "CREATE_UPDATE directly on every push",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The safest pattern is to create a change set, pause with a Manual Approval action so a team member can review the proposed changes in the CloudFormation console, then execute the approved change set.",
         },
         {
           question:
             "How long does a CodePipeline Manual Approval action wait before timing out?",
-          options: ["24 hours", "3 days", "7 days", "30 days"],
-          correctIndex: 2,
+          options: ["24 hours", "7 days", "3 days", "30 days"],
+          correctIndex: 1,
           explanation:
             "A Manual Approval action pauses the pipeline and waits up to 7 days for a reviewer to approve or reject the deployment via the console or API.",
         },
@@ -244,24 +244,24 @@ Because CodePipeline emits state change events to **EventBridge**, you can build
           question:
             "When a CodePipeline stage fails, what can you do without restarting the entire pipeline?",
           options: [
+            "Manually replay only the source action",
+            "Revert to the previous successful pipeline version",
             "Nothing — the entire pipeline must be re-triggered from the source stage",
             "Retry the failed stage directly from the pipeline execution history",
-            "Revert to the previous successful pipeline version",
-            "Manually replay only the source action",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CodePipeline allows you to retry a failed stage without restarting the entire pipeline. The execution history in the console lets you click into any execution and retry from the failed stage.",
         },
         {
           question: "What does CloudTrail record for CodePipeline?",
           options: [
+            "S3 artifact access logs",
+            "CloudWatch metrics for pipeline execution duration",
             "Container logs from CodeBuild build executions",
             "All CodePipeline API calls including who created, modified, and triggered pipelines",
-            "CloudWatch metrics for pipeline execution duration",
-            "S3 artifact access logs",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CloudTrail records all CodePipeline API calls, providing an audit trail of every action taken — who created pipelines, who triggered them, and who modified configurations.",
         },
@@ -281,12 +281,12 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
           question:
             "In a containerized CodePipeline workflow using ECS, what does the CodeBuild stage typically do?",
           options: [
+            "Scale the ECS cluster before deployment",
+            "Run integration tests against the live ECS service",
             "Directly update the ECS task definition",
             "Build a Docker image and push it to ECR",
-            "Run integration tests against the live ECS service",
-            "Scale the ECS cluster before deployment",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "In a GitHub → CodeBuild → ECS pipeline, CodeBuild builds the Docker image, pushes it to ECR, and produces the image digest or task definition as an artifact. The ECS deploy action then updates the service.",
         },
@@ -302,12 +302,12 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
           question:
             "When deploying a static website with CodePipeline, what must happen after uploading new files to S3?",
           options: [
-            "Nothing — S3 updates are immediately visible to all users",
             "The CloudFront cache must be invalidated to serve the new content",
-            "The S3 bucket versioning must be updated",
             "Route 53 DNS records must be refreshed",
+            "Nothing — S3 updates are immediately visible to all users",
+            "The S3 bucket versioning must be updated",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "After uploading new static files to S3, the CloudFront cache must be invalidated so edge locations serve the updated content. A Lambda Invoke action in the pipeline can perform this invalidation automatically.",
         },
@@ -370,12 +370,12 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
       question:
         "A team wants the safest way to deploy CloudFormation infrastructure changes through CodePipeline with human review. What is the recommended action sequence?",
       options: [
-        "CREATE_UPDATE → deploy directly",
         "CHANGE_SET_CREATE → Manual Approval → CHANGE_SET_EXECUTE",
+        "CREATE_UPDATE → deploy directly",
         "DELETE_STACK → CREATE_UPDATE",
         "Manual Approval → CREATE_UPDATE → CHANGE_SET_CREATE",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The safest pattern is CHANGE_SET_CREATE (preview the changes), then a Manual Approval action (reviewer examines the change set), then CHANGE_SET_EXECUTE (apply the approved changes). This prevents accidental infrastructure changes.",
     },
@@ -383,12 +383,12 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
       question:
         "Which source detection method should be used in CodePipeline for near-instant pipeline triggers?",
       options: [
-        "Polling every 60 seconds",
-        "EventBridge (CloudWatch Events) detection",
-        "Manual pipeline trigger from the console",
         "S3 bucket notification",
+        "Manual pipeline trigger from the console",
+        "EventBridge (CloudWatch Events) detection",
+        "Polling every 60 seconds",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "EventBridge detection triggers the pipeline almost instantly when a repository change occurs. The legacy polling method checks every minute and adds unnecessary latency to the delivery cycle.",
     },
@@ -397,11 +397,11 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
         "A CodePipeline stage fails during a deploy. What is the most efficient way to resume without losing previously built artifacts?",
       options: [
         "Create a new pipeline with updated configuration",
-        "Retry the failed stage directly from the pipeline execution history",
         "Re-push the source commit to re-trigger from the beginning",
         "Manually re-run the CodeBuild project",
+        "Retry the failed stage directly from the pipeline execution history",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "CodePipeline allows retrying a failed stage without restarting the entire pipeline. This preserves the artifacts from earlier stages and resumes from the point of failure.",
     },
@@ -443,11 +443,11 @@ For static websites, a **S3 + CloudFront** pipeline builds the frontend with Cod
         "What is the effect of disabling a pipeline transition between two stages?",
       options: [
         "The pipeline is deleted and must be recreated",
-        "The pipeline pauses at that transition, acting as a manual gate until re-enabled",
         "All artifacts between those stages are deleted",
+        "The pipeline pauses at that transition, acting as a manual gate until re-enabled",
         "The source detection stops and no new pipeline executions start",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Disabling a pipeline transition pauses the flow at that point. New executions still start and proceed up to the disabled transition, but they wait there until the transition is re-enabled — acting as a manual gate.",
     },

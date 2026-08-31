@@ -18,12 +18,12 @@ export const rdsGuide: ServiceGuide = {
           question:
             "A new application requires a relational database with complex multi-table transactions and SQL joins. The team wants automated backups, patching, and high availability without managing database infrastructure. Which service should they choose?",
           options: [
+            "A self-managed MySQL database on EC2 for full control",
             "Amazon DynamoDB with transactions enabled",
             "Amazon RDS (or Aurora) for managed relational database operations",
-            "A self-managed MySQL database on EC2 for full control",
             "Amazon Redshift for SQL query support",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Amazon RDS (or Aurora) is the right choice for OLTP workloads requiring SQL joins, multi-table transactions, and complex queries, combined with managed operations like automated backups, patching, and Multi-AZ failover. DynamoDB is NoSQL and does not support SQL joins natively. Redshift is for data warehousing, not OLTP.",
         },
@@ -31,12 +31,12 @@ export const rdsGuide: ServiceGuide = {
           question:
             "Amazon Aurora differs from standard RDS MySQL in which key architectural way?",
           options: [
-            "Aurora uses in-memory caching that standard MySQL does not support",
             "Aurora stores data across three Availability Zones in a shared cluster volume, providing six copies of data",
+            "Aurora uses in-memory caching that standard MySQL does not support",
             "Aurora requires manual patching while standard RDS is automated",
             "Aurora supports more concurrent connections than standard RDS MySQL",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Aurora's shared cluster volume replicates data six times across three Availability Zones, providing higher durability and near-zero replication lag to Aurora replicas. Standard RDS MySQL uses asynchronous replication to read replicas and synchronous replication to the Multi-AZ standby. This architecture enables Aurora to offer up to 5x the throughput of standard MySQL.",
         },
@@ -127,20 +127,20 @@ export const rdsGuide: ServiceGuide = {
           question:
             "An engineer accidentally runs a DROP TABLE statement on an RDS database. How can they recover the data to 5 minutes before the accidental deletion?",
           options: [
-            "Promote a read replica that has the pre-deletion data",
             "Use Point-in-Time Recovery to restore the database to 5 minutes before the deletion",
-            "Restore from the most recent daily automated backup",
             "Use the Multi-AZ standby which was not affected by the DROP statement",
+            "Promote a read replica that has the pre-deletion data",
+            "Restore from the most recent daily automated backup",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Point-in-Time Recovery (PITR) allows restoration to any second within the automated backup retention period, including 5 minutes before the accidental DELETE. PITR creates a new RDS instance from the automated backups and transaction logs. Restoring from a daily backup would lose up to a full day of data. The Multi-AZ standby replicates all changes synchronously and would also have the DROP TABLE applied.",
         },
         {
           question:
             "What is the maximum automated backup retention period for Amazon RDS?",
-          options: ["7 days", "14 days", "35 days", "365 days"],
-          correctIndex: 2,
+          options: ["35 days", "14 days", "7 days", "365 days"],
+          correctIndex: 0,
           explanation:
             "RDS automated backups can be retained for 1 to 35 days. The retention period determines how far back you can perform Point-in-Time Recovery. Manual snapshots are retained indefinitely until explicitly deleted and are not affected by the automated backup retention setting.",
         },
@@ -149,11 +149,11 @@ export const rdsGuide: ServiceGuide = {
             "When restoring an RDS instance from a snapshot, what is created?",
           options: [
             "The existing instance is updated in-place with the snapshot data",
-            "A new RDS instance is created — the original instance is not modified",
             "A read replica is created from the snapshot",
+            "A new RDS instance is created — the original instance is not modified",
             "The snapshot data is applied as a patch to the running instance",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Restoring from an RDS snapshot always creates a new RDS instance with a new endpoint. You cannot restore data in-place into an existing running instance. After the restore completes, you must update application connection strings to point to the new instance, or use a CNAME to redirect traffic.",
         },
@@ -180,12 +180,12 @@ export const rdsGuide: ServiceGuide = {
           question:
             "What is the benefit of IAM database authentication for RDS MySQL/PostgreSQL compared to static passwords?",
           options: [
-            "IAM authentication provides faster query execution than password authentication",
-            "IAM authentication tokens rotate automatically every 15 minutes, eliminating long-lived credential exposure risk",
             "IAM authentication bypasses VPC security group rules for database connections",
             "IAM authentication enables read replica promotion without manual steps",
+            "IAM authentication tokens rotate automatically every 15 minutes, eliminating long-lived credential exposure risk",
+            "IAM authentication provides faster query execution than password authentication",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "IAM database authentication generates short-lived authentication tokens that rotate every 15 minutes. This eliminates the risk of long-lived static password exposure. Connections are authenticated via the AWS SDK's token generation mechanism, and no static database password needs to be stored in application configuration or Secrets Manager.",
         },
@@ -199,12 +199,12 @@ export const rdsGuide: ServiceGuide = {
           question:
             "A Lambda function scales to 500 concurrent executions, each opening a new database connection to RDS. The database reaches its connection limit and starts failing requests. What should be added to resolve this?",
           options: [
-            "Increase the Lambda reserved concurrency to 250 to reduce connections",
-            "Add an RDS Proxy between Lambda and RDS to pool and share connections",
-            "Upgrade to a larger RDS instance class with more connection capacity",
             "Use DynamoDB instead of RDS to handle the concurrent access",
+            "Upgrade to a larger RDS instance class with more connection capacity",
+            "Add an RDS Proxy between Lambda and RDS to pool and share connections",
+            "Increase the Lambda reserved concurrency to 250 to reduce connections",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "RDS Proxy pools database connections so that many Lambda invocations share a smaller number of actual database connections. This prevents the connection storm that occurs when hundreds of Lambda functions each open their own connection. RDS Proxy is the AWS-recommended solution for Lambda-to-RDS architectures.",
         },
@@ -213,11 +213,11 @@ export const rdsGuide: ServiceGuide = {
             "In addition to connection pooling, what other benefit does RDS Proxy provide during a Multi-AZ failover?",
           options: [
             "It prevents the failover from occurring by keeping the primary healthy",
-            "It maintains connections during the failover and reconnects applications without requiring endpoint changes",
             "It promotes a read replica to primary faster than standard failover",
             "It replicates in-flight transactions to the standby before failover",
+            "It maintains connections during the failover and reconnects applications without requiring endpoint changes",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "During a Multi-AZ failover, RDS Proxy maintains the connection pool and handles the reconnection to the new primary transparently. Applications connected through the proxy do not need to detect the failover or update their connection strings — the proxy handles the transition, reducing failover impact on application availability.",
         },
@@ -263,12 +263,12 @@ export const rdsGuide: ServiceGuide = {
       question:
         "Can the Multi-AZ standby instance for a standard RDS deployment serve read queries?",
       options: [
-        "Yes, it serves reads to reduce primary load",
-        "Yes, but only when explicitly configured",
         "No, the standby exists solely for automatic failover",
+        "Yes, but only when explicitly configured",
         "No, only during maintenance windows",
+        "Yes, it serves reads to reduce primary load",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "The Multi-AZ standby instance does not serve any read traffic. It is a synchronously replicated hot standby whose only purpose is automatic failover. To scale reads, you must create separate read replicas. This is a fundamental distinction tested frequently on the SAA-C03 exam.",
     },
@@ -290,11 +290,11 @@ export const rdsGuide: ServiceGuide = {
         "Which RDS feature allows recovery to any point in time within the backup retention period?",
       options: [
         "Manual snapshot restore",
+        "Multi-AZ standby promotion",
         "Aurora Backtrack",
         "Point-in-Time Recovery (PITR)",
-        "Multi-AZ standby promotion",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Point-in-Time Recovery (PITR) uses automated backups and continuously retained transaction logs to restore the database to any second within the retention period (up to 35 days). It always restores to a new RDS instance. Aurora Backtrack rewinds in-place but is specific to Aurora and has a configurable maximum backtrack window.",
     },
@@ -302,20 +302,20 @@ export const rdsGuide: ServiceGuide = {
       question:
         "A Lambda-based application scales to 800 concurrent executions, each opening a direct connection to an RDS MySQL instance. The database starts rejecting connections. What resolves this?",
       options: [
-        "Enable Multi-AZ to share connection load between primary and standby",
         "Add RDS Proxy between Lambda and RDS to pool and share connections",
-        "Increase Lambda reserved concurrency limit to 400 to reduce connections",
         "Switch to Aurora to support more concurrent connections",
+        "Increase Lambda reserved concurrency limit to 400 to reduce connections",
+        "Enable Multi-AZ to share connection load between primary and standby",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "RDS Proxy pools database connections so many Lambda invocations share a much smaller number of actual database connections. It is the AWS-recommended solution for Lambda-to-RDS architectures where connection storms occur due to Lambda's rapid horizontal scaling. Multi-AZ does not help with connection limits.",
     },
     {
       question:
         "What is the maximum number of read replicas supported by Amazon Aurora?",
-      options: ["5 replicas", "10 replicas", "15 replicas", "20 replicas"],
-      correctIndex: 2,
+      options: ["15 replicas", "5 replicas", "10 replicas", "20 replicas"],
+      correctIndex: 0,
       explanation:
         "Amazon Aurora supports up to 15 read replicas per cluster, compared to 5 for standard RDS MySQL and PostgreSQL. Aurora replicas read from the shared cluster volume with near-zero lag and can also serve as automatic failover targets, unlike standard RDS read replicas which use asynchronous replication.",
     },
@@ -323,24 +323,24 @@ export const rdsGuide: ServiceGuide = {
       question:
         "How does IAM database authentication improve security compared to static database passwords?",
       options: [
-        "IAM tokens never expire and provide permanent access",
-        "IAM tokens rotate every 15 minutes, eliminating long-lived credential exposure",
-        "IAM authentication encrypts queries in transit using a separate key",
         "IAM authentication removes the need for VPC security groups on the database",
+        "IAM authentication encrypts queries in transit using a separate key",
+        "IAM tokens rotate every 15 minutes, eliminating long-lived credential exposure",
+        "IAM tokens never expire and provide permanent access",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "IAM database authentication tokens have a 15-minute expiration and are generated dynamically using AWS credentials. This eliminates the need to store long-lived static passwords in application configuration or secrets managers, reducing the risk of credential leakage.",
     },
     {
       question: "What does restoring an RDS database from a snapshot create?",
       options: [
-        "An in-place restore of the existing RDS instance to the snapshot state",
-        "A new RDS instance with a new endpoint that contains the snapshot data",
-        "A read replica of the original instance pre-populated with snapshot data",
         "A temporary rollback of the existing instance that can be cancelled",
+        "A read replica of the original instance pre-populated with snapshot data",
+        "A new RDS instance with a new endpoint that contains the snapshot data",
+        "An in-place restore of the existing RDS instance to the snapshot state",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Restoring from an RDS snapshot always creates a new RDS instance with a new DNS endpoint. The original instance (if it still exists) is not modified. Applications must be updated to use the new endpoint, or a CNAME record can be updated to redirect traffic. You cannot restore in-place into a running instance.",
     },
@@ -348,12 +348,12 @@ export const rdsGuide: ServiceGuide = {
       question:
         "Which Aurora feature allows rewinding the database cluster to a specific past point in time without creating a new cluster?",
       options: [
-        "Point-in-Time Recovery",
-        "Aurora Backtrack",
-        "Aurora Global Database rollback",
         "Aurora Serverless snapshot restore",
+        "Point-in-Time Recovery",
+        "Aurora Global Database rollback",
+        "Aurora Backtrack",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Aurora Backtrack rewinds the Aurora cluster to a specific point in time in-place without creating a new cluster. This is faster than PITR (which creates a new instance) but is limited to the configured backtrack window. Backtrack is Aurora-specific and not available for standard RDS engines.",
     },

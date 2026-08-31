@@ -18,12 +18,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "How many IP addresses does AWS reserve in every VPC subnet?",
           options: [
-            "2 addresses (first and last)",
-            "3 addresses (first, second, and last)",
             "5 addresses (first four and last)",
             "8 addresses for network overhead",
+            "2 addresses (first and last)",
+            "3 addresses (first, second, and last)",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "AWS reserves 5 IP addresses in every subnet: the network address (first), the VPC router (second), the DNS server (third), reserved for future use (fourth), and the broadcast address (last). A /28 subnet with 16 addresses only has 11 usable addresses after these 5 are reserved. This must be factored into subnet sizing.",
         },
@@ -31,12 +31,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "What distinguishes a public subnet from a private subnet in a VPC?",
           options: [
+            "Public subnets are in different Availability Zones than private subnets",
             "Public subnets use larger CIDR blocks than private subnets",
             "Public subnets have a route to an Internet Gateway; private subnets do not",
             "Public subnets allow all inbound traffic; private subnets block all inbound traffic",
-            "Public subnets are in different Availability Zones than private subnets",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The defining characteristic of a public subnet is a route to an Internet Gateway (IGW) in its route table. This route allows resources with public IP addresses to communicate bidirectionally with the internet. Private subnets have no route to the IGW, making their resources inaccessible from the internet directly.",
         },
@@ -50,12 +50,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "EC2 instances in private subnets across three Availability Zones need outbound internet access for software updates. How should NAT Gateways be deployed for high availability and cost efficiency?",
           options: [
-            "One NAT Gateway in a single public subnet shared by all private subnets",
             "One NAT Gateway per AZ, each in a public subnet, with each AZ's private subnets routing to their local NAT Gateway",
+            "One NAT Gateway in a single public subnet shared by all private subnets",
             "One NAT Gateway per private subnet for maximum redundancy",
             "No NAT Gateway needed — use VPC endpoints for all internet traffic",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Deploying one NAT Gateway per AZ ensures that each AZ's private subnets route outbound traffic to their local NAT Gateway. If one AZ fails, the other AZs' NAT Gateways continue working independently. A single shared NAT Gateway creates an AZ dependency — if its AZ fails, all private subnets lose internet access and cross-AZ traffic incurs data transfer costs.",
         },
@@ -64,11 +64,11 @@ export const vpcGuide: ServiceGuide = {
             "Which VPC component provides outbound-only IPv6 internet connectivity for resources in private subnets?",
           options: [
             "NAT Gateway with IPv6 support enabled",
-            "Egress-Only Internet Gateway",
             "Internet Gateway with IPv6 routing",
             "IPv6 VPC endpoint",
+            "Egress-Only Internet Gateway",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "An Egress-Only Internet Gateway provides outbound-only IPv6 connectivity for resources in private subnets. Since IPv6 addresses are globally routable (unlike IPv4 private addresses), NAT is not needed — but you still want to prevent unsolicited inbound connections. The Egress-Only IGW allows outbound IPv6 traffic while blocking inbound-initiated connections.",
         },
@@ -76,12 +76,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "An Internet Gateway is attached to a VPC, but an EC2 instance in a public subnet cannot communicate with the internet. What is the most likely missing configuration?",
           options: [
-            "The instance needs a security group rule allowing all outbound traffic",
             "The instance needs an Elastic IP or public IP address assigned",
             "The VPC needs a second Internet Gateway for redundancy",
+            "The instance needs a security group rule allowing all outbound traffic",
             "The instance needs to be in a different Availability Zone",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "For an EC2 instance in a public subnet to communicate with the internet, it needs both a route to the Internet Gateway in the subnet's route table AND a public IP address (either auto-assigned or an Elastic IP). Without a public IP, the instance has no internet-routable address even though the route exists.",
         },
@@ -96,11 +96,11 @@ export const vpcGuide: ServiceGuide = {
             "An administrator adds an inbound rule to a Security Group allowing TCP port 443. Does she also need to add an outbound rule for the response traffic?",
           options: [
             "Yes — Security Groups require both inbound and outbound rules for bidirectional traffic",
-            "No — Security Groups are stateful; response traffic is automatically allowed",
             "Yes — only HTTPS requires explicit outbound rules; HTTP does not",
+            "No — Security Groups are stateful; response traffic is automatically allowed",
             "No — but only if the default outbound allow-all rule has not been modified",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Security Groups are stateful — they track connection state and automatically allow return traffic for established connections. An inbound allow rule on port 443 means the response traffic is automatically allowed outbound without an explicit outbound rule. This is the key difference from NACLs, which are stateless and require explicit rules in both directions.",
         },
@@ -109,11 +109,11 @@ export const vpcGuide: ServiceGuide = {
             "A Network ACL has two rules: Rule 100 allows all TCP traffic, and Rule 200 denies all TCP traffic. A new inbound request arrives on port 80. What is the result?",
           options: [
             "Denied — the deny rule takes precedence regardless of order",
-            "Allowed — Rule 100 matches first and its action (Allow) applies",
             "Denied — NACLs always process deny rules before allow rules",
+            "Allowed — Rule 100 matches first and its action (Allow) applies",
             "Allowed — NACLs require explicit denies that override all allows",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "NACLs evaluate rules in ascending numeric order and stop at the first matching rule. Rule 100 (Allow all TCP) is evaluated before Rule 200 (Deny all TCP). Since Rule 100 matches port 80 traffic, the Allow action applies and Rule 200 is never evaluated. Rule ordering is critical in NACL design.",
         },
@@ -121,12 +121,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "Why must NACL outbound rules explicitly allow ephemeral ports (1024–65535) for return traffic from web servers?",
           options: [
-            "Because NACLs are stateless and do not track connection state — both directions must be explicitly allowed",
             "Because Security Groups block ephemeral ports by default",
+            "Because NACLs are stateless and do not track connection state — both directions must be explicitly allowed",
             "Because web servers use ephemeral ports for initial connection establishment",
             "Because the Internet Gateway blocks ephemeral ports unless explicitly allowed",
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
             "NACLs are stateless — they do not track connection state and evaluate each packet independently. When a client connects to a web server on port 80, the server's response goes back on the client's ephemeral port (1024–65535). Without an outbound NACL rule allowing these ephemeral ports, the response packets are blocked. Security Groups handle this automatically due to statefulness.",
         },
@@ -140,12 +140,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "VPC A is peered with VPC B, and VPC B is peered with VPC C. Can resources in VPC A communicate with resources in VPC C through VPC B?",
           options: [
-            "Yes — VPC peering supports transitive routing through intermediate VPCs",
             "No — VPC peering is non-transitive; A and C need their own direct peering connection",
+            "Yes — VPC peering supports transitive routing through intermediate VPCs",
             "Yes — if Transit Gateway is enabled on VPC B",
             "No — transitive routing requires Direct Connect, not VPC peering",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "VPC peering is non-transitive. Even though A-B and B-C are peered, traffic from A cannot route through B to reach C. For A to communicate with C, a direct peering connection between A and C must be established. For architectures with many VPCs, this creates a complex full-mesh requirement — Transit Gateway is the solution for hub-and-spoke topologies.",
         },
@@ -153,12 +153,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "A company has 50 VPCs across multiple accounts and needs all of them to communicate with each other and with on-premises networks. Which service avoids a complex full-mesh peering topology?",
           options: [
-            "VPC Peering with 50×49/2 = 1,225 peering connections",
-            "AWS Transit Gateway acting as a central regional router",
-            "AWS PrivateLink with interface endpoints in each VPC",
             "VPN connections between each pair of VPCs",
+            "AWS PrivateLink with interface endpoints in each VPC",
+            "AWS Transit Gateway acting as a central regional router",
+            "VPC Peering with 50×49/2 = 1,225 peering connections",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "AWS Transit Gateway acts as a central hub that all VPCs, VPN connections, and Direct Connect attachments connect to. It handles transitive routing, eliminating the need for full-mesh peering. With 50 VPCs, a full mesh would require 1,225 peering connections; Transit Gateway requires only 50 attachments.",
         },
@@ -186,11 +186,11 @@ export const vpcGuide: ServiceGuide = {
             "A company needs a dedicated private network connection to AWS with consistent bandwidth and low latency for a mission-critical application. Which hybrid connectivity option provides this?",
           options: [
             "AWS Site-to-Site VPN over the public internet",
-            "AWS Direct Connect with a dedicated private circuit",
             "AWS Client VPN for individual user access",
             "VPC peering with the on-premises network",
+            "AWS Direct Connect with a dedicated private circuit",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS Direct Connect provides a dedicated, private physical connection from an on-premises data center to an AWS Direct Connect location, bypassing the public internet. This delivers consistent bandwidth, low latency, and predictable network performance required for mission-critical applications. Site-to-Site VPN uses the public internet and is subject to variability and bandwidth limits.",
         },
@@ -198,12 +198,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "What is the recommended architecture for hybrid connectivity that provides both performance and redundancy?",
           options: [
+            "Multiple Direct Connect connections without any VPN backup",
+            "Direct Connect only — VPN adds unnecessary complexity",
             "Two Site-to-Site VPN connections for active-active redundancy",
             "Direct Connect as the primary path with Site-to-Site VPN as a failover",
-            "Direct Connect only — VPN adds unnecessary complexity",
-            "Multiple Direct Connect connections without any VPN backup",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The recommended pattern combines Direct Connect as the primary path (for consistent performance) with a Site-to-Site VPN as an automatic failover. CloudWatch alarms monitor the Direct Connect connection health and trigger failover to the VPN if the Direct Connect circuit fails. This provides both performance (Direct Connect) and resilience (VPN backup).",
         },
@@ -217,12 +217,12 @@ export const vpcGuide: ServiceGuide = {
           question:
             "A security team needs to investigate rejected connection attempts to EC2 instances over the past week. Which VPC feature provides this visibility?",
           options: [
-            "CloudWatch metrics for EC2 network I/O",
-            "VPC Flow Logs with REJECT records delivered to CloudWatch Logs or S3",
             "AWS Config rules tracking security group changes",
+            "CloudWatch metrics for EC2 network I/O",
             "CloudTrail logs for EC2 API calls",
+            "VPC Flow Logs with REJECT records delivered to CloudWatch Logs or S3",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "VPC Flow Logs capture metadata for all traffic to and from ENIs, including the action field (ACCEPT or REJECT). Rejected connection attempts appear as REJECT records and can be queried in CloudWatch Logs Insights or Amazon Athena (for S3-delivered logs) to investigate the source IPs, ports, and timing of rejected traffic.",
         },
@@ -230,11 +230,11 @@ export const vpcGuide: ServiceGuide = {
           question: "At which levels can VPC Flow Logs be enabled?",
           options: [
             "Only at the VPC level",
-            "At the VPC, subnet, or individual ENI level",
             "At the region or Availability Zone level",
             "Only at the security group level",
+            "At the VPC, subnet, or individual ENI level",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "VPC Flow Logs can be enabled at three granularity levels: the entire VPC (captures all ENIs in the VPC), a specific subnet (captures all ENIs in that subnet), or an individual ENI. Finer granularity allows you to focus on specific resources for cost control and targeted troubleshooting.",
         },
@@ -279,8 +279,8 @@ export const vpcGuide: ServiceGuide = {
     {
       question:
         "How many IP addresses does AWS reserve in a /24 subnet (256 total addresses)?",
-      options: ["2 addresses", "3 addresses", "5 addresses", "8 addresses"],
-      correctIndex: 2,
+      options: ["8 addresses", "5 addresses", "3 addresses", "2 addresses"],
+      correctIndex: 1,
       explanation:
         "AWS reserves 5 IP addresses in every subnet regardless of size: the network address, VPC router, DNS server, one reserved for future use, and the broadcast address. A /24 subnet has 256 total addresses minus 5 reserved = 251 usable addresses.",
     },
@@ -289,11 +289,11 @@ export const vpcGuide: ServiceGuide = {
         "Private subnets in three AZs need outbound internet access. How should NAT Gateways be deployed for fault tolerance?",
       options: [
         "One NAT Gateway in a single public subnet, shared across all AZs",
-        "One NAT Gateway per AZ in a public subnet, each AZ's private subnets routing locally",
-        "One NAT Gateway per private subnet for maximum redundancy",
         "NAT Gateways are not needed — use VPC endpoints instead",
+        "One NAT Gateway per private subnet for maximum redundancy",
+        "One NAT Gateway per AZ in a public subnet, each AZ's private subnets routing locally",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Deploying one NAT Gateway per AZ ensures each AZ's private subnets use a local NAT Gateway. If one AZ fails, only that AZ loses internet access — other AZs continue operating independently. A single shared NAT Gateway creates a single point of failure and causes cross-AZ data transfer charges.",
     },
@@ -302,11 +302,11 @@ export const vpcGuide: ServiceGuide = {
         "A Security Group has an inbound rule allowing port 443. Is an explicit outbound rule needed for HTTPS response traffic?",
       options: [
         "Yes — Security Groups require matching outbound rules",
-        "No — Security Groups are stateful and automatically allow response traffic",
         "Yes — only for NACLs is response traffic automatic",
         "No — but only if the default outbound allow-all rule is present",
+        "No — Security Groups are stateful and automatically allow response traffic",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Security Groups are stateful — they track connection state and automatically allow response traffic for established connections. An inbound allow on port 443 means HTTPS responses are automatically permitted outbound. This contrasts with NACLs, which are stateless and require explicit rules in both directions.",
     },
@@ -314,12 +314,12 @@ export const vpcGuide: ServiceGuide = {
       question:
         "VPC A is peered with VPC B, and VPC B is peered with VPC C. Can VPC A reach VPC C?",
       options: [
-        "Yes — peering is transitive through intermediate VPCs",
-        "No — VPC peering is non-transitive; direct peering between A and C is required",
         "Yes — if Transit Gateway is enabled in VPC B",
         "No — peering only works within the same account",
+        "Yes — peering is transitive through intermediate VPCs",
+        "No — VPC peering is non-transitive; direct peering between A and C is required",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "VPC peering is non-transitive. A-B and B-C peering connections do not allow A to reach C through B. A separate A-C peering connection is required. For architectures with many VPCs, Transit Gateway is the scalable solution as it handles transitive routing centrally.",
     },
@@ -327,12 +327,12 @@ export const vpcGuide: ServiceGuide = {
       question:
         "Which AWS service acts as a central regional router enabling transitive routing between many VPCs and on-premises networks?",
       options: [
-        "VPC Peering with route propagation",
-        "AWS Transit Gateway",
-        "AWS PrivateLink with interface endpoints",
         "AWS Direct Connect with multiple virtual interfaces",
+        "VPC Peering with route propagation",
+        "AWS PrivateLink with interface endpoints",
+        "AWS Transit Gateway",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "AWS Transit Gateway is a regional network hub that VPCs, VPN connections, and Direct Connect attachments connect to. It enables transitive routing so any attached network can communicate with any other, eliminating the need for complex full-mesh peering topologies. It significantly simplifies multi-VPC and hybrid architectures.",
     },
@@ -340,12 +340,12 @@ export const vpcGuide: ServiceGuide = {
       question:
         "What is the key difference between Security Groups and Network ACLs?",
       options: [
-        "Security Groups support deny rules; NACLs support only allow rules",
-        "Security Groups are stateful (auto-allow return traffic); NACLs are stateless (both directions must be explicitly allowed)",
         "NACLs apply to individual ENIs; Security Groups apply to entire subnets",
         "Security Groups are evaluated after NACLs in the traffic flow",
+        "Security Groups support deny rules; NACLs support only allow rules",
+        "Security Groups are stateful (auto-allow return traffic); NACLs are stateless (both directions must be explicitly allowed)",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The fundamental difference is statefulness: Security Groups track connection state and automatically allow response traffic; NACLs do not track state and require explicit rules for both inbound and outbound traffic (including ephemeral ports for return traffic). Security Groups apply to ENIs; NACLs apply to subnets. Both are evaluated — NACLs at the subnet boundary, Security Groups at the ENI.",
     },
@@ -353,12 +353,12 @@ export const vpcGuide: ServiceGuide = {
       question:
         "Which VPC endpoint type is free and available only for Amazon S3 and Amazon DynamoDB?",
       options: [
-        "Interface endpoint (PrivateLink)",
         "Gateway endpoint",
-        "Service endpoint",
+        "Interface endpoint (PrivateLink)",
         "Regional endpoint",
+        "Service endpoint",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Gateway endpoints for S3 and DynamoDB are free — there is no hourly charge or data processing fee. They work by adding a route to the subnet route table directing S3/DynamoDB traffic through the endpoint, keeping it on the AWS network. Interface endpoints (PrivateLink) serve all other AWS services and have per-AZ hourly charges.",
     },
@@ -366,12 +366,12 @@ export const vpcGuide: ServiceGuide = {
       question:
         "What is the recommended hybrid connectivity architecture that provides consistent performance AND redundancy for on-premises to AWS connectivity?",
       options: [
-        "Two Site-to-Site VPN tunnels in active-active mode",
         "Direct Connect as primary with Site-to-Site VPN as automatic failover",
+        "Two Site-to-Site VPN tunnels in active-active mode",
         "Direct Connect only — additional VPN connections add cost without benefit",
         "Two Direct Connect connections without any VPN backup",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The recommended pattern is Direct Connect as the primary path (for consistent bandwidth and low latency) with a Site-to-Site VPN as an automatic failover. CloudWatch alarms monitor Direct Connect health and trigger automatic BGP failover to the VPN if the Direct Connect circuit fails. This provides both performance and resilience.",
     },

@@ -24,12 +24,12 @@ export const mlFundamentalsGuide: ServiceGuide = {
           question:
             "A data scientist trains a model to predict house prices using historical sales data with known prices. Which ML paradigm is this?",
           options: [
-            "Unsupervised learning",
-            "Reinforcement learning",
             "Supervised learning",
+            "Reinforcement learning",
+            "Unsupervised learning",
             "Self-supervised learning",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "This is supervised learning — the training data contains input-output pairs (house features and known prices). The algorithm learns a mapping function to predict prices for new houses.",
         },
@@ -37,20 +37,20 @@ export const mlFundamentalsGuide: ServiceGuide = {
           question:
             "A model groups customer purchase histories into segments without any predefined categories. Which ML paradigm does this represent?",
           options: [
-            "Supervised learning",
             "Reinforcement learning",
-            "Transfer learning",
             "Unsupervised learning",
+            "Supervised learning",
+            "Transfer learning",
           ],
-          correctIndex: 3,
+          correctIndex: 1,
           explanation:
             "Unsupervised learning discovers hidden structure in unlabeled data. Clustering (e.g., K-Means) groups similar data points without predefined target categories.",
         },
         {
           question:
             "In reinforcement learning, what term describes the mapping from observed states to actions that an agent learns to maximize cumulative reward?",
-          options: ["Feature vector", "Policy", "Gradient", "Hyperparameter"],
-          correctIndex: 1,
+          options: ["Feature vector", "Gradient", "Policy", "Hyperparameter"],
+          correctIndex: 2,
           explanation:
             "A policy is the mapping from states to actions that the RL agent learns. The goal of reinforcement learning is to find the optimal policy that maximizes cumulative reward over time.",
         },
@@ -78,12 +78,12 @@ For **regression**, common metrics include **RMSE** (Root Mean Squared Error —
           question:
             "An AUC-ROC score of 0.5 for a binary classifier indicates:",
           options: [
-            "Perfect discrimination between classes",
             "Performance equivalent to random chance",
-            "The model has severe overfitting",
             "High precision but low recall",
+            "The model has severe overfitting",
+            "Perfect discrimination between classes",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "An AUC-ROC of 0.5 means the model discriminates no better than random chance. A perfect classifier has AUC-ROC of 1.0; values above 0.5 indicate better-than-random discrimination.",
         },
@@ -91,12 +91,12 @@ For **regression**, common metrics include **RMSE** (Root Mean Squared Error —
           question:
             "Why should the test set be used only once at the very end of model development?",
           options: [
-            "Test sets are too small to use more than once",
-            "Using it for hyperparameter tuning inflates apparent performance",
-            "The test set contains unlabeled data that cannot be reused",
             "Repeated use causes data leakage into the training set",
+            "The test set contains unlabeled data that cannot be reused",
+            "Using it for hyperparameter tuning inflates apparent performance",
+            "Test sets are too small to use more than once",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Using the test set to make model decisions inflates apparent performance — the model effectively trains on the test set indirectly. It should be used only once to get an unbiased estimate of real-world performance.",
         },
@@ -116,12 +116,12 @@ The **bias-variance tradeoff** formalizes this: model error decomposes into bias
           question:
             "A model achieves 99% accuracy on training data but only 62% on validation data. What does this indicate?",
           options: [
-            "Underfitting — the model is too simple",
             "Overfitting — the model memorized the training data",
-            "Data leakage in the training pipeline",
             "The validation set is too small",
+            "Underfitting — the model is too simple",
+            "Data leakage in the training pipeline",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A large gap between training accuracy (99%) and validation accuracy (62%) is the classic sign of overfitting. The model has memorized training data including noise, and fails to generalize.",
         },
@@ -131,10 +131,10 @@ The **bias-variance tradeoff** formalizes this: model error decomposes into bias
           options: [
             "Add L2 regularization to reduce complexity",
             "Apply dropout layers to prevent memorization",
-            "Use a more complex model or add more features",
             "Gather more training data",
+            "Use a more complex model or add more features",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "High error on both training and test sets indicates underfitting — the model is too simple to capture the patterns. Remedies include using a more complex model, adding more features, or training for more epochs.",
         },
@@ -167,12 +167,12 @@ Common feature engineering techniques include: **normalization/standardization**
           question:
             "A fraud detection model is trained with a feature called 'fraud_case_opened'. Evaluation metrics look excellent, but the model fails in production. What is the most likely cause?",
           options: [
-            "Overfitting to the training data",
-            "Data leakage — the feature wouldn't exist at prediction time",
             "Underfitting due to too few features",
             "Class imbalance in the training set",
+            "Overfitting to the training data",
+            "Data leakage — the feature wouldn't exist at prediction time",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Data leakage occurs when features contain information unavailable at prediction time. A 'fraud_case_opened' flag only exists after fraud is confirmed, not at the moment a transaction needs to be scored — this leaks future information into training.",
         },
@@ -221,11 +221,11 @@ Common feature engineering techniques include: **normalization/standardization**
             "Which algorithm family is generally the highest-performing on structured tabular data according to the guide?",
           options: [
             "k-Nearest Neighbors",
-            "Linear models",
             "Gradient Boosting (XGBoost, LightGBM)",
+            "Linear models",
             "Convolutional Neural Networks",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Gradient Boosting methods (XGBoost, LightGBM, CatBoost) typically achieve the highest performance on tabular data. They build trees sequentially, each correcting the errors of the previous tree.",
         },
@@ -297,19 +297,19 @@ Common feature engineering techniques include: **normalization/standardization**
         "An autonomous robot learns to navigate a warehouse by receiving positive rewards for successful deliveries and negative rewards for collisions. Which ML paradigm is this?",
       options: [
         "Supervised learning with labeled trajectories",
+        "Semi-supervised learning with partial labels",
         "Unsupervised clustering of navigation paths",
         "Reinforcement learning with a reward signal",
-        "Semi-supervised learning with partial labels",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Reinforcement learning trains an agent to maximize cumulative reward through trial-and-error interaction with an environment. The robot (agent) learns a policy from rewards and penalties without labeled examples.",
     },
     {
       question:
         "A medical imaging model shows 98% accuracy but doctors report it misses many cancer cases. What metric should be examined?",
-      options: ["RMSE", "R-squared", "Recall", "Precision"],
-      correctIndex: 2,
+      options: ["RMSE", "Recall", "Precision", "R-squared"],
+      correctIndex: 1,
       explanation:
         "Missing cancer cases are false negatives — recall measures what fraction of actual positives the model catches. High accuracy on imbalanced datasets can hide poor recall if negative cases dominate.",
     },
@@ -319,10 +319,10 @@ Common feature engineering techniques include: **normalization/standardization**
       options: [
         "Add more features to the model",
         "Increase model depth",
-        "Apply L2 regularization",
         "Remove the validation set",
+        "Apply L2 regularization",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "L2 (Ridge) regularization penalizes large model weights, reducing model complexity and variance. Other overfitting remedies include gathering more data, applying dropout, or using early stopping.",
     },
@@ -343,12 +343,12 @@ Common feature engineering techniques include: **normalization/standardization**
       question:
         "k-Fold cross-validation is preferred over a single train/test split primarily when:",
       options: [
-        "The dataset is very large and training is computationally expensive",
         "The dataset is small and a single split would produce an unreliable estimate",
         "The model is a deep neural network requiring GPU training",
         "The task is reinforcement learning with an environment simulator",
+        "The dataset is very large and training is computationally expensive",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "k-Fold cross-validation rotates the validation fold across k partitions, producing a more robust performance estimate. It is especially valuable for small datasets where any single split may produce an unrepresentative sample.",
     },
@@ -356,12 +356,12 @@ Common feature engineering techniques include: **normalization/standardization**
       question:
         "The Transformer architecture is described as dominant for which type of task?",
       options: [
-        "Image classification using spatial filters",
-        "Tabular data regression",
-        "Natural language processing and sequence modeling",
         "Anomaly detection in time series",
+        "Tabular data regression",
+        "Image classification using spatial filters",
+        "Natural language processing and sequence modeling",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Transformers use self-attention to process sequences in parallel and have become the dominant architecture for NLP. They underlie modern large language models and foundation models, and are increasingly applied to vision tasks.",
     },
@@ -369,12 +369,12 @@ Common feature engineering techniques include: **normalization/standardization**
       question:
         "Which regression metric penalizes large prediction errors more heavily than small ones?",
       options: [
+        "RMSE (Root Mean Squared Error)",
         "MAE (Mean Absolute Error)",
         "R-squared",
-        "RMSE (Root Mean Squared Error)",
         "Accuracy",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "RMSE squares the errors before averaging, which penalizes large errors disproportionately. MAE equally weights all errors regardless of magnitude. RMSE is preferred when large errors are particularly undesirable.",
     },

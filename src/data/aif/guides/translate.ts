@@ -21,11 +21,11 @@ Translate uses NMT models trained on massive multilingual corpora. Unlike phrase
             "What neural architecture does Amazon Translate use, and what key advantage does it have over phrase-based statistical translation?",
           options: [
             "Recurrent neural networks (RNNs); they are faster than transformer models for short texts",
-            "Encoder-decoder transformer networks; NMT generates the full output sentence holistically, handling grammatical restructuring, pronoun agreement, and idiomatic expressions far better",
             "Convolutional neural networks (CNNs); they process both source and target languages in parallel",
             "Large language models (LLMs); they can generate free-form translations with no structure constraints",
+            "Encoder-decoder transformer networks; NMT generates the full output sentence holistically, handling grammatical restructuring, pronoun agreement, and idiomatic expressions far better",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon Translate uses encoder-decoder neural networks (transformer architectures). The key advantage of NMT over statistical phrase-based approaches is that it generates the entire output sentence holistically, handling grammatical restructuring, word order differences, pronoun agreement, verb conjugation, and idiomatic expressions far more effectively.",
         },
@@ -34,11 +34,11 @@ Translate uses NMT models trained on massive multilingual corpora. Unlike phrase
             "How many languages and language direction pairs does Amazon Translate currently support?",
           options: [
             "30 languages and 900 language pairs",
+            "100+ languages and 10,000+ language direction pairs",
             "50 languages and 2,500 language pairs",
             "75+ languages and 5,000+ language direction pairs",
-            "100+ languages and 10,000+ language direction pairs",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon Translate supports over 75 languages and more than 5,000 language direction pairs. You can translate between any supported source and target language combination within these pairs.",
         },
@@ -53,8 +53,8 @@ For large-scale translation workloads — a library of documents, a database of 
         {
           question:
             "What is the maximum input size for a single Amazon Translate batch translation job?",
-          options: ["500 MB", "1 GB", "5 GB", "10 GB"],
-          correctIndex: 2,
+          options: ["1 GB", "500 MB", "10 GB", "5 GB"],
+          correctIndex: 3,
           explanation:
             "Amazon Translate batch translation jobs handle up to 5 GB of input data. This makes batch translation suitable for large-scale document libraries, product catalogs, and customer feedback corpora that would be impractical to translate synchronously.",
         },
@@ -62,12 +62,12 @@ For large-scale translation workloads — a library of documents, a database of 
           question:
             "A global e-commerce company wants to translate their entire product catalog (100,000 DOCX files) into 8 languages simultaneously. Which Translate feature enables this in a single job?",
           options: [
+            "Active Custom Translation with parallel data for each of the 8 target languages",
             "TranslateText called in parallel with 8 concurrent API invocations per document",
             "Batch translation with multiple target languages specified — a single job produces all 8 language versions",
-            "Active Custom Translation with parallel data for each of the 8 target languages",
             "Custom Terminology with 8 separate language-specific glossaries applied sequentially",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Batch translation supports multiple target languages in a single job submission. You specify the source language and all target languages, and Translate processes the documents in parallel and writes translated files for each target language back to S3 — preserving the original DOCX format.",
         },
@@ -117,12 +117,12 @@ Parallel data teaches the model patterns beyond individual term mappings: the fo
           question:
             "What type of training data is required for Amazon Translate's Active Custom Translation (ACT)?",
           options: [
-            "Monolingual domain text in the source language only",
             "Parallel data — sentence pairs containing both the source text and the desired target translation",
             "A glossary of key terms in CSV format with their preferred translations",
             "Audio recordings of professional translators reading the source text",
+            "Monolingual domain text in the source language only",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Active Custom Translation requires parallel data — collections of sentence pairs containing both the source text and the desired translation. This is the training signal the model uses to learn domain-specific style, formality, and phrasing beyond individual term mappings.",
         },
@@ -153,12 +153,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
           question:
             "How do you enable automatic source language detection in Amazon Translate's TranslateText API?",
           options: [
-            "Set AutoDetect: true in the API request parameters",
             "Specify 'auto' as the source language code",
-            "Omit the SourceLanguageCode parameter — Translate detects it automatically by default",
             "Call Amazon Comprehend DetectDominantLanguage first and pass its output as a required parameter",
+            "Omit the SourceLanguageCode parameter — Translate detects it automatically by default",
+            "Set AutoDetect: true in the API request parameters",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Automatic language detection is enabled by specifying 'auto' as the SourceLanguageCode in the TranslateText API call. Translate uses the same underlying technology as Amazon Comprehend's DetectDominantLanguage to identify the source language automatically.",
         },
@@ -166,12 +166,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
           question:
             "Which AWS service does Amazon Translate integrate with for multilingual enterprise search scenarios?",
           options: [
-            "Amazon OpenSearch Service",
-            "Amazon Kendra",
-            "Amazon CloudSearch",
             "AWS Glue",
+            "Amazon OpenSearch Service",
+            "Amazon CloudSearch",
+            "Amazon Kendra",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon Translate integrates with Amazon Kendra for multilingual enterprise search. Translate can convert user queries to the language of stored documents (or vice versa), enabling search across multilingual content repositories without requiring full corpus translation.",
         },
@@ -215,12 +215,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
       question:
         "A global SaaS company wants to automatically translate their help documentation (DOCX files) from English into French, German, Spanish, and Japanese simultaneously. What is the correct Amazon Translate approach?",
       options: [
-        "Call TranslateText four times (once per target language) for each document",
         "Submit a single batch translation job specifying all four target languages — Translate produces all four translated versions in one job",
+        "Call TranslateText four times (once per target language) for each document",
         "Use Active Custom Translation with parallel data for each target language",
         "Use Custom Terminology with a multilingual glossary covering all four target languages",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Batch translation supports multiple target languages in a single job. You submit one job specifying English as the source and all four target languages, and Translate processes the DOCX files in parallel, writing translated versions for each language back to S3 while preserving the DOCX format.",
     },
@@ -254,12 +254,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
       question:
         "A customer support platform receives messages in unknown languages from global customers. How should they configure Amazon Translate to handle this?",
       options: [
-        "Call Amazon Comprehend DetectDominantLanguage first, then pass the result to TranslateText",
         "Specify 'auto' as the SourceLanguageCode in TranslateText — Translate detects the language automatically",
-        "Use batch translation with a language detection pre-processing Lambda",
         "Configure Translate to attempt all 75 supported languages and use the highest-confidence result",
+        "Use batch translation with a language detection pre-processing Lambda",
+        "Call Amazon Comprehend DetectDominantLanguage first, then pass the result to TranslateText",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Specifying 'auto' as the SourceLanguageCode in TranslateText enables automatic language detection. Translate identifies the source language using the same technology as Amazon Comprehend's DetectDominantLanguage, eliminating the need for a separate detection step.",
     },
@@ -267,12 +267,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
       question:
         "Amazon Translate is best described as which type of AI service?",
       options: [
+        "Text-to-speech — reads text aloud in the target language",
+        "Neural machine translation — converts text from one language to another",
         "Automatic speech recognition — converts multilingual audio to text",
         "Natural language understanding — extracts entities and sentiment from multilingual text",
-        "Neural machine translation — converts text from one language to another",
-        "Text-to-speech — reads text aloud in the target language",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Amazon Translate is a neural machine translation (NMT) service — it converts text from one language to another. It is distinct from Transcribe (ASR), Comprehend (NLU/text analysis), and Polly (TTS).",
     },
@@ -281,11 +281,11 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
         "A media company has a large existing translation memory from SDL Trados containing thousands of professionally translated sentence pairs. How can they leverage this for Amazon Translate?",
       options: [
         "Import it as a Custom Terminology glossary by extracting key-value term pairs",
-        "Use it as parallel data for Active Custom Translation to fine-tune a domain-specific translation model",
         "Store it in Amazon Kendra and use it for cross-lingual search instead of translation",
         "Convert it to a custom vocabulary for Amazon Transcribe to improve multilingual ASR",
+        "Use it as parallel data for Active Custom Translation to fine-tune a domain-specific translation model",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A translation memory from a CAT tool like SDL Trados consists of source-target sentence pairs — exactly the parallel data format required for Active Custom Translation. These high-quality professional translations become training data for a personalized translation model that learns the company's style and vocabulary.",
     },
@@ -293,12 +293,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
       question:
         "Which Amazon Translate API is appropriate for translating a user's chat message in real time, and what is its character limit?",
       options: [
+        "TranslateDocument — synchronous, optimized for short conversational text",
         "TranslateText — synchronous, up to 10,000 bytes",
         "StartTextTranslationJob — asynchronous, processes real-time messages with low latency",
         "TranslateText — synchronous, up to 100,000 bytes",
-        "TranslateDocument — synchronous, optimized for short conversational text",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "TranslateText is the synchronous API for real-time translation. It accepts up to 10,000 bytes of text and returns the translation immediately — making it suitable for chat messages, product descriptions, and other real-time translation use cases.",
     },
@@ -306,12 +306,12 @@ Translate integrates naturally with Amazon Comprehend (translate → then analyz
       question:
         "Amazon Translate's batch translation preserves the original file format in the output. Which of the following formats does it support for format-preserving batch translation?",
       options: [
-        "PDF, DOCX, PPTX, and RTF",
         "Plain text, HTML, DOCX, PPTX, XLSX, and XML",
-        "DOCX, PDF, and Markdown",
+        "PDF, DOCX, PPTX, and RTF",
         "HTML, JSON, and plain text only",
+        "DOCX, PDF, and Markdown",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Amazon Translate batch translation supports format-preserving translation for: plain text, HTML, DOCX (Word), PPTX (PowerPoint), XLSX (Excel), and XML. The translated output files maintain the original format — a DOCX in becomes a translated DOCX out.",
     },

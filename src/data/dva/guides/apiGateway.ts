@@ -22,8 +22,8 @@ export const apiGatewayGuide: ServiceGuide = {
         {
           question:
             "Which API Gateway type supports response caching, usage plans, and WAF integration?",
-          options: ["HTTP API", "WebSocket API", "REST API", "All API types"],
-          correctIndex: 2,
+          options: ["REST API", "HTTP API", "All API types", "WebSocket API"],
+          correctIndex: 0,
           explanation:
             "REST APIs support the full feature set including caching, usage plans, API keys, WAF, and resource policies. HTTP APIs are cheaper but lack these features.",
         },
@@ -31,20 +31,20 @@ export const apiGatewayGuide: ServiceGuide = {
           question:
             "An application needs JWT (OIDC/OAuth2) authorization and the lowest cost per request. Which API type should you choose?",
           options: [
-            "REST API with Cognito authorizer",
             "HTTP API",
-            "WebSocket API",
+            "REST API with Cognito authorizer",
             "REST API with Lambda authorizer",
+            "WebSocket API",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "HTTP APIs natively support JWT authorizers for OIDC/OAuth2 and are roughly 70% cheaper than REST APIs — the right choice when you don't need REST API's advanced features.",
         },
         {
           question:
             "Which WebSocket API route key fires when a client first establishes a connection?",
-          options: ["$default", "$disconnect", "$connect", "$open"],
-          correctIndex: 2,
+          options: ["$connect", "$disconnect", "$default", "$open"],
+          correctIndex: 0,
           explanation:
             "$connect fires when a client establishes a WebSocket connection. $disconnect fires on disconnection, and $default handles unmatched messages.",
         },
@@ -66,12 +66,12 @@ export const apiGatewayGuide: ServiceGuide = {
           question:
             "Which API Gateway integration type allows you to write directly to an SQS queue without a Lambda function?",
           options: [
-            "Lambda Proxy Integration",
-            "Mock Integration",
             "AWS Service Integration",
+            "Lambda Proxy Integration",
             "HTTP Proxy Integration",
+            "Mock Integration",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "AWS Service Integration lets API Gateway call AWS service APIs (SQS, DynamoDB, Step Functions) directly, eliminating the Lambda passthrough function and reducing latency and cost.",
         },
@@ -79,24 +79,24 @@ export const apiGatewayGuide: ServiceGuide = {
           question:
             "Lambda Proxy Integration vs Lambda Non-Proxy Integration: what does the Non-Proxy (Custom) integration add?",
           options: [
+            "JWT authorization support",
             "Faster response times",
             "VTL mapping templates to transform request and response",
-            "JWT authorization support",
             "Built-in caching at the integration layer",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda Non-Proxy (Custom) integration uses VTL mapping templates to transform the request before Lambda receives it and the response before the client receives it — more power, more complexity.",
         },
         {
           question: "What is the best use case for a Mock Integration?",
           options: [
-            "High-performance production endpoints",
             "Testing, CORS preflight responses, and API stubs during development",
             "Direct calls to DynamoDB without Lambda",
             "Forwarding requests to an on-premises HTTP server",
+            "High-performance production endpoints",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Mock Integration returns a hard-coded response without calling any backend — ideal for CORS preflight responses, development stubs, and testing API consumers before the backend is built.",
         },
@@ -130,12 +130,12 @@ This lets a single API definition serve multiple environments by simply changing
           question:
             "A canary deployment in API Gateway sends 10% of traffic to a new version. What must you do to fully adopt the canary?",
           options: [
-            "Delete the old stage",
             "Promote the canary to become the base stage",
             "Create a new API from scratch",
+            "Delete the old stage",
             "Update the stage variable",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Once you are satisfied with the canary's behavior, you promote it to become the base deployment, shifting all traffic to the new version.",
         },
@@ -144,11 +144,11 @@ This lets a single API definition serve multiple environments by simply changing
             "In API Gateway, a change to an API configuration does not take effect until you:",
           options: [
             "Restart the API",
-            "Update the stage variable",
             "Create a deployment to a stage",
             "Clear the API cache",
+            "Update the stage variable",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "API Gateway REST APIs require an explicit deployment to a stage before any configuration changes are visible to callers. The stage references the deployment snapshot.",
         },
@@ -170,12 +170,12 @@ This lets a single API definition serve multiple environments by simply changing
           question:
             "The Cognito User Pool Authorizer validates a JWT, but which feature does it NOT support?",
           options: [
-            "Token signature validation",
-            "Token expiry check",
             "Audience (app client ID) validation",
             "OAuth scope enforcement",
+            "Token expiry check",
+            "Token signature validation",
           ],
-          correctIndex: 3,
+          correctIndex: 1,
           explanation:
             "The Cognito authorizer validates the JWT signature, expiry, and audience, but does NOT enforce OAuth scopes. You need a Lambda authorizer or HTTP API's native JWT authorizer (which does check scopes) for scope-based control.",
         },
@@ -198,10 +198,10 @@ This lets a single API definition serve multiple environments by simply changing
           options: [
             "Cognito User Pool Authorizer",
             "Lambda Authorizer",
-            "Resource Policy",
             "IAM Authorization only",
+            "Resource Policy",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Resource Policies are required for cross-account access and for Private APIs. They are JSON policies attached to the API itself that specify which principals or accounts can call it.",
         },
@@ -221,12 +221,12 @@ The **Integration Response** phase receives the backend's response and applies a
           question:
             "API Gateway request validation fails because a required query parameter is missing. What HTTP status does API Gateway return — and does it invoke Lambda?",
           options: [
+            "500, and Lambda is NOT invoked",
             "400, and Lambda is still invoked",
             "400, and Lambda is NOT invoked",
             "404, and Lambda is NOT invoked",
-            "500, and Lambda is NOT invoked",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Request validation failures return 400 Bad Request without invoking the backend Lambda, saving compute cost and protecting downstream services from malformed input.",
         },
@@ -234,12 +234,12 @@ The **Integration Response** phase receives the backend's response and applies a
           question:
             "In VTL mapping templates, which variable gives you access to the incoming request body?",
           options: [
-            "$context.body",
             "$input.json('$')",
+            "$context.body",
             "$stageVariables.body",
             "$request.payload",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "$input.json('$') returns the entire request body as a JSON string. $input.json('$.field') extracts a specific field. $context provides request context metadata; $stageVariables provides stage variable values.",
         },
@@ -257,12 +257,12 @@ When a client exceeds the rate limit, API Gateway returns **429 Too Many Request
           question:
             "What is the default account-level rate limit for API Gateway?",
           options: [
-            "1,000 RPS with 500 burst",
             "5,000 RPS with 10,000 burst",
             "10,000 RPS with 5,000 burst",
+            "1,000 RPS with 500 burst",
             "Unlimited",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The default account-level throttle is 10,000 requests per second steady-state with a burst of 5,000. These limits apply across all APIs in the account and can be raised via Service Quotas.",
         },
@@ -306,12 +306,12 @@ For **REST APIs**, the setup is manual. You add an OPTIONS method to each resour
           question:
             "For a REST API, what is required to handle CORS preflight requests?",
           options: [
+            "Add a WAF rule to allow OPTIONS requests",
             "Enable the CORS toggle in the console",
             "Add an OPTIONS method with a Mock integration returning CORS headers on each resource",
-            "Add a WAF rule to allow OPTIONS requests",
             "Nothing — REST API handles CORS automatically",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "REST APIs require manual CORS setup: an OPTIONS method with a Mock integration returning Access-Control-Allow-* headers on each resource. HTTP APIs have a CORS toggle that handles this automatically.",
         },
@@ -337,12 +337,12 @@ Private APIs are the right pattern for internal microservices that should never 
           question:
             "What three components are required to set up a Private API in API Gateway?",
           options: [
-            "NAT Gateway, private subnet, and API key",
-            "VPC Interface Endpoint for execute-api, Private endpoint type, and resource policy",
             "VPN connection, security group, and Lambda authorizer",
+            "NAT Gateway, private subnet, and API key",
             "Direct Connect, VPC Peering, and WAF",
+            "VPC Interface Endpoint for execute-api, Private endpoint type, and resource policy",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A Private API requires: (1) a VPC Interface Endpoint for execute-api, (2) the API endpoint type set to Private, and (3) a resource policy explicitly allowing access. All three must be in place.",
         },
@@ -350,12 +350,12 @@ Private APIs are the right pattern for internal microservices that should never 
           question:
             "What creates the private network path to a Private REST API from within a VPC?",
           options: [
-            "NAT Gateway",
             "VPC Peering",
-            "VPC Interface Endpoint for execute-api",
             "Internet Gateway",
+            "NAT Gateway",
+            "VPC Interface Endpoint for execute-api",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "A VPC Interface Endpoint for the execute-api service creates an ENI with a private IP in your VPC. This is the only network path to a Private API — no internet routing is involved.",
         },
@@ -374,11 +374,11 @@ Enable **X-Ray tracing** at the stage level to get end-to-end distributed traces
             "Latency is high but IntegrationLatency is low in CloudWatch metrics. Where is the bottleneck?",
           options: [
             "The Lambda function is slow",
-            "The database is throttled",
             "API Gateway itself — likely mapping templates or cache misses",
+            "The database is throttled",
             "The client network connection is slow",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "IntegrationLatency measures time in the backend only. If Latency is high but IntegrationLatency is low, the extra time is being spent in API Gateway — often VTL mapping template processing or cache misses.",
         },
@@ -387,11 +387,11 @@ Enable **X-Ray tracing** at the stage level to get end-to-end distributed traces
             "Which API Gateway logging mode is better for debugging authorizer evaluation and mapping template issues?",
           options: [
             "Access logging",
-            "Execution logging",
             "CloudWatch metrics",
             "X-Ray tracing",
+            "Execution logging",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Execution logging records API Gateway's internal processing including authorizer evaluation and mapping template application. Access logging captures structured request/response data better for traffic analysis.",
         },
@@ -411,12 +411,12 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
           question:
             "A high-volume write endpoint must accept requests instantly and process them asynchronously. Which integration pattern achieves this?",
           options: [
-            "API Gateway + Lambda (synchronous)",
             "API Gateway + SQS via AWS Service integration",
             "API Gateway + DynamoDB direct write",
+            "API Gateway + Lambda (synchronous)",
             "API Gateway + Step Functions synchronous express",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "API Gateway + SQS via AWS Service integration accepts the request, writes it to SQS, and returns 200 immediately. Workers then process the messages asynchronously without the client waiting.",
         },
@@ -425,11 +425,11 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
             "When placing CloudFront in front of API Gateway, which API Gateway endpoint type is correct to use as the origin?",
           options: [
             "Edge-Optimized",
-            "Regional",
             "Private",
             "Any type works equally well",
+            "Regional",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A Regional API Gateway endpoint is the correct type to use behind CloudFront. Edge-Optimized already uses CloudFront internally, so adding another CloudFront distribution in front of it would be redundant.",
         },
@@ -491,12 +491,12 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
       question:
         "A Lambda authorizer returns an IAM policy. How long can this result be cached?",
       options: [
-        "60 seconds",
-        "300 seconds",
-        "3,600 seconds",
         "It cannot be cached",
+        "300 seconds",
+        "60 seconds",
+        "3,600 seconds",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Lambda authorizer results can be cached for up to 3,600 seconds (1 hour), keyed on the token or identity source, avoiding repeated Lambda invocations for every API request.",
     },
@@ -505,11 +505,11 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
         "Request validation fails at API Gateway for a missing required header. Which statement is correct?",
       options: [
         "API Gateway returns 500 and invokes Lambda",
-        "API Gateway returns 400 and Lambda is not invoked",
         "API Gateway returns 403 and Lambda is not invoked",
+        "API Gateway returns 400 and Lambda is not invoked",
         "Lambda is invoked and handles the validation error",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Request validation rejections return HTTP 400 without invoking the backend Lambda, saving compute cost and keeping invalid requests from reaching downstream services.",
     },
@@ -530,12 +530,12 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
       question:
         "API Gateway Latency is 800ms but IntegrationLatency is 50ms. What does this indicate?",
       options: [
-        "Lambda function is slow",
-        "DynamoDB is throttled",
         "The bottleneck is within API Gateway itself",
+        "DynamoDB is throttled",
+        "Lambda function is slow",
         "Client connection is slow",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "IntegrationLatency measures time in the backend. If Latency >> IntegrationLatency, the excess time is spent in API Gateway — likely VTL mapping template processing or cache misses.",
     },
@@ -570,11 +570,11 @@ Placing **CloudFront in front of API Gateway** gives you two caching layers (Clo
         "What HTTP status code does API Gateway return when a client exceeds the rate limit?",
       options: [
         "400 Bad Request",
-        "403 Forbidden",
         "429 Too Many Requests",
+        "403 Forbidden",
         "503 Service Unavailable",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "API Gateway returns HTTP 429 Too Many Requests when a client exceeds the configured rate limit. Clients should implement exponential backoff with jitter when receiving 429 responses.",
     },

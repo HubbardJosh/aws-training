@@ -19,11 +19,11 @@ export const efsGuide: ServiceGuide = {
             "Multiple EC2 instances in different Availability Zones need concurrent read/write access to the same file system. Which AWS storage service should be used?",
           options: [
             "Amazon EBS with Multi-Attach enabled",
-            "Amazon EFS — a shared NFS file system mountable by thousands of instances across all AZs",
             "Amazon S3 mounted via s3fs-fuse",
+            "Amazon EFS — a shared NFS file system mountable by thousands of instances across all AZs",
             "An EC2 instance acting as an NFS server",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "EFS is a shared POSIX-compliant NFS file system that can be mounted simultaneously by thousands of EC2 instances across all Availability Zones in a region. EBS Multi-Attach is limited to a single AZ and the io1/io2 volume type.",
         },
@@ -32,11 +32,11 @@ export const efsGuide: ServiceGuide = {
             "Which storage type is most appropriate for storing millions of discrete objects (images, logs) accessed via an API?",
           options: [
             "Amazon EFS — shared file system",
-            "Amazon EBS — block storage",
             "Amazon S3 — object storage",
+            "Amazon EBS — block storage",
             "Amazon FSx — managed file system",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Amazon S3 is purpose-built for storing and retrieving discrete objects at massive scale via HTTP/S API calls. It is not a mountable file system but excels for object storage, data lakes, and content distribution.",
         },
@@ -50,12 +50,12 @@ export const efsGuide: ServiceGuide = {
           question:
             "An EFS file system stores only 100 GB but needs consistent 500 MB/s throughput for a video processing workload. Which throughput mode should be used?",
           options: [
-            "Bursting throughput — it automatically bursts as needed",
             "Provisioned throughput — throughput is specified independently of storage size",
-            "Max I/O performance mode — it provides unlimited throughput",
             "General Purpose performance mode with enhanced networking",
+            "Max I/O performance mode — it provides unlimited throughput",
+            "Bursting throughput — it automatically bursts as needed",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Provisioned throughput mode allows you to specify throughput independently of storage size. With only 100 GB stored, bursting mode would provide very limited baseline throughput (50 MB/s per TB = ~5 MB/s baseline), which is insufficient for a 500 MB/s requirement.",
         },
@@ -63,12 +63,12 @@ export const efsGuide: ServiceGuide = {
           question:
             "Which EFS performance mode is recommended for highly parallelized big data analytics workloads?",
           options: [
-            "General Purpose mode — lowest latency for all workloads",
             "Max I/O mode — scales to higher aggregate throughput at the cost of slightly higher per-operation latency",
-            "Provisioned throughput mode — independent throughput configuration",
             "Bursting mode — provides credits for peak usage",
+            "General Purpose mode — lowest latency for all workloads",
+            "Provisioned throughput mode — independent throughput configuration",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Max I/O performance mode is designed for highly parallelized workloads that can tolerate higher per-operation latency in exchange for higher aggregate throughput and IOPS. General Purpose mode has the lowest latency but lower maximum aggregate throughput.",
         },
@@ -83,11 +83,11 @@ export const efsGuide: ServiceGuide = {
             "How much cheaper is EFS Infrequent Access (EFS-IA) storage compared to EFS Standard?",
           options: [
             "Up to 30% cheaper",
+            "The same price — EFS-IA only reduces retrieval costs",
             "Up to 60% cheaper",
             "Up to 92% cheaper",
-            "The same price — EFS-IA only reduces retrieval costs",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "EFS Infrequent Access (EFS-IA) storage costs up to 92% less than EFS Standard for files that are not frequently accessed. Lifecycle policies automatically move files to EFS-IA after a configurable number of days without access.",
         },
@@ -127,12 +127,12 @@ export const efsGuide: ServiceGuide = {
           question:
             "Which port must the EFS mount target's security group allow inbound from EC2 instances?",
           options: [
-            "TCP 443 (HTTPS)",
             "TCP 2049 (NFS)",
             "TCP 445 (SMB)",
+            "TCP 443 (HTTPS)",
             "UDP 111 (RPC)",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "EFS uses the NFS protocol on TCP port 2049. The mount target's security group must allow inbound TCP 2049 from the security groups of EC2 instances that need to mount the file system.",
         },
@@ -146,12 +146,12 @@ export const efsGuide: ServiceGuide = {
           question:
             "Multiple containers sharing an EFS file system need to be isolated from each other — each container should only see its own directory and use a specific user identity. Which EFS feature provides this?",
           options: [
+            "Separate EFS file systems for each container",
+            "IAM policies restricting each container's IAM role",
             "POSIX permissions set on each directory",
             "EFS Access Points — they enforce a POSIX user identity and root the access point at a specific directory",
-            "IAM policies restricting each container's IAM role",
-            "Separate EFS file systems for each container",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EFS Access Points enforce a specific POSIX UID/GID for all operations and can restrict access to a specific root directory within the file system. This enables multiple applications or containers to share one EFS file system with complete isolation.",
         },
@@ -179,11 +179,11 @@ export const efsGuide: ServiceGuide = {
             "A machine learning Lambda function needs to load a 5 GB model file on every cold start. The model is too large for the Lambda deployment package or /tmp storage. What is the recommended solution?",
           options: [
             "Increase the Lambda memory limit to accommodate the model",
+            "Use Lambda Layers to package the model separately from the function code",
             "Store the model in S3 and download it on every invocation",
             "Mount an EFS file system to the Lambda function and load the model from EFS",
-            "Use Lambda Layers to package the model separately from the function code",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "EFS provides persistent shared storage that Lambda functions can mount via VPC. A large ML model stored on EFS can be loaded at function initialization, persisting across invocations without re-downloading from S3 each time.",
         },
@@ -242,12 +242,12 @@ export const efsGuide: ServiceGuide = {
       question:
         "Ten EC2 instances across three Availability Zones need concurrent read/write access to the same set of configuration files. Which storage service is the correct choice?",
       options: [
+        "An EC2 instance running Samba as a file server",
+        "Amazon EFS — shared NFS file system mountable across all AZs simultaneously",
         "Amazon EBS with Multi-Attach",
         "Amazon S3 with a VPC endpoint",
-        "Amazon EFS — shared NFS file system mountable across all AZs simultaneously",
-        "An EC2 instance running Samba as a file server",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "EFS is the correct choice for shared file system access across multiple EC2 instances in different AZs. It is a fully managed NFS file system that scales automatically and supports thousands of simultaneous mounts.",
     },
@@ -281,12 +281,12 @@ export const efsGuide: ServiceGuide = {
       question:
         "How many EFS mount targets should be created for a multi-AZ VPC with three Availability Zones?",
       options: [
-        "One mount target for the entire VPC",
-        "Three mount targets — one per Availability Zone",
         "One per subnet in the primary AZ",
+        "One mount target for the entire VPC",
         "As many as the number of EC2 instances",
+        "Three mount targets — one per Availability Zone",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Best practice is to create one EFS mount target per Availability Zone. Instances connect to the mount target in their own AZ to avoid cross-AZ data transfer charges and minimize latency.",
     },
@@ -307,12 +307,12 @@ export const efsGuide: ServiceGuide = {
       question:
         "Multiple containerized applications sharing an EFS file system need to be isolated — each app should only access its own directory and operate as a specific user. Which feature provides this isolation?",
       options: [
+        "EFS Access Points with enforced POSIX UID/GID and root directory",
         "Separate IAM roles per container",
         "EFS lifecycle policies per application directory",
-        "EFS Access Points with enforced POSIX UID/GID and root directory",
         "POSIX chmod permissions set manually on each directory",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "EFS Access Points enforce a specific POSIX user identity (UID/GID) and root directory for all access through the access point, regardless of the OS user in the container. This provides strong isolation between applications sharing one file system.",
     },
@@ -334,11 +334,11 @@ export const efsGuide: ServiceGuide = {
         "Which EFS performance mode is appropriate for web serving and home directory workloads with low latency requirements?",
       options: [
         "Max I/O — provides the highest throughput",
+        "Bursting — accumulates credits during low-traffic periods",
         "General Purpose — lowest per-operation latency, appropriate for most workloads",
         "Provisioned throughput — independent of storage size",
-        "Bursting — accumulates credits during low-traffic periods",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "General Purpose performance mode provides the lowest per-operation latency and is recommended for the majority of workloads including web serving, CMS, and home directories. Max I/O is reserved for highly parallelized big data workloads.",
     },

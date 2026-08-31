@@ -19,11 +19,11 @@ Each EC2 instance runs on physical hardware inside an AWS data center, but you i
           question: "What is an Amazon EC2 instance?",
           options: [
             "A managed database service hosted by AWS",
-            "A virtual machine that runs on physical AWS hardware",
             "A serverless function that runs code in response to events",
             "A dedicated container orchestration cluster",
+            "A virtual machine that runs on physical AWS hardware",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "An EC2 instance is a virtual machine (VM) running on physical hardware in an AWS data center. You choose the OS, install software, and control network access — treating it like your own dedicated machine, but paying only for the time you use it.",
         },
@@ -31,12 +31,12 @@ Each EC2 instance runs on physical hardware inside an AWS data center, but you i
           question:
             "What is the primary advantage of using EC2 over purchasing physical servers?",
           options: [
-            "EC2 instances always run faster than physical servers",
-            "You can launch instances in minutes and pay only for what you use, with no upfront hardware cost",
             "EC2 is free for all workloads under 1 TB of storage",
+            "EC2 instances always run faster than physical servers",
             "EC2 instances never require patching or maintenance",
+            "You can launch instances in minutes and pay only for what you use, with no upfront hardware cost",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EC2 eliminates upfront hardware investment — you launch instances in minutes and pay by the hour or second. This lets you scale up quickly and avoid over-provisioning by terminating instances you no longer need.",
         },
@@ -58,10 +58,10 @@ For the Cloud Practitioner exam, the key concept is that you pick an instance ty
           options: [
             "T family (burstable general purpose)",
             "C family (compute optimized)",
-            "R or X family (memory optimized)",
             "I family (storage optimized)",
+            "R or X family (memory optimized)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The R and X families are Memory Optimized instances that provide large amounts of RAM. They are suited for in-memory databases, real-time big data analytics, and other memory-intensive workloads.",
         },
@@ -82,12 +82,12 @@ For the Cloud Practitioner exam, the key concept is that you pick an instance ty
           question:
             "In the instance name 'm5.large', what does each part represent?",
           options: [
-            "m = memory type, 5 = number of cores, large = storage size",
-            "m = general-purpose family, 5 = fifth generation, large = instance size",
             "m = managed service, 5 = version 5, large = capacity tier",
+            "m = memory type, 5 = number of cores, large = storage size",
             "m = multi-AZ capable, 5 = five 9s availability, large = high availability",
+            "m = general-purpose family, 5 = fifth generation, large = instance size",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The naming convention encodes: m = general-purpose family (M family), 5 = fifth generation of that family, large = the size tier within the family. This pattern applies across all EC2 instance types.",
         },
@@ -111,12 +111,12 @@ For the Cloud Practitioner exam, the key concept is that you pick an instance ty
           question:
             "Which EC2 purchasing option offers discounts up to 90% but can be interrupted by AWS with a two-minute warning?",
           options: [
+            "Savings Plans",
             "Reserved Instances",
             "Dedicated Hosts",
             "Spot Instances",
-            "Savings Plans",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Spot Instances offer discounts up to 90% by using spare EC2 capacity, but AWS can reclaim them with a two-minute warning. They are ideal for fault-tolerant, interruptible workloads like batch processing, big data, and CI/CD jobs.",
         },
@@ -125,11 +125,11 @@ For the Cloud Practitioner exam, the key concept is that you pick an instance ty
             "A company runs a steady, predictable web application workload and wants to reduce EC2 costs by up to 72%. Which purchasing option is most appropriate?",
           options: [
             "Spot Instances",
-            "On-Demand Instances",
             "Reserved Instances with a 1- or 3-year commitment",
             "Dedicated Hosts",
+            "On-Demand Instances",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Reserved Instances offer discounts up to 72% compared to On-Demand pricing in exchange for a 1- or 3-year commitment. They are ideal for steady, predictable workloads where you can forecast your capacity needs.",
         },
@@ -137,12 +137,12 @@ For the Cloud Practitioner exam, the key concept is that you pick an instance ty
           question:
             "When would you choose a Dedicated Host over other EC2 purchasing options?",
           options: [
-            "When you need the lowest possible cost for batch processing",
             "When software licenses are tied to physical cores/sockets, or compliance requires dedicated hardware",
-            "When you need instances that scale automatically with traffic",
             "When you need instances that span multiple Availability Zones",
+            "When you need the lowest possible cost for batch processing",
+            "When you need instances that scale automatically with traffic",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Dedicated Hosts provide a physical server entirely for your use. They are required when software licenses are tied to physical cores or sockets (like some Oracle or Windows licenses), or when compliance regulations prohibit sharing hardware with other AWS customers.",
         },
@@ -162,12 +162,12 @@ For the exam, remember that EBS persists independently of the instance lifecycle
           question:
             "What happens to data stored on an EC2 instance store when the instance is stopped or terminated?",
           options: [
-            "The data is automatically backed up to Amazon S3",
-            "The data persists and is available when the instance restarts",
             "The data is lost — instance store is ephemeral storage",
             "The data is moved to an EBS volume automatically",
+            "The data is automatically backed up to Amazon S3",
+            "The data persists and is available when the instance restarts",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Instance store is ephemeral — data is lost when the instance stops or terminates. Instance store is physically attached to the host hardware and provides very high performance, but should only be used for temporary data like caches or scratch files.",
         },
@@ -200,12 +200,12 @@ EC2 instances can be assigned an **IAM Instance Profile**, which grants the inst
           question:
             "What is the correct way to grant an EC2 application access to other AWS services like S3 or DynamoDB?",
           options: [
+            "Enable public access on S3 buckets so the EC2 instance can access them without credentials",
             "Store access keys in the application's configuration file on the instance",
             "Assign an IAM Instance Profile (with an IAM role) to the EC2 instance",
             "Create a dedicated IAM user and share the credentials via environment variables",
-            "Enable public access on S3 buckets so the EC2 instance can access them without credentials",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "IAM Instance Profiles grant an IAM role to the EC2 instance, allowing the application to call AWS services using automatically rotated temporary credentials. This is the secure approach — embedding long-term access keys in code or config files is a security risk.",
         },
@@ -214,11 +214,11 @@ EC2 instances can be assigned an **IAM Instance Profile**, which grants the inst
             "Security Groups in AWS are described as 'stateful'. What does this mean?",
           options: [
             "Security group rules are saved and cannot be changed after creation",
-            "If an inbound rule allows traffic, the return traffic is automatically allowed without an explicit outbound rule",
             "Security groups maintain a log of all traffic that passes through them",
             "Security groups apply the same rules to all instances in the same VPC",
+            "If an inbound rule allows traffic, the return traffic is automatically allowed without an explicit outbound rule",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Stateful means that return traffic is automatically allowed. If you allow inbound HTTP traffic on port 80, the response traffic back to the client is automatically permitted, even without an explicit outbound rule. This differs from NACLs, which are stateless.",
         },
@@ -227,11 +227,11 @@ EC2 instances can be assigned an **IAM Instance Profile**, which grants the inst
             "Why would you assign an Elastic IP address to an EC2 instance?",
           options: [
             "To enable the instance to communicate with other instances in the same VPC",
-            "To provide a static public IP address that does not change when the instance is stopped and restarted",
             "To allow the instance to access the internet without a NAT Gateway",
             "To improve network performance by bypassing the standard AWS network",
+            "To provide a static public IP address that does not change when the instance is stopped and restarted",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "When an EC2 instance is stopped and restarted, its public IP address changes. An Elastic IP is a static public IP that remains associated with your account until you release it, ensuring your instance is always reachable at the same address.",
         },
@@ -249,12 +249,12 @@ For high availability, you spread instances across multiple **Availability Zones
           question:
             "What combination of AWS services provides both automatic scaling and high availability for EC2 workloads?",
           options: [
+            "IAM roles and Security Groups",
             "CloudFormation and AWS Config",
             "Auto Scaling Groups and Elastic Load Balancer",
-            "IAM roles and Security Groups",
             "CloudWatch and AWS CloudTrail",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Auto Scaling Groups (ASGs) automatically add or remove instances based on demand, while an Elastic Load Balancer distributes traffic across healthy instances. Together they provide both scalability and high availability.",
         },
@@ -262,12 +262,12 @@ For high availability, you spread instances across multiple **Availability Zones
           question:
             "Why should production EC2 instances be spread across multiple Availability Zones?",
           options: [
-            "Multiple AZs provide faster network speeds between instances",
             "A failure in one AZ does not affect instances in other AZs, ensuring the application remains available",
             "Spreading across AZs reduces EC2 pricing through volume discounts",
             "Multiple AZs are required to use Elastic Load Balancers",
+            "Multiple AZs provide faster network speeds between instances",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Each Availability Zone is a separate physical data center with independent power, cooling, and networking. Spreading instances across AZs means a failure (power outage, hardware failure) in one AZ does not take down the entire application.",
         },
@@ -326,12 +326,12 @@ For high availability, you spread instances across multiple **Availability Zones
       question:
         "What is the key difference between Amazon EBS and EC2 instance store?",
       options: [
-        "EBS is faster; instance store is slower but cheaper",
-        "EBS is persistent and survives instance stops; instance store is ephemeral and lost on stop/terminate",
-        "EBS is only available for Linux instances; instance store works with all OS types",
         "EBS requires a Dedicated Host; instance store works with all instance types",
+        "EBS is faster; instance store is slower but cheaper",
+        "EBS is only available for Linux instances; instance store works with all OS types",
+        "EBS is persistent and survives instance stops; instance store is ephemeral and lost on stop/terminate",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "EBS (Elastic Block Store) is persistent network-attached storage that survives instance stops and terminations. Instance store is physically attached ephemeral storage that is lost when the instance stops or terminates.",
     },
@@ -339,12 +339,12 @@ For high availability, you spread instances across multiple **Availability Zones
       question:
         "An application running on EC2 needs to read objects from an S3 bucket. What is the most secure way to grant this access?",
       options: [
-        "Store AWS access keys in the application's source code",
-        "Create an IAM user and hardcode the credentials in the EC2 instance's environment variables",
         "Assign an IAM Instance Profile with an appropriate S3 read role to the EC2 instance",
+        "Store AWS access keys in the application's source code",
         "Make the S3 bucket public so the EC2 instance can access it without credentials",
+        "Create an IAM user and hardcode the credentials in the EC2 instance's environment variables",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "IAM Instance Profiles attach an IAM role to an EC2 instance, providing automatically rotated temporary credentials. The application retrieves credentials from the instance metadata endpoint — no hardcoded keys needed.",
     },
@@ -352,12 +352,12 @@ For high availability, you spread instances across multiple **Availability Zones
       question:
         "Which EC2 instance family would you choose for a high-traffic video transcoding workload that is CPU-intensive?",
       options: [
-        "T family (burstable general purpose)",
-        "R family (memory optimized)",
         "C family (compute optimized)",
+        "T family (burstable general purpose)",
         "I family (storage optimized)",
+        "R family (memory optimized)",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "The C family (Compute Optimized) provides a higher ratio of CPU to memory and is designed for CPU-intensive workloads like video transcoding, batch processing, high-performance web servers, and scientific modeling.",
     },
@@ -378,12 +378,12 @@ For high availability, you spread instances across multiple **Availability Zones
       question:
         "What does 'Reserved Instance' mean in the context of EC2 pricing?",
       options: [
-        "AWS reserves the instance for your exclusive use so no other customer can use that hardware",
-        "You commit to a 1- or 3-year term in exchange for discounts up to 72% compared to On-Demand pricing",
         "The instance is reserved for disaster recovery and does not run by default",
+        "AWS reserves the instance for your exclusive use so no other customer can use that hardware",
         "You reserve the right to launch instances in any region at any time",
+        "You commit to a 1- or 3-year term in exchange for discounts up to 72% compared to On-Demand pricing",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Reserved Instances are a billing commitment, not a reservation of physical hardware. You commit to using a specific instance type in a specific region for 1 or 3 years and receive discounts up to 72% compared to On-Demand pricing.",
     },
@@ -391,12 +391,12 @@ For high availability, you spread instances across multiple **Availability Zones
       question:
         "Which protocol is used to connect to a Linux EC2 instance, and what is used to authenticate?",
       options: [
+        "Telnet with an access key ID",
         "RDP with username and password",
         "SSH with a key pair (.pem file)",
         "HTTPS with IAM credentials",
-        "Telnet with an access key ID",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Linux EC2 instances use SSH for remote access. Authentication uses a key pair: AWS stores the public key and you keep the private key (.pem file). Windows instances use RDP with a password decrypted using the private key.",
     },

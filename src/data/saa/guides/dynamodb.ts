@@ -18,12 +18,12 @@ export const dynamodbGuide: ServiceGuide = {
           question:
             "A DynamoDB table stores user activity events. The design uses userId as the partition key and timestamp as the sort key. What type of primary key is this?",
           options: [
+            "Local secondary index key",
+            "Global secondary index key",
             "Simple primary key — a single partition key",
             "Composite primary key — a partition key combined with a sort key",
-            "Global secondary index key",
-            "Local secondary index key",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A composite primary key combines a partition key (userId) with a sort key (timestamp). This enables range queries and sorting within a user's partition, making it natural for time-series and one-to-many data.",
         },
@@ -62,8 +62,8 @@ export const dynamodbGuide: ServiceGuide = {
         {
           question:
             "How many eventually consistent reads per second does 1 RCU support for items up to 4 KB?",
-          options: ["0.5", "1", "2", "4"],
-          correctIndex: 2,
+          options: ["0.5", "2", "1", "4"],
+          correctIndex: 1,
           explanation:
             "One RCU supports one strongly consistent read OR two eventually consistent reads per second for items up to 4 KB. Eventually consistent reads are cheaper because they may return slightly stale data by reading from any replica.",
         },
@@ -71,12 +71,12 @@ export const dynamodbGuide: ServiceGuide = {
           question:
             "A startup is launching a new mobile app with completely unknown traffic patterns. Which DynamoDB capacity mode is most appropriate?",
           options: [
-            "Provisioned with Auto Scaling set to 0 minimum",
             "On-Demand — eliminates capacity planning and accommodates any request rate instantly",
-            "Provisioned with a very high maximum to handle worst-case traffic",
+            "Provisioned with Auto Scaling set to 0 minimum",
             "On-Demand for reads, Provisioned for writes",
+            "Provisioned with a very high maximum to handle worst-case traffic",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "On-Demand capacity mode is ideal for new applications with unknown traffic patterns. DynamoDB instantly scales to handle any volume without capacity planning, and you pay per request rather than for pre-allocated capacity.",
         },
@@ -104,11 +104,11 @@ export const dynamodbGuide: ServiceGuide = {
             "Which statement about Global Secondary Index (GSI) reads is correct?",
           options: [
             "GSIs support both strongly consistent and eventually consistent reads",
-            "GSIs support only eventually consistent reads",
-            "GSIs support only strongly consistent reads",
             "GSI read consistency depends on the base table's consistency setting",
+            "GSIs support only strongly consistent reads",
+            "GSIs support only eventually consistent reads",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "GSIs support only eventually consistent reads. Strongly consistent reads are only available on the base table or LSIs. This is a key difference between GSIs and LSIs that the exam frequently tests.",
         },
@@ -121,8 +121,8 @@ export const dynamodbGuide: ServiceGuide = {
         {
           question:
             "How long are DynamoDB Stream records retained before they expire?",
-          options: ["1 hour", "12 hours", "24 hours", "7 days"],
-          correctIndex: 2,
+          options: ["7 days", "12 hours", "1 hour", "24 hours"],
+          correctIndex: 3,
           explanation:
             "DynamoDB Stream records are retained for 24 hours. After this window, records are no longer available for processing. This is sufficient for near-real-time CDC patterns but not for long-term replay.",
         },
@@ -131,11 +131,11 @@ export const dynamodbGuide: ServiceGuide = {
             "Which DynamoDB Stream view type captures both the state of an item before and after a modification?",
           options: [
             "KEYS_ONLY",
-            "NEW_IMAGE",
             "OLD_IMAGE",
             "NEW_AND_OLD_IMAGES",
+            "NEW_IMAGE",
           ],
-          correctIndex: 3,
+          correctIndex: 2,
           explanation:
             "The NEW_AND_OLD_IMAGES stream view type captures both the old item state (before the change) and the new item state (after the change). This is useful for audit logging and computing diffs between versions.",
         },
@@ -149,12 +149,12 @@ export const dynamodbGuide: ServiceGuide = {
           question:
             "What conflict resolution strategy does DynamoDB Global Tables use when two replicas receive concurrent writes to the same item?",
           options: [
-            "The write with the highest timestamp wins (last-writer-wins)",
             "The write in the primary region always wins",
+            "The write with the highest timestamp wins (last-writer-wins)",
             "Both writes are preserved and merged using CRDT logic",
             "A conflict exception is thrown and the application must resolve it",
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
             "DynamoDB Global Tables use last-writer-wins conflict resolution based on timestamps. The write with the highest timestamp is accepted, and the conflicting write is discarded. Applications should design for this behavior.",
         },
@@ -181,24 +181,24 @@ export const dynamodbGuide: ServiceGuide = {
           question:
             "A DynamoDB table serves a product catalog that is read thousands of times per second but rarely updated. Which caching option delivers microsecond read latency with minimal code changes?",
           options: [
-            "Amazon ElastiCache Redis with lazy loading",
-            "DynamoDB Accelerator (DAX) — swap the DynamoDB client for the DAX client",
             "CloudFront with DynamoDB as a custom origin",
+            "Amazon ElastiCache Redis with lazy loading",
             "DynamoDB On-Demand mode with Global Tables",
+            "DynamoDB Accelerator (DAX) — swap the DynamoDB client for the DAX client",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "DAX delivers microsecond read latency for eventually consistent reads with minimal code changes — just swap the DynamoDB client for the DAX client. It is purpose-built for DynamoDB and maintains a write-through cache.",
         },
         {
           question: "When does DAX NOT improve DynamoDB read performance?",
           options: [
-            "For product catalog lookups with high read frequency",
             "For strongly consistent reads, which bypass the DAX cache and go directly to DynamoDB",
             "For session stores accessed by millions of users",
+            "For product catalog lookups with high read frequency",
             "For leaderboard data read by gaming clients",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Strongly consistent reads bypass the DAX cache and are served directly from DynamoDB, so DAX provides no latency benefit for them. DAX is most beneficial for eventually consistent reads on frequently accessed items.",
         },
@@ -244,12 +244,12 @@ export const dynamodbGuide: ServiceGuide = {
       question:
         "A DynamoDB table has a partition key of 'status' with values 'active' or 'inactive'. What problem will this cause at scale?",
       options: [
-        "DynamoDB will refuse to store items with only two partition key values",
         "Hot partitions — all traffic concentrates on one of two physical partitions, exhausting their throughput",
-        "Items cannot be queried without a sort key when there are only two partition key values",
+        "DynamoDB will refuse to store items with only two partition key values",
         "Global Tables cannot replicate tables with low-cardinality partition keys",
+        "Items cannot be queried without a sort key when there are only two partition key values",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "A low-cardinality partition key like 'status' creates hot partitions because all traffic for 'active' items goes to one partition. The solution is to choose a high-cardinality key or add a random suffix to distribute writes.",
     },
@@ -257,12 +257,12 @@ export const dynamodbGuide: ServiceGuide = {
       question:
         "Which DynamoDB index type must be created at table creation time and shares the base table's provisioned throughput?",
       options: [
+        "Primary Index",
         "Global Secondary Index (GSI)",
         "Local Secondary Index (LSI)",
-        "Primary Index",
         "Composite Index",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Local Secondary Indexes (LSIs) must be defined when the table is created — they cannot be added or removed afterward. LSIs share the base table's provisioned throughput and support both strongly consistent and eventually consistent reads.",
     },
@@ -270,12 +270,12 @@ export const dynamodbGuide: ServiceGuide = {
       question:
         "A Lambda function should be triggered automatically whenever a DynamoDB item is created or updated. Which feature enables this?",
       options: [
-        "DynamoDB Global Tables replication events",
         "DynamoDB Streams with a Lambda event source mapping",
+        "DynamoDB Global Tables replication events",
         "Amazon EventBridge with a DynamoDB change rule",
         "CloudWatch metric filter on DynamoDB write metrics",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "DynamoDB Streams capture item-level changes (creates, updates, deletes) and Lambda event source mappings process stream records automatically. This is the standard change data capture (CDC) pattern for DynamoDB.",
     },
@@ -283,20 +283,20 @@ export const dynamodbGuide: ServiceGuide = {
       question:
         "A globally distributed gaming application needs to allow players in US and EU to write to the same DynamoDB table with low latency. Which feature enables this?",
       options: [
-        "Cross-region read replicas with manual failover",
         "DynamoDB Global Tables providing multi-region, multi-active replication",
-        "DynamoDB Streams replicating data between two separate regional tables",
         "DAX clusters deployed in multiple regions with a shared cache",
+        "Cross-region read replicas with manual failover",
+        "DynamoDB Streams replicating data between two separate regional tables",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "DynamoDB Global Tables provide fully managed multi-region, multi-active replication. All replicas accept both reads and writes, giving players in each region low-latency access to the same data with automatic conflict resolution.",
     },
     {
       question:
         "How many Read Capacity Units (RCUs) are required to perform 10 strongly consistent reads per second of items that are 6 KB each?",
-      options: ["10", "15", "20", "30"],
-      correctIndex: 2,
+      options: ["20", "10", "30", "15"],
+      correctIndex: 0,
       explanation:
         "One RCU supports one strongly consistent read per second for items up to 4 KB. A 6 KB item requires 2 RCUs (ceiling of 6/4). For 10 reads/second: 10 × 2 = 20 RCUs.",
     },
@@ -305,11 +305,11 @@ export const dynamodbGuide: ServiceGuide = {
         "An existing DynamoDB table needs a new query pattern that filters by email address. The email attribute is not part of the primary key. What is the solution?",
       options: [
         "Create a Local Secondary Index on the email attribute",
-        "Create a Global Secondary Index (GSI) with email as the partition key",
         "Recreate the table with email as a sort key in a composite primary key",
         "Use a Scan with a FilterExpression on the email attribute",
+        "Create a Global Secondary Index (GSI) with email as the partition key",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A Global Secondary Index (GSI) with email as the partition key enables efficient queries on email. Unlike LSIs, GSIs can be added after table creation. Scan is inefficient at scale as it reads every item in the table.",
     },
@@ -331,11 +331,11 @@ export const dynamodbGuide: ServiceGuide = {
         "A company needs a DynamoDB table that can handle unpredictable traffic spikes without throttling errors and without the overhead of capacity management. Which capacity mode should be used?",
       options: [
         "Provisioned with Auto Scaling and a wide max capacity",
+        "DAX with On-Demand reads and Provisioned writes",
         "On-Demand — instantly accommodates any request rate with no capacity planning",
         "Provisioned with reserved capacity purchases for cost savings",
-        "DAX with On-Demand reads and Provisioned writes",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "On-Demand capacity mode instantly handles any request rate without throttling, with no capacity planning required. It charges per request rather than for pre-allocated capacity, making it ideal for unpredictable or highly variable workloads.",
     },

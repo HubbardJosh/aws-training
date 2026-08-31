@@ -68,12 +68,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs to ensure EC2 instances in a placement group have the lowest possible network latency between them. Which placement group strategy should be used?",
     options: [
-      "Spread placement group",
-      "Partition placement group",
       "Cluster placement group",
+      "Partition placement group",
+      "Spread placement group",
       "Regional placement group",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "Cluster placement groups pack instances close together within a single Availability Zone, providing the lowest network latency and highest throughput between instances. They are ideal for HPC and tightly coupled applications.",
     tags: ["ec2", "placement-group", "networking"],
@@ -87,12 +87,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company requires that its EC2 instances use dedicated physical servers due to regulatory compliance. No other customer's instances should share the hardware. Which option meets this requirement at the LOWEST cost?",
     options: [
+      "Reserved Instances (No Upfront)",
       "Dedicated Instances",
       "Dedicated Hosts",
       "On-Demand Instances",
-      "Reserved Instances (No Upfront)",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Dedicated Instances run on hardware dedicated to a single customer but do not provide visibility into or control over the underlying host. Dedicated Hosts provide the same isolation plus host-level control but are more expensive. Dedicated Instances are the lower-cost compliance option.",
     tags: ["ec2", "dedicated", "compliance"],
@@ -106,12 +106,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An EC2 instance stores critical temporary data on an instance store volume. The instance is stopped and then started again. What happens to the instance store data?",
     options: [
-      "The data persists across stop/start cycles",
       "The data is lost when the instance is stopped",
-      "The data is automatically backed up to S3",
       "The data is replicated to another instance store",
+      "The data persists across stop/start cycles",
+      "The data is automatically backed up to S3",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Instance store volumes are ephemeral — data is lost when the instance is stopped, hibernated, or terminated. Only a reboot preserves instance store data. For persistent storage, EBS volumes or S3 should be used instead.",
     tags: ["ec2", "instance-store", "storage"],
@@ -145,12 +145,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "Which EC2 instance type family is optimized for memory-intensive workloads such as in-memory databases and real-time processing of large datasets?",
     options: [
-      "C5 (Compute Optimized)",
       "R5 (Memory Optimized)",
-      "T3 (General Purpose Burstable)",
+      "C5 (Compute Optimized)",
       "P3 (Accelerated Computing)",
+      "T3 (General Purpose Burstable)",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "R-family instances (Memory Optimized) are designed for workloads that require large amounts of RAM, such as in-memory databases (Redis, Memcached), real-time big data analytics, and high-performance databases like SAP HANA.",
     tags: ["ec2", "instance-types", "memory"],
@@ -167,11 +167,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company wants to host a static website using Amazon S3. What must be configured on the S3 bucket to allow public read access to the website files?",
     options: [
       "Enable S3 Transfer Acceleration",
-      "Disable Block Public Access and attach a bucket policy allowing public reads",
       "Enable S3 Versioning",
+      "Disable Block Public Access and attach a bucket policy allowing public reads",
       "Configure an S3 Access Point",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "To serve a public static website, you must disable Block Public Access settings and attach a bucket policy that grants s3:GetObject to everyone (Principal: *). Block Public Access overrides bucket policies, so both steps are required.",
     tags: ["s3", "static-website", "bucket-policy"],
@@ -185,12 +185,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company stores infrequently accessed compliance documents in Amazon S3 that must be retrieved within minutes when needed. Which storage class provides the LOWEST cost while meeting this requirement?",
     options: [
-      "S3 Standard",
-      "S3 Standard-Infrequent Access (S3 Standard-IA)",
       "S3 Glacier Flexible Retrieval",
       "S3 One Zone-Infrequent Access",
+      "S3 Standard",
+      "S3 Standard-Infrequent Access (S3 Standard-IA)",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "S3 Standard-IA is designed for infrequently accessed data that still requires millisecond retrieval. It costs less than S3 Standard while providing the same durability and availability, making it the right fit for compliance documents needing quick but rare access.",
     tags: ["s3", "storage-class", "infrequent-access"],
@@ -223,12 +223,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application uploads many small objects to Amazon S3. A solutions architect notices high request costs. Which S3 feature can automatically move objects to cheaper storage classes based on access patterns without writing lifecycle rules?",
     options: [
+      "S3 Replication",
       "S3 Intelligent-Tiering",
       "S3 Standard-IA",
       "S3 Glacier Instant Retrieval",
-      "S3 Replication",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "S3 Intelligent-Tiering automatically moves objects between access tiers (Frequent, Infrequent, Archive Instant) based on changing access patterns, with no retrieval fees. It eliminates the need to manually write lifecycle rules for unpredictable workloads.",
     tags: ["s3", "intelligent-tiering", "cost-optimization"],
@@ -242,12 +242,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A financial institution requires that S3 objects cannot be deleted or overwritten for 7 years to meet regulatory requirements. Which S3 feature enforces this?",
     options: [
-      "S3 Versioning",
-      "S3 Object Lock in COMPLIANCE mode with a 7-year retention period",
-      "S3 Bucket Policy denying DeleteObject",
       "S3 MFA Delete",
+      "S3 Versioning",
+      "S3 Bucket Policy denying DeleteObject",
+      "S3 Object Lock in COMPLIANCE mode with a 7-year retention period",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "S3 Object Lock in COMPLIANCE mode prevents any user, including the root account, from deleting or overwriting objects before the retention period expires. This is the only S3 mechanism that satisfies SEC Rule 17a-4 and similar immutability regulations.",
     tags: ["s3", "object-lock", "compliance", "worm"],
@@ -261,12 +261,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs to replicate S3 objects from a bucket in us-east-1 to a bucket in eu-west-1. Objects must be encrypted with customer-managed KMS keys in both regions. Which combination of settings is required?",
     options: [
-      "Enable CRR; use the same KMS key ARN in both regions",
-      "Enable CRR; specify a destination KMS key in eu-west-1 and grant the S3 replication role kms:GenerateDataKey and kms:Decrypt permissions",
-      "Enable SRR; specify the destination bucket and enable SSE-S3",
       "Enable CRR; S3 automatically re-encrypts objects with the destination region's default KMS key",
+      "Enable SRR; specify the destination bucket and enable SSE-S3",
+      "Enable CRR; specify a destination KMS key in eu-west-1 and grant the S3 replication role kms:GenerateDataKey and kms:Decrypt permissions",
+      "Enable CRR; use the same KMS key ARN in both regions",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Cross-Region Replication (CRR) with SSE-KMS requires specifying a destination KMS key in the target region and granting the IAM replication role kms:Decrypt on the source key and kms:GenerateDataKey on the destination key. KMS keys are region-specific and cannot be shared across regions.",
     tags: ["s3", "crr", "kms", "encryption", "replication"],
@@ -300,12 +300,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to grant a partner company's AWS account read access to specific S3 objects without creating IAM users. What is the MOST secure approach?",
     options: [
+      "Make the S3 bucket public and share the object URLs",
       "Share the root account access keys with the partner",
       "Create a bucket policy that allows the partner's AWS account ID access to the specific objects",
-      "Make the S3 bucket public and share the object URLs",
       "Enable S3 Transfer Acceleration for the partner",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "A bucket policy using the aws:PrincipalAccount condition or specifying the partner's account ARN grants cross-account access securely without sharing credentials. This is the standard AWS pattern for cross-account S3 access.",
     tags: ["s3", "bucket-policy", "cross-account"],
@@ -321,12 +321,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs EC2 instances in a private subnet to download software updates from the internet without being directly accessible from the internet. What should be used?",
     options: [
-      "Internet Gateway attached to the private subnet",
-      "NAT Gateway in a public subnet with a route from the private subnet",
-      "VPC Peering connection to a public VPC",
       "AWS Direct Connect",
+      "VPC Peering connection to a public VPC",
+      "NAT Gateway in a public subnet with a route from the private subnet",
+      "Internet Gateway attached to the private subnet",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "A NAT Gateway placed in a public subnet allows instances in private subnets to initiate outbound internet connections while preventing inbound connections from the internet. The private subnet route table must point 0.0.0.0/0 to the NAT Gateway.",
     tags: ["vpc", "nat-gateway", "private-subnet"],
@@ -359,12 +359,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company has two VPCs in the same AWS account and region that need to communicate privately. VPC-A uses CIDR 10.0.0.0/16 and VPC-B uses 10.1.0.0/16. What is the SIMPLEST solution?",
     options: [
-      "Create an AWS Site-to-Site VPN between the two VPCs",
-      "Create a VPC Peering connection between VPC-A and VPC-B and update route tables in both VPCs",
-      "Deploy a Transit Gateway connecting both VPCs",
       "Use AWS PrivateLink to expose services between the VPCs",
+      "Deploy a Transit Gateway connecting both VPCs",
+      "Create a VPC Peering connection between VPC-A and VPC-B and update route tables in both VPCs",
+      "Create an AWS Site-to-Site VPN between the two VPCs",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "VPC Peering is the simplest solution for direct private connectivity between two VPCs with non-overlapping CIDRs. After creating the peering connection, you add routes in each VPC's route table pointing to the peer VPC CIDR via the peering connection.",
     tags: ["vpc", "peering", "networking"],
@@ -378,12 +378,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company has 10 VPCs that all need to communicate with each other and share a connection to on-premises. Managing VPC peering connections is becoming complex. What AWS service simplifies this hub-and-spoke networking?",
     options: [
-      "AWS Direct Connect Gateway",
       "AWS Transit Gateway",
       "VPC Peering with full mesh topology",
       "AWS VPN CloudHub",
+      "AWS Direct Connect Gateway",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "AWS Transit Gateway acts as a regional hub that allows transitive routing between thousands of VPCs and on-premises networks through a single gateway. It eliminates the need for complex full-mesh VPC peering and simplifies network management.",
     tags: ["vpc", "transit-gateway", "networking"],
@@ -397,12 +397,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application needs to connect to an AWS service (e.g., S3) from a private subnet without traffic traversing the public internet. Which feature should be used?",
     options: [
-      "NAT Gateway",
       "Internet Gateway",
       "VPC Endpoint",
       "AWS Direct Connect",
+      "NAT Gateway",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "VPC Endpoints (Gateway endpoints for S3/DynamoDB, Interface endpoints for other services) allow private subnet resources to communicate with AWS services over the AWS private network, without requiring internet access, a NAT gateway, or public IPs.",
     tags: ["vpc", "vpc-endpoint", "s3", "private"],
@@ -416,12 +416,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company runs a multi-tier application with web servers in public subnets and database servers in private subnets. The database servers need OS patches from the internet but must not be publicly accessible. What is the CORRECT architecture?",
     options: [
-      "Assign public IP addresses to the database servers",
-      "Place the database servers in a public subnet with a strict security group",
-      "Create a NAT Gateway in a public subnet; add a route in the private subnet route table to the NAT Gateway for 0.0.0.0/0",
       "Create an Internet Gateway and attach it directly to the private subnet",
+      "Place the database servers in a public subnet with a strict security group",
+      "Assign public IP addresses to the database servers",
+      "Create a NAT Gateway in a public subnet; add a route in the private subnet route table to the NAT Gateway for 0.0.0.0/0",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "A NAT Gateway in a public subnet (which has an Internet Gateway route) allows private subnet instances to initiate outbound traffic to the internet for updates while preventing unsolicited inbound connections. This is the standard AWS pattern for private subnet internet access.",
     tags: ["vpc", "nat-gateway", "multi-tier", "security"],
@@ -456,11 +456,11 @@ export const quizQuestions: QuizQuestion[] = [
       "Which VPC component controls traffic at the EC2 instance level and is stateful, meaning return traffic is automatically allowed?",
     options: [
       "Network ACL",
-      "Security Group",
       "Route Table",
       "Internet Gateway",
+      "Security Group",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Security groups are stateful firewalls that operate at the instance level. When you allow inbound traffic on a port, the response traffic is automatically allowed regardless of outbound rules. NACLs are stateless and require explicit rules for both directions.",
     tags: ["vpc", "security-group", "stateful"],
@@ -476,12 +476,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company runs an RDS MySQL database and wants to offload read traffic from the primary instance to improve performance. Which RDS feature should be used?",
     options: [
+      "RDS Automated Backups",
       "RDS Multi-AZ deployment",
       "RDS Read Replica",
-      "RDS Automated Backups",
       "RDS Proxy",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "RDS Read Replicas create asynchronous copies of the primary database that can serve SELECT queries, offloading read traffic and improving overall throughput. They can be created in the same Region, a different AZ, or a different Region.",
     tags: ["rds", "read-replica", "performance"],
@@ -495,12 +495,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs its RDS database to automatically failover to a standby instance in a different AZ with minimal downtime if the primary instance fails. Which RDS feature provides this?",
     options: [
-      "RDS Read Replica",
       "RDS Multi-AZ deployment",
+      "RDS Read Replica",
       "RDS Automated Backups",
       "RDS Performance Insights",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "RDS Multi-AZ maintains a synchronous standby replica in a different AZ. If the primary fails, RDS automatically fails over to the standby (typically within 1–2 minutes) by updating the DNS endpoint, requiring no application changes.",
     tags: ["rds", "multi-az", "high-availability", "failover"],
@@ -514,12 +514,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application uses Lambda functions that frequently open and close database connections to RDS, causing connection exhaustion. What is the BEST solution?",
     options: [
-      "Increase the RDS instance size to a larger DB instance class",
       "Use RDS Proxy to pool and share database connections",
       "Enable RDS Multi-AZ to distribute connection load",
+      "Increase the RDS instance size to a larger DB instance class",
       "Add a Read Replica and direct Lambda connections there",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "RDS Proxy maintains a pool of established connections to the database and allows Lambda functions (and other applications) to reuse them, dramatically reducing connection overhead. It is purpose-built for serverless workloads that open many short-lived connections.",
     tags: ["rds", "rds-proxy", "lambda", "connections"],
@@ -533,12 +533,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs a fully managed relational database that automatically scales storage and compute, supports MySQL and PostgreSQL compatibility, and provides up to 5x better performance than standard MySQL. Which AWS service meets these requirements?",
     options: [
-      "Amazon RDS for MySQL",
       "Amazon Aurora",
-      "Amazon DynamoDB",
       "Amazon Redshift",
+      "Amazon RDS for MySQL",
+      "Amazon DynamoDB",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Amazon Aurora is AWS's cloud-native relational database offering MySQL and PostgreSQL compatibility with up to 5x (MySQL) and 3x (PostgreSQL) better performance than standard engines. Aurora storage automatically grows in 10 GB increments up to 128 TB.",
     tags: ["rds", "aurora", "performance"],
@@ -552,12 +552,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company's RDS for PostgreSQL database is experiencing slow query performance. A solutions architect wants to identify the top SQL queries consuming the most database load. Which RDS feature should be used?",
     options: [
-      "RDS Enhanced Monitoring",
       "RDS Performance Insights",
-      "Amazon CloudWatch Logs",
+      "RDS Enhanced Monitoring",
       "AWS X-Ray",
+      "Amazon CloudWatch Logs",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "RDS Performance Insights provides a dashboard to analyze database load and identify the top SQL queries, wait events, users, and hosts consuming resources. It uses a DB Load metric that makes it easy to pinpoint performance bottlenecks.",
     tags: ["rds", "performance-insights", "troubleshooting"],
@@ -571,12 +571,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses Aurora MySQL with one primary and two read replicas. A solutions architect wants to ensure the application automatically connects to the primary for writes and distributes reads across replicas without changing the application's connection string. How can this be achieved?",
     options: [
-      "Use the cluster endpoint for all connections",
-      "Use the reader endpoint for write connections and individual instance endpoints for reads",
       "Use the cluster endpoint for writes and the reader endpoint for reads, both of which are provided automatically by Aurora",
+      "Use the reader endpoint for write connections and individual instance endpoints for reads",
       "Deploy an RDS Proxy and configure it with read/write splitting rules",
+      "Use the cluster endpoint for all connections",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "Aurora provides a cluster endpoint (always points to the primary) for write traffic and a reader endpoint that load-balances across all read replicas. Using both endpoints allows the application to separate reads and writes without tracking individual instance endpoints.",
     tags: ["rds", "aurora", "endpoints", "read-replica"],
@@ -608,8 +608,8 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "easy",
     type: "single",
     question: "By default, how long does Amazon RDS retain automated backups?",
-    options: ["1 day", "7 days", "35 days", "90 days"],
-    correctIndices: [1],
+    options: ["7 days", "1 day", "35 days", "90 days"],
+    correctIndices: [0],
     explanation:
       "RDS automated backups are retained for 7 days by default. This can be configured from 1 to 35 days. Automated backups enable point-in-time recovery within the retention window.",
     tags: ["rds", "backup", "retention"],
@@ -625,12 +625,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A developer needs a fully managed NoSQL database that can handle millions of requests per second with single-digit millisecond latency. Which AWS service is BEST suited?",
     options: [
+      "Amazon Redshift",
       "Amazon RDS for MySQL",
       "Amazon DynamoDB",
-      "Amazon Redshift",
       "Amazon Aurora",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Amazon DynamoDB is a fully managed, serverless NoSQL key-value and document database that delivers single-digit millisecond performance at any scale. It is designed for high-throughput, low-latency workloads with automatic scaling.",
     tags: ["dynamodb", "nosql", "performance"],
@@ -643,8 +643,8 @@ export const quizQuestions: QuizQuestion[] = [
     type: "single",
     question:
       "A DynamoDB table uses partition key 'userId' and sort key 'timestamp'. A query needs to find all items for a specific userId ordered by timestamp. Which DynamoDB operation is MOST efficient?",
-    options: ["Scan", "Query", "GetItem", "BatchGetItem"],
-    correctIndices: [1],
+    options: ["Query", "Scan", "BatchGetItem", "GetItem"],
+    correctIndices: [0],
     explanation:
       "The Query operation retrieves all items with a given partition key value and can filter/sort by sort key. It is far more efficient than a Scan, which reads every item in the table. Query only consumes capacity for items in the specified partition.",
     tags: ["dynamodb", "query", "scan", "performance"],
@@ -716,11 +716,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A DynamoDB table uses provisioned capacity. Read traffic spikes unpredictably during flash sales, causing ReadThrottle events. The company wants to automatically handle these spikes without over-provisioning. Which feature should be enabled?",
     options: [
       "DynamoDB Auto Scaling with target tracking",
-      "DynamoDB On-Demand capacity mode",
       "DynamoDB Accelerator (DAX)",
       "DynamoDB Streams with Lambda processing",
+      "DynamoDB On-Demand capacity mode",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "On-Demand capacity mode automatically handles sudden traffic spikes by instantly accommodating any request volume without throttling, with no capacity planning required. While it costs more per request than well-provisioned capacity, it eliminates throttling during unpredictable flash sales.",
     tags: ["dynamodb", "on-demand", "capacity", "throttling"],
@@ -754,12 +754,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "What are the two required components of a DynamoDB primary key when using a composite primary key?",
     options: [
-      "Partition key and Sort key",
+      "Partition key and Global Secondary Index",
       "Hash key and Range key (these are alternative names for Partition key and Sort key)",
       "Primary key and Foreign key",
-      "Partition key and Global Secondary Index",
+      "Partition key and Sort key",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "A DynamoDB composite primary key consists of a Partition key (also called hash key) and a Sort key (also called range key). The combination must be unique across all items. The partition key determines the physical partition, while the sort key allows ordering within a partition.",
     tags: ["dynamodb", "primary-key", "fundamentals"],
@@ -794,12 +794,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company has multiple developers who need the same set of permissions. What is the MOST efficient way to manage this in IAM?",
     options: [
-      "Attach individual policies to each IAM user",
       "Create an IAM group, attach the required policies to the group, and add all developers to the group",
       "Share a single IAM user account among all developers",
       "Give all developers administrator access",
+      "Attach individual policies to each IAM user",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "IAM groups allow you to assign permissions to multiple users at once. Adding users to a group is the most efficient and maintainable approach — when permissions need to change, you update the group policy once rather than updating each user individually.",
     tags: ["iam", "groups", "best-practices"],
@@ -814,11 +814,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company uses AWS Organizations with multiple accounts. The security team wants to prevent any account in the organization from disabling AWS CloudTrail, regardless of IAM permissions in individual accounts. What should be used?",
     options: [
       "IAM permission boundaries in each account",
-      "A Service Control Policy (SCP) attached to the organization root or OUs",
       "AWS Config rules in each account",
       "IAM role trust policies",
+      "A Service Control Policy (SCP) attached to the organization root or OUs",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Service Control Policies (SCPs) in AWS Organizations set maximum permission guardrails for all accounts in the organization. An SCP denying cloudtrail:StopLogging and cloudtrail:DeleteTrail cannot be overridden by any IAM policy in member accounts, even by account administrators.",
     tags: ["iam", "scp", "organizations", "cloudtrail"],
@@ -851,12 +851,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to allow users to assume an IAM role only when they are accessing from the corporate IP range. Which IAM policy element enforces this?",
     options: [
-      "Principal element in the role trust policy",
-      "Condition element with the aws:SourceIp condition key",
       "Resource element in the permissions policy",
       "Effect element set to Deny",
+      "Condition element with the aws:SourceIp condition key",
+      "Principal element in the role trust policy",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "The Condition element with aws:SourceIp allows you to restrict who can assume a role based on the requester's IP address. When added to a role's trust policy, users outside the specified IP range cannot successfully call sts:AssumeRole.",
     tags: ["iam", "conditions", "ip-restriction", "trust-policy"],
@@ -870,12 +870,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs to allow an IAM user to launch EC2 instances of only t3.micro type and no other instance types. Which IAM policy element achieves this with the LEAST privilege?",
     options: [
-      "Use a Deny policy for all EC2 actions except RunInstances",
       "Use an Allow policy for ec2:RunInstances with a Condition on ec2:InstanceType equaling t3.micro",
-      "Use a Resource ARN in the IAM policy scoped to t3.micro instances",
       "Attach an AWS managed policy for EC2 ReadOnly access",
+      "Use a Resource ARN in the IAM policy scoped to t3.micro instances",
+      "Use a Deny policy for all EC2 actions except RunInstances",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "The ec2:InstanceType condition key can be used in the Condition block of an IAM policy to restrict RunInstances calls to specific instance types. This follows the principle of least privilege by allowing only the exact instance type needed.",
     tags: ["iam", "conditions", "least-privilege", "ec2"],
@@ -909,12 +909,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "What is the IAM security best practice for the AWS account root user?",
     options: [
-      "Use the root user for day-to-day administrative tasks",
       "Enable MFA on the root user and avoid using it for routine tasks",
-      "Create access keys for the root user and store them securely",
+      "Use the root user for day-to-day administrative tasks",
       "Share root user credentials with the security team for emergency access",
+      "Create access keys for the root user and store them securely",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "AWS strongly recommends enabling MFA on the root account and using it only for tasks that specifically require root access (e.g., changing account settings, closing the account). All other tasks should be performed using IAM users or roles with appropriate permissions.",
     tags: ["iam", "root-user", "mfa", "best-practices"],
@@ -930,12 +930,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company runs a web application on EC2 instances and needs to distribute HTTP/HTTPS traffic across multiple instances with support for path-based routing. Which load balancer type should be used?",
     options: [
-      "Classic Load Balancer",
       "Network Load Balancer",
-      "Application Load Balancer",
+      "Classic Load Balancer",
       "Gateway Load Balancer",
+      "Application Load Balancer",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "Application Load Balancer (ALB) operates at Layer 7 (HTTP/HTTPS) and supports advanced routing features including path-based routing, host-based routing, and query string routing. It is the ideal choice for modern web applications and microservices.",
     tags: ["elb", "alb", "routing", "layer7"],
@@ -949,12 +949,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs to handle millions of TCP connections per second with ultra-low latency for a real-time trading application. Which load balancer type is MOST appropriate?",
     options: [
-      "Application Load Balancer",
-      "Classic Load Balancer",
       "Network Load Balancer",
+      "Classic Load Balancer",
       "Gateway Load Balancer",
+      "Application Load Balancer",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "Network Load Balancer (NLB) operates at Layer 4 (TCP/UDP) and is designed for extreme performance — millions of requests per second with sub-millisecond latency. It is ideal for latency-sensitive applications like gaming, IoT, and financial trading.",
     tags: ["elb", "nlb", "performance", "layer4"],
@@ -968,12 +968,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application requires that each user session is consistently routed to the same EC2 instance. Which ALB feature provides this behavior?",
     options: [
-      "Connection Draining",
       "Cross-Zone Load Balancing",
       "Sticky Sessions (Session Affinity)",
+      "Connection Draining",
       "Health Check configuration",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "Sticky sessions (session affinity) use cookies to bind a user's session to a specific target. When enabled, the ALB uses a cookie to route requests from the same client to the same target, ensuring session state on the instance is reachable throughout the session.",
     tags: ["elb", "alb", "sticky-sessions", "session-affinity"],
@@ -987,12 +987,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to deploy third-party network appliances (firewalls, intrusion detection systems) in AWS to inspect all inbound and outbound traffic. Which load balancer type enables this pattern?",
     options: [
+      "Gateway Load Balancer",
+      "Classic Load Balancer",
       "Application Load Balancer",
       "Network Load Balancer",
-      "Classic Load Balancer",
-      "Gateway Load Balancer",
     ],
-    correctIndices: [3],
+    correctIndices: [0],
     explanation:
       "Gateway Load Balancer (GWLB) operates at Layer 3 and enables deployment of, and traffic routing through, third-party virtual network appliances. It uses the GENEVE protocol to encapsulate traffic, making it ideal for inline security inspection scenarios.",
     tags: ["elb", "gwlb", "security", "network-appliances"],
@@ -1006,12 +1006,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An ALB serves two applications — one at /app1/* and one at /app2/* — on separate target groups. A user requests /app1/page. Which routing feature of ALB handles this?",
     options: [
-      "Host-based routing",
-      "Path-based routing",
       "Query string routing",
       "Weighted target group routing",
+      "Path-based routing",
+      "Host-based routing",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Path-based routing uses the URL path in the request to direct traffic to different target groups. Rules on the ALB listener match the path prefix (/app1/* vs /app2/*) and forward requests to the corresponding target group, enabling a single ALB to serve multiple applications.",
     tags: ["elb", "alb", "path-routing", "target-groups"],
@@ -1025,12 +1025,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect is configuring an ALB and wants to ensure that unhealthy instances stop receiving traffic within 30 seconds of failing. Which setting directly controls this?",
     options: [
-      "Deregistration delay",
-      "Health check interval and unhealthy threshold settings on the target group",
       "Connection idle timeout",
       "Load balancer deletion protection",
+      "Health check interval and unhealthy threshold settings on the target group",
+      "Deregistration delay",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "The health check interval (time between checks) multiplied by the unhealthy threshold (number of consecutive failures) determines how quickly the ALB marks a target unhealthy. Setting interval to 10 seconds and threshold to 3 means unhealthy targets are removed in ~30 seconds.",
     tags: ["elb", "alb", "health-checks", "target-group"],
@@ -1067,11 +1067,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company wants EC2 instances to automatically scale out when CPU utilization exceeds 70%. Which Auto Scaling policy type is MOST appropriate?",
     options: [
       "Simple scaling policy",
-      "Step scaling policy",
       "Target tracking scaling policy",
       "Scheduled scaling policy",
+      "Step scaling policy",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "Target tracking scaling automatically adjusts capacity to maintain a specified metric target (e.g., 70% CPU). AWS manages the scaling actions and the policy continuously adjusts capacity up or down to keep the metric at the target, similar to a thermostat.",
     tags: ["auto-scaling", "target-tracking", "cpu"],
@@ -1085,12 +1085,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company knows that its e-commerce application receives a traffic spike every Saturday morning at 9:00 AM. What Auto Scaling feature should be used to proactively add capacity before the spike?",
     options: [
+      "Scheduled scaling",
       "Target tracking scaling",
       "Step scaling",
-      "Scheduled scaling",
       "Predictive scaling",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "Scheduled scaling allows you to set specific times to scale in or out based on known traffic patterns. By scheduling an increase in minimum capacity before 9:00 AM on Saturdays, you ensure instances are warmed up and ready before the traffic spike arrives.",
     tags: ["auto-scaling", "scheduled-scaling", "planned-capacity"],
@@ -1104,12 +1104,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Auto Scaling group launches new EC2 instances behind an ALB. New instances are serving traffic before the application has fully started, causing errors. What is the BEST solution?",
     options: [
-      "Increase the ALB health check interval",
-      "Configure a lifecycle hook on the 'EC2_INSTANCE_LAUNCHING' transition to delay registration until the application is ready",
       "Increase the cooldown period for the scaling policy",
+      "Increase the ALB health check interval",
       "Use a larger instance type so the application starts faster",
+      "Configure a lifecycle hook on the 'EC2_INSTANCE_LAUNCHING' transition to delay registration until the application is ready",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Lifecycle hooks pause instance launch in a 'Pending:Wait' state, allowing custom actions (e.g., running a startup script, waiting for application initialization) before the instance is placed InService and receives traffic from the ALB.",
     tags: ["auto-scaling", "lifecycle-hooks", "alb"],
@@ -1123,12 +1123,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An Auto Scaling group has instances in us-east-1a, us-east-1b, and us-east-1c. After a scale-in event, which AZ does Auto Scaling terminate an instance from first by default?",
     options: [
-      "The AZ with the oldest launch template",
       "The AZ with the most instances to rebalance across AZs",
       "The AZ closest to the minimum capacity",
       "A random AZ",
+      "The AZ with the oldest launch template",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Auto Scaling's default termination policy first identifies the AZ with the most instances (or selects randomly among AZs with equal counts), then terminates the instance using the oldest launch configuration/template. This rebalancing behavior maintains even distribution across AZs.",
     tags: ["auto-scaling", "termination-policy", "scale-in"],
@@ -1161,12 +1161,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An application experiences long instance startup times (8–10 minutes). This causes Auto Scaling to be slow to respond to traffic spikes. What feature pre-initializes instances so they are ready to serve traffic quickly when needed?",
     options: [
-      "Scheduled scaling with longer lead times",
       "Auto Scaling Warm Pools",
-      "Launch Templates with user data optimization",
+      "Scheduled scaling with longer lead times",
       "Predictive scaling only",
+      "Launch Templates with user data optimization",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Warm Pools maintain a pool of pre-initialized instances in a stopped or running state. When Auto Scaling needs to scale out, it uses warm pool instances (which are already initialized) instead of launching new ones, dramatically reducing the time to serve traffic during spikes.",
     tags: ["auto-scaling", "warm-pools", "startup-time"],
@@ -1202,12 +1202,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company hosts a static website on S3 and wants to serve it globally with low latency and HTTPS support. Which AWS service should be placed in front of the S3 bucket?",
     options: [
+      "Elastic Load Balancing",
       "AWS Global Accelerator",
       "Amazon CloudFront",
-      "Elastic Load Balancing",
       "Amazon Route 53",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Amazon CloudFront is a CDN that caches content at edge locations worldwide, reducing latency for global users. It provides HTTPS support via SSL/TLS certificates from AWS Certificate Manager (ACM) and can serve S3 static content with Origin Access Control for security.",
     tags: ["cloudfront", "cdn", "s3", "https"],
@@ -1221,12 +1221,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses CloudFront to serve an S3 bucket. They want to ensure that users cannot access the S3 bucket directly — only through CloudFront. What is the RECOMMENDED approach?",
     options: [
+      "Enable S3 Block Public Access and use a signed URL for all requests",
       "Set the S3 bucket to private and enable CloudFront Origin Access Control (OAC)",
       "Enable S3 Transfer Acceleration and restrict access by IP",
       "Put a Network Load Balancer in front of S3",
-      "Enable S3 Block Public Access and use a signed URL for all requests",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Origin Access Control (OAC) is the recommended way to restrict S3 bucket access to CloudFront only. The S3 bucket policy allows access from the CloudFront distribution's OAC, and Block Public Access prevents direct S3 access from the internet.",
     tags: ["cloudfront", "s3", "oac", "security"],
@@ -1259,12 +1259,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company updated static assets on S3 but CloudFront is still serving the old cached versions. What is the FASTEST way to force CloudFront to serve the new content?",
     options: [
-      "Wait for the cache TTL to expire naturally",
-      "Create a new CloudFront distribution",
       "Create a CloudFront invalidation for the affected paths",
       "Change the S3 bucket name",
+      "Create a new CloudFront distribution",
+      "Wait for the cache TTL to expire naturally",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "A CloudFront invalidation removes objects from the edge cache before their TTL expires, forcing CloudFront to fetch fresh content from the origin on the next request. Invalidation can target specific paths or /* for all objects, though invalidations have a small cost.",
     tags: ["cloudfront", "cache", "invalidation", "ttl"],
@@ -1279,11 +1279,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company wants to run lightweight JavaScript code at CloudFront edge locations to customize HTTP responses (e.g., add security headers) with the lowest possible latency. Which feature is MOST appropriate?",
     options: [
       "Lambda@Edge",
+      "CloudFront Origin Shield",
       "CloudFront Functions",
       "AWS Lambda with CloudFront triggers",
-      "CloudFront Origin Shield",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "CloudFront Functions run at 600+ edge locations (all Points of Presence) with sub-millisecond startup times and are designed for lightweight, simple operations like header manipulation, URL rewrites, and request normalization. Lambda@Edge runs at regional edge caches and supports more complex logic but with higher latency and cost.",
     tags: ["cloudfront", "cloudfront-functions", "edge-computing"],
@@ -1298,11 +1298,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A CloudFront distribution serves an API from an ALB origin. The company wants to reduce load on the ALB by caching API responses. However, some API endpoints return user-specific data and should never be cached. How should the distribution be configured?",
     options: [
       "Set the default TTL to 0 for all cache behaviors",
-      "Create separate cache behaviors: one with caching enabled for public endpoints and one with TTL=0 for user-specific endpoints",
       "Enable Origin Shield for the ALB origin",
       "Use a Lambda@Edge function to bypass caching based on cookies",
+      "Create separate cache behaviors: one with caching enabled for public endpoints and one with TTL=0 for user-specific endpoints",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "CloudFront cache behaviors allow different caching configurations based on URL path patterns. By creating one behavior for public API paths (with caching) and another for user-specific paths (with TTL=0 or no caching), you get optimal performance without serving stale user-specific data.",
     tags: ["cloudfront", "cache-behavior", "ttl", "api"],
@@ -1316,12 +1316,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs to block CloudFront from serving content to users in specific countries due to licensing restrictions. Which CloudFront feature provides this?",
     options: [
-      "CloudFront Signed Cookies",
-      "WAF geographic match rules",
       "CloudFront geographic restriction (geo-restriction)",
+      "WAF geographic match rules",
+      "CloudFront Signed Cookies",
       "CloudFront Origin Shield",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "CloudFront's built-in geographic restriction (geo-restriction) allows you to create an allowlist or blocklist of countries. When a user from a blocked country requests content, CloudFront returns a 403 Forbidden response without forwarding the request to the origin.",
     tags: ["cloudfront", "geo-restriction", "compliance"],
@@ -1338,11 +1338,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company wants to route users to the AWS region with the lowest network latency. Which Route 53 routing policy should be used?",
     options: [
       "Simple routing",
-      "Weighted routing",
       "Latency-based routing",
+      "Weighted routing",
       "Geolocation routing",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "Latency-based routing directs users to the AWS region that provides the lowest latency. Route 53 measures actual network latency between users and AWS regions and routes requests to the endpoint with the best latency, improving application performance for global users.",
     tags: ["route53", "latency-routing", "global"],
@@ -1356,12 +1356,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company is performing a gradual blue-green deployment. They want to send 10% of traffic to the new (green) environment and 90% to the existing (blue) environment. Which Route 53 routing policy supports this?",
     options: [
-      "Failover routing",
       "Weighted routing",
-      "Latency-based routing",
       "Geolocation routing",
+      "Failover routing",
+      "Latency-based routing",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Weighted routing lets you assign relative weights to DNS records (e.g., weight 10 for green, weight 90 for blue). Route 53 routes traffic proportionally based on these weights, making it ideal for gradual deployments, A/B testing, and canary releases.",
     tags: ["route53", "weighted-routing", "blue-green", "deployment"],
@@ -1377,10 +1377,10 @@ export const quizQuestions: QuizQuestion[] = [
     options: [
       "Latency-based routing",
       "Weighted routing with 99/1 split",
-      "Failover routing with health checks",
       "Geolocation routing",
+      "Failover routing with health checks",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "Route 53 failover routing uses health checks to monitor the primary endpoint. If the health check fails, Route 53 automatically routes traffic to the secondary (DR) endpoint. This provides DNS-level failover for active-passive disaster recovery configurations.",
     tags: ["route53", "failover", "disaster-recovery", "health-check"],
@@ -1413,12 +1413,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company hosts a web application behind an ALB and wants to use a custom domain name (e.g., www.example.com) pointing to the ALB. Which Route 53 record type should be used?",
     options: [
+      "MX record pointing to the ALB",
       "CNAME record pointing to the ALB DNS name",
       "A record with an Alias target pointing to the ALB",
-      "MX record pointing to the ALB",
       "TXT record with the ALB DNS name",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Route 53 Alias records are the preferred way to point a domain (including the zone apex like example.com) to AWS resources like ALBs, CloudFront distributions, and S3 websites. Alias records are free (no charge per query) and support the zone apex, which CNAME records cannot.",
     tags: ["route53", "alias-record", "alb", "dns"],
@@ -1473,12 +1473,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to run backend code in response to HTTP requests without managing servers. Which AWS service is MOST appropriate?",
     options: [
-      "Amazon EC2 with Auto Scaling",
-      "AWS Lambda with Amazon API Gateway",
       "Amazon ECS on EC2",
+      "Amazon EC2 with Auto Scaling",
       "AWS Elastic Beanstalk",
+      "AWS Lambda with Amazon API Gateway",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "AWS Lambda is a serverless compute service that runs code in response to events without requiring server management. Combined with API Gateway, it forms the standard serverless architecture for HTTP-triggered backend logic, scaling automatically with request volume.",
     tags: ["lambda", "serverless", "api-gateway"],
@@ -1491,8 +1491,8 @@ export const quizQuestions: QuizQuestion[] = [
     type: "single",
     question:
       "What is the maximum execution timeout for a single AWS Lambda function invocation?",
-    options: ["30 seconds", "5 minutes", "15 minutes", "1 hour"],
-    correctIndices: [2],
+    options: ["15 minutes", "5 minutes", "30 seconds", "1 hour"],
+    correctIndices: [0],
     explanation:
       "AWS Lambda functions have a maximum execution timeout of 15 minutes (900 seconds). For workloads that require longer processing, consider AWS Step Functions, AWS Batch, or EC2-based solutions.",
     tags: ["lambda", "limits", "timeout"],
@@ -1525,12 +1525,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function is being throttled because it is consuming all available concurrency in the account, starving other functions. Which Lambda feature limits the maximum concurrent executions for this specific function?",
     options: [
-      "Provisioned Concurrency",
-      "Reserved Concurrency",
       "Lambda Dead Letter Queue",
       "Lambda Destinations",
+      "Provisioned Concurrency",
+      "Reserved Concurrency",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Reserved Concurrency sets both a maximum and a guarantee for a specific function. By setting reserved concurrency on the high-traffic function, you cap its concurrency usage, ensuring that remaining account-level concurrency remains available for other functions.",
     tags: ["lambda", "reserved-concurrency", "throttling"],
@@ -1602,12 +1602,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Lambda function needs to access a secret API key stored in AWS Secrets Manager. What is the MOST secure way to pass this secret to the function?",
     options: [
-      "Hard-code the API key in the Lambda function code",
       "Store the API key in a Lambda environment variable in plaintext",
       "Grant the Lambda execution role permissions to retrieve the secret from Secrets Manager at runtime",
       "Pass the API key as a query string parameter in the function's trigger",
+      "Hard-code the API key in the Lambda function code",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "The best practice is to grant the Lambda execution role the secretsmanager:GetSecretValue permission and retrieve the secret at runtime. This avoids storing secrets in code or environment variables, and Secrets Manager handles rotation automatically.",
     tags: ["lambda", "secrets-manager", "security"],
@@ -1623,12 +1623,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to decouple a web application from a backend processing service so that traffic spikes do not overwhelm the backend. Which AWS service is MOST appropriate?",
     options: [
-      "Amazon SNS",
-      "Amazon SQS",
-      "Amazon Kinesis Data Streams",
       "AWS Step Functions",
+      "Amazon SNS",
+      "Amazon Kinesis Data Streams",
+      "Amazon SQS",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Amazon SQS is a fully managed message queuing service that decouples application components. The web app puts messages into the queue, and the backend processes them at its own pace. SQS acts as a buffer, absorbing traffic spikes without overwhelming downstream services.",
     tags: ["sqs", "decoupling", "queuing"],
@@ -1642,12 +1642,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A financial application requires that messages in SQS are processed in the exact order they are sent, and that each message is processed only once. Which SQS queue type meets these requirements?",
     options: [
+      "Delay Queue",
       "Standard Queue",
       "FIFO Queue",
       "Dead Letter Queue",
-      "Delay Queue",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "SQS FIFO (First-In-First-Out) queues guarantee message ordering and exactly-once processing by deduplicating messages using a MessageDeduplicationId. Standard queues provide at-least-once delivery and best-effort ordering, which is insufficient for financial transactions.",
     tags: ["sqs", "fifo", "ordering", "exactly-once"],
@@ -1661,12 +1661,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A consumer receives an SQS message and needs 10 minutes to process it. The queue's visibility timeout is 30 seconds. What will happen if the consumer doesn't finish processing in time?",
     options: [
+      "The message is moved to the Dead Letter Queue",
+      "SQS automatically extends the visibility timeout",
       "The message is permanently deleted after 30 seconds",
       "The message becomes visible again in the queue and may be delivered to another consumer",
-      "SQS automatically extends the visibility timeout",
-      "The message is moved to the Dead Letter Queue",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "When the visibility timeout expires, SQS makes the message visible again so another consumer can receive it. To prevent this, the consumer should either extend the visibility timeout using ChangeMessageVisibility or the visibility timeout should be set longer than the maximum processing time.",
     tags: ["sqs", "visibility-timeout", "message-processing"],
@@ -1700,11 +1700,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A polling consumer frequently makes empty ReceiveMessage calls to SQS when the queue is empty, incurring unnecessary API costs. Which SQS feature reduces empty receives?",
     options: [
       "Short polling with a high WaitTimeSeconds",
-      "Long polling by setting WaitTimeSeconds to up to 20 seconds",
-      "Increasing the visibility timeout",
       "Enabling message retention",
+      "Increasing the visibility timeout",
+      "Long polling by setting WaitTimeSeconds to up to 20 seconds",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "SQS long polling (WaitTimeSeconds 1–20) keeps the connection open until a message arrives or the wait time expires. This eliminates empty responses when no messages are available, reducing API calls and costs compared to short polling, which returns immediately even if the queue is empty.",
     tags: ["sqs", "long-polling", "cost-optimization"],
@@ -1718,12 +1718,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses SQS to process orders. Some messages fail repeatedly and should be isolated after 3 failed processing attempts. What is the correct configuration?",
     options: [
-      "Set the visibility timeout to a very high value to prevent redelivery",
       "Create a Dead Letter Queue and configure a redrive policy on the main queue with maxReceiveCount=3",
-      "Enable FIFO queue with content-based deduplication",
       "Use SQS message attributes to track failure counts",
+      "Enable FIFO queue with content-based deduplication",
+      "Set the visibility timeout to a very high value to prevent redelivery",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "A Dead Letter Queue (DLQ) with a redrive policy captures messages that exceed the maxReceiveCount. After 3 failed receives, SQS moves the message to the DLQ, preventing poison pill messages from blocking the main queue and enabling separate analysis of failed messages.",
     tags: ["sqs", "dlq", "redrive-policy", "error-handling"],
@@ -1760,11 +1760,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company wants to send notifications to multiple endpoints (email, SMS, SQS, Lambda) whenever a new order is placed. Which AWS service implements this pub/sub pattern?",
     options: [
       "Amazon SQS",
-      "Amazon SNS",
       "Amazon EventBridge",
       "AWS Step Functions",
+      "Amazon SNS",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Amazon SNS (Simple Notification Service) is a fully managed pub/sub messaging service. Publishers send messages to SNS topics, and SNS fans out the message to all subscribed endpoints simultaneously — including email, SMS, SQS queues, Lambda functions, and HTTP endpoints.",
     tags: ["sns", "pub-sub", "fan-out", "notifications"],
@@ -1797,12 +1797,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs to send SMS alerts to on-call engineers when a CloudWatch alarm triggers. Which integration achieves this with the LEAST custom code?",
     options: [
-      "CloudWatch Alarm → Lambda → custom SMS API",
       "CloudWatch Alarm → SNS topic with SMS subscriptions",
-      "CloudWatch Alarm → SQS queue → EC2 SMS sender",
       "CloudWatch Alarm → EventBridge → custom target",
+      "CloudWatch Alarm → SQS queue → EC2 SMS sender",
+      "CloudWatch Alarm → Lambda → custom SMS API",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "CloudWatch Alarms natively support SNS as an action target. SNS topics can have phone number SMS subscriptions, delivering texts directly when the alarm triggers — no custom code required. This is the simplest, most reliable pattern for operational alerting.",
     tags: ["sns", "cloudwatch", "sms", "alerting"],
@@ -1834,12 +1834,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs ordered message delivery and exactly-once deduplication for notifications between microservices using SNS. Which SNS feature supports this?",
     options: [
-      "Standard SNS topic with SQS FIFO subscription",
-      "SNS FIFO topic with SQS FIFO queue subscribers",
       "Standard SNS topic with message filtering",
+      "Standard SNS topic with SQS FIFO subscription",
       "SNS topic with Lambda subscribers",
+      "SNS FIFO topic with SQS FIFO queue subscribers",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "SNS FIFO topics provide strict message ordering and deduplication within a message group. When subscribed to SQS FIFO queues, the entire fan-out pipeline maintains ordering and exactly-once semantics, which is required for scenarios like financial event processing.",
     tags: ["sns", "fifo", "ordering", "deduplication"],
@@ -1894,12 +1894,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs to monitor CPU utilization of EC2 instances and trigger an alarm when it exceeds 80% for 5 consecutive minutes. Which AWS service provides this capability?",
     options: [
-      "AWS CloudTrail",
       "Amazon CloudWatch",
-      "AWS Config",
+      "AWS CloudTrail",
       "AWS Trusted Advisor",
+      "AWS Config",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "Amazon CloudWatch collects metrics from AWS services including EC2 CPU utilization. CloudWatch Alarms evaluate metrics over a specified period and trigger actions (SNS notification, Auto Scaling, etc.) when thresholds are breached for a configured number of evaluation periods.",
     tags: ["cloudwatch", "alarms", "ec2", "cpu"],
@@ -1914,11 +1914,11 @@ export const quizQuestions: QuizQuestion[] = [
       "An application running on EC2 generates application logs that need to be centrally stored and searchable. Which CloudWatch feature handles this?",
     options: [
       "CloudWatch Metrics",
-      "CloudWatch Logs",
-      "CloudWatch Events",
       "CloudWatch Dashboards",
+      "CloudWatch Events",
+      "CloudWatch Logs",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "CloudWatch Logs collects, stores, and enables searching of log data from EC2 instances (via the CloudWatch agent), Lambda functions, API Gateway, and other services. Log groups and log streams organize logs, and CloudWatch Logs Insights enables SQL-like queries.",
     tags: ["cloudwatch", "logs", "centralized-logging"],
@@ -1932,12 +1932,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to monitor memory utilization of EC2 instances. They notice that memory metrics are not available in the default CloudWatch metrics. What must be done?",
     options: [
-      "Enable detailed monitoring on the EC2 instance",
       "Install and configure the CloudWatch agent on the EC2 instance",
-      "Create a custom CloudWatch dashboard",
       "Use AWS Systems Manager to push memory metrics automatically",
+      "Create a custom CloudWatch dashboard",
+      "Enable detailed monitoring on the EC2 instance",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "EC2 default CloudWatch metrics are hypervisor-level and do not include memory, disk usage, or other OS-level metrics. Installing the CloudWatch agent on the instance enables collection of custom metrics including memory, disk, and custom application metrics.",
     tags: ["cloudwatch", "agent", "custom-metrics", "memory"],
@@ -1970,12 +1970,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect needs to query large volumes of CloudWatch log data to find specific error patterns across multiple log groups. Which CloudWatch feature is MOST appropriate?",
     options: [
+      "CloudWatch Synthetics",
       "CloudWatch Metrics",
       "CloudWatch Logs Insights",
       "CloudWatch Contributor Insights",
-      "CloudWatch Synthetics",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "CloudWatch Logs Insights provides an interactive SQL-like query language for analyzing log data across one or more log groups. It can process billions of log events and return results in seconds, making it ideal for ad-hoc troubleshooting and pattern analysis.",
     tags: ["cloudwatch", "logs-insights", "querying"],
@@ -2030,12 +2030,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to define its entire AWS infrastructure as code and deploy it consistently across multiple environments. Which AWS service is MOST appropriate?",
     options: [
+      "AWS Service Catalog",
+      "AWS OpsWorks",
       "AWS Systems Manager",
       "AWS CloudFormation",
-      "AWS OpsWorks",
-      "AWS Service Catalog",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "AWS CloudFormation is an infrastructure-as-code service that allows you to define AWS resources in JSON or YAML templates. CloudFormation provisions and manages resources consistently, supports drift detection, and enables repeatable deployments across dev, staging, and production environments.",
     tags: ["cloudformation", "iac", "infrastructure-as-code"],
@@ -2049,12 +2049,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A CloudFormation stack update fails partway through and some resources are left in an inconsistent state. What does CloudFormation do by default?",
     options: [
-      "Leaves the stack in the partial state and requires manual cleanup",
       "Rolls back all changes to the previously known good state",
-      "Deletes the entire stack",
+      "Leaves the stack in the partial state and requires manual cleanup",
       "Pauses and waits for manual intervention",
+      "Deletes the entire stack",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "By default, CloudFormation automatically rolls back a failed stack update to the previous known good state (ROLLBACK_COMPLETE). This ensures that a failed update doesn't leave infrastructure in a partial, inconsistent state. Rollback on failure can be disabled for debugging.",
     tags: ["cloudformation", "rollback", "stack-update"],
@@ -2068,12 +2068,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A solutions architect wants to reuse common CloudFormation resource definitions (e.g., a standard VPC) across multiple stacks. What is the BEST CloudFormation feature for this?",
     options: [
-      "CloudFormation Parameters",
       "CloudFormation Mappings",
       "Nested Stacks (using AWS::CloudFormation::Stack resource)",
       "CloudFormation Conditions",
+      "CloudFormation Parameters",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "Nested stacks allow you to create modular, reusable CloudFormation templates. A parent stack references child stacks using the AWS::CloudFormation::Stack resource, enabling shared infrastructure components (VPCs, security groups) to be defined once and reused across multiple parent stacks.",
     tags: ["cloudformation", "nested-stacks", "reuse", "modularity"],
@@ -2087,12 +2087,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses CloudFormation to manage production infrastructure. They want to prevent accidental deletion of a critical RDS database when the stack is deleted. Which CloudFormation feature protects against this?",
     options: [
-      "CloudFormation StackSets",
-      "DeletionPolicy: Retain on the RDS resource",
       "CloudFormation drift detection",
+      "CloudFormation StackSets",
       "AWS Config rules",
+      "DeletionPolicy: Retain on the RDS resource",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "The DeletionPolicy attribute on a CloudFormation resource controls what happens when the resource is removed from the stack. Setting DeletionPolicy: Retain preserves the resource even when the stack is deleted, preventing accidental data loss for critical resources like databases.",
     tags: ["cloudformation", "deletion-policy", "retain", "rds"],
@@ -2107,11 +2107,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company needs to deploy the same CloudFormation stack across 20 AWS accounts and 3 regions simultaneously. Which CloudFormation feature enables this?",
     options: [
       "Nested Stacks",
-      "CloudFormation StackSets",
       "CloudFormation Change Sets",
+      "CloudFormation StackSets",
       "CloudFormation Drift Detection",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "CloudFormation StackSets extend CloudFormation stacks across multiple AWS accounts and regions with a single operation. With AWS Organizations integration, StackSets can automatically deploy to all accounts in specified OUs, making multi-account, multi-region deployments scalable.",
     tags: ["cloudformation", "stacksets", "multi-account", "multi-region"],
@@ -2205,11 +2205,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company uses ElastiCache for Redis to store user session data. They need the cache to scale horizontally to handle millions of concurrent users. Which Redis deployment mode enables horizontal scaling?",
     options: [
       "Redis Single-Node",
-      "Redis Cluster Mode Enabled",
       "Redis Multi-AZ with Cluster Mode Disabled",
       "Redis Replication Group without clustering",
+      "Redis Cluster Mode Enabled",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Redis Cluster Mode Enabled (also called Redis Cluster) shards data across multiple node groups (shards), enabling horizontal scaling of both read and write capacity. Each shard holds a subset of the keyspace, allowing the cache to scale beyond the memory of a single node.",
     tags: ["elasticache", "redis-cluster", "scaling", "sharding"],
@@ -2223,12 +2223,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to use ElastiCache for session management but needs the session store to survive a node failure without data loss. Which feature provides this?",
     options: [
-      "Memcached with multi-threading",
-      "Redis with Multi-AZ replication and automatic failover",
-      "Redis in single-node mode with snapshots",
       "Memcached with consistent hashing",
+      "Redis in single-node mode with snapshots",
+      "Redis with Multi-AZ replication and automatic failover",
+      "Memcached with multi-threading",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "ElastiCache for Redis with Multi-AZ creates a synchronous read replica in another AZ. If the primary node fails, ElastiCache automatically promotes the replica to primary within seconds, ensuring session data survives node failures with minimal downtime.",
     tags: ["elasticache", "redis", "multi-az", "failover", "sessions"],
@@ -2284,11 +2284,11 @@ export const quizQuestions: QuizQuestion[] = [
       "Multiple EC2 instances in different Availability Zones need to share the same file system simultaneously. Which AWS storage service supports this?",
     options: [
       "Amazon EBS (gp3 volume)",
+      "Amazon FSx for Windows File Server",
       "Amazon S3",
       "Amazon EFS (Elastic File System)",
-      "Amazon FSx for Windows File Server",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "Amazon EFS is a fully managed NFS file system that can be mounted concurrently by thousands of EC2 instances across multiple AZs in a region. EBS volumes can only be attached to one instance at a time (in most configurations), making EFS the right choice for shared concurrent access.",
     tags: ["efs", "shared-storage", "multi-az", "nfs"],
@@ -2303,11 +2303,11 @@ export const quizQuestions: QuizQuestion[] = [
       "A company hosts Windows-based EC2 instances that need a managed file system compatible with the SMB protocol. Which AWS service should be used?",
     options: [
       "Amazon EFS",
-      "Amazon FSx for Windows File Server",
-      "Amazon S3",
       "Amazon EBS Multi-Attach",
+      "Amazon S3",
+      "Amazon FSx for Windows File Server",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Amazon FSx for Windows File Server provides a fully managed Windows-native file system that supports the SMB protocol, Windows NTFS, Active Directory integration, and DFS namespaces. EFS uses NFS and is designed for Linux workloads.",
     tags: ["efs", "fsx", "windows", "smb"],
@@ -2321,12 +2321,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company's EFS file system stores large amounts of infrequently accessed files. They want to reduce storage costs automatically without changing their application. Which EFS feature moves cold files to cheaper storage?",
     options: [
-      "EFS Provisioned Throughput",
       "EFS Lifecycle Management with Infrequent Access (IA) storage class",
-      "EFS Intelligent-Tiering",
       "EFS Burst Throughput",
+      "EFS Intelligent-Tiering",
+      "EFS Provisioned Throughput",
     ],
-    correctIndices: [1],
+    correctIndices: [0],
     explanation:
       "EFS Lifecycle Management automatically moves files that haven't been accessed for a configurable period (7, 14, 30, 60, or 90 days) to the EFS Infrequent Access (IA) storage class, which costs significantly less than Standard. Files are seamlessly moved back to Standard on access.",
     tags: ["efs", "lifecycle", "infrequent-access", "cost"],
@@ -2340,12 +2340,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "An EFS file system is mounted by EC2 instances and needs to deliver consistent, high throughput for a media processing workload regardless of the amount of data stored. Which EFS throughput mode should be used?",
     options: [
-      "Bursting Throughput",
       "Elastic Throughput",
       "Provisioned Throughput",
+      "Bursting Throughput",
       "Enhanced Throughput",
     ],
-    correctIndices: [2],
+    correctIndices: [1],
     explanation:
       "EFS Provisioned Throughput allows you to specify a fixed throughput level (in MiB/s) independent of the file system's storage size. This is ideal for workloads requiring consistent, predictable throughput that exceeds what bursting credits can sustain.",
     tags: ["efs", "provisioned-throughput", "performance"],
@@ -2359,12 +2359,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to use Amazon EFS across multiple AWS regions for disaster recovery. How can EFS data be replicated to another region?",
     options: [
-      "EFS natively supports cross-region replication via the EFS console",
-      "Use AWS DataSync to replicate EFS data to another EFS file system in a different region",
       "Mount the EFS file system in both regions simultaneously",
+      "EFS natively supports cross-region replication via the EFS console",
       "Use S3 Cross-Region Replication to replicate EFS data",
+      "Use AWS DataSync to replicate EFS data to another EFS file system in a different region",
     ],
-    correctIndices: [0],
+    correctIndices: [1],
     explanation:
       "Amazon EFS Replication enables automatic, continuous replication to another EFS file system in a different region with a recovery point objective (RPO) of minutes. This is configured directly in the EFS console and requires no custom tooling.",
     tags: ["efs", "replication", "disaster-recovery", "cross-region"],
@@ -2400,12 +2400,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs to archive compliance records that must be retained for 7 years but are rarely accessed. Cost is the primary concern. Which S3 storage class is MOST cost-effective?",
     options: [
-      "S3 Standard",
-      "S3 Standard-IA",
       "S3 Glacier Deep Archive",
       "S3 Glacier Instant Retrieval",
+      "S3 Standard-IA",
+      "S3 Standard",
     ],
-    correctIndices: [2],
+    correctIndices: [0],
     explanation:
       "S3 Glacier Deep Archive is the lowest-cost S3 storage class, designed for data that is rarely accessed and can tolerate retrieval times of 12 hours (Standard retrieval) or 48 hours (Bulk retrieval). At roughly $0.00099/GB-month, it is ideal for long-term compliance archiving.",
     tags: ["s3-glacier", "deep-archive", "cost", "compliance"],
@@ -2419,12 +2419,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company stores archived medical images in S3 Glacier Flexible Retrieval. Occasionally, an urgent request requires an image within 5 minutes. Which retrieval option meets this requirement?",
     options: [
-      "Standard retrieval (3-5 hours)",
       "Bulk retrieval (5-12 hours)",
-      "Expedited retrieval (1-5 minutes)",
       "Instant retrieval (milliseconds)",
+      "Standard retrieval (3-5 hours)",
+      "Expedited retrieval (1-5 minutes)",
     ],
-    correctIndices: [2],
+    correctIndices: [3],
     explanation:
       "Expedited retrievals from S3 Glacier Flexible Retrieval typically complete within 1–5 minutes and are available for archives under 250 MB. Provisioned retrieval capacity can be purchased to guarantee expedited retrieval capacity is available when needed.",
     tags: ["s3-glacier", "expedited-retrieval", "retrieval-options"],
@@ -2438,12 +2438,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to prevent anyone from deleting Glacier archives for the duration of a regulatory hold (up to 10 years), even AWS support. Which feature enforces this?",
     options: [
-      "Glacier Vault Lock with a Compliance control policy",
       "S3 Bucket Policy with Deny Delete",
-      "IAM policy denying glacier:DeleteArchive",
       "S3 Object Lock in Governance mode",
+      "IAM policy denying glacier:DeleteArchive",
+      "Glacier Vault Lock with a Compliance control policy",
     ],
-    correctIndices: [0],
+    correctIndices: [3],
     explanation:
       "Glacier Vault Lock enforces compliance controls by locking a vault policy permanently. Once locked, no one — including the root account or AWS — can delete archives before the retention period expires. This satisfies SEC Rule 17a-4(f), HIPAA, and similar immutability requirements.",
     tags: ["s3-glacier", "vault-lock", "compliance", "worm"],
@@ -2456,8 +2456,8 @@ export const quizQuestions: QuizQuestion[] = [
     type: "single",
     question:
       "What is the minimum storage duration charge for objects stored in S3 Glacier Flexible Retrieval?",
-    options: ["30 days", "60 days", "90 days", "180 days"],
-    correctIndices: [2],
+    options: ["30 days", "90 days", "180 days", "60 days"],
+    correctIndices: [1],
     explanation:
       "S3 Glacier Flexible Retrieval has a minimum storage duration of 90 days. Objects deleted, overwritten, or transitioned before 90 days incur a pro-rated early deletion fee for the remaining days. S3 Glacier Deep Archive has a minimum of 180 days.",
     tags: ["s3-glacier", "minimum-storage", "pricing"],
@@ -2471,12 +2471,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses S3 Glacier Flexible Retrieval and needs to retrieve archives urgently but finds that Expedited retrieval is being throttled. What can be provisioned to guarantee Expedited retrieval capacity?",
     options: [
-      "Dedicated Glacier instances",
-      "Provisioned Retrieval Capacity units",
-      "S3 Transfer Acceleration for Glacier",
       "Reserved Vault Capacity",
+      "S3 Transfer Acceleration for Glacier",
+      "Provisioned Retrieval Capacity units",
+      "Dedicated Glacier instances",
     ],
-    correctIndices: [1],
+    correctIndices: [2],
     explanation:
       "Provisioned Retrieval Capacity guarantees that Expedited retrievals will not be throttled. Each unit of provisioned capacity ensures that at least 3 Expedited retrievals can be performed every 5 minutes and provides up to 150 MB/s of retrieval throughput.",
     tags: ["s3-glacier", "provisioned-capacity", "expedited-retrieval"],
@@ -2512,12 +2512,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company needs to collect and process streaming clickstream data from millions of website visitors in real time. Which AWS service is MOST appropriate?",
     options: [
-      "Amazon SQS",
-      "Amazon Kinesis Data Streams",
       "Amazon S3",
       "AWS Batch",
+      "Amazon SQS",
+      "Amazon Kinesis Data Streams",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Amazon Kinesis Data Streams is designed for real-time ingestion and processing of large streams of data records. It supports multiple consumers reading from the same stream simultaneously, making it ideal for real-time analytics on high-volume event streams like clickstream data.",
     tags: ["kinesis", "streaming", "real-time", "clickstream"],
@@ -2550,12 +2550,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A Kinesis Data Stream is experiencing high read throughput from multiple consumers. The stream has 4 shards and each consumer is hitting the 2 MB/s read limit per shard. What is the BEST solution to increase read throughput without re-sharding?",
     options: [
+      "Convert the stream to a Kinesis Data Firehose",
+      "Add more producers to the stream",
       "Increase the retention period of the stream",
       "Enable Enhanced Fan-Out for each consumer",
-      "Add more producers to the stream",
-      "Convert the stream to a Kinesis Data Firehose",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "Enhanced Fan-Out provides each registered consumer with a dedicated 2 MB/s throughput per shard via HTTP/2 push, rather than sharing the 2 MB/s limit. With n consumers using Enhanced Fan-Out, total read throughput becomes n × 2 MB/s per shard.",
     tags: ["kinesis", "enhanced-fan-out", "throughput", "consumers"],
@@ -2607,12 +2607,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company uses Kinesis Data Firehose to deliver streaming data to S3. They need to transform the records (e.g., convert JSON to Parquet) before delivery. Which Firehose feature supports in-stream transformation?",
     options: [
-      "Kinesis Data Analytics for Apache Flink",
-      "Kinesis Firehose data transformation using AWS Lambda",
       "Kinesis Firehose format conversion to Parquet/ORC via built-in schema integration with Glue",
       "Both B and C are valid approaches",
+      "Kinesis Firehose data transformation using AWS Lambda",
+      "Kinesis Data Analytics for Apache Flink",
     ],
-    correctIndices: [3],
+    correctIndices: [1],
     explanation:
       "Kinesis Data Firehose supports two transformation mechanisms: Lambda-based transformation (invoke a Lambda function to process each batch) and built-in format conversion (convert JSON to Parquet or ORC using an AWS Glue Data Catalog schema). Both are valid depending on the use case.",
     tags: ["kinesis", "firehose", "transformation", "lambda", "glue"],
@@ -2705,12 +2705,12 @@ export const quizQuestions: QuizQuestion[] = [
     question:
       "A company wants to quickly add protection against the OWASP Top 10 vulnerabilities to their CloudFront distribution without writing custom WAF rules. What is the EASIEST approach?",
     options: [
+      "Use Amazon GuardDuty with WAF integration",
+      "Enable AWS Shield Advanced",
       "Write custom regex rules for each OWASP vulnerability",
       "Use AWS WAF Managed Rule Groups (e.g., AWS Managed Rules for Core Rule Set)",
-      "Enable AWS Shield Advanced",
-      "Use Amazon GuardDuty with WAF integration",
     ],
-    correctIndices: [1],
+    correctIndices: [3],
     explanation:
       "AWS Managed Rule Groups are pre-configured rule sets maintained by AWS and AWS Marketplace sellers that protect against common threats like the OWASP Top 10. The AWS Core Rule Set (CRS) covers SQL injection, XSS, and other common vulnerabilities without any rule authoring.",
     tags: ["waf", "managed-rules", "owasp", "crs"],

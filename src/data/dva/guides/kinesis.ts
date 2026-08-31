@@ -20,8 +20,8 @@ export const kinesisGuide: ServiceGuide = {
         {
           question:
             "What is the minimum buffer interval for Kinesis Data Firehose, making it near-real-time rather than truly real-time?",
-          options: ["1 second", "10 seconds", "60 seconds", "5 minutes"],
-          correctIndex: 2,
+          options: ["5 minutes", "1 second", "10 seconds", "60 seconds"],
+          correctIndex: 3,
           explanation:
             "Kinesis Data Firehose has a minimum buffer interval of 60 seconds. Data is held in the buffer until either the size threshold or the time threshold is reached. This means Firehose is near-real-time, not sub-second like Kinesis Data Streams.",
         },
@@ -42,12 +42,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "Which Kinesis service is best suited for windowed aggregations and stateful stream processing?",
           options: [
-            "Kinesis Data Streams with KCL",
-            "Kinesis Data Firehose with Lambda transformation",
-            "Amazon Managed Service for Apache Flink",
             "Kinesis Data Streams with Enhanced Fan-Out",
+            "Kinesis Data Firehose with Lambda transformation",
+            "Kinesis Data Streams with KCL",
+            "Amazon Managed Service for Apache Flink",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics) runs managed Apache Flink applications that support the full Flink API including windowed aggregations, stateful processing, complex event processing, and stream joins.",
         },
@@ -80,12 +80,12 @@ The **partition key** you assign to each record determines which shard receives 
           question:
             "A stream has 3 applications all reading from the same shard using standard polling. What read throughput does each consumer get?",
           options: [
-            "2 MB/s each, since Kinesis scales automatically",
             "They share the 2 MB/s shard read capacity",
-            "6 MB/s total, since consumers add capacity",
             "The first consumer gets 2 MB/s; others get nothing",
+            "6 MB/s total, since consumers add capacity",
+            "2 MB/s each, since Kinesis scales automatically",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The 2 MB/s read capacity per shard is shared among all standard polling consumers. Three consumers on one shard share that 2 MB/s budget. Enhanced Fan-Out (EFO) solves this by giving each registered consumer its own dedicated 2 MB/s.",
         },
@@ -93,12 +93,12 @@ The **partition key** you assign to each record determines which shard receives 
           question:
             "What exception is thrown when a hot shard's write capacity is exceeded due to a low-cardinality partition key?",
           options: [
-            "ThrottlingException",
-            "ProvisionedThroughputExceededException",
             "ShardCapacityExceededException",
+            "ThrottlingException",
             "ResourceInUseException",
+            "ProvisionedThroughputExceededException",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "ProvisionedThroughputExceededException is thrown when a shard's write or read throughput limits are exceeded. This is commonly caused by hot shards resulting from low-cardinality partition keys that concentrate traffic on a small number of shards.",
         },
@@ -115,8 +115,8 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
         {
           question:
             "What is the maximum number of records that can be sent in a single PutRecords API call?",
-          options: ["10", "100", "500", "1,000"],
-          correctIndex: 2,
+          options: ["1,000", "100", "10", "500"],
+          correctIndex: 3,
           explanation:
             "PutRecords batches up to 500 records in a single API call. It returns individual success or failure status for each record, so you can retry only the failed records rather than the entire batch.",
         },
@@ -124,20 +124,20 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
           question:
             "What is an important caveat when using the Kinesis Producer Library (KPL) for record aggregation?",
           options: [
+            "KPL increases per-shard costs due to additional API calls",
+            "KPL does not support custom partition keys",
             "KPL can only send records to FIFO streams",
             "KPL-aggregated records must be deaggregated by a KCL consumer or deaggregation library",
-            "KPL does not support custom partition keys",
-            "KPL increases per-shard costs due to additional API calls",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "KPL aggregates multiple small records into a single Kinesis record. Standard GetRecords calls return the aggregated blob as-is — consumers must use the KCL or an explicit deaggregation library to unpack the individual records from the aggregated blob.",
         },
         {
           question:
             "What is the maximum size of a single Kinesis Data Streams record payload?",
-          options: ["256 KB", "512 KB", "1 MB", "5 MB"],
-          correctIndex: 2,
+          options: ["5 MB", "256 KB", "512 KB", "1 MB"],
+          correctIndex: 3,
           explanation:
             "Each Kinesis Data Streams record payload can be up to 1 MB. The data is base64-encoded in API calls. For larger data, you would need to store the data elsewhere (e.g., S3) and send a reference in the stream.",
         },
@@ -156,8 +156,8 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
         {
           question:
             "What is the maximum number of Enhanced Fan-Out (EFO) consumers that can be registered per Kinesis stream?",
-          options: ["5", "10", "20", "50"],
-          correctIndex: 2,
+          options: ["20", "5", "50", "10"],
+          correctIndex: 0,
           explanation:
             "Up to 20 Enhanced Fan-Out consumers can be registered per stream. Each EFO consumer gets its own dedicated 2 MB/s per shard via HTTP/2 push, without sharing throughput with other consumers.",
         },
@@ -165,12 +165,12 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
           question:
             "A Lambda function processing Kinesis records keeps failing on one bad record in a batch, blocking the entire shard. What configuration helps isolate the problematic record?",
           options: [
-            "Increase the batch size to dilute the bad record",
-            "Enable BisectBatchOnFunctionError to split failing batches in half",
             "Reduce the shard count to limit parallelism",
+            "Increase the batch size to dilute the bad record",
             "Enable Enhanced Fan-Out to separate the failing consumer",
+            "Enable BisectBatchOnFunctionError to split failing batches in half",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "BisectBatchOnFunctionError splits a failing batch in half on each retry, progressively isolating the problematic record. This prevents one bad record (poison pill) from blocking the entire shard indefinitely.",
         },
@@ -178,12 +178,12 @@ Every record contains the actual data payload (up to 1 MB, base64-encoded in the
           question:
             "How does Lambda scale when consuming from a Kinesis Data Stream?",
           options: [
-            "One Lambda function processes all shards sequentially",
-            "Lambda auto-scales based on the number of records per shard",
             "One concurrent Lambda invocation per shard",
+            "Lambda auto-scales based on the number of records per shard",
+            "One Lambda function processes all shards sequentially",
             "Lambda scales based on payload size, not shard count",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Lambda creates one concurrent invocation per shard when consuming from Kinesis via event source mapping. To increase Lambda parallelism, you increase the number of shards in the stream.",
         },
@@ -201,12 +201,12 @@ Two capabilities make Firehose more powerful than a simple forwarder. **Lambda t
           question:
             "Which of the following is NOT a supported Kinesis Data Firehose destination?",
           options: [
+            "Amazon DynamoDB",
             "Amazon S3",
             "Amazon Redshift",
-            "Amazon DynamoDB",
             "Amazon OpenSearch Service",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Amazon DynamoDB is not a supported Kinesis Data Firehose destination. Firehose delivers to S3, Redshift (via S3 staging), OpenSearch Service, Splunk, and HTTP endpoints. For DynamoDB ingestion, you would use Kinesis Data Streams with a Lambda consumer.",
         },
@@ -214,12 +214,12 @@ Two capabilities make Firehose more powerful than a simple forwarder. **Lambda t
           question:
             "A Kinesis Firehose Lambda transformation function takes 6 minutes to process a batch. What happens?",
           options: [
-            "Firehose automatically increases the timeout and waits",
-            "The transformation times out; records go to the S3 error bucket",
-            "Firehose delivers the untransformed records to the destination",
             "Firehose retries with a smaller batch until it succeeds",
+            "Firehose delivers the untransformed records to the destination",
+            "The transformation times out; records go to the S3 error bucket",
+            "Firehose automatically increases the timeout and waits",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda transformation functions must return results within 5 minutes. If the function exceeds this timeout, the transformation fails and those records are routed to the configured S3 error bucket rather than the main destination.",
         },
@@ -228,11 +228,11 @@ Two capabilities make Firehose more powerful than a simple forwarder. **Lambda t
             "What Firehose feature converts JSON records to Parquet or ORC format on the fly for cost-efficient Athena queries?",
           options: [
             "Lambda transformation",
-            "Format conversion using AWS Glue Data Catalog",
-            "S3 intelligent tiering",
             "Compression with Snappy",
+            "S3 intelligent tiering",
+            "Format conversion using AWS Glue Data Catalog",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Format conversion uses AWS Glue Data Catalog schema definitions to convert JSON records to columnar formats (Parquet or ORC) on the fly. Columnar formats can reduce Athena query costs by 90% or more compared to JSON or CSV.",
         },
@@ -250,12 +250,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "Which programming languages are supported for writing applications on Amazon Managed Service for Apache Flink?",
           options: [
+            "Go and Rust",
             "Only SQL",
             "Java, Scala, or Python",
             "JavaScript and TypeScript only",
-            "Go and Rust",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Amazon Managed Service for Apache Flink supports Flink applications written in Java, Scala, or Python. A legacy SQL mode is also available but Apache Flink applications using the full Flink API are preferred for new development.",
         },
@@ -263,12 +263,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "What operational burden does Amazon Managed Service for Apache Flink remove compared to self-managed Flink?",
           options: [
-            "The need to write Flink application code",
             "Cluster management, auto-scaling, checkpointing, and failure recovery",
+            "The need to write Flink application code",
             "The need for data sources and sinks",
             "Writing SQL queries for stream processing",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The managed service handles cluster management, auto-scaling, checkpointing state to S3, and failure recovery and restart. Running Apache Flink yourself requires significant operational expertise that the managed service eliminates.",
         },
@@ -301,12 +301,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "A new analytics service needs to process all events from the past 7 days that have already been consumed by another service. Which service supports this requirement?",
           options: [
-            "SQS — messages can be retrieved after processing",
-            "SNS — messages are retained for 7 days by default",
             "Kinesis Data Streams — records are retained and replayable",
+            "SQS — messages can be retrieved after processing",
             "None — consumed messages cannot be replayed in any AWS service",
+            "SNS — messages are retained for 7 days by default",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Kinesis Data Streams retains records for a configurable period (1–365 days) and tracks consumer position separately from the data. A new consumer can be pointed to the beginning of the retention window to replay historical data, making it ideal for adding new consumers to historical data.",
         },
@@ -314,12 +314,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "What happens to an SQS message after it is successfully processed and deleted by a consumer?",
           options: [
-            "It moves to a cold storage tier for 14 days",
             "It is permanently deleted and cannot be replayed",
             "It remains available for other consumers to read",
             "It is archived to S3 automatically",
+            "It moves to a cold storage tier for 14 days",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SQS is a work queue where each message is consumed by one consumer and then permanently deleted. Unlike Kinesis, there is no replay capability — once deleted, the message is gone.",
         },
@@ -327,12 +327,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "Which pattern combines fan-out delivery with durable per-consumer buffering?",
           options: [
-            "SQS FIFO → Lambda",
             "SNS → multiple SQS queues",
             "Kinesis → Enhanced Fan-Out consumers",
+            "SQS FIFO → Lambda",
             "EventBridge → Lambda",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The SNS + SQS fan-out pattern delivers a copy of each message to multiple SQS queues simultaneously. Each queue provides durable buffering for its consumer, which processes independently at its own pace with its own retry and DLQ configuration.",
         },
@@ -352,12 +352,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "How do you increase the number of concurrent Lambda invocations when consuming from Kinesis Data Streams?",
           options: [
-            "Increase the Lambda batch size",
             "Enable Enhanced Fan-Out for Lambda",
             "Increase the number of shards in the stream",
+            "Increase the Lambda batch size",
             "Configure Lambda reserved concurrency",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Lambda creates one concurrent invocation per shard. Increasing the number of shards increases the parallelism of Lambda processing. Batch size affects how many records each invocation processes, not how many invocations run concurrently.",
         },
@@ -365,12 +365,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "Which integration pattern writes records directly to Kinesis Data Streams without requiring a Lambda intermediary?",
           options: [
-            "CloudFront → Kinesis",
             "API Gateway AWS Service integration → Kinesis PutRecord",
+            "CloudFront → Kinesis",
             "S3 event notifications → Kinesis",
             "CloudWatch alarms → Kinesis",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "API Gateway's AWS Service integration can call Kinesis PutRecord directly on behalf of clients. This eliminates the Lambda intermediary for high-volume event ingestion, reducing cost and latency.",
         },
@@ -378,12 +378,12 @@ The practical use cases are workloads that need real-time computation on the str
           question:
             "What is the standard pattern for building a data lake that simultaneously serves real-time consumers and analytical queries?",
           options: [
-            "SQS → Lambda → S3",
-            "Kinesis Data Streams → Firehose → S3 (with Kinesis also serving operational consumers)",
             "SNS → S3 → Athena",
+            "SQS → Lambda → S3",
             "EventBridge → Glue → S3",
+            "Kinesis Data Streams → Firehose → S3 (with Kinesis also serving operational consumers)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Kinesis Data Streams serves real-time operational consumers while also feeding Kinesis Data Firehose, which delivers data to S3 in columnar format for Athena queries. This separates operational and analytical concerns without duplicating producer code.",
         },
@@ -431,12 +431,12 @@ The practical use cases are workloads that need real-time computation on the str
       question:
         "You have 4 independent applications that all need to read from the same Kinesis stream with full throughput. What should you use?",
       options: [
+        "Create 4 separate Kinesis streams, one per consumer",
         "Standard polling with KCL for each consumer",
         "Enhanced Fan-Out (EFO) — each consumer gets dedicated 2 MB/s per shard",
-        "Create 4 separate Kinesis streams, one per consumer",
         "Use SQS instead, which supports multiple consumers natively",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Enhanced Fan-Out gives each registered consumer its own dedicated 2 MB/s per shard via HTTP/2 push. With standard polling, all 4 consumers share the 2 MB/s read capacity per shard, each getting only 500 KB/s.",
     },
@@ -445,11 +445,11 @@ The practical use cases are workloads that need real-time computation on the str
         "A producer writes records with the same partition key for all events. What problem will occur at high volume?",
       options: [
         "Records will be delivered out of order",
+        "The retention period will be shortened automatically",
         "ProvisionedThroughputExceededException due to hot shards",
         "Records will be duplicated across shards",
-        "The retention period will be shortened automatically",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "A low-cardinality partition key causes all records to hash to the same shard, creating a hot shard. This quickly exhausts the 1 MB/s write capacity and causes ProvisionedThroughputExceededException. Use high-cardinality keys like UUIDs or user IDs.",
     },
@@ -457,12 +457,12 @@ The practical use cases are workloads that need real-time computation on the str
       question:
         "What is the minimum delivery latency you should expect from Kinesis Data Firehose?",
       options: [
-        "Under 1 second",
-        "About 5 seconds",
         "At least 60 seconds",
         "At least 5 minutes",
+        "Under 1 second",
+        "About 5 seconds",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Kinesis Data Firehose buffers records and delivers when either the size threshold OR the time threshold is reached. The minimum buffer interval is 60 seconds, making Firehose near-real-time, not sub-second.",
     },
@@ -470,20 +470,20 @@ The practical use cases are workloads that need real-time computation on the str
       question:
         "A Lambda function is stuck retrying a bad record in a Kinesis batch, blocking the entire shard. Which configuration resolves this?",
       options: [
-        "Increase the Lambda timeout to allow more processing time",
-        "Enable BisectBatchOnFunctionError to progressively isolate the bad record",
-        "Use Enhanced Fan-Out to separate the Lambda consumer",
         "Decrease the batch size to 1 record",
+        "Use Enhanced Fan-Out to separate the Lambda consumer",
+        "Enable BisectBatchOnFunctionError to progressively isolate the bad record",
+        "Increase the Lambda timeout to allow more processing time",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "BisectBatchOnFunctionError splits a failing batch in half on each retry, progressively narrowing down to the problematic record. This prevents a single poison-pill record from blocking the entire shard indefinitely.",
     },
     {
       question:
         "Which Kinesis API sends up to 500 records in a single call and returns per-record success/failure?",
-      options: ["PutRecord", "PutRecords", "BatchPutRecords", "SendRecords"],
-      correctIndex: 1,
+      options: ["PutRecords", "SendRecords", "PutRecord", "BatchPutRecords"],
+      correctIndex: 0,
       explanation:
         "PutRecords sends up to 500 records in a single API call and returns individual success or failure status for each record in the response. This allows you to retry only the failed records rather than the entire batch.",
     },
@@ -491,20 +491,20 @@ The practical use cases are workloads that need real-time computation on the str
       question:
         "What is the key difference between Kinesis Data Streams and SQS for message consumption?",
       options: [
-        "Kinesis supports larger message sizes than SQS",
-        "Kinesis records persist and can be replayed; SQS messages are deleted after processing",
         "SQS supports ordering within partitions; Kinesis does not",
         "Kinesis is cheaper than SQS for high-volume workloads",
+        "Kinesis supports larger message sizes than SQS",
+        "Kinesis records persist and can be replayed; SQS messages are deleted after processing",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Kinesis records remain in the stream for the configured retention period (up to 365 days) and can be replayed by pointing a consumer to an earlier position. SQS messages are permanently deleted once successfully processed.",
     },
     {
       question:
         "How many records per second can a single Kinesis shard ingest?",
-      options: ["100", "500", "1,000", "10,000"],
-      correctIndex: 2,
+      options: ["100", "500", "10,000", "1,000"],
+      correctIndex: 3,
       explanation:
         "Each Kinesis shard supports up to 1,000 records per second or 1 MB/s of write throughput, whichever limit is reached first. Exceeding either limit causes ProvisionedThroughputExceededException.",
     },
@@ -512,12 +512,12 @@ The practical use cases are workloads that need real-time computation on the str
       question:
         "What does the Kinesis Producer Library (KPL) do that improves efficiency for high-volume small-record producers?",
       options: [
-        "It shards records automatically based on content",
         "It aggregates multiple small records into a single Kinesis record up to 1 MB",
         "It compresses records using GZIP before sending",
         "It routes records to the least-loaded shard automatically",
+        "It shards records automatically based on content",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The KPL aggregates multiple small records into a single Kinesis record (up to 1 MB), dramatically increasing effective throughput per shard for workloads with many small records. KCL consumers or a deaggregation library must be used to unpack these aggregated records.",
     },

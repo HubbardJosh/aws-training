@@ -19,11 +19,11 @@ export const wafGuide: ServiceGuide = {
             "AWS WAF Web ACLs can be associated with which AWS resources?",
           options: [
             "EC2 instances and RDS databases only",
-            "CloudFront distributions, ALBs, API Gateway REST APIs, AppSync, and Cognito user pools",
-            "Any AWS resource that processes HTTP traffic",
             "Only CloudFront distributions and Application Load Balancers",
+            "Any AWS resource that processes HTTP traffic",
+            "CloudFront distributions, ALBs, API Gateway REST APIs, AppSync, and Cognito user pools",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS WAF Web ACLs can be associated with CloudFront distributions, Application Load Balancers, API Gateway REST APIs, AWS AppSync GraphQL APIs, and Amazon Cognito user pool endpoints. WAF cannot be applied directly to EC2 instances, RDS, or other compute/database resources — it only integrates with these specific Layer 7 entry points.",
         },
@@ -63,12 +63,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "A web application is experiencing an HTTP flood attack from many IP addresses each sending thousands of requests per minute. Which WAF rule type automatically blocks IP addresses exceeding a request threshold?",
           options: [
-            "AWS Managed Rule Group (Core Rule Set)",
-            "Geographic match custom rule",
             "Rate-based rule with a per-IP threshold",
             "IP set match rule with a blocklist",
+            "AWS Managed Rule Group (Core Rule Set)",
+            "Geographic match custom rule",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Rate-based rules automatically block IP addresses (or other aggregation keys) that exceed a configured request threshold within a five-minute sliding window. They are the primary WAF defense against HTTP flood DDoS attacks and credential stuffing because they automatically detect and block high-rate sources without requiring manual IP blocklist maintenance.",
         },
@@ -76,12 +76,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "A team wants the fastest way to add baseline OWASP Top 10 protection to their ALB without writing any custom rules. What should they use?",
           options: [
-            "Custom WAF rules using SQL injection and XSS detection statements",
-            "AWS Managed Rules — specifically the AWS Core Rule Set (CRS)",
             "A rate-based rule limiting requests per IP",
+            "Custom WAF rules using SQL injection and XSS detection statements",
             "AWS Shield Standard applied to the ALB",
+            "AWS Managed Rules — specifically the AWS Core Rule Set (CRS)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS Managed Rules (specifically the Core Rule Set) provide pre-configured, automatically maintained protection against OWASP Top 10 vulnerabilities. They require no custom rule writing — simply enable the managed rule group in the Web ACL. They are the fastest path to baseline protection and are updated by AWS as new threats emerge.",
         },
@@ -95,12 +95,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "A website is experiencing credential stuffing attacks against its login page, where attackers try thousands of username/password combinations. Which WAF feature detects and blocks this?",
           options: [
+            "AWS Core Rule Set SQL injection detection",
+            "A rate-based rule on the login endpoint",
             "AWS WAF Bot Control in Common mode",
             "AWS WAF Fraud Control — Account Takeover Prevention (ATP)",
-            "A rate-based rule on the login endpoint",
-            "AWS Core Rule Set SQL injection detection",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Account Takeover Prevention (ATP) is specifically designed to detect credential stuffing attacks on login pages. It analyzes login request patterns, response codes (e.g., many 401s indicating failed logins), and username/password pair usage to identify high-risk login attempts and automatically block or challenge them. A rate-based rule could limit request volume but cannot distinguish credential stuffing patterns the way ATP can.",
         },
@@ -108,12 +108,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "Which WAF Bot Control mode uses machine learning to detect sophisticated bots that rotate IP addresses and mimic human browsing behavior?",
           options: [
-            "Common mode",
-            "Targeted mode",
-            "Advanced mode",
             "Enterprise mode",
+            "Advanced mode",
+            "Targeted mode",
+            "Common mode",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Bot Control Targeted mode uses advanced machine learning and browser fingerprinting to detect sophisticated bots that evade basic detection by rotating IPs, using residential proxies, and mimicking human behavior patterns. Common mode uses basic signature-based detection suitable for identifying well-known bots. Targeted mode is the appropriate choice when bots are specifically designed to evade detection.",
         },
@@ -129,10 +129,10 @@ export const wafGuide: ServiceGuide = {
           options: [
             "Amazon CloudWatch Logs",
             "Amazon S3 with event notifications",
-            "Amazon Kinesis Data Firehose",
             "AWS CloudTrail",
+            "Amazon Kinesis Data Firehose",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon Kinesis Data Firehose can stream WAF logs to third-party SIEM systems, Splunk, and other HTTP endpoints in near-real time. CloudWatch Logs is better for real-time alerting within AWS; S3 is better for long-term retention and batch analysis with Athena. Firehose is the right choice for streaming to external security analytics systems.",
         },
@@ -140,12 +140,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "Which WAF action allows a rule to log matching requests without blocking them, useful for testing new rules before enforcement?",
           options: [
-            "Allow action with logging enabled",
-            "Block action with a 200 response override",
-            "Count action",
             "CAPTCHA action",
+            "Count action",
+            "Block action with a 200 response override",
+            "Allow action with logging enabled",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The Count action is a non-terminal WAF action that logs the fact that a rule matched but does not block or alter the request. It is used for testing new rules — you can observe which requests would match a rule (and how many) before switching to Block. Count rules allow evaluation to continue to subsequent rules in the Web ACL.",
         },
@@ -172,12 +172,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "Which AWS service, when combined with WAF, provides DDoS cost protection (credits for scaling charges during attacks) and access to a 24/7 DDoS response team?",
           options: [
-            "AWS Shield Standard",
             "AWS Shield Advanced",
             "AWS Firewall Manager",
+            "AWS Shield Standard",
             "Amazon GuardDuty",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "AWS Shield Advanced provides enhanced DDoS protection including: volumetric DDoS attack mitigation, cost protection (AWS credits for scaling charges incurred due to DDoS attacks), real-time attack visibility, and access to the AWS Shield Response Team (SRT) for 24/7 assisted mitigation during active attacks. Shield Standard is free and automatic but provides only basic L3/L4 protection without these advanced features.",
         },
@@ -191,12 +191,12 @@ export const wafGuide: ServiceGuide = {
           question:
             "A company with 100 AWS accounts in an Organization wants to ensure all ALBs automatically get the same WAF Core Rule Set protection without manual per-account configuration. Which service enables this?",
           options: [
-            "AWS Config with a WAF compliance rule",
-            "AWS Firewall Manager with a WAF policy scoped to all ALBs",
             "AWS Organizations SCP restricting ALB creation without WAF",
             "AWS Security Hub with automated WAF remediation",
+            "AWS Config with a WAF compliance rule",
+            "AWS Firewall Manager with a WAF policy scoped to all ALBs",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS Firewall Manager allows you to define a WAF policy that specifies which Web ACL configuration to enforce across all accounts in an Organization. New ALBs that match the policy scope are automatically protected without manual action in each account. This is the correct solution for ensuring consistent WAF coverage across a large multi-account organization.",
         },
@@ -255,12 +255,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "At which OSI layer does AWS WAF operate, and what type of traffic does it filter?",
       options: [
-        "Layer 3/4 — IP and TCP/UDP traffic",
-        "Layer 7 — HTTP/HTTPS request content",
         "Layer 2 — Ethernet frames",
         "All layers — full deep packet inspection",
+        "Layer 7 — HTTP/HTTPS request content",
+        "Layer 3/4 — IP and TCP/UDP traffic",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "AWS WAF operates at Layer 7 (the application layer), inspecting HTTP and HTTPS request content including headers, URI paths, query strings, and request bodies. Network ACLs and Security Groups operate at Layers 3/4. WAF's Layer 7 visibility enables protection against application-specific attacks like SQL injection and XSS that are invisible to network-layer controls.",
     },
@@ -268,12 +268,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "A WAF Web ACL has Rule 10 (Count), Rule 20 (Block for SQL injection), and Rule 30 (Allow). An incoming request matches Rule 20. What happens?",
       options: [
-        "The request is Counted by Rule 10, then Blocked by Rule 20",
         "The request is Blocked by Rule 20 — the first terminal action wins",
-        "The request is Allowed by Rule 30 — Allow rules always take precedence",
         "All three rules are evaluated and the most restrictive action applies",
+        "The request is Allowed by Rule 30 — Allow rules always take precedence",
+        "The request is Counted by Rule 10, then Blocked by Rule 20",
       ],
-      correctIndex: 0,
+      correctIndex: 3,
       explanation:
         "Rules are evaluated in priority order (lowest number first). Rule 10 (Count) is non-terminal — it logs the request and continues evaluation. Rule 20 (Block) matches and is terminal — the Block action applies and evaluation stops. Rule 30 is never reached. Count rules are the exception to the 'first match stops evaluation' behavior because they are non-terminal.",
     },
@@ -281,12 +281,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "Which WAF rule type is the primary defense against HTTP flood DDoS attacks by automatically blocking high-rate IP addresses?",
       options: [
-        "AWS Managed Rule Group (Core Rule Set)",
-        "Geographic match custom rule",
-        "Rate-based rule with a per-IP threshold",
         "IP set match rule with a static blocklist",
+        "Rate-based rule with a per-IP threshold",
+        "Geographic match custom rule",
+        "AWS Managed Rule Group (Core Rule Set)",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Rate-based rules automatically block IP addresses (or other aggregation keys) that exceed a configured request count within a five-minute sliding window. They dynamically identify and block high-volume attack sources without requiring manual IP blocklist maintenance, making them the primary WAF mechanism for HTTP flood DDoS defense.",
     },
@@ -294,12 +294,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "Where should a WAF Web ACL be associated to filter attacks at the earliest possible point before requests reach the origin?",
       options: [
-        "Application Load Balancer in the origin region",
-        "Amazon CloudFront distribution at edge locations",
         "API Gateway in the origin region",
         "EC2 instances using a host-based WAF agent",
+        "Amazon CloudFront distribution at edge locations",
+        "Application Load Balancer in the origin region",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Associating WAF with CloudFront filters requests at the nearest edge location — before traffic crosses the internet to reach the origin. This provides the earliest interception, reduces origin load, and protects the origin even during outages. ALB-attached WAF only filters after traffic has already reached the AWS region, meaning attack traffic has already consumed network capacity.",
     },
@@ -307,12 +307,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "A company wants to ensure all 200 ALBs across 50 AWS accounts automatically receive the same WAF Core Rule Set policy. Which service provides centralized enforcement?",
       options: [
-        "AWS Config with WAF compliance rules and auto-remediation",
         "AWS Firewall Manager with a WAF policy scoped to the Organization",
-        "AWS Security Hub with automated WAF findings",
         "AWS CloudFormation StackSets deploying WAF Web ACLs to each account",
+        "AWS Config with WAF compliance rules and auto-remediation",
+        "AWS Security Hub with automated WAF findings",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AWS Firewall Manager enforces WAF Web ACL configurations across all accounts in an AWS Organization. New ALBs that match the policy scope are automatically protected without manual per-account action. CloudFormation StackSets require manual triggers for new resources; Firewall Manager provides continuous, automatic enforcement.",
     },
@@ -320,12 +320,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "Which WAF Bot Control mode uses machine learning to detect sophisticated bots that rotate IPs and mimic human behavior?",
       options: [
-        "Common mode with signature-based detection",
         "Targeted mode with advanced ML-based detection",
-        "Standard mode with behavioral analysis",
         "Enterprise mode with full browser emulation",
+        "Common mode with signature-based detection",
+        "Standard mode with behavioral analysis",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Bot Control Targeted mode uses advanced machine learning and browser fingerprinting to identify sophisticated bots that evade basic detection techniques such as rotating IP addresses, using residential proxies, and mimicking human browsing patterns. Common mode uses simpler signature-based detection appropriate for known bots that do not attempt to evade detection.",
     },
@@ -333,12 +333,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "Which AWS service provides free, automatic L3/L4 DDoS protection for all AWS customers without any configuration?",
       options: [
-        "AWS WAF with default rate-based rules",
         "AWS Shield Advanced",
-        "AWS Shield Standard",
         "Amazon GuardDuty",
+        "AWS WAF with default rate-based rules",
+        "AWS Shield Standard",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "AWS Shield Standard is automatically enabled for all AWS customers at no charge. It provides always-on protection against common network and transport-layer DDoS attacks (SYN floods, UDP reflection) at Layers 3 and 4. Shield Advanced adds volumetric attack protection, cost protection, and SRT access at an additional subscription cost.",
     },
@@ -346,12 +346,12 @@ export const wafGuide: ServiceGuide = {
       question:
         "Which WAF action should be used when testing a new rule to observe which requests would match without blocking any traffic?",
       options: [
-        "Allow action with audit logging enabled",
-        "Block action with a 200 status override",
         "Count action",
+        "Block action with a 200 status override",
+        "Allow action with audit logging enabled",
         "CAPTCHA action in test mode",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "The Count action is non-terminal — it logs that a rule matched and increments the CloudWatch CountedRequests metric, but does not block the request or stop rule evaluation. Using Count lets you validate how many real requests would be affected by a rule before switching to Block, eliminating the risk of accidentally blocking legitimate traffic during rule testing.",
     },

@@ -21,12 +21,12 @@ You configure CloudFront through a **distribution**, which defines your origin, 
           question:
             "What is the primary purpose of CloudFront's edge locations?",
           options: [
-            "To host EC2 instances closer to users",
-            "To cache content near users, reducing latency and origin load",
-            "To provide additional storage capacity for S3 buckets",
             "To run Lambda functions with lower cold start times",
+            "To provide additional storage capacity for S3 buckets",
+            "To cache content near users, reducing latency and origin load",
+            "To host EC2 instances closer to users",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Edge locations cache content near users so subsequent requests are served locally rather than traveling back to the origin server. This dramatically reduces latency and reduces the load on your origin.",
         },
@@ -34,12 +34,12 @@ You configure CloudFront through a **distribution**, which defines your origin, 
           question:
             "When a user requests content that is already cached at the nearest CloudFront edge location, this is called a:",
           options: [
-            "Cache miss",
             "Origin fetch",
             "Cache hit",
             "Distribution hit",
+            "Cache miss",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "A cache hit occurs when requested content is already present at the edge location and can be served directly, without going back to the origin server. Cache hits result in dramatically lower latency for users.",
         },
@@ -96,12 +96,12 @@ You configure CloudFront through a **distribution**, which defines your origin, 
         {
           question: "How do cache behaviors in a CloudFront distribution work?",
           options: [
-            "A single behavior applies to all content in the distribution",
-            "Different behaviors can apply different caching rules to different URL patterns",
             "Cache behaviors are set at the origin level, not the distribution level",
+            "A single behavior applies to all content in the distribution",
             "Behaviors only control whether content is cached, not how long",
+            "Different behaviors can apply different caching rules to different URL patterns",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Cache behaviors match specific URL patterns (like /images/* or /api/*) and allow different caching rules — TTL, header forwarding, query string handling — to apply to different types of content within the same distribution.",
         },
@@ -123,12 +123,12 @@ You can also configure **multiple behaviors** in a single distribution, routing 
           question:
             "What is the purpose of Origin Access Control (OAC) when using an S3 origin with CloudFront?",
           options: [
-            "It allows users to access S3 content directly without going through CloudFront",
-            "It keeps the S3 bucket private so only CloudFront can read from it",
-            "It encrypts data as it travels from S3 to CloudFront edge locations",
             "It enables cross-region replication of S3 content to edge locations",
+            "It allows users to access S3 content directly without going through CloudFront",
+            "It encrypts data as it travels from S3 to CloudFront edge locations",
+            "It keeps the S3 bucket private so only CloudFront can read from it",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Origin Access Control (OAC) keeps the S3 bucket private and grants only CloudFront permission to read from it. This prevents users from bypassing CloudFront and accessing S3 directly, ensuring all traffic goes through your CDN.",
         },
@@ -136,12 +136,12 @@ You can also configure **multiple behaviors** in a single distribution, routing 
           question:
             "CloudFront Origin Groups are used to accomplish which of the following?",
           options: [
-            "Group multiple distributions under a single domain name",
-            "Aggregate content from multiple S3 buckets into one cache",
             "Configure a primary and secondary origin for automatic failover on 5xx errors",
             "Route traffic based on geographic location of the viewer",
+            "Group multiple distributions under a single domain name",
+            "Aggregate content from multiple S3 buckets into one cache",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Origin Groups enable origin failover. You configure a primary and secondary origin; if CloudFront receives a 5xx error from the primary, it automatically retries the request against the secondary origin, improving availability.",
         },
@@ -165,12 +165,12 @@ You can also configure **multiple behaviors** in a single distribution, routing 
           question:
             "Which AWS service integrates with CloudFront to protect against SQL injection, XSS, and DDoS attacks at the application layer?",
           options: [
-            "AWS Shield Advanced",
             "AWS WAF (Web Application Firewall)",
+            "AWS Shield Advanced",
             "AWS GuardDuty",
             "Amazon Inspector",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "AWS WAF integrates directly with CloudFront distributions and lets you define rules to block web exploits like SQL injection and cross-site scripting (XSS), filter by IP reputation, and set rate limits to mitigate DDoS attacks.",
         },
@@ -178,12 +178,12 @@ You can also configure **multiple behaviors** in a single distribution, routing 
           question:
             "A media company needs to restrict access to their video content based on the viewer's country due to licensing agreements. Which CloudFront feature should they use?",
           options: [
-            "Signed URLs",
             "Origin Access Control",
-            "Geo-restriction",
             "Cache behaviors",
+            "Signed URLs",
+            "Geo-restriction",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Geo-restriction (geographic blocking) lets you allow or deny access to CloudFront content based on the viewer's country. This is commonly required for content licensing compliance where distribution rights are limited to specific countries.",
         },
@@ -191,12 +191,12 @@ You can also configure **multiple behaviors** in a single distribution, routing 
           question:
             "AWS Shield Standard is included with CloudFront at what cost?",
           options: [
-            "$0.008 per GB of data transferred",
             "A flat $3,000 per month",
-            "No cost — it is automatically enabled for all CloudFront distributions",
+            "$0.008 per GB of data transferred",
             "It is only available with AWS Shield Advanced",
+            "No cost — it is automatically enabled for all CloudFront distributions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "AWS Shield Standard is automatically enabled at no cost for all CloudFront distributions. It protects against common DDoS attacks. AWS Shield Advanced provides enhanced protection for an additional cost.",
         },
@@ -218,12 +218,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
           question:
             "What is the standard AWS architecture for serving a static website globally with low latency?",
           options: [
-            "EC2 instances deployed in every region with Route 53 latency routing",
             "CloudFront distribution in front of an S3 bucket, with Route 53 for custom domain",
             "Elastic Load Balancer distributing traffic across S3 buckets in multiple regions",
+            "EC2 instances deployed in every region with Route 53 latency routing",
             "API Gateway serving static files from Lambda functions at the edge",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The standard pattern for globally serving a static website is: store files in S3, put a CloudFront distribution in front, and use Route 53 for a custom domain. CloudFront caches the content at edge locations worldwide for low latency.",
         },
@@ -232,11 +232,11 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
             "Lambda@Edge enables which capability in CloudFront architectures?",
           options: [
             "Running Lambda functions in your VPC without internet access",
+            "Deploying Lambda function code directly from CloudFront distributions",
             "Automatically scaling Lambda functions based on CloudFront request volume",
             "Running Lambda functions at CloudFront edge locations to customize request/response handling",
-            "Deploying Lambda function code directly from CloudFront distributions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Lambda@Edge allows you to run Lambda functions at CloudFront edge locations. This enables use cases like A/B testing, URL rewriting, header manipulation, and authentication enforcement at the edge without a round-trip to the origin.",
         },
@@ -294,12 +294,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "What is the primary benefit of using Amazon CloudFront in front of an S3 bucket hosting a static website?",
       options: [
+        "It automatically scales S3 storage capacity based on traffic",
+        "It encrypts S3 data at rest using CloudFront-managed keys",
         "It adds automatic versioning to S3 objects",
         "It caches content at edge locations globally, reducing latency for users worldwide",
-        "It encrypts S3 data at rest using CloudFront-managed keys",
-        "It automatically scales S3 storage capacity based on traffic",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "CloudFront caches content at edge locations near users worldwide. Instead of every request going back to S3 in a single region, content is served locally from the nearest edge location, dramatically reducing latency.",
     },
@@ -307,12 +307,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "A company wants to keep their S3 bucket completely private but still serve its content through CloudFront. What should they configure?",
       options: [
-        "Make the S3 bucket public and restrict access via WAF rules",
-        "Use Origin Access Control (OAC) to allow only CloudFront to access the bucket",
         "Enable Cross-Origin Resource Sharing (CORS) on the S3 bucket",
+        "Make the S3 bucket public and restrict access via WAF rules",
         "Create a signed URL for every object in the bucket",
+        "Use Origin Access Control (OAC) to allow only CloudFront to access the bucket",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Origin Access Control (OAC) keeps the S3 bucket private and grants only CloudFront permission to read from it. This prevents users from bypassing CloudFront and accessing S3 directly.",
     },
@@ -320,12 +320,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "Which CloudFront feature allows you to preview and expire cached content before its TTL expires?",
       options: [
-        "Cache behaviors",
         "Cache invalidation",
-        "Origin Groups",
         "Geo-restriction",
+        "Origin Groups",
+        "Cache behaviors",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Cache invalidation lets you remove specific objects from the edge cache before their TTL expires. This is useful when deploying new content and you need the edge to serve the updated version immediately.",
     },
@@ -333,12 +333,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "Which security feature should you use to allow only paying subscribers to access private video files distributed through CloudFront?",
       options: [
-        "Geo-restriction",
-        "AWS WAF rate limiting",
         "Signed URLs or Signed Cookies",
         "Origin Access Control",
+        "Geo-restriction",
+        "AWS WAF rate limiting",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Signed URLs and Signed Cookies restrict access to private content by generating time-limited, optionally IP-restricted access tokens. Only users with a valid signed URL or cookie can access the protected content.",
     },
@@ -346,12 +346,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "AWS Shield Standard is included with CloudFront at what cost, and what does it protect against?",
       options: [
-        "Included free; protects against common DDoS attacks",
-        "$3,000/month; protects against SQL injection and XSS",
         "Included free; protects against SQL injection and XSS",
+        "$3,000/month; protects against SQL injection and XSS",
+        "Included free; protects against common DDoS attacks",
         "$0.008/GB; protects against common DDoS attacks",
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
         "AWS Shield Standard is automatically enabled at no cost for all CloudFront distributions. It protects against common DDoS attacks. AWS WAF (not Shield) is the service that protects against SQL injection and XSS.",
     },
@@ -371,12 +371,12 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
       question:
         "Which AWS service integrates with CloudFront to provide application-layer protection including rules against SQL injection and cross-site scripting?",
       options: [
-        "AWS Shield Advanced",
         "Amazon GuardDuty",
         "AWS WAF",
         "Amazon Inspector",
+        "AWS Shield Advanced",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "AWS WAF (Web Application Firewall) integrates directly with CloudFront and lets you define rules to block web exploits like SQL injection and XSS, filter by IP reputation, and set rate limits.",
     },
@@ -385,11 +385,11 @@ For the Cloud Practitioner exam, the key understanding is that CloudFront reduce
         "Lambda@Edge in the context of CloudFront is used for which purpose?",
       options: [
         "Running Lambda functions to process S3 events before CloudFront caches them",
-        "Running Lambda functions at edge locations to customize request and response handling without round-trips to the origin",
-        "Automatically creating CloudFront distributions when Lambda functions are deployed",
         "Using Lambda to generate signed URLs for private CloudFront content",
+        "Automatically creating CloudFront distributions when Lambda functions are deployed",
+        "Running Lambda functions at edge locations to customize request and response handling without round-trips to the origin",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Lambda@Edge runs Lambda functions at CloudFront edge locations, enabling use cases like A/B testing, URL rewriting, header manipulation, and authentication enforcement at the edge without requiring a full round-trip to the origin server.",
     },

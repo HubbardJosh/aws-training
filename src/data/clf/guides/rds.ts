@@ -29,12 +29,12 @@ The key benefit of RDS over running your own database on EC2 is that AWS manages
           question:
             "What is the primary advantage of using Amazon RDS over running your own database on an EC2 instance?",
           options: [
+            "RDS supports more database engines than any self-managed option",
             "RDS databases run faster than databases on EC2",
             "RDS is free while running a database on EC2 incurs charges",
             "AWS manages backups, patching, and infrastructure so you focus on your application",
-            "RDS supports more database engines than any self-managed option",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "RDS is a managed service — AWS handles provisioning hardware, installing software, taking backups, applying patches, and monitoring health. You retain control of your schema, queries, and application logic, but the operational burden of running the database is AWS's responsibility.",
         },
@@ -64,12 +64,12 @@ Multi-AZ is about **availability and durability**, not performance. The standby 
         {
           question: "What does RDS Multi-AZ deployment provide?",
           options: [
-            "Improved read performance by distributing queries across multiple instances",
             "High availability with automatic failover to a standby instance in another Availability Zone",
             "Lower cost by sharing compute resources across multiple databases",
+            "Improved read performance by distributing queries across multiple instances",
             "The ability to run different database engines in the same Multi-AZ group",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "RDS Multi-AZ automatically provisions a synchronous standby instance in a different AZ. If the primary fails, RDS automatically fails over to the standby — typically in 60–120 seconds — using the same DNS endpoint so no application code changes are needed.",
         },
@@ -78,11 +78,11 @@ Multi-AZ is about **availability and durability**, not performance. The standby 
             "Can you use the RDS Multi-AZ standby instance to serve read traffic and improve performance?",
           options: [
             "Yes — the standby handles all read queries while the primary handles writes",
-            "Yes — but only during maintenance windows",
             "No — the standby instance does not serve read traffic; it is only for failover",
+            "Yes — but only during maintenance windows",
             "No — you must purchase a separate read license to use the standby for reads",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The RDS Multi-AZ standby instance does NOT serve read traffic. It exists solely for high availability and automatic failover. To scale read traffic, you must create Read Replicas, which are separate from Multi-AZ.",
         },
@@ -114,12 +114,12 @@ A Read Replica can be promoted to become an independent primary database, which 
         {
           question: "What is the primary purpose of RDS Read Replicas?",
           options: [
-            "To provide automatic failover when the primary instance fails",
-            "To scale read capacity by handling read-only queries on separate instances",
             "To create encrypted copies of the primary database for compliance",
+            "To provide automatic failover when the primary instance fails",
             "To replicate data across regions for billing consolidation",
+            "To scale read capacity by handling read-only queries on separate instances",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Read Replicas scale read capacity by offloading read-only queries to separate instances. Your application directs writes to the primary endpoint and reads to replica endpoints, distributing the read workload horizontally.",
         },
@@ -140,12 +140,12 @@ A Read Replica can be promoted to become an independent primary database, which 
           question:
             "What is the key difference between RDS Multi-AZ and Read Replicas?",
           options: [
-            "Multi-AZ is for disaster recovery across regions; Read Replicas are for single-region HA",
             "Multi-AZ is for high availability with synchronous replication and no read traffic; Read Replicas scale reads with asynchronous replication",
-            "Multi-AZ supports all database engines; Read Replicas only support Aurora",
             "Multi-AZ requires more expensive instance types than Read Replicas",
+            "Multi-AZ is for disaster recovery across regions; Read Replicas are for single-region HA",
+            "Multi-AZ supports all database engines; Read Replicas only support Aurora",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Multi-AZ uses synchronous replication for high availability — the standby doesn't serve reads, it's purely for failover. Read Replicas use asynchronous replication to scale read capacity — they actively serve read traffic but may have slight lag.",
         },
@@ -166,8 +166,8 @@ You can **restore** from either backup type, but this always creates a **new** R
         {
           question:
             "What is the maximum retention period for RDS automated backups?",
-          options: ["7 days", "14 days", "35 days", "90 days"],
-          correctIndex: 2,
+          options: ["7 days", "14 days", "90 days", "35 days"],
+          correctIndex: 3,
           explanation:
             "RDS automated backups have a configurable retention period of 1 to 35 days. Within the retention window, you can restore to any second using point-in-time recovery. Automated backups are deleted when you delete the RDS instance.",
         },
@@ -175,12 +175,12 @@ You can **restore** from either backup type, but this always creates a **new** R
           question:
             "What happens when you restore an RDS database from a backup or snapshot?",
           options: [
-            "The existing database instance is restored in place with the original data",
-            "A brand new RDS instance is created; the original instance is unaffected",
-            "The database is temporarily offline during restoration to the same instance",
             "The restore overwrites the most recent automated backup",
+            "The existing database instance is restored in place with the original data",
+            "The database is temporarily offline during restoration to the same instance",
+            "A brand new RDS instance is created; the original instance is unaffected",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Restoring from a backup or snapshot always creates a brand new RDS instance. The original instance (if it still exists) is unaffected. After restoration, you must update your application's connection string to point to the new instance.",
         },
@@ -213,12 +213,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
           question:
             "How many copies of data does Amazon Aurora store, and across how many Availability Zones?",
           options: [
+            "6 copies across 6 AZs",
+            "6 copies across 3 AZs",
             "2 copies across 2 AZs",
             "3 copies across 3 AZs",
-            "6 copies across 3 AZs",
-            "6 copies across 6 AZs",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Aurora stores 6 copies of your data spread across 3 Availability Zones. This provides exceptional durability and availability — Aurora can survive the loss of up to 2 copies without impacting write availability and up to 3 copies without impacting read availability.",
         },
@@ -226,11 +226,11 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
           question: "What is Aurora Serverless designed for?",
           options: [
             "Running Aurora in containers without managing EC2 instances",
-            "On-demand, auto-scaling Aurora for infrequent or unpredictable workloads where you pay only for capacity used",
-            "Running Aurora across multiple AWS accounts simultaneously",
             "Replacing Lambda for serverless application backends",
+            "Running Aurora across multiple AWS accounts simultaneously",
+            "On-demand, auto-scaling Aurora for infrequent or unpredictable workloads where you pay only for capacity used",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Aurora Serverless is an on-demand, auto-scaling configuration of Aurora that starts, scales, and shuts down automatically based on application needs. It is ideal for infrequent or unpredictable workloads — you pay only for the database capacity actually used.",
         },
@@ -238,12 +238,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
           question:
             "Compared to standard MySQL running on RDS, Aurora typically delivers how much more throughput?",
           options: [
+            "Up to 10x MySQL throughput",
             "Up to 2x MySQL throughput",
             "Up to 5x MySQL throughput",
-            "Up to 10x MySQL throughput",
             "The same throughput as MySQL",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Aurora typically delivers up to 5x the throughput of MySQL and up to 3x the throughput of PostgreSQL on equivalent hardware. This performance advantage, combined with 6-way replication and automatic storage scaling, makes Aurora AWS's premium relational database offering.",
         },
@@ -313,12 +313,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
       question:
         "A developer needs to restore a production RDS database to how it was exactly 3 days ago. Which backup feature enables this?",
       options: [
-        "Manual snapshots — restore the snapshot taken 3 days ago",
-        "Automated backups with point-in-time recovery",
         "Read Replica promotion to the state from 3 days ago",
+        "Manual snapshots — restore the snapshot taken 3 days ago",
         "Aurora Serverless automatic rollback",
+        "Automated backups with point-in-time recovery",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Automated backups enable point-in-time recovery to any second within the retention period (1–35 days). RDS backs up the full instance and transaction logs, allowing precise recovery. This would restore to the state exactly 3 days ago.",
     },
@@ -326,12 +326,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
       question:
         "Which RDS feature allows you to take a database backup that persists indefinitely until you explicitly delete it?",
       options: [
-        "Automated backups",
-        "Point-in-time recovery",
-        "Manual snapshots",
         "Multi-AZ standby copies",
+        "Manual snapshots",
+        "Point-in-time recovery",
+        "Automated backups",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Manual snapshots are user-initiated backups that persist until you explicitly delete them. Unlike automated backups (which are deleted when the RDS instance is deleted and expire after the retention period), manual snapshots are retained indefinitely.",
     },
@@ -339,12 +339,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
       question:
         "Amazon Aurora differs from standard RDS MySQL in which key way?",
       options: [
-        "Aurora supports SQL queries while standard MySQL uses a proprietary query language",
         "Aurora is MySQL-compatible but delivers up to 5x the throughput with 6-way replication across 3 AZs",
         "Aurora is only available in us-east-1 while standard MySQL is available globally",
         "Aurora requires you to manage the underlying EC2 instances",
+        "Aurora supports SQL queries while standard MySQL uses a proprietary query language",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Aurora is MySQL-compatible (and PostgreSQL-compatible) but is AWS's cloud-native engine built for the cloud. It delivers up to 5x MySQL throughput, automatically stores 6 copies across 3 AZs, and auto-scales storage up to 128 TB.",
     },
@@ -378,12 +378,12 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
       question:
         "For which workload type is Aurora Serverless most appropriate?",
       options: [
-        "A high-traffic e-commerce site with consistent, predictable load 24/7",
         "A development database accessed infrequently and with unpredictable traffic patterns",
         "A database requiring strict data residency in a specific Availability Zone",
         "A database that requires synchronous replication to a standby instance",
+        "A high-traffic e-commerce site with consistent, predictable load 24/7",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Aurora Serverless is ideal for infrequent or unpredictable workloads. It starts, scales, and shuts down automatically based on actual usage — you pay only for the capacity used. For consistent 24/7 workloads, provisioned Aurora is more cost-effective.",
     },

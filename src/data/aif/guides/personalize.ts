@@ -32,12 +32,12 @@ Building a recommendation engine from scratch requires expertise in collaborativ
           question:
             "What is the primary business reason organizations use Amazon Personalize instead of building a recommendation engine from scratch?",
           options: [
-            "Personalize automatically sources product catalog data from Amazon.com",
-            "It packages ML expertise (collaborative filtering, deep learning, low-latency serving) into a managed service, avoiding a multi-year engineering investment",
-            "Personalize provides pre-built user profiles based on public social media data",
             "It guarantees higher revenue than any custom-built recommendation system",
+            "Personalize automatically sources product catalog data from Amazon.com",
+            "Personalize provides pre-built user profiles based on public social media data",
+            "It packages ML expertise (collaborative filtering, deep learning, low-latency serving) into a managed service, avoiding a multi-year engineering investment",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The key value proposition is that Personalize packages complex ML expertise — collaborative filtering, matrix factorization, deep learning, real-time feature engineering, and low-latency serving — into a managed service that does not require ML expertise to operate.",
         },
@@ -67,12 +67,12 @@ A **Solution** trains a recommendation model by applying a Recipe to your data. 
           question:
             "Which Amazon Personalize recipe would you use to rerank a pre-selected list of items by how relevant they are to a specific user?",
           options: [
-            "aws-user-personalization",
-            "aws-similar-items",
             "aws-personalized-ranking",
+            "aws-similar-items",
             "aws-popularity-count",
+            "aws-user-personalization",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "aws-personalized-ranking accepts a user ID and a provided list of items, then returns them reordered by predicted relevance to that specific user. This is ideal for reranking search results or editorial curated lists.",
         },
@@ -80,12 +80,12 @@ A **Solution** trains a recommendation model by applying a Recipe to your data. 
           question:
             "What is the correct hierarchy of Personalize artifacts, from broadest to most specific?",
           options: [
-            "Campaign → Solution → Solution Version → Recipe",
             "Dataset Group → Recipe → Solution → Solution Version → Campaign",
+            "Campaign → Solution → Solution Version → Recipe",
             "Recipe → Dataset Group → Solution → Campaign",
             "Solution Version → Solution → Dataset Group → Campaign",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The hierarchy is: Dataset Group (container) → Recipe (algorithm template) applied during training → Solution (trained model) → Solution Version (specific artifact) → Campaign (serving endpoint).",
         },
@@ -103,12 +103,12 @@ As users interact with your application, you call \`PutEvents\` with each intera
           question:
             "Which API do you call to stream real-time interaction events into Amazon Personalize so recommendations update immediately without full retraining?",
           options: [
-            "GetRecommendations",
-            "PutEvents",
             "CreateDatasetImportJob",
             "UpdateSolution",
+            "PutEvents",
+            "GetRecommendations",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "PutEvents is the real-time event ingestion API. It accepts individual interaction events (user ID, item ID, event type, timestamp) and Personalize incorporates them into recommendations immediately without waiting for a full model retraining cycle.",
         },
@@ -116,12 +116,12 @@ As users interact with your application, you call \`PutEvents\` with each intera
           question:
             "How does contextual metadata improve Amazon Personalize recommendations?",
           options: [
-            "It replaces the Interactions dataset, reducing data collection requirements",
-            "It is passed at request time in GetRecommendations, allowing the model to serve context-aware recommendations based on device, time, or location",
-            "It automatically filters out items that are unavailable in the user's geographic region",
             "It enables the model to predict future user behavior using historical context windows",
+            "It automatically filters out items that are unavailable in the user's geographic region",
+            "It is passed at request time in GetRecommendations, allowing the model to serve context-aware recommendations based on device, time, or location",
+            "It replaces the Interactions dataset, reducing data collection requirements",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Contextual metadata (device type, time of day, location) is passed in the GetRecommendations API call at request time. The model learns context-specific patterns — for example, different recommendations for mobile vs TV or morning vs evening — and applies them in real time.",
         },
@@ -138,11 +138,11 @@ As users interact with your application, you call \`PutEvents\` with each intera
             "You need to pre-compute personalized email recommendation lists for 2 million users nightly. Which Amazon Personalize feature should you use?",
           options: [
             "GetRecommendations called in parallel for each user",
-            "Batch inference jobs that read user IDs from S3 and write results back to S3",
             "PutEvents with a scheduled batch of user interaction events",
             "A Campaign endpoint called from a scheduled Lambda function",
+            "Batch inference jobs that read user IDs from S3 and write results back to S3",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Batch inference jobs are purpose-built for offline, large-scale scoring. You provide an S3 input file of user IDs, submit the job, and Personalize writes recommendation lists for every user back to S3 — ideal for email personalization and other pre-computed use cases.",
         },
@@ -150,12 +150,12 @@ As users interact with your application, you call \`PutEvents\` with each intera
           question:
             "What is the difference between GetRecommendations and GetPersonalizedRanking in Amazon Personalize?",
           options: [
+            "GetRecommendations requires a Campaign; GetPersonalizedRanking uses batch inference only",
             "GetRecommendations is synchronous; GetPersonalizedRanking is asynchronous",
             "GetRecommendations generates a list of items for a user; GetPersonalizedRanking reorders a provided list by that user's affinity",
-            "GetRecommendations requires a Campaign; GetPersonalizedRanking uses batch inference only",
             "GetRecommendations uses the aws-similar-items recipe; GetPersonalizedRanking uses aws-user-personalization",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "GetRecommendations generates a ranked item list from scratch for a user or item. GetPersonalizedRanking takes a pre-selected list you provide (e.g., search results) and reorders it by the specific user's predicted affinity — useful when the candidate set is already constrained.",
         },
@@ -174,11 +174,11 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
             "How does Amazon Personalize handle new users who have no interaction history (the cold start problem)?",
           options: [
             "It refuses to generate recommendations until at least 10 interactions are recorded",
-            "It falls back to popularity-based recommendations until sufficient interaction data accumulates",
-            "It uses demographic data from the Users dataset to infer preferences immediately",
             "It applies the aws-trending-now recipe automatically for all new users",
+            "It uses demographic data from the Users dataset to infer preferences immediately",
+            "It falls back to popularity-based recommendations until sufficient interaction data accumulates",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "For new users (cold start), Personalize falls back to popularity-based recommendations until enough interaction events are recorded to personalize results. For new items, item exploration deliberately surfaces them to gather interaction data.",
         },
@@ -187,11 +187,11 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
             "You want to ensure that items a user has already purchased never appear in their recommendations. Which Amazon Personalize feature should you use?",
           options: [
             "Promotions with a negative boost weight",
-            "Filters with an EXCLUDE expression based on the purchase event type",
-            "Custom item metadata that flags purchased items",
             "A post-processing Lambda that removes purchased items from GetRecommendations results",
+            "Custom item metadata that flags purchased items",
+            "Filters with an EXCLUDE expression based on the purchase event type",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Filters are the correct tool. You define a filter expression such as EXCLUDE itemId WHERE Interactions.event_type = 'purchase', and Personalize applies it at inference time to remove already-purchased items from recommendation results.",
         },
@@ -235,12 +235,12 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
       question:
         "A media streaming company wants to recommend shows to users based on their watch history. Which Amazon Personalize recipe is MOST appropriate?",
       options: [
-        "aws-popularity-count",
-        "aws-similar-items",
-        "aws-user-personalization",
         "aws-trending-now",
+        "aws-similar-items",
+        "aws-popularity-count",
+        "aws-user-personalization",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "aws-user-personalization is the primary recipe for generating personalized recommendations for a specific user based on their interaction history. It is the most common recipe for this use case and includes automatic item exploration for new content.",
     },
@@ -248,12 +248,12 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
       question:
         "What is the purpose of the Dataset Group in Amazon Personalize?",
       options: [
-        "It is the trained model artifact that gets deployed to a Campaign",
-        "It is a container that holds all datasets, solutions, and campaigns for a single personalization use case",
-        "It is the API endpoint for serving real-time recommendations",
         "It is the algorithm template that defines how recommendations are computed",
+        "It is the trained model artifact that gets deployed to a Campaign",
+        "It is the API endpoint for serving real-time recommendations",
+        "It is a container that holds all datasets, solutions, and campaigns for a single personalization use case",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A Dataset Group is the top-level container in Amazon Personalize. It holds all the Datasets (Interactions, Items, Users), Solutions, Solution Versions, and Campaigns for one personalization use case, keeping resources logically isolated.",
     },
@@ -261,12 +261,12 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
       question:
         "You want to guarantee that at least 3 of the top 10 recommendations returned for each user are from a new sponsored product category. Which Amazon Personalize feature enables this?",
       options: [
-        "Filters with an INCLUDE expression for the sponsored category",
         "Promotions, which define a minimum item count from a filter-identified eligible set",
         "Custom Terminology overrides applied at inference time",
         "Item exploration with the exploration rate set to 30%",
+        "Filters with an INCLUDE expression for the sponsored category",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Promotions allow you to guarantee a minimum number of items from a specific set (identified by a filter expression) appear in recommendation results. This is the correct mechanism for boosting sponsored or promotional items into results.",
     },
@@ -275,11 +275,11 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
         "Which statement correctly describes the relationship between a Solution and a Campaign in Amazon Personalize?",
       options: [
         "A Campaign contains multiple Solutions and selects the best one automatically",
-        "A Solution is the algorithm template; a Campaign is the trained model",
         "A Solution is trained from a Recipe and produces a Solution Version; a Campaign deploys a Solution Version as a live endpoint",
+        "A Solution is the algorithm template; a Campaign is the trained model",
         "A Campaign trains new Solution Versions automatically when new interaction data arrives",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "A Solution trains a model by applying a Recipe to your data, producing a Solution Version (the artifact). A Campaign deploys a specific Solution Version as a low-latency HTTPS endpoint for real-time inference.",
     },
@@ -287,12 +287,12 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
       question:
         "A developer wants to personalize search results by reordering them based on each user's preferences. Which API should they call?",
       options: [
-        "GetRecommendations with the user ID and an item filter",
         "GetPersonalizedRanking with the user ID and the pre-selected list of search result items",
         "PutEvents with the search query as a contextual metadata field",
         "StartBatchInferenceJob with the search index as the input source",
+        "GetRecommendations with the user ID and an item filter",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "GetPersonalizedRanking is designed exactly for this use case. You pass a user ID and your pre-selected candidate list (e.g., search results), and Personalize returns them reordered by the user's predicted affinity.",
     },
@@ -301,11 +301,11 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
         "How does Amazon Personalize differ from simply hardcoding popular items into a recommendation section?",
       options: [
         "Personalize always returns the same top items for all users, but updates them daily",
-        "Personalize uses each individual user's interaction history to produce personalized rankings, rather than a single global popularity list",
         "Personalize sources recommendations from Amazon.com's catalog rather than your own data",
+        "Personalize uses each individual user's interaction history to produce personalized rankings, rather than a single global popularity list",
         "Personalize requires users to explicitly rate items before generating recommendations",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The core value of Personalize is individual personalization — each user receives recommendations tailored to their own interaction history. The aws-popularity-count recipe does provide non-personalized popularity, but the main recipes (aws-user-personalization, aws-personalized-ranking) are user-specific.",
     },
@@ -314,11 +314,11 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
         "Which dataset type in Amazon Personalize would you use to store attributes like item category, price, and genre?",
       options: [
         "Interactions dataset",
-        "Context dataset",
         "Items dataset",
+        "Context dataset",
         "Features dataset",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The Items dataset stores catalog metadata such as item ID, category, price, genre, and tags. This optional dataset enriches recommendations by providing additional item attributes that the model can use alongside interaction signals.",
     },
@@ -326,12 +326,12 @@ The **cold start problem** is a fundamental challenge in recommendation systems:
       question:
         "An e-commerce site imports historical purchase data into Amazon Personalize and also calls PutEvents as users browse. What is the purpose of each approach?",
       options: [
-        "Historical import sets the model's exploration rate; PutEvents configures item filters",
-        "Historical import loads training data for model training; PutEvents streams real-time signals that update recommendations immediately during active sessions",
         "Both do the same thing — PutEvents is just a faster version of batch import",
         "Historical import is required for Campaigns; PutEvents is only used for batch inference jobs",
+        "Historical import loads training data for model training; PutEvents streams real-time signals that update recommendations immediately during active sessions",
+        "Historical import sets the model's exploration rate; PutEvents configures item filters",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Batch import via CreateDatasetImportJob loads historical interaction data to train the model. PutEvents streams real-time interaction events that Personalize incorporates immediately into recommendations without retraining — enabling session-level personalization.",
     },

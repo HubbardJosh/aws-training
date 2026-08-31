@@ -23,12 +23,12 @@ Parameter Store has two service tiers. The **Standard tier** is free and support
           question:
             "A Lambda function reads 12 configuration parameters on every invocation, causing high SSM API call volume and added latency. Which approach eliminates per-invocation API calls while keeping configuration current?",
           options: [
-            "Switch to the Advanced tier, which includes built-in caching for Lambda",
             "Use the Lambda extension for Parameter Store, which caches parameters locally and serves them from localhost",
             "Store all parameters as a single JSON StringList and parse it in the function",
+            "Switch to the Advanced tier, which includes built-in caching for Lambda",
             "Use environment variables baked into the Lambda deployment package at deploy time",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The Lambda extension for Parameter Store runs as a companion process in the Lambda execution environment. It caches parameter values locally and exposes them via a local HTTP endpoint (`localhost:2772`), so the function reads configuration without making any SSM API calls on each invocation. The extension polls for updates in the background, keeping values fresh without per-invocation network round-trips.",
         },
@@ -36,12 +36,12 @@ Parameter Store has two service tiers. The **Standard tier** is free and support
           question:
             "A developer needs to store a database password in Parameter Store. The password must be encrypted at rest. Which parameter type should they use?",
           options: [
-            "String — the default type, which encrypts values automatically",
             "StringList — splits the password into a list for additional obfuscation",
-            "SecureString — encrypts the value with KMS and is suitable for sensitive data",
             "Advanced String — the Advanced tier adds encryption to plain String parameters",
+            "String — the default type, which encrypts values automatically",
+            "SecureString — encrypts the value with KMS and is suitable for sensitive data",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "SecureString parameters are encrypted at rest using AWS KMS. This is the correct choice for sensitive values like database passwords, API keys, and credentials stored in Parameter Store. Standard String parameters store plaintext with no encryption. StringList is for comma-separated non-sensitive values. There is no 'Advanced String' type.",
         },
@@ -74,12 +74,12 @@ Both services integrate with Lambda (SDK calls), ECS task definitions (secrets i
           question:
             "A production RDS database uses credentials that must automatically rotate every 30 days, with no manual intervention. Which service handles this requirement?",
           options: [
+            "Systems Manager Automation with a runbook that rotates the RDS password on a maintenance window schedule",
             "Parameter Store Advanced tier with a parameter policy set to expire every 30 days",
             "Secrets Manager with a built-in rotation Lambda that manages the full RDS credential rotation lifecycle",
             "Parameter Store SecureString with a scheduled Lambda function that updates the value monthly",
-            "Systems Manager Automation with a runbook that rotates the RDS password on a maintenance window schedule",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Secrets Manager provides built-in automatic rotation for RDS, Redshift, DocumentDB, and ElastiCache using managed Lambda rotation functions. The rotation lifecycle — creating a new credential, updating the database, testing the new credential, and promoting it — is fully automated with no manual steps. Parameter Store has no native automatic rotation capability.",
         },
@@ -87,12 +87,12 @@ Both services integrate with Lambda (SDK calls), ECS task definitions (secrets i
           question:
             "A microservices team needs to share a third-party API key across three AWS accounts. Which service natively supports cross-account secret sharing?",
           options: [
+            "Both services support cross-account sharing with the same mechanism",
             "Parameter Store, by using resource-based policies on the parameter",
             "Secrets Manager, which supports resource-based policies enabling cross-account access",
-            "Both services support cross-account sharing with the same mechanism",
             "Neither service supports cross-account sharing — the key must be replicated to each account",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Secrets Manager supports resource-based policies that allow cross-account access to secrets. Parameter Store parameters are account-scoped with no native cross-account sharing mechanism. This is one of the two key reasons to choose Secrets Manager over Parameter Store (the other being automatic rotation).",
         },
@@ -100,12 +100,12 @@ Both services integrate with Lambda (SDK calls), ECS task definitions (secrets i
           question:
             'A developer stores a feature flag value (a plain string `"true"` or `"false"`) in Parameter Store. Which tier and type is the most cost-effective choice?',
           options: [
+            "Advanced tier String, for the higher 8 KB value limit",
             "Advanced tier SecureString, for maximum security",
             "Standard tier String, because it is free and plaintext feature flags need no encryption",
             "Standard tier SecureString, because all production values should be encrypted",
-            "Advanced tier String, for the higher 8 KB value limit",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Feature flags are non-sensitive configuration values — there is no reason to encrypt them with KMS (which adds cost for decryption API calls) or to pay for the Advanced tier. Standard tier String parameters are free and fully sufficient for plaintext configuration like feature flags, endpoint URLs, and version numbers.",
         },
@@ -125,12 +125,12 @@ All session activity is logged to S3 or CloudWatch Logs, which is important for 
           question:
             "A security team wants to remove all SSH key pairs and close port 22 on their EC2 instances while still allowing engineers to access instance shells. Which SSM feature enables this?",
           options: [
+            "Patch Manager — automates shell access for patching operations",
+            "SSM Agent port forwarding — tunnels SSH traffic through port 443 to avoid port 22",
             "Run Command — executes commands remotely without SSH, though interactive access is not available",
             "Session Manager — provides interactive shell access via an outbound HTTPS tunnel, requiring no SSH keys or open inbound ports",
-            "SSM Agent port forwarding — tunnels SSH traffic through port 443 to avoid port 22",
-            "Patch Manager — automates shell access for patching operations",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Session Manager provides interactive shell access without SSH keys, bastion hosts, or inbound security group rules. The SSM agent on the instance maintains an outbound HTTPS connection to the SSM service, and sessions are proxied through that channel. Engineers start sessions from the console or CLI (`aws ssm start-session`) and the instance never needs inbound connectivity.",
         },
@@ -139,11 +139,11 @@ All session activity is logged to S3 or CloudWatch Logs, which is important for 
             "A developer needs to connect their local database client to a private RDS instance that only accepts connections from a specific EC2 instance's security group. No bastion host exists. Which Session Manager capability solves this?",
           options: [
             "Open port 5432 on the RDS security group to the developer's IP address temporarily",
-            "Use Session Manager port forwarding to tunnel a local port through the EC2 instance to the RDS endpoint",
-            "Create a VPC peering connection between the developer's local network and the VPC",
             "Use Run Command to export the RDS data and download it via S3",
+            "Create a VPC peering connection between the developer's local network and the VPC",
+            "Use Session Manager port forwarding to tunnel a local port through the EC2 instance to the RDS endpoint",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Session Manager port forwarding tunnels a local port (e.g., localhost:5432) through the EC2 instance to a private resource the instance can reach — in this case the RDS endpoint. The RDS security group only needs to allow connections from the EC2 instance's security group, and no inbound ports need to be opened for the developer. This is a common pattern for accessing private databases without a bastion host.",
         },
@@ -189,12 +189,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
           question:
             "Before deploying a new AppConfig configuration, a team wants to validate that the JSON structure matches their schema AND that business rules (like rate limits being within acceptable bounds) are satisfied. Which validator types can they combine?",
           options: [
-            "JSON Schema validator only — Lambda validators are not supported for AppConfig",
             "JSON Schema validator for structure/type checking and a Lambda validator for custom business logic validation",
-            "Lambda validator only — JSON Schema is not natively supported in AppConfig",
             "CloudWatch alarms act as validators by rolling back deployments when metrics degrade",
+            "JSON Schema validator only — Lambda validators are not supported for AppConfig",
+            "Lambda validator only — JSON Schema is not natively supported in AppConfig",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "AppConfig supports two validator types that can be used together: a JSON Schema validator checks that the new configuration conforms to a defined schema (structure and types), and a Lambda validator runs custom code for business rule validation (e.g., ensuring rate limits are within acceptable bounds). Both validators must pass before the deployment proceeds.",
         },
@@ -202,12 +202,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
           question:
             "A Lambda function reads its AppConfig configuration via the Lambda Extension. Where does the function read the configuration from at runtime?",
           options: [
-            "Directly from the AppConfig API using `GetConfiguration` SDK calls",
             "From an environment variable injected at deploy time by AppConfig",
             "From a local HTTP endpoint at `localhost:2772` served by the Lambda Extension",
+            "Directly from the AppConfig API using `GetConfiguration` SDK calls",
             "From an S3 bucket that AppConfig updates when configuration changes are deployed",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The AppConfig Lambda Extension serves the current cached configuration from a local HTTP endpoint at `localhost:2772/applications/{app}/environments/{env}/configurations/{profile}`. The function reads from this local endpoint rather than calling the AppConfig API directly, which keeps latency low and eliminates per-invocation API costs. The extension polls AppConfig in the background and updates the cache when changes are deployed.",
         },
@@ -242,12 +242,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
           question:
             "A compliance team wants to ensure the CloudWatch agent is always installed and running on every EC2 instance, and automatically re-install it if drift is detected. Which SSM feature enforces this continuous desired state?",
           options: [
-            "Run Command scheduled with EventBridge to check every hour",
-            "Patch Manager with a custom baseline that includes the CloudWatch agent package",
             "State Manager, which continuously enforces desired state and reapplies it when drift is detected",
             "Automation runbooks triggered by CloudWatch alarms when the agent stops sending metrics",
+            "Run Command scheduled with EventBridge to check every hour",
+            "Patch Manager with a custom baseline that includes the CloudWatch agent package",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "State Manager is designed for continuous desired state enforcement. You define an association that specifies the desired state (e.g., CloudWatch agent installed and running), and State Manager applies it on a schedule and re-applies it whenever drift is detected. Run Command is for one-time execution; Patch Manager is for OS patch management.",
         },
@@ -294,11 +294,11 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
             "A CloudFormation template needs to read the current value of a Parameter Store parameter at deployment time without hardcoding the value. Which dynamic reference syntax achieves this?",
           options: [
             "`!Ref /myapp/prod/param` — the CloudFormation Ref function resolves SSM paths",
+            "`Fn::ImportValue: /myapp/prod/param` — cross-stack exports work with Parameter Store paths",
             "`{{resolve:ssm:/myapp/prod/param}}` — the SSM dynamic reference fetches the value at deploy time",
             "`${ssm:/myapp/prod/param}` — the shell variable syntax is supported in CloudFormation",
-            "`Fn::ImportValue: /myapp/prod/param` — cross-stack exports work with Parameter Store paths",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "CloudFormation dynamic references use the syntax `{{resolve:ssm:/path/to/parameter}}` to fetch the current value of a Parameter Store parameter at deployment time. For SecureString parameters, use `{{resolve:ssm-secure:/path}}`. This keeps environment-specific values out of templates and allows the same template to deploy differently across environments.",
         },
@@ -307,11 +307,11 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
             "A team wants a Lambda function to be invoked automatically whenever the value of a specific Parameter Store parameter changes (e.g., a feature flag is toggled). Which AWS service integration enables this reactive pattern?",
           options: [
             "CloudWatch alarms monitoring the parameter's access metrics",
+            "Parameter Store supports Lambda triggers directly, similar to DynamoDB Streams",
             "Parameter Store publishes change events to EventBridge, which can trigger a Lambda function rule",
             "Lambda must poll Parameter Store on a schedule using CloudWatch Events",
-            "Parameter Store supports Lambda triggers directly, similar to DynamoDB Streams",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Parameter Store publishes change events (parameter created, updated, deleted) to Amazon EventBridge. You can create an EventBridge rule that matches these events and targets a Lambda function, enabling reactive workflows when configuration values change. This is how you implement automated rollout coordination when a feature flag is toggled.",
         },
@@ -361,12 +361,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
       question:
         "A developer needs to store a plain-text application version number and a KMS-encrypted database password in Parameter Store. Which parameter types should they use for each?",
       options: [
+        "String for the version number; SecureString for the database password",
         "String for both — Parameter Store encrypts all parameters at rest automatically",
         "SecureString for both — all production parameters should be encrypted",
-        "String for the version number; SecureString for the database password",
         "StringList for the version number; SecureString for the database password",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "String parameters store plaintext and are appropriate for non-sensitive values like version numbers, endpoint URLs, and feature flags. SecureString parameters are encrypted with KMS and are the correct choice for sensitive values like database passwords. There is no reason to encrypt a plaintext version number, and doing so adds unnecessary KMS API call costs.",
     },
@@ -375,11 +375,11 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
         "A team is deciding between Parameter Store and Secrets Manager for their RDS database credentials. The credentials must rotate automatically every 90 days. Which service should they choose and why?",
       options: [
         "Parameter Store Advanced tier, because parameter policies support automatic expiration",
-        "Secrets Manager, because it provides built-in automatic rotation for RDS with managed Lambda rotation functions",
         "Parameter Store SecureString, because KMS encryption satisfies the rotation requirement",
         "Either service; both support automatic rotation with the same configuration effort",
+        "Secrets Manager, because it provides built-in automatic rotation for RDS with managed Lambda rotation functions",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Secrets Manager is the correct choice when automatic rotation is required. It provides built-in managed rotation Lambda functions for RDS, Redshift, DocumentDB, and ElastiCache that handle the full rotation lifecycle automatically. Parameter Store has no native automatic rotation capability — Advanced tier parameter policies support expiration notifications and auto-deletion, but not credential rotation.",
     },
@@ -400,12 +400,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
       question:
         "AppConfig's Lambda Extension caches configuration locally. What is the primary operational benefit of this caching approach?",
       options: [
+        "It encrypts configuration values at rest within the Lambda execution environment",
         "It prevents configuration changes from taking effect until the Lambda function is redeployed",
         "It eliminates per-invocation AppConfig API calls, reducing latency and cost while still polling for updates in the background",
         "It stores configuration in the Lambda deployment package, making cold starts faster",
-        "It encrypts configuration values at rest within the Lambda execution environment",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The Lambda Extension serves cached configuration from a local HTTP endpoint (`localhost:2772`), so each function invocation reads configuration without making an AppConfig API call. The extension polls AppConfig in the background and updates the cache when changes are deployed, ensuring the function picks up new configuration within the polling interval without per-invocation API costs.",
     },
@@ -426,12 +426,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
       question:
         "A Run Command execution needs to target all EC2 instances in the production environment. Which targeting method achieves this without specifying individual instance IDs?",
       options: [
-        "Run Command does not support bulk targeting — instance IDs must be specified individually",
         "Use an SSM Resource Group or target by tag (e.g., `Environment=prod`) to select all matching instances",
-        "Use a CloudWatch alarm to trigger Run Command across all instances simultaneously",
         "Create an SSM Automation runbook that discovers instances and passes them to Run Command",
+        "Use a CloudWatch alarm to trigger Run Command across all instances simultaneously",
+        "Run Command does not support bulk targeting — instance IDs must be specified individually",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Run Command supports targeting instances by tag key-value pairs (e.g., `Environment=prod`), by resource group, or by individual instance IDs. Tag-based targeting is the most practical approach for fleet operations because it automatically includes new instances that have the tag and excludes terminated instances, without requiring the command to be updated each time the fleet changes.",
     },
@@ -439,12 +439,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
       question:
         "A Lambda function reads a SecureString parameter from Parameter Store. Which two IAM permissions does the execution role require?",
       options: [
-        "`ssm:GetParameter` and `ssm:PutParameter`",
-        "`ssm:GetParameter` and `kms:Decrypt`",
-        "`ssm:DescribeParameters` and `kms:GenerateDataKey`",
         "`ssm:GetParameter` only — KMS decryption is handled transparently by SSM",
+        "`ssm:GetParameter` and `ssm:PutParameter`",
+        "`ssm:DescribeParameters` and `kms:GenerateDataKey`",
+        "`ssm:GetParameter` and `kms:Decrypt`",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Reading a SecureString parameter requires two permissions: `ssm:GetParameters` (to fetch the encrypted value from Parameter Store) and `kms:Decrypt` (to decrypt the value using the KMS key that encrypted it). Without `kms:Decrypt`, the API call will fail with an access denied error from KMS even though the SSM permission is present.",
     },
@@ -452,12 +452,12 @@ The **AppConfig Agent** (for EC2 and containers) and **Lambda Extension** poll A
       question:
         "Which AppConfig deployment strategy should a team use when they want to apply a configuration change to all clients simultaneously with no gradual rollout?",
       options: [
-        "Linear — applies changes at a fixed rate across the deployment window",
         "Exponential — starts small and increases, reaching 100% at the end",
-        "AllAtOnce — immediately applies the new configuration to all polling clients",
         "Canary — tests with 10% of clients before full deployment",
+        "Linear — applies changes at a fixed rate across the deployment window",
+        "AllAtOnce — immediately applies the new configuration to all polling clients",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "The AllAtOnce deployment strategy applies the new configuration immediately to all clients on their next poll. It is appropriate when the change is low-risk and a gradual rollout is not needed. Linear and Exponential strategies spread the change over time, which is useful for higher-risk changes where you want to detect problems before all clients are affected.",
     },

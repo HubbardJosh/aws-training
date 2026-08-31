@@ -18,11 +18,11 @@ export const ec2Guide: ServiceGuide = {
             "A team is running a large in-memory analytics database that requires 512 GB of RAM. Which EC2 instance family is most appropriate?",
           options: [
             "C family (Compute Optimized)",
-            "M family (General Purpose)",
             "R or X family (Memory Optimized)",
+            "M family (General Purpose)",
             "I family (Storage Optimized)",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Memory-optimized R and X families are designed for workloads requiring large amounts of RAM, such as in-memory databases, real-time analytics, and SAP HANA. They provide the highest memory-to-vCPU ratios.",
         },
@@ -44,11 +44,11 @@ export const ec2Guide: ServiceGuide = {
             "What does the 'g' suffix in the instance type name r6g.2xlarge indicate?",
           options: [
             "GPU acceleration",
+            "Geographic availability in a specific region",
             "General-purpose storage",
             "AWS Graviton (ARM-based) processor",
-            "Geographic availability in a specific region",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The 'g' suffix indicates an AWS Graviton processor (ARM-based). Graviton instances typically offer better price-performance than equivalent x86 instances for supported workloads.",
         },
@@ -75,12 +75,12 @@ export const ec2Guide: ServiceGuide = {
           question:
             "A company has a stable web application running 24/7 for at least the next 3 years. Which purchasing model provides the greatest cost savings?",
           options: [
+            "Dedicated Hosts with On-Demand pricing",
             "Spot Instances — cheapest option",
             "On-Demand — most flexible",
             "Standard Reserved Instances with a 3-year term — up to 72% savings",
-            "Dedicated Hosts with On-Demand pricing",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Standard Reserved Instances with a 3-year term provide up to 72% savings over On-Demand for predictable, steady-state workloads. The long-term commitment justifies the discount for a 3-year deployment.",
         },
@@ -107,12 +107,12 @@ export const ec2Guide: ServiceGuide = {
           question:
             "A critical application has 5 EC2 instances, and no two instances should share the same underlying hardware to minimize the blast radius of hardware failures. Which placement group type is appropriate?",
           options: [
-            "Cluster placement group",
             "Spread placement group — each instance on distinct hardware, max 7 per AZ",
-            "Partition placement group",
             "No placement group — instances are already on separate hardware by default",
+            "Cluster placement group",
+            "Partition placement group",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Spread placement groups place each instance on distinct underlying hardware within an AZ, ensuring hardware failures affect at most one instance. It supports up to 7 running instances per AZ per group, suitable for small critical workloads.",
         },
@@ -139,12 +139,12 @@ export const ec2Guide: ServiceGuide = {
           question:
             "Which EBS volume type allows IOPS and throughput to be configured independently, regardless of volume size?",
           options: [
-            "gp2 — General Purpose SSD (legacy)",
             "gp3 — General Purpose SSD",
             "io1 — Provisioned IOPS SSD",
+            "gp2 — General Purpose SSD (legacy)",
             "st1 — Throughput Optimized HDD",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "gp3 allows IOPS and throughput to be configured independently of volume size, unlike gp2 where IOPS scale with volume size. gp3 is the recommended default general-purpose SSD type.",
         },
@@ -171,12 +171,12 @@ export const ec2Guide: ServiceGuide = {
           question:
             "What is the correct way to grant an EC2 application access to AWS services like S3 without embedding credentials?",
           options: [
+            "Use AWS Secrets Manager to retrieve hardcoded access keys at startup",
             "Store access keys in environment variables on the EC2 instance",
             "Embed access keys in the application's configuration file",
             "Attach an IAM Instance Profile (IAM role) to the EC2 instance",
-            "Use AWS Secrets Manager to retrieve hardcoded access keys at startup",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "IAM Instance Profiles attach an IAM role to an EC2 instance. Applications retrieve temporary, auto-rotating credentials from the Instance Metadata Service (169.254.169.254) without any hardcoded keys.",
         },
@@ -191,11 +191,11 @@ export const ec2Guide: ServiceGuide = {
             "Why is a golden AMI preferred over user data scripts for installing dependencies on Auto Scaling instances?",
           options: [
             "User data scripts are not supported in Auto Scaling Groups",
-            "Golden AMIs have all dependencies pre-baked, enabling faster and more consistent instance launches without waiting for package installation",
             "User data scripts run after the instance is healthy, causing health check failures",
+            "Golden AMIs have all dependencies pre-baked, enabling faster and more consistent instance launches without waiting for package installation",
             "Golden AMIs are cheaper to launch than instances with user data scripts",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Golden AMIs pre-install all dependencies so instances launch quickly and consistently without installing packages at boot time. This reduces scale-out latency and eliminates the risk of installation failures or version drift.",
         },
@@ -203,12 +203,12 @@ export const ec2Guide: ServiceGuide = {
           question:
             "Which EC2 feature is required to configure an Auto Scaling Group with a mix of Spot and On-Demand instances?",
           options: [
-            "Launch Configurations with a Spot price override",
             "Launch Templates with a Mixed Instance Policy",
-            "A separate ASG for Spot instances alongside an On-Demand ASG",
             "EC2 Fleet with manual instance management",
+            "A separate ASG for Spot instances alongside an On-Demand ASG",
+            "Launch Configurations with a Spot price override",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Launch Templates (not the older Launch Configurations) are required for Mixed Instance Policies in Auto Scaling Groups. They support combining multiple instance types with a mix of Spot and On-Demand purchasing, unlocking significant cost optimization.",
         },
@@ -254,12 +254,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "A company runs a NoSQL database requiring consistently high random IOPS with sub-millisecond latency. Which EBS volume type is most appropriate?",
       options: [
-        "gp3 — General Purpose SSD",
-        "st1 — Throughput Optimized HDD",
         "io2 Block Express — Provisioned IOPS SSD for highest IOPS and lowest latency",
+        "gp3 — General Purpose SSD",
         "sc1 — Cold HDD",
+        "st1 — Throughput Optimized HDD",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "io2 Block Express delivers sub-millisecond latency and the highest IOPS for demanding databases. gp3 is a good general-purpose option but io2 Block Express is designed for the most demanding database workloads.",
     },
@@ -267,12 +267,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "Which EC2 purchasing model is appropriate for a stateless batch processing job that can handle interruption?",
       options: [
-        "On-Demand — no interruption risk",
         "Spot Instances — up to 90% savings for fault-tolerant, interruptible workloads",
+        "On-Demand — no interruption risk",
         "Reserved Instances — predictable cost",
         "Dedicated Hosts — physical isolation",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Spot Instances offer up to 90% savings and are ideal for stateless, fault-tolerant workloads that can checkpoint and resume. AWS provides a 2-minute warning before reclaiming Spot capacity.",
     },
@@ -280,12 +280,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "An application requires that no two instances share the same physical rack to maximize fault isolation. Which placement group type enforces this?",
       options: [
-        "Cluster placement group",
         "Partition placement group — each partition has its own rack",
         "Spread placement group — each instance on distinct hardware",
         "Default placement — AWS handles distribution automatically",
+        "Cluster placement group",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Spread placement groups place each instance on distinct underlying hardware (separate racks), ensuring hardware failures affect at most one instance. Partition placement groups use separate racks per partition but can have multiple instances per partition.",
     },
@@ -293,12 +293,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "A team needs to give their EC2 application permission to read from an S3 bucket. What is the recommended approach?",
       options: [
-        "Create an IAM user, generate access keys, and store them in the application configuration",
-        "Store the root account access keys in an environment variable",
-        "Attach an IAM Instance Profile with an IAM role that grants s3:GetObject permission",
         "Use an S3 bucket policy that allows all EC2 instances in the region",
+        "Store the root account access keys in an environment variable",
+        "Create an IAM user, generate access keys, and store them in the application configuration",
+        "Attach an IAM Instance Profile with an IAM role that grants s3:GetObject permission",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "IAM Instance Profiles attach IAM roles to EC2 instances. Applications retrieve temporary, auto-rotating credentials from the Instance Metadata Service without hardcoded keys. This is the AWS-recommended approach and avoids long-lived credential exposure.",
     },
@@ -306,12 +306,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "EC2 basic monitoring publishes metrics to CloudWatch at what interval?",
       options: [
+        "Every 5 minutes",
         "Every 10 seconds",
         "Every 1 minute",
-        "Every 5 minutes",
         "Every 15 minutes",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "EC2 basic monitoring (the default) publishes metrics every 5 minutes. Detailed monitoring must be explicitly enabled to get 1-minute granularity, which is required for more responsive Auto Scaling policies.",
     },
@@ -319,12 +319,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "A new EC2 instance type is needed for an Auto Scaling Group that currently uses Launch Configurations. Which feature must the ASG migrate to in order to support Mixed Instance Policies?",
       options: [
-        "EC2 Fleet with mixed configuration",
         "Launch Templates with a Mixed Instance Policy",
         "A second Auto Scaling Group for the new instance type",
         "Spot Fleet with On-Demand allocation strategy",
+        "EC2 Fleet with mixed configuration",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Launch Templates (not Launch Configurations) are required for Mixed Instance Policies that combine multiple instance types with Spot and On-Demand purchasing in a single ASG. Launch Configurations are legacy and do not support this feature.",
     },
@@ -332,12 +332,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "Which EC2 instance family is designed for large-scale distributed data processing systems like HDFS and Cassandra that need a balance of storage and compute across many nodes?",
       options: [
-        "M family — General Purpose",
         "C family — Compute Optimized",
         "R family — Memory Optimized",
         "I or D family — Storage Optimized",
+        "M family — General Purpose",
       ],
-      correctIndex: 3,
+      correctIndex: 2,
       explanation:
         "Storage-optimized I and D families provide high sequential I/O throughput and large local storage, making them well-suited for distributed data stores like HDFS, HBase, and Cassandra that require fast local disk access across many nodes.",
     },
@@ -345,12 +345,12 @@ export const ec2Guide: ServiceGuide = {
       question:
         "A Security Group rule allows inbound TCP port 443. A user connects via HTTPS. Do you need to add an explicit outbound rule to allow the response traffic?",
       options: [
-        "Yes — both inbound and outbound rules must be explicitly configured",
-        "No — Security Groups are stateful; return traffic is automatically allowed",
-        "Yes — response traffic uses ephemeral ports that must be explicitly allowed",
         "Only if the destination is a different AZ",
+        "Yes — both inbound and outbound rules must be explicitly configured",
+        "Yes — response traffic uses ephemeral ports that must be explicitly allowed",
+        "No — Security Groups are stateful; return traffic is automatically allowed",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Security Groups are stateful. When you allow inbound traffic, the corresponding outbound response traffic is automatically permitted without an explicit outbound rule. This contrasts with NACLs, which are stateless and require explicit rules in both directions.",
     },

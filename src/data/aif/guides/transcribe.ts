@@ -22,11 +22,11 @@ For **real-time applications**, Transcribe's **streaming API** accepts a continu
             "What transport protocols does Amazon Transcribe's streaming API use for real-time transcription?",
           options: [
             "RTSP and RTP",
-            "WebSocket and HTTP/2",
             "gRPC and WebSocket",
             "HTTP/1.1 with long polling and Server-Sent Events",
+            "WebSocket and HTTP/2",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon Transcribe's streaming API accepts continuous audio over WebSocket or HTTP/2, returning partial and final transcription results as speech is recognized. This enables real-time use cases like live captioning and real-time call monitoring.",
         },
@@ -34,12 +34,12 @@ For **real-time applications**, Transcribe's **streaming API** accepts a continu
           question:
             "Beyond the transcript text, what additional data does Amazon Transcribe include in its JSON output for batch transcription jobs?",
           options: [
-            "Sentiment scores and entity labels for each sentence",
-            "Confidence scores and precise start/end timestamps for each word",
-            "Speaker voice prints and acoustic feature vectors",
             "Language detection probability scores and dialect classification",
+            "Speaker voice prints and acoustic feature vectors",
+            "Confidence scores and precise start/end timestamps for each word",
+            "Sentiment scores and entity labels for each sentence",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Transcribe's JSON output includes not only the transcript text but also confidence scores for each word and precise start/end timestamps. These timestamps are valuable for generating synchronized caption files and enabling keyword search within audio recordings.",
         },
@@ -57,12 +57,12 @@ You enable diarization by setting \`ShowSpeakerLabels: true\` in your transcript
           question:
             "Which Amazon Transcribe parameter enables speaker diarization in a batch transcription job?",
           options: [
-            "EnableSpeakerSeparation: true",
             "ShowSpeakerLabels: true (with MaxSpeakerLabels specifying the maximum number of speakers)",
-            "ChannelIdentification: true with the number of expected speakers",
+            "EnableSpeakerSeparation: true",
             "DiarizationEnabled: true with a SpeakerCount parameter",
+            "ChannelIdentification: true with the number of expected speakers",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Speaker diarization is enabled by setting ShowSpeakerLabels: true in the transcription job configuration. You also specify MaxSpeakerLabels to indicate the maximum number of distinct speakers Transcribe should identify in the recording.",
         },
@@ -93,12 +93,12 @@ You enable diarization by setting \`ShowSpeakerLabels: true\` in your transcript
           question:
             "What is the key difference between a custom vocabulary and a custom language model in Amazon Transcribe?",
           options: [
-            "Custom vocabularies are for English only; custom language models support all languages",
             "Custom vocabularies add specific terms with pronunciation hints; custom language models fine-tune the entire language model component on domain text for broader accuracy improvement",
-            "Custom vocabularies are applied at training time; custom language models are applied at transcription time",
             "Custom vocabularies improve accuracy for all speakers; custom language models only improve accuracy for a specific speaker's voice",
+            "Custom vocabularies are for English only; custom language models support all languages",
+            "Custom vocabularies are applied at training time; custom language models are applied at transcription time",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Custom vocabularies add specific terms (with optional pronunciation hints and display forms) to help Transcribe recognize individual words. Custom language models fine-tune the language model component on large amounts of domain text, improving accuracy across an entire domain rather than just specific terms.",
         },
@@ -106,12 +106,12 @@ You enable diarization by setting \`ShowSpeakerLabels: true\` in your transcript
           question:
             "A pharmaceutical company wants Amazon Transcribe to correctly recognize dozens of proprietary drug names in clinical trial recordings. Which feature is most appropriate?",
           options: [
+            "Speaker diarization to identify when pharmacists vs. patients speak drug names",
             "Custom language model trained on clinical trial transcripts",
             "Custom vocabulary listing the drug names with their correct pronunciations and display forms",
             "Channel identification to separate pharmacist and patient audio",
-            "Speaker diarization to identify when pharmacists vs. patients speak drug names",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Custom vocabularies are the right tool for recognizing specific terms like drug names. You list the terms with optional IPA pronunciation hints and display forms (how they should appear in the transcript). Custom language models are more appropriate when you need broad domain-wide accuracy improvement, not just specific term recognition.",
         },
@@ -130,11 +130,11 @@ Call Analytics detects **sentiment** on each speaker turn (positive, negative, n
             "Which of the following is NOT a capability of Amazon Transcribe Call Analytics?",
           options: [
             "Sentiment detection on each speaker turn",
-            "Real-time translation of the call into a second language for multilingual agents",
             "PII detection and redaction from both the transcript and the audio file",
+            "Real-time translation of the call into a second language for multilingual agents",
             "Identification of call characteristics such as interruptions and non-talk time",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Real-time translation is not a Transcribe Call Analytics capability — that would require Amazon Translate. Call Analytics provides sentiment analysis, PII redaction, call characteristic detection (interruptions, talk speed), issue and outcome detection, and optionally AI-generated call summaries.",
         },
@@ -227,12 +227,12 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
       question:
         "A company needs to transcribe recorded customer service calls stored in S3 and identify which agent and which customer made each statement. Which Transcribe features should they use?",
       options: [
-        "Batch transcription with custom vocabulary for agent names",
         "Batch transcription with speaker diarization (ShowSpeakerLabels: true)",
+        "Batch transcription with custom vocabulary for agent names",
         "Streaming API with channel identification enabled",
         "Transcribe Call Analytics with sentiment detection",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Batch transcription with speaker diarization (ShowSpeakerLabels: true) is the correct approach for stored S3 recordings where you need to label which speaker said what. Transcribe detects speakers and annotates each segment with a speaker label and timestamp.",
     },
@@ -253,12 +253,12 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
       question:
         "A media company needs to generate synchronized captions for thousands of video files. Which Transcribe output feature enables accurate caption timing?",
       options: [
-        "Confidence scores — higher confidence words are used for caption placement",
         "Word-level timestamps — each word has precise start/end times for caption synchronization",
-        "Speaker labels — each speaker's segment defines a caption block",
         "Channel identification — stereo channels define left/right caption positioning",
+        "Confidence scores — higher confidence words are used for caption placement",
+        "Speaker labels — each speaker's segment defines a caption block",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Word-level timestamps in Transcribe's JSON output provide precise start and end times for each word, enabling accurate synchronization of caption segments to the exact moment words were spoken — suitable for generating WebVTT or SRT caption files.",
     },
@@ -266,12 +266,12 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
       question:
         "What is the correct direction of Amazon Transcribe's core function?",
       options: [
-        "Text to speech — converts written text into spoken audio",
         "Speech to text — converts audio recordings into written transcripts",
         "Text to text — translates transcripts between languages",
         "Audio to audio — enhances and filters audio recordings",
+        "Text to speech — converts written text into spoken audio",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Amazon Transcribe is speech-to-text (ASR) — it converts audio recordings into written transcripts. The opposite direction (text-to-speech) is Amazon Polly. This distinction is a common exam question for AIF-C01.",
     },
@@ -280,11 +280,11 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
         "A legal firm needs to transcribe depositions where multiple attorneys and witnesses speak. The recording is mono (single channel). Which Transcribe feature should they use to attribute statements to individual speakers?",
       options: [
         "Channel identification — split the mono recording into separate virtual channels",
-        "Speaker diarization — automatically detects and labels individual speakers in a mono recording",
-        "Custom vocabulary — add attorney and witness names for better recognition",
         "Custom language model — train on deposition transcripts to improve legal terminology accuracy",
+        "Custom vocabulary — add attorney and witness names for better recognition",
+        "Speaker diarization — automatically detects and labels individual speakers in a mono recording",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Speaker diarization (ShowSpeakerLabels: true) works on mono recordings to automatically detect and label individual speakers. Channel identification requires stereo recordings where speakers are already on separate tracks. Diarization is the correct choice for mono multi-speaker recordings.",
     },
@@ -293,11 +293,11 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
         "A healthcare company wants Amazon Transcribe to correctly recognize hundreds of medical device names and drug names in physician dictation recordings. Which approach provides the broadest improvement?",
       options: [
         "Custom vocabulary — list each medical term with its correct pronunciation",
-        "Custom language model — fine-tune on large amounts of clinical domain text for broad domain accuracy",
         "Transcribe Call Analytics — it includes a medical terminology module",
+        "Custom language model — fine-tune on large amounts of clinical domain text for broad domain accuracy",
         "Content redaction — configure medical terms as PII to track their occurrence",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Custom language models fine-tune Transcribe's language model component on large domain-specific text corpora (medical notes, drug databases, clinical trial reports), improving accuracy broadly across medical terminology. Custom vocabularies address specific individual terms but do not improve overall domain language modeling.",
     },
@@ -318,12 +318,12 @@ For media accessibility compliance (ADA, WCAG), Transcribe's precise word-level 
       question:
         "You are building a live captioning system for a video conferencing application. Which Amazon Transcribe API should you use?",
       options: [
-        "Batch transcription with StartTranscriptionJob — submit video files as they complete",
         "Streaming API over WebSocket or HTTP/2 — returns partial and final results in real time",
-        "Transcribe Call Analytics — it supports real-time call monitoring",
         "Custom language model endpoint — deploy a domain-specific model for real-time use",
+        "Transcribe Call Analytics — it supports real-time call monitoring",
+        "Batch transcription with StartTranscriptionJob — submit video files as they complete",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The streaming API is required for real-time applications like live captioning. It accepts a continuous audio stream over WebSocket or HTTP/2 and returns partial and final transcription results as speech is recognized, enabling synchronous caption display during live video conferencing.",
     },

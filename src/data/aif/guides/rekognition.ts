@@ -23,12 +23,12 @@ export const rekognitionGuide: ServiceGuide = {
           question:
             "Which Amazon Rekognition API would you use to automatically detect and categorize violent or explicit content in user-uploaded images?",
           options: [
-            "DetectLabels",
             "DetectModerationLabels",
-            "DetectFaces",
+            "DetectLabels",
             "RecognizeCelebrities",
+            "DetectFaces",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "DetectModerationLabels is the content moderation API. It identifies unsafe content including explicit adult content, violence, hate symbols, and more, organized in a taxonomy with confidence scores — purpose-built for content moderation pipelines.",
         },
@@ -59,12 +59,12 @@ export const rekognitionGuide: ServiceGuide = {
           question:
             "What must you create and populate before you can use SearchFacesByImage in Amazon Rekognition?",
           options: [
-            "A Custom Labels project trained on face images",
-            "A Collection — a persistent server-side index of face vectors built with IndexFaces",
-            "A Stream Processor connected to Kinesis Video Streams",
             "An SNS topic to receive face match notifications",
+            "A Custom Labels project trained on face images",
+            "A Stream Processor connected to Kinesis Video Streams",
+            "A Collection — a persistent server-side index of face vectors built with IndexFaces",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SearchFacesByImage requires a pre-built Collection. A Collection is a server-side index of face vectors that you populate by calling IndexFaces for each person, associating each face with an external ID from your system.",
         },
@@ -93,12 +93,12 @@ The **DetectText** API handles images; for video, Rekognition uses the asynchron
           question:
             "You need to read the text on road signs in dashcam images. Which AWS service is most appropriate?",
           options: [
+            "Amazon Comprehend — it extracts entities and key phrases from text in images",
             "Amazon Textract — it provides the highest text extraction accuracy",
             "Amazon Rekognition DetectText — it is designed for scene text in natural images",
-            "Amazon Comprehend — it extracts entities and key phrases from text in images",
             "Amazon Translate — it identifies and translates text found in images",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Rekognition DetectText is designed for scene text — text appearing in natural images on signs, license plates, product labels, and similar surfaces. Textract is purpose-built for structured document extraction (forms, tables) and is not optimized for scene text.",
         },
@@ -106,12 +106,12 @@ The **DetectText** API handles images; for video, Rekognition uses the asynchron
           question:
             "When should you use Amazon Textract instead of Rekognition's text detection for reading text?",
           options: [
-            "When the text appears on outdoor signs or in photographs of physical scenes",
             "When you need to extract structured data from documents such as form field key-value pairs or table data",
-            "When the document contains more than 1,000 words",
             "When the image is stored in S3 rather than passed as raw bytes",
+            "When the text appears on outdoor signs or in photographs of physical scenes",
+            "When the document contains more than 1,000 words",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Textract is purpose-built for structured document understanding — it extracts form field key-value pairs, table data, and layout structure from documents. Rekognition text detection is better for unstructured scene text on signs, labels, and photos.",
         },
@@ -130,11 +130,11 @@ For **stored video**, you submit a \`StartLabelDetection\`, \`StartFaceDetection
             "What is the correct pattern for analyzing a video file stored in S3 using Amazon Rekognition?",
           options: [
             "Call DetectLabels directly with the S3 URI — Rekognition handles video frames automatically",
-            "Call a Start* API (e.g., StartLabelDetection), wait for SNS notification, then call the corresponding Get* API",
             "Upload the video to a Kinesis Video Stream and create a Stream Processor",
+            "Call a Start* API (e.g., StartLabelDetection), wait for SNS notification, then call the corresponding Get* API",
             "Use Rekognition Custom Labels with video input to detect objects frame by frame",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Stored video analysis in Rekognition follows an async pattern: call Start* (e.g., StartLabelDetection) with the S3 path → Rekognition processes asynchronously → publishes completion to SNS → you call Get* (e.g., GetLabelDetection) to retrieve timestamped results.",
         },
@@ -163,12 +163,12 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
           question:
             "Why does Rekognition Custom Labels require far fewer training images than training a computer vision model from scratch?",
           options: [
-            "Custom Labels uses synthetic data augmentation to multiply a small image set into millions of samples",
-            "Custom Labels applies transfer learning, fine-tuning Rekognition's pre-trained feature extractor on your labeled data",
-            "Custom Labels only performs image classification, which requires less data than object detection",
             "Custom Labels uses crowdsourced labeling to automatically expand small datasets",
+            "Custom Labels only performs image classification, which requires less data than object detection",
+            "Custom Labels applies transfer learning, fine-tuning Rekognition's pre-trained feature extractor on your labeled data",
+            "Custom Labels uses synthetic data augmentation to multiply a small image set into millions of samples",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Rekognition Custom Labels uses transfer learning — it starts from Rekognition's existing pre-trained feature extractor (already trained on massive image datasets) and fine-tunes only the final layers on your labeled domain images. This means dozens to hundreds of images are often sufficient.",
         },
@@ -176,12 +176,12 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
           question:
             "Which two output types does Rekognition Custom Labels support?",
           options: [
-            "Sentiment analysis and named entity recognition",
             "Object localization (bounding boxes) and image classification",
-            "Text detection and face recognition",
+            "Sentiment analysis and named entity recognition",
             "Scene description and activity detection",
+            "Text detection and face recognition",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Rekognition Custom Labels models support object localization (detecting objects and drawing bounding boxes around them) and image classification (assigning an overall label to an image). Both are available for custom domain-specific use cases.",
         },
@@ -238,24 +238,24 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
       question:
         "An airport security application needs to match faces from live camera feeds against a watchlist of thousands of individuals. Which Rekognition components are required?",
       options: [
-        "DetectFaces + CompareFaces applied to each pair of camera frames",
         "A Collection populated with IndexFaces + a Stream Processor connected to Kinesis Video Streams",
-        "Custom Labels trained on the watchlist images + DetectLabels for real-time detection",
+        "DetectFaces + CompareFaces applied to each pair of camera frames",
         "Celebrity recognition with a custom external URL list",
+        "Custom Labels trained on the watchlist images + DetectLabels for real-time detection",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "This requires a Collection (server-side face index populated with IndexFaces for each watchlist individual) and a Rekognition Stream Processor connected to Kinesis Video Streams for real-time face matching against the Collection.",
     },
     {
       question: "What does CompareFaces return when called with two images?",
       options: [
-        "A list of all faces detected in both images with their attributes",
         "A similarity score indicating how likely the two images contain the same person",
-        "The identity of the person if they are in Rekognition's celebrity database",
         "Bounding boxes for all faces in both images along with emotion analysis",
+        "The identity of the person if they are in Rekognition's celebrity database",
+        "A list of all faces detected in both images with their attributes",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "CompareFaces takes two images and returns a similarity score representing how likely it is that both images show the same person. It is the foundation for document-to-selfie identity verification workflows.",
     },
@@ -263,12 +263,12 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
       question:
         "Which statement correctly describes the async video analysis pattern in Amazon Rekognition?",
       options: [
-        "You call DetectLabels with a video S3 URI and receive timestamped results synchronously",
-        "You call Start* with an S3 video path, receive an SNS notification on completion, then call the corresponding Get* API",
-        "You upload video to Kinesis Video Streams and poll GetStreamResults until complete",
         "You create a Stream Processor that analyzes stored S3 video and writes results to DynamoDB",
+        "You call DetectLabels with a video S3 URI and receive timestamped results synchronously",
+        "You upload video to Kinesis Video Streams and poll GetStreamResults until complete",
+        "You call Start* with an S3 video path, receive an SNS notification on completion, then call the corresponding Get* API",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Stored video analysis is asynchronous: call a Start* API (StartLabelDetection, StartFaceDetection, etc.) → Rekognition processes and sends completion to SNS → your application calls the corresponding Get* API to retrieve timestamped results.",
     },
@@ -276,12 +276,12 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
       question:
         "A retail company wants to detect whether customers are wearing hard hats in warehouse security camera footage. Rekognition's base models don't recognize this specific item. What should they use?",
       options: [
-        "DetectProtectiveEquipment — Rekognition has a built-in PPE detection API",
-        "Rekognition Custom Labels trained on labeled images of workers with and without hard hats",
-        "DetectLabels with a confidence threshold of 99% to improve precision",
         "A Kinesis Video Stream Processor with face detection enabled",
+        "DetectProtectiveEquipment — Rekognition has a built-in PPE detection API",
+        "DetectLabels with a confidence threshold of 99% to improve precision",
+        "Rekognition Custom Labels trained on labeled images of workers with and without hard hats",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "Amazon Rekognition has a built-in DetectProtectiveEquipment API that specifically detects personal protective equipment including hard hats, face covers, and hand covers on people in images. This is a purpose-built API for workplace safety use cases.",
     },
@@ -315,12 +315,12 @@ The workflow starts in the **Rekognition Custom Labels console**, where you crea
       question:
         "A sports broadcaster wants to automatically detect which athletes appear in archived game footage stored in S3. What is the correct workflow?",
       options: [
-        "Call DetectFaces on each video frame in a Lambda loop",
-        "Call StartFaceSearch with the S3 video path and a Collection of athlete faces, then GetFaceSearch after SNS notification",
-        "Use Celebrity recognition — professional athletes are automatically indexed",
         "Create a Stream Processor and point it at the S3 video bucket",
+        "Use Celebrity recognition — professional athletes are automatically indexed",
+        "Call StartFaceSearch with the S3 video path and a Collection of athlete faces, then GetFaceSearch after SNS notification",
+        "Call DetectFaces on each video frame in a Lambda loop",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "For stored video face recognition, you call StartFaceSearch with the S3 video path and a pre-built Collection (populated with the athletes' faces via IndexFaces). After receiving an SNS completion notification, call GetFaceSearch to retrieve timestamped results showing when each athlete appears.",
     },

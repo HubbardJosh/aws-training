@@ -18,12 +18,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "A company wants to point their root domain (example.com) to an Application Load Balancer. Why can't they use a CNAME record?",
           options: [
-            "CNAMEs do not support ALB endpoints",
-            "CNAME records are not permitted at the zone apex (root domain)",
             "CNAMEs are only supported for IPv6 addresses",
             "CNAMEs require a static IP, which ALBs do not provide",
+            "CNAMEs do not support ALB endpoints",
+            "CNAME records are not permitted at the zone apex (root domain)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CNAME records cannot be used at the zone apex (root domain like example.com) — this is a DNS standard restriction. To point a root domain to an AWS resource like an ALB, you must use a Route 53 Alias record, which is a Route 53 extension that works at the zone apex, is free, and automatically tracks the ALB's changing IP addresses.",
         },
@@ -44,12 +44,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "Which type of Route 53 hosted zone answers DNS queries only from within associated VPCs?",
           options: [
-            "Public hosted zone",
             "Private hosted zone",
-            "Internal hosted zone",
+            "Public hosted zone",
             "VPC-scoped hosted zone",
+            "Internal hosted zone",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A private hosted zone answers DNS queries only from within the VPCs it is associated with. This allows you to use custom domain names for internal services (like api.internal.mycompany.com) without exposing them to the public internet. Public hosted zones answer queries from anywhere on the internet.",
         },
@@ -63,12 +63,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "A company wants to gradually shift 10% of traffic to a new application version while keeping 90% on the current version, without downtime. Which Route 53 routing policy should they use?",
           options: [
+            "Geolocation routing",
+            "Failover routing",
             "Latency-based routing",
             "Weighted routing",
-            "Failover routing",
-            "Geolocation routing",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Weighted routing distributes traffic proportionally based on assigned weights. Setting the new version's record weight to 10 and the current version's weight to 90 routes 10% of traffic to the new version. This enables gradual traffic shifting (canary/blue-green deployments) at the DNS level without any downtime.",
         },
@@ -76,12 +76,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "Which Route 53 routing policy directs users to endpoints based on their geographic country or continent to support data residency requirements?",
           options: [
-            "Latency-based routing",
-            "Geoproximity routing",
             "Geolocation routing",
+            "Geoproximity routing",
             "Multi-value answer routing",
+            "Latency-based routing",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Geolocation routing directs DNS queries to specific endpoints based on the geographic origin of the query (country or continent). This is used for content localization (serving region-specific content) and data residency compliance (ensuring data stays within specific geographic boundaries). Latency-based routing optimizes for performance, not geographic compliance.",
         },
@@ -91,10 +91,10 @@ export const route53Guide: ServiceGuide = {
           options: [
             "Geolocation routing",
             "Geoproximity routing",
-            "Latency-based routing",
             "Weighted routing",
+            "Latency-based routing",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Latency-based routing measures the latency between the user's DNS resolver and each configured AWS region and directs traffic to the region with the lowest measured latency. This optimizes global application performance. Note: the lowest-latency region is not always the geographically closest region — routing is based on network latency measurements.",
         },
@@ -121,12 +121,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "What is the difference between active-active and active-passive failover in Route 53?",
           options: [
-            "Active-active uses weighted routing with health checks on all endpoints; active-passive uses failover routing with a designated primary and secondary",
             "Active-active uses failover routing; active-passive uses weighted routing",
-            "Active-active requires Direct Connect; active-passive uses VPN connections",
             "Both patterns use the same routing policy, differing only in region count",
+            "Active-active requires Direct Connect; active-passive uses VPN connections",
+            "Active-active uses weighted routing with health checks on all endpoints; active-passive uses failover routing with a designated primary and secondary",
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation:
             "Active-active failover uses weighted or latency-based routing with health checks on all endpoints — all endpoints serve traffic simultaneously, and unhealthy ones are automatically removed. Active-passive failover uses Route 53 Failover routing, designating one endpoint as primary and another as secondary; the secondary only receives traffic when the primary's health checks fail.",
         },
@@ -141,11 +141,11 @@ export const route53Guide: ServiceGuide = {
             "A company deploys its application in two AWS regions and wants both regions to serve traffic simultaneously, with automatic failover if one region becomes unhealthy. Which Route 53 routing policy supports this active-active pattern?",
           options: [
             "Failover routing with a primary and secondary designation",
-            "Geolocation routing directing all traffic to one region",
             "Latency-based routing with health checks on both regional endpoints",
             "Simple routing with both regional endpoints in a single record",
+            "Geolocation routing directing all traffic to one region",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Latency-based routing with health checks enabled on all endpoints creates an active-active multi-region architecture. Both regions serve traffic based on lowest latency for each user, and if one region's health checks fail, Route 53 automatically routes all traffic to the remaining healthy region. Simple routing does not support health checks for automatic failover.",
         },
@@ -154,11 +154,11 @@ export const route53Guide: ServiceGuide = {
             "For a comprehensive multi-region disaster recovery strategy, which combination of services provides the lowest RPO and RTO?",
           options: [
             "Route 53 failover routing + S3 versioning + RDS Multi-AZ",
-            "Route 53 failover routing + Aurora Global Database + S3 Cross-Region Replication",
             "Route 53 weighted routing + DynamoDB Global Tables + CloudFront",
             "Route 53 latency routing + RDS read replicas + ElastiCache replication",
+            "Route 53 failover routing + Aurora Global Database + S3 Cross-Region Replication",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Route 53 failover routing provides automatic DNS-level failover, Aurora Global Database provides sub-second cross-region database replication with managed regional failover in under a minute, and S3 Cross-Region Replication keeps object storage synchronized. This combination enables RPO in seconds and RTO in minutes — the key metrics for a comprehensive DR strategy.",
         },
@@ -172,12 +172,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "An on-premises application needs to resolve AWS private hosted zone DNS records over a Direct Connect connection. Which Route 53 Resolver feature enables this?",
           options: [
-            "Route 53 Resolver Outbound Endpoints",
             "Route 53 Resolver Inbound Endpoints",
             "Route 53 private hosted zone with VPN association",
             "Route 53 Resolver DNS Firewall",
+            "Route 53 Resolver Outbound Endpoints",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Route 53 Resolver Inbound Endpoints accept DNS queries forwarded from on-premises networks via Direct Connect or VPN. The on-premises DNS server is configured to forward queries for the private hosted zone domain to the inbound endpoint IP addresses, enabling resolution of AWS private DNS records from on-premises systems.",
         },
@@ -204,12 +204,12 @@ export const route53Guide: ServiceGuide = {
           question:
             "Route 53's high availability for hosted zones is achieved through which mechanism?",
           options: [
-            "Multi-AZ replication of DNS records across availability zones",
             "Anycast routing where queries are answered by the nearest Route 53 name server globally",
+            "Multi-AZ replication of DNS records across availability zones",
             "Active-passive failover between two Route 53 name server clusters",
             "DNS record caching at all CloudFront edge locations",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Route 53 name servers use anycast routing, meaning DNS queries are automatically directed to the geographically nearest Route 53 name server. This distributes query load globally and provides high availability — if one name server location is unavailable, queries are automatically routed to the next nearest. This architecture backs Route 53's 100% availability SLA for hosted zones.",
         },
@@ -268,12 +268,12 @@ export const route53Guide: ServiceGuide = {
       question:
         "A company wants to map their root domain (example.com) to an Application Load Balancer. Which DNS record type must be used?",
       options: [
+        "Route 53 Alias record pointing to the ALB",
         "CNAME record pointing to the ALB DNS name",
         "A record with the ALB's static IP",
-        "Route 53 Alias record pointing to the ALB",
         "TXT record with the ALB ARN",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "CNAME records cannot be used at the zone apex (root domain). A Route 53 Alias record is required to map a root domain to an AWS resource like an ALB. Alias records work at the zone apex, are free, and automatically track the ALB's IP addresses as they change.",
     },
@@ -281,12 +281,12 @@ export const route53Guide: ServiceGuide = {
       question:
         "Which Route 53 routing policy is best for gradually shifting traffic from an old application version to a new one?",
       options: [
-        "Failover routing",
         "Weighted routing",
         "Latency-based routing",
+        "Failover routing",
         "Geolocation routing",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Weighted routing distributes traffic proportionally based on configured weights. By adjusting weights between the old and new versions (e.g., 90/10 then 80/20, etc.), you can perform a gradual canary or blue/green deployment at the DNS level without downtime.",
     },
@@ -295,11 +295,11 @@ export const route53Guide: ServiceGuide = {
         "A global application should direct each user to the AWS region with the lowest network latency. Which routing policy achieves this?",
       options: [
         "Geolocation routing",
-        "Geoproximity routing",
         "Latency-based routing",
+        "Geoproximity routing",
         "Multi-value answer routing",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Latency-based routing measures network latency between the user's DNS resolver and each configured AWS region and routes queries to the region with the lowest latency. This optimizes performance for global users. Geolocation routing routes based on geographic origin, not measured latency.",
     },
@@ -308,11 +308,11 @@ export const route53Guide: ServiceGuide = {
         "A Route 53 health check must monitor an internal service running in a private VPC subnet. How should this be configured?",
       options: [
         "Use an HTTP health check with the private IP address of the service",
+        "Place the service in a public subnet temporarily for health check configuration",
         "Create a CloudWatch alarm monitoring the service and configure a Route 53 health check to evaluate the alarm state",
         "Use a Calculated health check aggregating multiple TCP probes",
-        "Place the service in a public subnet temporarily for health check configuration",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Route 53 health checkers are external to VPCs and cannot reach private IP addresses. The correct approach is to use a CloudWatch alarm that monitors the private resource (via CloudWatch metrics or a proxy endpoint), then configure a Route 53 health check that evaluates that CloudWatch alarm's state.",
     },
@@ -321,11 +321,11 @@ export const route53Guide: ServiceGuide = {
         "Which Route 53 routing policy designates an explicit primary and secondary endpoint, with the secondary only receiving traffic when the primary's health check fails?",
       options: [
         "Weighted routing with weights 100 and 0",
-        "Failover routing",
-        "Latency-based routing",
         "Multi-value answer routing",
+        "Latency-based routing",
+        "Failover routing",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Failover routing explicitly designates one record as primary and another as secondary. Route 53 monitors the primary with a health check and automatically routes traffic to the secondary only when the primary is unhealthy. This is the active-passive pattern. Weighted routing at 100/0 could approximate this but requires manual intervention to switch.",
     },
@@ -334,11 +334,11 @@ export const route53Guide: ServiceGuide = {
         "An on-premises application needs to resolve DNS records in an AWS private hosted zone. Which Route 53 Resolver feature enables this over a Direct Connect connection?",
       options: [
         "Resolver Outbound Endpoints",
-        "Resolver Inbound Endpoints",
         "Resolver DNS Firewall",
         "Private hosted zone cross-account association",
+        "Resolver Inbound Endpoints",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Route 53 Resolver Inbound Endpoints provide IP addresses within a VPC that on-premises DNS servers can forward queries to over Direct Connect or VPN. The on-premises DNS server is configured to forward queries for the private hosted zone domain to these endpoint IPs, enabling on-premises systems to resolve AWS private DNS records.",
     },
@@ -348,10 +348,10 @@ export const route53Guide: ServiceGuide = {
       options: [
         "Latency-based routing",
         "Geoproximity routing with bias adjustment",
-        "Geolocation routing",
         "Multi-value answer routing",
+        "Geolocation routing",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Geolocation routing directs DNS queries to specific endpoints based on the geographic origin of the query (country or continent). This is the correct policy for data residency requirements where users from specific countries must be served by endpoints in specific regions. Latency-based routing optimizes for performance, not geographic compliance.",
     },
@@ -359,12 +359,12 @@ export const route53Guide: ServiceGuide = {
       question:
         "EC2 instances in a VPC need to resolve hostnames from an on-premises Active Directory domain. Which Route 53 Resolver component is required?",
       options: [
-        "Resolver Inbound Endpoints to accept queries from EC2",
         "Resolver Outbound Endpoints with forwarding rules for the on-premises domain",
+        "Resolver Inbound Endpoints to accept queries from EC2",
         "A private hosted zone mirroring the AD records",
         "Resolver DNS Firewall with AD domain allowlist",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Route 53 Resolver Outbound Endpoints forward DNS queries from within the VPC to specified DNS servers (the on-premises AD DNS in this case) for configured domains. A forwarding rule maps the on-premises domain to the on-premises DNS server IPs via the outbound endpoint. This enables EC2 instances to resolve on-premises hostnames without custom DNS infrastructure in the VPC.",
     },

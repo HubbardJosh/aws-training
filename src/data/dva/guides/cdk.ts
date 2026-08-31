@@ -21,12 +21,12 @@ When you run \`cdk synth\`, CDK evaluates your code and emits a standard CloudFo
           question:
             "Which CDK construct level provides sensible defaults and grant*() methods for IAM?",
           options: [
-            "L1 (Cfn* constructs)",
-            "L2 constructs",
-            "L3 patterns",
             "App constructs",
+            "L3 patterns",
+            "L2 constructs",
+            "L1 (Cfn* constructs)",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "L2 constructs (like Bucket, Function, Table) wrap CloudFormation resources with sensible secure defaults and convenience methods like grantRead() and grantReadWriteData(). L1 constructs are raw CloudFormation wrappers with no defaults.",
         },
@@ -34,11 +34,11 @@ When you run \`cdk synth\`, CDK evaluates your code and emits a standard CloudFo
           question: "What does `cdk synth` produce?",
           options: [
             "A deployed CloudFormation stack",
+            "A CDK diff report",
             "A CloudFormation template written to cdk.out/",
             "An S3 bucket with assets",
-            "A CDK diff report",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "cdk synth evaluates your CDK code and emits the synthesized CloudFormation template to the cdk.out/ directory. This is a good habit to run before deployment to preview exactly what CloudFormation will receive.",
         },
@@ -47,11 +47,11 @@ When you run \`cdk synth\`, CDK evaluates your code and emits a standard CloudFo
             "An L3 construct like ApplicationLoadBalancedFargateService creates which of the following?",
           options: [
             "A single CloudFormation resource",
+            "Only the application code, not the infrastructure",
             "A direct wrapper around one CloudFormation resource type",
             "Multiple resources (ALB, ECS service, task definition, security groups) from a few lines of code",
-            "Only the application code, not the infrastructure",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "L3 constructs (patterns) compose multiple resources to implement a full architecture. ApplicationLoadBalancedFargateService creates an ALB, ECS Fargate service, task definition, target group, and associated security groups automatically.",
         },
@@ -99,11 +99,11 @@ Three patterns in this example are characteristic of idiomatic CDK. The **\`gran
           question: "What does table.grantReadWriteData(handler) do in CDK?",
           options: [
             "Grants the table read/write access to the Lambda function",
+            "Enables DynamoDB Streams for the table",
             "Automatically creates IAM policy statements granting the Lambda the needed DynamoDB actions",
             "Creates a DynamoDB trigger on the Lambda",
-            "Enables DynamoDB Streams for the table",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "grant*() methods on L2 constructs automatically generate the correct IAM policy statements and attach them to the target principal's role. table.grantReadWriteData(handler) adds DynamoDB read/write permissions to the Lambda's execution role.",
         },
@@ -111,12 +111,12 @@ Three patterns in this example are characteristic of idiomatic CDK. The **\`gran
           question:
             "Which RemovalPolicy should you use for a production RDS database to prevent accidental deletion?",
           options: [
-            "RemovalPolicy.DESTROY",
             "RemovalPolicy.RETAIN",
-            "RemovalPolicy.SNAPSHOT",
+            "RemovalPolicy.DESTROY",
             "RemovalPolicy.KEEP",
+            "RemovalPolicy.SNAPSHOT",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "RemovalPolicy.RETAIN removes the resource from CloudFormation management but leaves it running when the stack is deleted — appropriate for production databases where data must be preserved. DESTROY deletes the resource.",
         },
@@ -139,24 +139,24 @@ cdk deploy --require-approval never  # skip manual approval for security group c
         {
           question: "What does `cdk bootstrap` create in your AWS account?",
           options: [
-            "A sample CDK application",
-            "The CDKToolkit CloudFormation stack with an S3 bucket and ECR repository for assets",
-            "A new IAM role for CDK deployments",
             "A CloudFormation stack with all your defined resources",
+            "A sample CDK application",
+            "A new IAM role for CDK deployments",
+            "The CDKToolkit CloudFormation stack with an S3 bucket and ECR repository for assets",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "cdk bootstrap deploys the CDKToolkit CloudFormation stack, creating an S3 bucket for asset storage and an ECR repository for container images. This must be done once per account/region before any CDK deployment.",
         },
         {
           question: "What is the purpose of `cdk diff`?",
           options: [
-            "Compares two CDK app versions in source control",
             "Previews what would change in the deployed stack compared to the current synthesized template",
-            "Shows differences between L1 and L2 construct outputs",
+            "Compares two CDK app versions in source control",
             "Lists all CloudFormation drift detections",
+            "Shows differences between L1 and L2 construct outputs",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "cdk diff compares the synthesized template against the currently deployed stack, showing additions, modifications, and deletions — similar to a CloudFormation change set preview. Run it before deploying to catch unexpected changes.",
         },
@@ -202,12 +202,12 @@ This gives you the full expressiveness of CloudFormation while keeping most of y
           question:
             "When an L2 construct doesn't expose a CloudFormation property you need, what pattern do you use?",
           options: [
+            "File a GitHub issue and wait for the CDK team to add the property",
+            "Write a raw CloudFormation template file alongside the CDK code",
             "Switch entirely to L1 constructs for that resource",
             "The escape hatch: access the underlying L1 resource via node.defaultChild",
-            "Write a raw CloudFormation template file alongside the CDK code",
-            "File a GitHub issue and wait for the CDK team to add the property",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The escape hatch pattern accesses the underlying L1 (CfnResource) from an L2 construct via bucket.node.defaultChild as s3.CfnBucket. You can then use addPropertyOverride() to set any CloudFormation property not exposed by the L2.",
         },
@@ -215,12 +215,12 @@ This gives you the full expressiveness of CloudFormation while keeping most of y
           question:
             "What is the benefit of creating organization-wide custom L3 constructs?",
           options: [
-            "They deploy faster than standard L2 constructs",
             "They ensure consistent security settings across projects without each team managing the details",
-            "They bypass the CDK bootstrap requirement",
+            "They deploy faster than standard L2 constructs",
             "They eliminate the need for IAM roles",
+            "They bypass the CDK bootstrap requirement",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Organization-wide custom constructs encapsulate approved, secure patterns that teams use as building blocks. This enforces consistency (e.g., all S3 buckets have versioning and encryption enabled) without requiring each team to know the implementation details.",
         },
@@ -239,8 +239,8 @@ This gives you the full expressiveness of CloudFormation while keeping most of y
         {
           question:
             "Which tool provides `sam local invoke` for running Lambda functions locally in Docker?",
-          options: ["CDK", "CloudFormation", "SAM", "Terraform"],
-          correctIndex: 2,
+          options: ["Terraform", "CDK", "CloudFormation", "SAM"],
+          correctIndex: 3,
           explanation:
             "SAM's CLI provides sam local invoke and sam local start-api for running Lambda functions and API Gateway locally in Docker containers. This local testing capability is SAM's killer feature for serverless development.",
         },
@@ -249,11 +249,11 @@ This gives you the full expressiveness of CloudFormation while keeping most of y
             "CDK generates which format that CloudFormation then deploys?",
           options: [
             "Terraform HCL",
-            "AWS CloudFormation templates (JSON/YAML)",
             "ARM templates",
+            "AWS CloudFormation templates (JSON/YAML)",
             "Pulumi programs",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "CDK synthesizes your TypeScript/Python/Java code into standard CloudFormation templates. CloudFormation then deploys those templates. Understanding CloudFormation is still essential even when using CDK.",
         },
@@ -292,12 +292,12 @@ This lets you write unit tests that verify your infrastructure has the propertie
           question:
             "The aws-cdk-lib/assertions library is used for what purpose?",
           options: [
-            "Deploying stacks to production",
-            "Writing unit tests that verify synthesized CloudFormation templates have expected properties",
             "Comparing deployed stacks against templates",
             "Generating IAM policies for CDK roles",
+            "Writing unit tests that verify synthesized CloudFormation templates have expected properties",
+            "Deploying stacks to production",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "aws-cdk-lib/assertions provides Template.fromStack() and assertion methods like hasResourceProperties() to unit test that your synthesized CloudFormation template has the infrastructure properties you expect — catching misconfigs before deployment.",
         },
@@ -353,12 +353,12 @@ This lets you write unit tests that verify your infrastructure has the propertie
     {
       question: "What does `table.grantReadWriteData(handler)` do in CDK?",
       options: [
-        "Enables DynamoDB Streams on the table",
         "Automatically creates the correct IAM policy on the Lambda's execution role",
-        "Grants the table access to call the Lambda function",
         "Creates a DynamoDB event source mapping",
+        "Enables DynamoDB Streams on the table",
+        "Grants the table access to call the Lambda function",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "grant*() methods on L2 constructs automatically generate and attach the correct IAM policy statements. table.grantReadWriteData(handler) adds DynamoDB read/write permissions to the Lambda's execution role without writing any IAM JSON.",
     },
@@ -367,11 +367,11 @@ This lets you write unit tests that verify your infrastructure has the propertie
         "An L2 construct doesn't expose a CloudFormation property you need. How do you access it?",
       options: [
         "Use cdk diff to manually patch it",
-        "Switch to an L1 construct for the entire resource",
         "Use the escape hatch: access the underlying L1 via node.defaultChild",
         "Override the CloudFormation template after synthesis",
+        "Switch to an L1 construct for the entire resource",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The escape hatch pattern accesses the underlying L1 resource (CfnResource) from an L2 construct. You can then call addPropertyOverride() to set any CloudFormation property the L2 doesn't expose.",
     },
@@ -379,12 +379,12 @@ This lets you write unit tests that verify your infrastructure has the propertie
       question:
         "CDK synthesizes your infrastructure code into what format for deployment?",
       options: [
-        "Terraform HCL",
         "CloudFormation JSON/YAML templates",
-        "AWS SAM templates",
         "Kubernetes manifests",
+        "Terraform HCL",
+        "AWS SAM templates",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "CDK synthesizes your code (TypeScript, Python, etc.) into standard CloudFormation templates stored in cdk.out/. CloudFormation then deploys those templates. CDK is ultimately a CloudFormation template generator.",
     },
@@ -392,24 +392,24 @@ This lets you write unit tests that verify your infrastructure has the propertie
       question:
         "Which RemovalPolicy setting deletes the resource when the CDK stack is destroyed?",
       options: [
+        "RemovalPolicy.DESTROY",
         "RemovalPolicy.RETAIN",
         "RemovalPolicy.SNAPSHOT",
-        "RemovalPolicy.DESTROY",
         "RemovalPolicy.DELETE",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "RemovalPolicy.DESTROY deletes the resource when the stack is destroyed. RETAIN removes it from CloudFormation management but leaves it running. SNAPSHOT takes a final backup before deletion (for RDS/EBS).",
     },
     {
       question: "What makes a CDK Pipeline 'self-mutating'?",
       options: [
-        "It automatically rolls back failed deployments",
-        "It scales the pipeline infrastructure during high load",
         "It updates its own pipeline definition when the CDK app code changes",
+        "It automatically rolls back failed deployments",
         "It generates new IAM roles on each deployment",
+        "It scales the pipeline infrastructure during high load",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "A CDK Pipeline (pipelines.CodePipeline) is self-mutating because changes to the CDK code that defines the pipeline are automatically applied to the pipeline itself on the next run — no manual pipeline updates required.",
     },
@@ -417,12 +417,12 @@ This lets you write unit tests that verify your infrastructure has the propertie
       question:
         "Which CDK construct level provides direct one-to-one wrappers around CloudFormation resources with no defaults?",
       options: [
-        "L2 constructs",
         "L3 patterns",
         "L1 (Cfn*) constructs",
         "App constructs",
+        "L2 constructs",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "L1 constructs (prefixed with Cfn, like CfnBucket) are direct wrappers around CloudFormation resources that expose every CloudFormation property but provide no defaults or convenience methods.",
     },

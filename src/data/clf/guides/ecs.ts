@@ -22,24 +22,24 @@ ECS is the AWS service that manages **running, scheduling, and scaling** your co
         {
           question: "How do containers differ from virtual machines (VMs)?",
           options: [
-            "Containers are slower to start but provide stronger isolation than VMs",
             "Containers share the host OS kernel and are lighter-weight; VMs include a full OS",
+            "Containers are slower to start but provide stronger isolation than VMs",
             "Containers require dedicated physical hardware; VMs can share hardware",
             "Containers can only run on Linux; VMs support both Linux and Windows",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Containers share the host operating system kernel and are much lighter-weight than VMs — they start in seconds and use far less memory and storage. VMs include a full OS and hypervisor, making them heavier but with stronger isolation.",
         },
         {
           question: "What is Amazon ECR (Elastic Container Registry)?",
           options: [
-            "A container orchestration service that runs and schedules Docker containers",
             "AWS's managed private container image registry, integrated with ECS and EKS",
-            "A serverless compute engine for running containers without managing servers",
+            "A container orchestration service that runs and schedules Docker containers",
             "A service for monitoring container performance metrics",
+            "A serverless compute engine for running containers without managing servers",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Amazon ECR is AWS's managed private container registry for storing and distributing Docker container images. It integrates tightly with ECS and EKS — you push images to ECR and the orchestration services pull them when launching containers.",
         },
@@ -48,11 +48,11 @@ ECS is the AWS service that manages **running, scheduling, and scaling** your co
             "What is the key advantage of packaging an application as a Docker container?",
           options: [
             "Containers are automatically distributed across multiple AWS regions",
-            "The container image includes all dependencies, ensuring the application runs identically across all environments",
             "Containers eliminate the need for any networking configuration",
+            "The container image includes all dependencies, ensuring the application runs identically across all environments",
             "Docker containers are inherently more secure than traditional application deployments",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A Docker container image includes the application and all its dependencies (runtime, libraries, configuration). This ensures the application runs identically in development, testing, and production environments, eliminating 'works on my machine' issues.",
         },
@@ -73,24 +73,24 @@ A **Cluster** is a logical grouping of tasks and services. It is the boundary fo
         {
           question: "In Amazon ECS, what is a Task Definition?",
           options: [
+            "The scaling policy that determines how many tasks to run",
             "A running instance of containers in ECS",
             "A blueprint describing the container image, CPU, memory, ports, and other configuration",
             "A logical grouping of ECS tasks and services",
-            "The scaling policy that determines how many tasks to run",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A Task Definition is the blueprint for your application in ECS. It specifies the container image to use, CPU and memory allocation, environment variables, networking, logging configuration, and port mappings.",
         },
         {
           question: "What does an ECS Service do?",
           options: [
-            "It builds container images from Dockerfiles and pushes them to ECR",
-            "It defines how many tasks to run and automatically replaces crashed tasks",
-            "It manages the underlying EC2 instances in an ECS cluster",
             "It stores container logs in Amazon CloudWatch",
+            "It builds container images from Dockerfiles and pushes them to ECR",
+            "It manages the underlying EC2 instances in an ECS cluster",
+            "It defines how many tasks to run and automatically replaces crashed tasks",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "An ECS Service maintains a desired number of running tasks. If a task crashes or becomes unhealthy, the Service scheduler automatically replaces it. Services also integrate with load balancers and support rolling deployments.",
         },
@@ -99,11 +99,11 @@ A **Cluster** is a logical grouping of tasks and services. It is the boundary fo
             "What is the relationship between Task Definitions and Tasks in ECS?",
           options: [
             "Tasks are templates; Task Definitions are running instances",
-            "Task Definitions are blueprints; Tasks are running instances of those blueprints",
-            "Task Definitions define the cluster; Tasks define the service",
             "They are different names for the same concept in ECS",
+            "Task Definitions define the cluster; Tasks define the service",
+            "Task Definitions are blueprints; Tasks are running instances of those blueprints",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A Task Definition is the blueprint (like a recipe) and a Task is a running instance of that blueprint (like a meal made from the recipe). Multiple tasks can run from the same Task Definition.",
         },
@@ -159,12 +159,12 @@ ECS integrates natively with **Amazon CloudWatch Logs** — configure the \`awsl
         {
           question: "What is the purpose of an IAM Task Role in Amazon ECS?",
           options: [
-            "To control which users can deploy tasks to an ECS cluster",
-            "To grant the containerized application permission to call AWS services without embedding credentials",
-            "To define the network security rules for ECS task traffic",
             "To specify which IAM users can pull images from Amazon ECR",
+            "To define the network security rules for ECS task traffic",
+            "To grant the containerized application permission to call AWS services without embedding credentials",
+            "To control which users can deploy tasks to an ECS cluster",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "IAM Task Roles grant ECS tasks permission to call AWS services (S3, DynamoDB, etc.) using automatically rotated temporary credentials — the same concept as EC2 instance profiles. This is the secure approach; never embed credentials in container images.",
         },
@@ -172,12 +172,12 @@ ECS integrates natively with **Amazon CloudWatch Logs** — configure the \`awsl
           question:
             "How should sensitive secrets like database passwords be handled in ECS task definitions?",
           options: [
-            "Hardcode them directly in the task definition as plain-text environment variables",
-            "Bake them into the Docker container image at build time",
             "Store them in AWS Secrets Manager or SSM Parameter Store and reference them by ARN in the task definition",
             "Pass them as command-line arguments when launching the task",
+            "Bake them into the Docker container image at build time",
+            "Hardcode them directly in the task definition as plain-text environment variables",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Secrets should be stored in AWS Secrets Manager or SSM Parameter Store and referenced from the task definition by ARN. ECS retrieves the secret at task startup and injects it as an environment variable, keeping secrets out of code, images, and task definitions.",
         },
@@ -210,12 +210,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
           question:
             "What is the key difference between Amazon ECS and Amazon EKS?",
           options: [
-            "ECS supports Docker containers; EKS only supports OCI containers",
-            "ECS uses AWS's own orchestration engine; EKS runs Kubernetes, the open-source standard",
-            "ECS is only available in us-east-1; EKS is available globally",
             "ECS requires Fargate; EKS requires EC2 instances",
+            "ECS is only available in us-east-1; EKS is available globally",
+            "ECS uses AWS's own orchestration engine; EKS runs Kubernetes, the open-source standard",
+            "ECS supports Docker containers; EKS only supports OCI containers",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "ECS uses AWS's proprietary orchestration engine (simpler, AWS-native). EKS runs Kubernetes, the open-source industry-standard orchestration platform with a large ecosystem and portability across cloud providers.",
         },
@@ -223,12 +223,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
           question:
             "An organization already has deep Kubernetes expertise and wants to run containers on AWS with their existing tooling. Which service should they use?",
           options: [
-            "Amazon ECS with EC2 launch type",
-            "Amazon ECS with Fargate",
-            "Amazon EKS (Elastic Kubernetes Service)",
             "AWS Lambda with container images",
+            "Amazon ECS with Fargate",
+            "Amazon ECS with EC2 launch type",
+            "Amazon EKS (Elastic Kubernetes Service)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon EKS is AWS's managed Kubernetes service, ideal for organizations with existing Kubernetes expertise. It runs standard Kubernetes, preserving familiarity with existing tools and supporting multi-cloud strategies.",
         },
@@ -286,8 +286,8 @@ Both services support Fargate for serverless compute. The choice between ECS and
     {
       question:
         "Which ECS object is the blueprint that defines the container image, CPU, memory, and port mappings for an application?",
-      options: ["Task", "Service", "Cluster", "Task Definition"],
-      correctIndex: 3,
+      options: ["Task Definition", "Cluster", "Service", "Task"],
+      correctIndex: 0,
       explanation:
         "A Task Definition is the blueprint for your containerized application. It defines which image to use, how much CPU and memory to allocate, environment variables, networking, logging, and port mappings. Tasks are running instances of a Task Definition.",
     },
@@ -295,12 +295,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "A containerized application running in ECS needs to write data to an S3 bucket. What is the correct way to grant this permission?",
       options: [
-        "Hardcode AWS access keys in the container image",
-        "Set the S3 bucket to public access",
         "Assign an IAM Task Role with S3 write permissions to the ECS task",
         "Store the access keys in an environment variable in the task definition",
+        "Hardcode AWS access keys in the container image",
+        "Set the S3 bucket to public access",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "IAM Task Roles grant ECS tasks temporary, automatically rotated credentials to call AWS services. Assigning a task role with S3 write permissions is the secure approach — hardcoding credentials in images or environment variables is a security risk.",
     },
@@ -308,12 +308,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "What is the purpose of Amazon ECR in a containerized application workflow?",
       options: [
-        "To orchestrate and schedule Docker containers across a cluster",
         "To store and distribute Docker container images securely",
         "To monitor container performance and send alerts",
+        "To orchestrate and schedule Docker containers across a cluster",
         "To provide serverless compute for running containers",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Amazon ECR (Elastic Container Registry) is AWS's managed private container image registry. You push Docker images to ECR, and ECS or EKS pulls them when launching containers. It integrates natively with IAM for access control.",
     },
@@ -321,12 +321,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "An ECS Service currently runs 3 tasks, but one task crashes due to an application error. What happens?",
       options: [
-        "The service remains at 2 tasks until manually restarted",
-        "The ECS Service scheduler automatically launches a replacement task to maintain the desired count",
         "CloudWatch sends an alert and waits for operator intervention",
+        "The service remains at 2 tasks until manually restarted",
         "Fargate automatically switches to a different container image",
+        "The ECS Service scheduler automatically launches a replacement task to maintain the desired count",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "ECS Services maintain a desired number of running tasks. If a task crashes or fails health checks, the Service scheduler automatically launches a replacement task to restore the desired count.",
     },
@@ -334,12 +334,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "Which service should an organization with existing Kubernetes expertise and a multi-cloud strategy choose for container orchestration on AWS?",
       options: [
-        "Amazon ECS with EC2 launch type",
-        "Amazon ECS with Fargate",
-        "Amazon EKS (Elastic Kubernetes Service)",
         "AWS Elastic Beanstalk with Docker platform",
+        "Amazon EKS (Elastic Kubernetes Service)",
+        "Amazon ECS with Fargate",
+        "Amazon ECS with EC2 launch type",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Amazon EKS runs standard Kubernetes, making it ideal for organizations with existing Kubernetes expertise. Kubernetes is portable across cloud providers, supporting multi-cloud strategies with consistent tooling.",
     },
@@ -347,12 +347,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "How should a database password be provided to a containerized application running in ECS?",
       options: [
-        "Hardcode it in the Dockerfile so it is baked into the container image",
         "Store it in AWS Secrets Manager and reference it by ARN in the ECS task definition",
+        "Hardcode it in the Dockerfile so it is baked into the container image",
         "Pass it as a command-line argument when starting the container",
         "Store it in an S3 bucket and have the application download it at startup",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Secrets should be stored in AWS Secrets Manager (or SSM Parameter Store) and referenced from the ECS task definition by ARN. ECS retrieves the secret at startup and injects it as an environment variable, keeping sensitive data out of images and task definitions.",
     },
@@ -360,12 +360,12 @@ Both services support Fargate for serverless compute. The choice between ECS and
       question:
         "What distinguishes containers from virtual machines in terms of startup time and resource usage?",
       options: [
-        "Containers are slower to start but use fewer resources than VMs",
         "Containers start in seconds and use far less memory than VMs, which include a full OS",
-        "Containers and VMs have identical startup times but containers use more storage",
         "VMs start faster because they use hardware virtualization",
+        "Containers and VMs have identical startup times but containers use more storage",
+        "Containers are slower to start but use fewer resources than VMs",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Containers share the host OS kernel, so they start in seconds and use far less memory and storage than VMs. VMs include a full guest OS with a hypervisor, making them heavier — typically taking minutes to start and consuming significantly more resources.",
     },

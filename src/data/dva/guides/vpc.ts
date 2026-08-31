@@ -35,12 +35,12 @@ Private subnets need a **NAT Gateway** to initiate outbound internet connections
           question:
             "A company runs workloads in three Availability Zones, all in private subnets. They deploy a single NAT Gateway in AZ-A. What is the risk of this configuration?",
           options: [
+            "The single NAT Gateway will be throttled because it serves three AZs simultaneously",
             "Traffic from AZ-B and AZ-C crosses AZ boundaries to reach the NAT Gateway, adding latency and cross-AZ data transfer costs; AZ-A failure eliminates outbound internet for all three AZs",
             "NAT Gateways cannot serve traffic from other Availability Zones by design",
-            "The single NAT Gateway will be throttled because it serves three AZs simultaneously",
             "Private subnets in AZ-B and AZ-C will not be able to route to the NAT Gateway without VPC peering",
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
             "A single NAT Gateway in one AZ is a single point of failure: if that AZ experiences an outage, instances in all three AZs lose outbound internet connectivity. Additionally, traffic from AZ-B and AZ-C must cross AZ boundaries to reach the NAT Gateway, incurring cross-AZ data transfer charges. Best practice is to deploy one NAT Gateway per AZ.",
         },
@@ -73,12 +73,12 @@ In practice, security groups handle the day-to-day traffic filtering for most ar
           question:
             "A security group allows inbound TCP on port 443. A user makes an HTTPS request to an EC2 instance in that security group. Do you need an explicit outbound rule to allow the response traffic?",
           options: [
+            "No — but only if the default outbound rule (allow all) is present",
             "Yes — security groups are stateless, so return traffic must be explicitly allowed",
             "No — security groups are stateful, so return traffic for allowed inbound connections is automatically permitted",
             "Yes — you need an outbound rule allowing TCP on ephemeral ports 1024–65535",
-            "No — but only if the default outbound rule (allow all) is present",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Security groups are stateful: when an inbound connection is allowed, the corresponding return traffic is automatically permitted without any explicit outbound rule. This is a fundamental difference from NACLs, which are stateless and require explicit rules for both directions. The statefulness of security groups makes them easier to manage for typical application traffic patterns.",
         },
@@ -99,12 +99,12 @@ In practice, security groups handle the day-to-day traffic filtering for most ar
           question:
             "An application security group needs to allow its RDS database to accept connections from the application tier, regardless of which specific IP addresses the application instances use. What is the most robust way to configure the RDS security group's inbound rule?",
           options: [
-            "Allow inbound on port 5432 from the VPC CIDR block (e.g., `10.0.0.0/16`)",
             "Allow inbound on port 5432 from each application instance's private IP address",
-            "Allow inbound on port 5432 referencing the application tier's security group ID as the source",
+            "Allow inbound on port 5432 from the VPC CIDR block (e.g., `10.0.0.0/16`)",
             "Allow all inbound traffic from within the VPC and rely on the application-tier NACL for filtering",
+            "Allow inbound on port 5432 referencing the application tier's security group ID as the source",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Referencing another security group as the source (rather than a CIDR block or specific IP addresses) is the most robust approach. The rule automatically covers all current and future instances in the application-tier security group, regardless of their IP addresses. This is more precise than using the VPC CIDR (which would allow any resource in the VPC to connect) and eliminates the maintenance burden of tracking individual IP addresses.",
         },
@@ -122,12 +122,12 @@ For connecting on-premises networks to AWS, two options exist with very differen
           question:
             "VPC A is peered with VPC B, and VPC B is peered with VPC C. Can a resource in VPC A communicate with a resource in VPC C?",
           options: [
+            "No — peering connections do not allow multi-hop routing even with explicit routes",
             "Yes — VPC peering is transitive; traffic routes through VPC B automatically",
             "No — VPC peering is not transitive; A cannot reach C through B without a direct peering connection between A and C",
             "Yes — but only if VPC B has route table entries for both VPC A and VPC C",
-            "No — peering connections do not allow multi-hop routing even with explicit routes",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "VPC peering is explicitly non-transitive. Even though A peers with B and B peers with C, traffic from A cannot travel through B to reach C. A direct peering connection between A and C is required. For architectures where many VPCs need full connectivity, Transit Gateway solves this by acting as a hub — every VPC connects to it and can reach any other connected VPC.",
         },
@@ -135,12 +135,12 @@ For connecting on-premises networks to AWS, two options exist with very differen
           question:
             "A company needs a dedicated 10 Gbps private connection from their data center to AWS with consistent, low-latency throughput. They are concerned about data encryption in transit. Which combination of services meets both requirements?",
           options: [
-            "Direct Connect alone — dedicated fiber provides encryption as part of the physical layer",
-            "VPN alone — encrypts all traffic and provides up to 10 Gbps throughput",
             "Direct Connect for the private dedicated connection, with a VPN tunnel over Direct Connect for encryption",
+            "Direct Connect alone — dedicated fiber provides encryption as part of the physical layer",
             "Transit Gateway with VPN attachments for both encryption and high throughput",
+            "VPN alone — encrypts all traffic and provides up to 10 Gbps throughput",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Direct Connect provides the dedicated 10 Gbps private connection with consistent latency, but it does not encrypt traffic by default. To add encryption, you run an IPSec VPN tunnel over the Direct Connect connection. This combination provides both the throughput and consistency of Direct Connect and the encryption of VPN. A VPN alone is limited to approximately 1.25 Gbps per tunnel.",
         },
@@ -149,11 +149,11 @@ For connecting on-premises networks to AWS, two options exist with very differen
             "A company has 15 VPCs that all need to communicate with each other and with an on-premises data center. Which connectivity approach scales most efficiently?",
           options: [
             "VPC peering between every pair of VPCs (105 peering connections) plus a VPN to each VPC",
+            "Direct Connect to each VPC individually using separate virtual interfaces",
             "Transit Gateway, with each VPC and the on-premises network connecting to it as attachments",
             "A hub VPC that peers with all 14 other VPCs, routing on-premises traffic through the hub",
-            "Direct Connect to each VPC individually using separate virtual interfaces",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Transit Gateway is the correct solution for hub-and-spoke connectivity at scale. Each VPC and the on-premises network connects to the Transit Gateway as an attachment. Routes flow through the Transit Gateway to any other attachment, eliminating the need for individual peering connections (which would be non-transitive and require N*(N-1)/2 connections). Transit Gateway supports thousands of attachments.",
         },
@@ -174,11 +174,11 @@ VPCs support **IPv6** in a dual-stack configuration where both IPv4 and IPv6 add
             "How many usable host IP addresses are available in a /28 subnet in a VPC?",
           options: [
             "16 — all addresses in the subnet are available for hosts",
+            "13 — AWS reserves only the network and broadcast addresses",
             "14 — AWS reserves the first and last address",
             "11 — AWS reserves 5 addresses (network, router, DNS, reserved, broadcast)",
-            "13 — AWS reserves only the network and broadcast addresses",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "AWS reserves 5 IP addresses in every subnet: the network address (first), the VPC router (second), the DNS server (third), a future-use reserved address (fourth), and the broadcast address (last). A /28 subnet has 16 total addresses minus 5 reserved = 11 usable host addresses. This reservation applies to every subnet size, which significantly impacts small subnets.",
         },
@@ -187,11 +187,11 @@ VPCs support **IPv6** in a dual-stack configuration where both IPv4 and IPv6 add
             "An Elastic IP address is allocated but not associated with any running resource. What is the billing implication?",
           options: [
             "EIPs are always free regardless of their association status",
-            "EIPs are free when associated with a running resource but incur an hourly charge when unassociated",
             "EIPs incur a charge per hour regardless of whether they are associated with a resource",
+            "EIPs are free when associated with a running resource but incur an hourly charge when unassociated",
             "EIPs are charged only for data transfer, not for allocation",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "AWS charges a small hourly fee for Elastic IP addresses that are allocated but not associated with a running, in-use resource. This pricing model discourages hoarding of public IPv4 addresses, which are a scarce global resource. An EIP associated with an active EC2 instance or NAT Gateway is free. You should release EIPs when no longer needed to avoid unnecessary charges.",
         },
@@ -199,12 +199,12 @@ VPCs support **IPv6** in a dual-stack configuration where both IPv4 and IPv6 add
           question:
             "A VPC subnet needs outbound IPv6 internet connectivity for its instances but should not accept any unsolicited inbound IPv6 connections. Which gateway type provides this?",
           options: [
-            "NAT Gateway — handles both IPv4 and IPv6 outbound traffic",
-            "Internet Gateway — blocks inbound IPv6 by default when no inbound route exists",
             "Egress-Only Internet Gateway — allows outbound IPv6 traffic while blocking unsolicited inbound connections",
             "Virtual Private Gateway — routes IPv6 traffic to on-premises networks",
+            "NAT Gateway — handles both IPv4 and IPv6 outbound traffic",
+            "Internet Gateway — blocks inbound IPv6 by default when no inbound route exists",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "The Egress-Only Internet Gateway is the IPv6 equivalent of a NAT Gateway. IPv6 addresses are globally routable (no NAT), so an Egress-Only IGW is required to allow IPv6 instances to initiate outbound connections while preventing unsolicited inbound connections. A standard Internet Gateway allows bidirectional IPv6 traffic, which would expose the instances to inbound connections.",
         },
@@ -222,12 +222,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
           question:
             "An EC2 instance is failing to receive traffic that should be allowed by its security group. A developer enables VPC Flow Logs to investigate. Which field in the flow log record immediately indicates whether traffic is being blocked?",
           options: [
+            "`action` — shows ACCEPT or REJECT for each flow",
             "`protocol` — shows whether the traffic type matches the security group rule",
             "`bytes` — a value of 0 indicates blocked traffic",
-            "`action` — shows ACCEPT or REJECT for each flow",
             "`srcport` — a blocked port shows as 0 in the flow log",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "The `action` field in a VPC Flow Log record shows either ACCEPT or REJECT for each traffic flow. A REJECT entry for traffic from an expected source IP confirms that a security group or NACL rule is blocking the connection. This is the primary field used to debug network connectivity issues — it directly answers whether the traffic was allowed or denied by the network controls.",
         },
@@ -248,12 +248,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
           question:
             "An interface VPC endpoint is configured for a service but DNS resolution is failing inside the VPC. Which two VPC settings must both be enabled for interface endpoint private DNS to work?",
           options: [
-            "`enablePublicDns` and `enablePrivateHostedZone`",
             "`enableDnsSupport` and `enableDnsHostnames`",
-            "`enableVpcDns` and `enablePrivateDns`",
             "`enableDnsResolution` and `enableDnsHostnames`",
+            "`enablePublicDns` and `enablePrivateHostedZone`",
+            "`enableVpcDns` and `enablePrivateDns`",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Both `enableDnsSupport` (enables the AWS-provided DNS resolver in the VPC) and `enableDnsHostnames` (makes private DNS names resolvable within the VPC) must be enabled for interface endpoint private DNS names to function. If either setting is disabled, the endpoint's private DNS name will not resolve correctly, causing connection failures even though the endpoint exists. This is a common misconfiguration.",
         },
@@ -286,12 +286,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
           question:
             "A VPC-attached Lambda function needs to access both a private RDS database and the public Stripe API. What network configuration is required?",
           options: [
-            "Attach the Lambda to a public subnet so it has both internet access and can reach the RDS via VPC routing",
             "Place the Lambda in a private subnet; use a NAT Gateway for outbound internet access to Stripe and private VPC routing for RDS",
             "Lambda cannot simultaneously access private VPC resources and public internet endpoints",
+            "Attach the Lambda to a public subnet so it has both internet access and can reach the RDS via VPC routing",
             "Attach the Lambda to both a private subnet (for RDS) and a public subnet (for Stripe) simultaneously",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A VPC-attached Lambda in a private subnet can reach private resources (like RDS) via VPC routing. For outbound internet access (like the Stripe API), the private subnet's route table must point `0.0.0.0/0` to a NAT Gateway in a public subnet. Lambda functions in public subnets still cannot initiate internet traffic — VPC-attached Lambda always needs a NAT Gateway for outbound internet access.",
         },
@@ -299,12 +299,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
           question:
             "An ALB serves traffic to ECS Fargate tasks in private subnets. How should the security groups be configured to ensure the tasks are not directly reachable from the internet?",
           options: [
-            "ALB security group: allow inbound 80/443 from the internet. Task security group: allow inbound on the app port only from the ALB's security group",
             "ALB security group: allow all traffic. Task security group: allow inbound 80/443 from the internet",
             "Both security groups should allow inbound 80/443 from the internet for redundancy",
+            "ALB security group: allow inbound 80/443 from the internet. Task security group: allow inbound on the app port only from the ALB's security group",
             "NACLs on the private subnet should block all internet traffic; no security group changes are needed",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "The standard pattern is: the ALB security group allows inbound HTTP/HTTPS from the internet (0.0.0.0/0), and the task security group allows inbound on the application port only from the ALB security group ID (not from the internet). This ensures tasks are only reachable through the ALB — direct internet access to the tasks is blocked because no internet route exists to the private subnet and the task security group doesn't allow it.",
         },
@@ -355,12 +355,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
       question:
         "A security group allows inbound on port 3306. A NACL on the same subnet has rule 100 denying all traffic from `10.0.1.0/24`. An RDS client at `10.0.1.50` tries to connect on port 3306. What happens?",
       options: [
-        "The connection is allowed because the security group permit takes precedence over the NACL deny",
-        "The connection is denied because NACLs are evaluated before security groups and rule 100 rejects the traffic at the subnet boundary",
         "The connection is allowed because security groups and NACLs are evaluated simultaneously and the allow wins",
+        "The connection is allowed because the security group permit takes precedence over the NACL deny",
         "The NACL deny only applies to outbound traffic; inbound traffic is controlled solely by security groups",
+        "The connection is denied because NACLs are evaluated before security groups and rule 100 rejects the traffic at the subnet boundary",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "NACLs are evaluated at the subnet boundary before traffic reaches the instance and its security group. If a NACL rule denies the traffic, it never reaches the security group. NACL rule 100 (deny `10.0.1.0/24`) is evaluated first (lowest number), matches the source IP, and the connection is rejected before the security group's port 3306 allow rule is even consulted.",
     },
@@ -369,11 +369,11 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
         "Which statement correctly describes the difference between security groups and NACLs regarding return traffic?",
       options: [
         "Both security groups and NACLs are stateful — return traffic is automatically allowed for both",
-        "Security groups are stateful (return traffic auto-allowed); NACLs are stateless (return traffic needs an explicit allow rule)",
         "NACLs are stateful; security groups are stateless and require explicit outbound rules for every inbound connection",
         "Neither is stateful — both require explicit rules for inbound and outbound traffic",
+        "Security groups are stateful (return traffic auto-allowed); NACLs are stateless (return traffic needs an explicit allow rule)",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Security groups are stateful: an allowed inbound connection automatically permits the return traffic without any explicit outbound rule. NACLs are stateless: you must add explicit outbound rules for return traffic (typically allowing ephemeral ports 1024–65535) or responses will be blocked. This is the most commonly tested distinction between the two mechanisms.",
     },
@@ -394,12 +394,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
       question:
         "A Lambda function is deployed inside a VPC to access a private RDS database. After deployment, the function cannot reach public AWS APIs like S3. What is the missing network component?",
       options: [
+        "An elastic IP address attached to the Lambda function's ENI",
+        "A VPC peering connection between the Lambda function's VPC and the S3 service VPC",
         "An Internet Gateway route in the Lambda function's subnet",
         "A NAT Gateway in a public subnet, with a route from the Lambda function's private subnet to the NAT Gateway",
-        "A VPC peering connection between the Lambda function's VPC and the S3 service VPC",
-        "An elastic IP address attached to the Lambda function's ENI",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "VPC-attached Lambda functions in private subnets have no outbound internet access by default. To reach public endpoints (S3, external APIs, etc.), the private subnet's route table must point `0.0.0.0/0` to a NAT Gateway deployed in a public subnet. Alternatively, for AWS services like S3, a Gateway VPC Endpoint is a free option that avoids the NAT Gateway entirely.",
     },
@@ -420,12 +420,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
       question:
         "Traffic from an on-premises data center connects to AWS via Direct Connect. A security audit requires that all traffic between the data center and AWS be encrypted. What must be done?",
       options: [
-        "Nothing — Direct Connect encrypts traffic by default using MACsec",
-        "Enable encryption in the Direct Connect console — it is an opt-in feature",
         "Run an IPSec VPN tunnel over the Direct Connect connection to add encryption",
         "Switch from Direct Connect to a VPN connection, which encrypts traffic by default",
+        "Enable encryption in the Direct Connect console — it is an opt-in feature",
+        "Nothing — Direct Connect encrypts traffic by default using MACsec",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Direct Connect is a dedicated private fiber connection but does not encrypt traffic in transit by default. To encrypt traffic over Direct Connect, you run an IPSec VPN tunnel on top of the Direct Connect connection. This provides the throughput and consistency of Direct Connect combined with the encryption of IPSec VPN. (MACsec is a separate layer-2 encryption option available on some Direct Connect connections, but the standard exam answer is IPSec VPN over Direct Connect.)",
     },
@@ -433,12 +433,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
       question:
         "A developer needs to debug why an EC2 instance cannot receive traffic on port 8080 from another instance. VPC Flow Logs are enabled. What should the developer look for in the logs?",
       options: [
+        "Flow log entries with `protocol: ICMP` showing connectivity test failures",
+        "CloudWatch metrics showing dropped packets at the instance level",
         "Flow log entries from the source instance's IP with `action: REJECT` on port 8080",
         "Flow log entries with `bytes: 0` indicating no data was transferred",
-        "CloudWatch metrics showing dropped packets at the instance level",
-        "Flow log entries with `protocol: ICMP` showing connectivity test failures",
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
         "Flow logs record each traffic flow with an `action` field of either ACCEPT or REJECT. To debug a blocked connection, look for flow log entries from the source instance's IP address to the destination on port 8080 with `action: REJECT`. A REJECT entry confirms that a security group or NACL is blocking the traffic, which narrows the investigation to the specific rule causing the block.",
     },
@@ -446,12 +446,12 @@ VPC DNS is provided by a resolver at the VPC's second IP address (the VPC CIDR b
       question:
         "An ECS Fargate task in a private subnet needs to pull a Docker image from ECR without routing through the public internet. Which combination of VPC endpoints is required?",
       options: [
-        "A single interface endpoint for ECR is sufficient",
         "Interface endpoints for ECR (both `ecr.api` and `ecr.dkr`) and a Gateway endpoint for S3, because ECR image layers are stored in S3",
         "A Gateway endpoint for ECR and S3 — both are supported by Gateway endpoints",
+        "A single interface endpoint for ECR is sufficient",
         "Only a NAT Gateway is needed — VPC endpoints are not supported for ECR image pulls",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Pulling an image from ECR requires three endpoints: `com.amazonaws.{region}.ecr.api` (for the ECR API), `com.amazonaws.{region}.ecr.dkr` (for the Docker registry protocol), and a Gateway endpoint for S3 (because ECR stores image layers in S3 and the pull fetches those layers). Missing any of these endpoints causes the image pull to fail or fall back to the NAT Gateway.",
     },

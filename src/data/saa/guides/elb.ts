@@ -18,12 +18,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "An ALB needs to route /api/* requests to an ECS-based API service and /static/* requests to an S3-backed service. Which ALB feature enables this?",
           options: [
-            "Host-based routing using the Host header",
             "Path-based routing using URL path patterns",
             "Query string routing using URL parameters",
             "Header-based routing using custom HTTP headers",
+            "Host-based routing using the Host header",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Path-based routing in ALB routes requests to different target groups based on the URL path pattern. /api/* can route to one target group and /static/* to another, all on the same ALB listener.",
         },
@@ -31,12 +31,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "Which ALB integration allows adding OIDC authentication to a web application without modifying application code?",
           options: [
-            "AWS WAF with a managed authentication rule group",
-            "AWS Certificate Manager for TLS termination",
             "AWS Cognito User Pools authentication offloading at the ALB",
             "Lambda@Edge running authentication logic",
+            "AWS Certificate Manager for TLS termination",
+            "AWS WAF with a managed authentication rule group",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "ALB integrates with AWS Cognito User Pools to handle OIDC authentication at the load balancer layer. Users are redirected to Cognito for login, and only authenticated requests are forwarded to the application — no code changes required.",
         },
@@ -44,12 +44,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "Which of the following target types does ALB NOT natively support in a target group?",
           options: [
-            "EC2 instances",
-            "Lambda functions",
             "RDS database endpoints",
+            "Lambda functions",
             "IP addresses",
+            "EC2 instances",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "ALB target groups support EC2 instances, ECS tasks, Lambda functions, and IP addresses. RDS database endpoints are not a valid ALB target type — load balancers route application traffic, not database connections.",
         },
@@ -63,12 +63,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "A financial services company needs a load balancer with static IP addresses that partner firms can whitelist in their firewall rules. Which ELB type supports this?",
           options: [
-            "Application Load Balancer — it supports static IPs via Global Accelerator",
             "Network Load Balancer — it supports static IPs and Elastic IPs per AZ",
-            "Gateway Load Balancer — it provides static IPs for all traffic",
             "Classic Load Balancer — the only type with persistent IP addresses",
+            "Application Load Balancer — it supports static IPs via Global Accelerator",
+            "Gateway Load Balancer — it provides static IPs for all traffic",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "NLB supports static IP addresses and Elastic IPs per Availability Zone, making them suitable for scenarios where partner firewall rules require known, stable IP addresses.",
         },
@@ -76,12 +76,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "An application uses a custom TCP protocol on port 5000. Which load balancer type should be used?",
           options: [
-            "Application Load Balancer — it handles all TCP traffic",
-            "Network Load Balancer — it operates at Layer 4 and supports any TCP/UDP protocol",
-            "Gateway Load Balancer — designed for custom protocols",
             "ALB with a custom listener protocol",
+            "Application Load Balancer — it handles all TCP traffic",
+            "Gateway Load Balancer — designed for custom protocols",
+            "Network Load Balancer — it operates at Layer 4 and supports any TCP/UDP protocol",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Network Load Balancer operates at Layer 4 (TCP/UDP/TLS) and supports any TCP or UDP protocol, not just HTTP/HTTPS. ALB only handles HTTP and HTTPS traffic at Layer 7.",
         },
@@ -96,11 +96,11 @@ export const elbGuide: ServiceGuide = {
             "A company needs to route all VPC ingress traffic through a third-party firewall appliance for deep packet inspection. Which AWS load balancer type enables this?",
           options: [
             "Application Load Balancer with WAF integration",
-            "Network Load Balancer with a firewall target group",
             "Gateway Load Balancer — purpose-built for scaling third-party network appliances",
+            "Network Load Balancer with a firewall target group",
             "Classic Load Balancer with proxy protocol",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Gateway Load Balancer is purpose-built for deploying and scaling third-party network appliances like firewalls and IDS systems. It operates at Layer 3, uses GENEVE protocol, and enables centralized traffic inspection without changing individual VPC route tables.",
         },
@@ -109,11 +109,11 @@ export const elbGuide: ServiceGuide = {
             "What protocol does Gateway Load Balancer use to encapsulate and forward traffic to appliance targets?",
           options: [
             "VXLAN",
-            "GENEVE",
             "GRE (Generic Routing Encapsulation)",
+            "GENEVE",
             "IPsec",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Gateway Load Balancer uses the GENEVE protocol (Generic Network Virtualization Encapsulation) to forward original packets to appliance instances for inspection and return them to the network path after processing.",
         },
@@ -127,12 +127,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "Auto Scaling is repeatedly terminating newly launched instances that appear unhealthy. The application takes 3 minutes to initialize. What should be adjusted?",
           options: [
+            "Switch from ELB health checks to EC2 status checks",
             "Increase the Auto Scaling minimum capacity",
             "Tune the health check thresholds — increase the unhealthy threshold count and interval to give new instances time to initialize",
             "Use a longer AMI with pre-warmed JVM",
-            "Switch from ELB health checks to EC2 status checks",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Health check thresholds must be tuned to allow newly launched instances enough time to initialize before being marked unhealthy. Increasing the health check interval, timeout, or unhealthy threshold count prevents premature termination of warming instances.",
         },
@@ -154,11 +154,11 @@ export const elbGuide: ServiceGuide = {
             "What happens to a target registered with an ELB target group when it fails health checks?",
           options: [
             "ELB immediately terminates the instance",
-            "ELB removes the unhealthy target from rotation and re-adds it automatically when it passes health checks again",
-            "ELB sends an SNS alert but continues routing traffic to the target",
             "ELB scales out additional instances to compensate",
+            "ELB sends an SNS alert but continues routing traffic to the target",
+            "ELB removes the unhealthy target from rotation and re-adds it automatically when it passes health checks again",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "When a target fails health checks, ELB stops routing traffic to it and removes it from rotation. When the target subsequently passes health checks, ELB automatically re-adds it to the rotation — the self-healing backbone of ELB-based architectures.",
         },
@@ -172,12 +172,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "An ALB needs to serve different SSL/TLS certificates for api.company.com and app.company.com on the same port 443 listener. Which ALB feature enables this?",
           options: [
+            "Host-based routing with separate certificates per target group",
             "Multiple listeners — one per domain on different ports",
             "Server Name Indication (SNI) — ALB selects the correct certificate based on the client's requested hostname",
-            "Host-based routing with separate certificates per target group",
             "CloudFront in front of the ALB handling certificate selection",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "ALB supports SNI, allowing multiple SSL/TLS certificates to be attached to a single HTTPS listener. ALB automatically selects the correct certificate based on the hostname in the client's TLS handshake.",
         },
@@ -186,11 +186,11 @@ export const elbGuide: ServiceGuide = {
             "What is the benefit of using ACM certificates on ALB compared to manually managing certificates?",
           options: [
             "ACM certificates support stronger encryption algorithms than manually managed certificates",
-            "ACM provides free, automatically renewing certificates — no manual renewal or private key management required",
-            "ACM certificates are required for ALB; manually managed certificates are not supported",
             "ACM certificates enable end-to-end encryption between ALB and targets",
+            "ACM certificates are required for ALB; manually managed certificates are not supported",
+            "ACM provides free, automatically renewing certificates — no manual renewal or private key management required",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "ACM provides free SSL/TLS certificates that automatically renew before expiration, eliminating the operational burden of certificate rotation and the risk of expired certificate outages.",
         },
@@ -204,12 +204,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "An NLB has 2 instances in us-east-1a and 8 instances in us-east-1b. Without cross-zone load balancing, what happens?",
           options: [
-            "Traffic is distributed evenly across all 10 instances regardless of AZ",
             "Each AZ's NLB node distributes 50% of traffic to its local instances — the 2 instances in us-east-1a each get 25%, while the 8 in us-east-1b each get 6.25%",
             "NLB routes all traffic to the AZ with more instances",
+            "Traffic is distributed evenly across all 10 instances regardless of AZ",
             "NLB automatically enables cross-zone balancing when instance counts are uneven",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Without cross-zone load balancing, each NLB node distributes traffic only to targets in its own AZ. With 50% of traffic going to each AZ, the 2 instances in us-east-1a each receive 25%, while the 8 instances in us-east-1b each receive only 6.25%.",
         },
@@ -217,12 +217,12 @@ export const elbGuide: ServiceGuide = {
           question:
             "What does connection draining (deregistration delay) prevent during rolling deployments?",
           options: [
-            "New instances from receiving traffic before they pass health checks",
-            "Abrupt termination of in-flight requests when a target is removed from rotation",
-            "The load balancer from sending traffic to instances in a different AZ",
             "Auto Scaling from terminating instances during a deployment",
+            "The load balancer from sending traffic to instances in a different AZ",
+            "Abrupt termination of in-flight requests when a target is removed from rotation",
+            "New instances from receiving traffic before they pass health checks",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Connection draining (deregistration delay) allows in-flight requests to complete before a target is fully removed from rotation. Without it, active connections would be abruptly terminated when an instance is deregistered during deployments or scale-in events.",
         },
@@ -268,12 +268,12 @@ export const elbGuide: ServiceGuide = {
       question:
         "A microservices application needs HTTP routing based on URL path — /auth to an authentication service and /products to a product catalog. Which load balancer type handles this?",
       options: [
+        "Classic Load Balancer with URL-based listener rules",
         "Network Load Balancer with path-based routing rules",
         "Application Load Balancer with path-based routing to different target groups",
         "Gateway Load Balancer with URL inspection rules",
-        "Classic Load Balancer with URL-based listener rules",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Application Load Balancer supports path-based routing, directing requests to different target groups based on the URL path. NLB operates at Layer 4 and cannot inspect URL paths.",
     },
@@ -281,12 +281,12 @@ export const elbGuide: ServiceGuide = {
       question:
         "A partner company requires a load balancer with known, static IP addresses for firewall whitelisting. Which ELB type meets this requirement?",
       options: [
+        "ALB behind AWS Global Accelerator for static IPs",
+        "Gateway Load Balancer — it provides static IPs by default",
         "Application Load Balancer — it supports static IPs via Elastic IP association",
         "Network Load Balancer — it supports static IPs and Elastic IPs per AZ",
-        "Gateway Load Balancer — it provides static IPs by default",
-        "ALB behind AWS Global Accelerator for static IPs",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "NLB supports static IP addresses and Elastic IPs per Availability Zone. ALB does not support static IPs directly (though Global Accelerator can provide static IPs in front of an ALB).",
     },
@@ -294,12 +294,12 @@ export const elbGuide: ServiceGuide = {
       question:
         "Which load balancer type should be used to distribute traffic through a fleet of third-party intrusion detection appliances?",
       options: [
-        "Application Load Balancer with WAF rules",
-        "Network Load Balancer with health checks on the appliances",
         "Gateway Load Balancer — purpose-built for scaling virtual network appliances",
+        "Application Load Balancer with WAF rules",
         "Classic Load Balancer in TCP passthrough mode",
+        "Network Load Balancer with health checks on the appliances",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Gateway Load Balancer is purpose-built for deploying and scaling third-party virtual network appliances (firewalls, IDS, DPI systems). It uses GENEVE encapsulation and operates at Layer 3.",
     },
@@ -320,12 +320,12 @@ export const elbGuide: ServiceGuide = {
       question:
         "Cross-zone load balancing is enabled by default at no extra charge for which ELB type?",
       options: [
+        "All ELB types enable it by default",
         "Network Load Balancer",
         "Gateway Load Balancer",
         "Application Load Balancer",
-        "All ELB types enable it by default",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "ALB enables cross-zone load balancing by default with no inter-AZ data transfer charge. NLB and GWLB have it disabled by default and charge for inter-AZ data transfer when enabled.",
     },
@@ -333,12 +333,12 @@ export const elbGuide: ServiceGuide = {
       question:
         "A web application needs OIDC authentication added without changing application code. Which ALB integration provides this?",
       options: [
-        "ALB with AWS WAF and an OIDC managed rule group",
         "ALB with AWS Cognito User Pools authentication offloading",
-        "ALB with Lambda Authorizers performing OIDC validation",
+        "ALB with AWS WAF and an OIDC managed rule group",
         "ALB with ACM certificates and mutual TLS",
+        "ALB with Lambda Authorizers performing OIDC validation",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "ALB integrates natively with Amazon Cognito User Pools to offload OIDC authentication. The ALB handles the OIDC flow and only forwards authenticated requests to the application — zero application code changes required.",
     },

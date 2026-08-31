@@ -19,12 +19,12 @@ Kendra is designed for the enterprise search use case: customer service agents f
           question:
             "How does Amazon Kendra differ from traditional keyword-based enterprise search?",
           options: [
-            "Kendra returns more documents per query than keyword search",
             "Kendra understands the natural language meaning of queries and returns direct answers extracted from documents",
-            "Kendra only searches structured database records, not unstructured documents",
             "Kendra requires users to use Boolean operators like AND and OR",
+            "Kendra returns more documents per query than keyword search",
+            "Kendra only searches structured database records, not unstructured documents",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Kendra uses ML to understand the semantic meaning of natural language queries and returns direct answers extracted from indexed documents, rather than a ranked list of documents for users to read through. Traditional search ranks documents by keyword frequency and requires users to find the answer themselves.",
         },
@@ -32,12 +32,12 @@ Kendra is designed for the enterprise search use case: customer service agents f
           question:
             "Which of the following is a primary use case for Amazon Kendra?",
           options: [
+            "Streaming real-time analytics from IoT sensors",
             "Training custom ML models on enterprise data",
             "Customer service agents searching internal product documentation to answer customer questions",
-            "Streaming real-time analytics from IoT sensors",
             "Automating ETL pipelines for data warehouses",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Amazon Kendra is designed for enterprise search use cases like customer service agents finding product information, employees searching HR policies, and researchers navigating document libraries. It is not an ML training platform, streaming analytics service, or ETL tool.",
         },
@@ -45,12 +45,12 @@ Kendra is designed for the enterprise search use case: customer service agents f
           question:
             "Which linguistic capabilities does Amazon Kendra use to improve search quality beyond keyword matching?",
           options: [
-            "Only exact phrase matching with stemming",
             "Understanding of synonyms, acronyms, and domain-specific terminology in natural language queries",
             "Sentiment analysis on search queries",
+            "Only exact phrase matching with stemming",
             "Machine translation of queries into English before searching",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Kendra understands synonyms (different words with same meaning), acronyms, and domain-specific terminology, allowing it to match queries to relevant documents even when exact keywords don't appear. Stemming is a basic keyword search technique. Sentiment analysis and machine translation are separate NLP capabilities.",
         },
@@ -90,11 +90,11 @@ Documents can include metadata **attributes** — tags like document type, depar
             "What does Kendra's BatchPutDocument API enable that data source connectors do not?",
           options: [
             "Scheduling automatic incremental updates from standard enterprise systems",
-            "Pushing documents from custom or non-supported source systems directly into the Kendra index",
             "Applying Lambda-based preprocessing to documents before indexing",
             "Enforcing document-level access control at query time",
+            "Pushing documents from custom or non-supported source systems directly into the Kendra index",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "BatchPutDocument allows you to programmatically push documents from custom or non-standard sources directly into the index, providing flexibility for sources without a pre-built connector. Automatic scheduled incremental updates are a feature of the pre-built connectors. Lambda preprocessing is Custom Document Enrichment. ACL enforcement is user context filtering.",
         },
@@ -110,12 +110,12 @@ Documents can include metadata **attributes** — tags like document type, depar
           question:
             "A user asks Kendra: 'What is the maximum file size for S3 objects?' Which Kendra query type handles this?",
           options: [
+            "Semantic query",
             "Keyword query",
             "Descriptive question",
             "Factoid question",
-            "Semantic query",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "A factoid question is a direct question with a short, specific factual answer — like a size limit or a person's name. Kendra extracts the answer text directly from indexed content. A descriptive question would ask for a longer explanation. A keyword query uses terms without a natural language question structure.",
         },
@@ -124,11 +124,11 @@ Documents can include metadata **attributes** — tags like document type, depar
             "A company wants Kendra search results to prioritize recently published internal documents over older external ones. Which feature achieves this?",
           options: [
             "Custom Document Enrichment with Lambda",
-            "User context filtering with JWT tokens",
             "Relevance tuning with recency bias and attribute value boosting",
+            "User context filtering with JWT tokens",
             "BatchPutDocument with priority metadata",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Relevance tuning allows you to set recency bias (newer documents rank higher) and boost documents based on attribute values (e.g., source=internal ranks above source=external). CDE modifies documents during ingestion. User context filtering enforces access control. BatchPutDocument is for pushing documents into the index.",
         },
@@ -136,12 +136,12 @@ Documents can include metadata **attributes** — tags like document type, depar
           question:
             "What is Custom Document Enrichment (CDE) in Amazon Kendra?",
           options: [
-            "A feature that translates documents into multiple languages before indexing",
-            "A Lambda-backed preprocessing pipeline that modifies, redacts, or enriches document content and metadata before indexing",
-            "A relevance tuning feature that boosts certain documents in search results",
             "An access control mechanism for document-level permissions",
+            "A feature that translates documents into multiple languages before indexing",
+            "A relevance tuning feature that boosts certain documents in search results",
+            "A Lambda-backed preprocessing pipeline that modifies, redacts, or enriches document content and metadata before indexing",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Custom Document Enrichment is a Lambda-backed pipeline invoked during document ingestion, allowing you to modify metadata, redact sensitive content, enrich documents with additional attributes, or filter which documents are indexed. It runs before documents enter the Kendra index. It is not for translation, relevance tuning, or access control.",
         },
@@ -157,12 +157,12 @@ Kendra is well-suited for the retrieval step because it understands natural lang
           question:
             "In a RAG architecture combining Kendra and Bedrock, what is Kendra's role?",
           options: [
-            "Kendra generates the final natural language answer",
             "Kendra acts as the retrieval backend, finding relevant document passages that are injected into the Bedrock model's prompt",
+            "Kendra generates the final natural language answer",
             "Kendra fine-tunes the Bedrock foundation model on enterprise documents",
             "Kendra handles user authentication before Bedrock generates responses",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "In a Kendra + Bedrock RAG architecture, Kendra performs the retrieval step — finding semantically relevant document passages from the enterprise corpus. Those passages are injected into the Bedrock model's prompt as context. Bedrock's foundation model then synthesizes a natural language answer grounded in Kendra's retrieved content.",
         },
@@ -171,11 +171,11 @@ Kendra is well-suited for the retrieval step because it understands natural lang
             "Why is Kendra particularly well-suited as the retrieval component in a RAG pipeline compared to simple keyword search?",
           options: [
             "Kendra stores documents in a vector database that Bedrock can query directly",
-            "Kendra understands natural language queries and ranks results by semantic relevance rather than keyword overlap",
             "Kendra automatically generates embeddings that Bedrock uses for fine-tuning",
+            "Kendra understands natural language queries and ranks results by semantic relevance rather than keyword overlap",
             "Kendra eliminates the need for document chunking in RAG pipelines",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Kendra uses ML to understand the semantic meaning of queries, ranking results by relevance even when exact keywords don't match. This makes it a stronger retrieval component than keyword search for natural language questions. Kendra uses its own index structure, not a vector database that Bedrock queries directly.",
         },
@@ -183,12 +183,12 @@ Kendra is well-suited for the retrieval step because it understands natural lang
           question:
             "What benefit does combining Kendra (retrieval) with Bedrock (generation) provide over using either service alone?",
           options: [
-            "It eliminates the need for user authentication",
-            "Enterprise-grade document search accuracy (Kendra) combined with state-of-the-art natural language answer generation (Bedrock)",
             "It reduces the cost of both services by 50%",
+            "It eliminates the need for user authentication",
             "Bedrock can fine-tune its model on Kendra's index automatically",
+            "Enterprise-grade document search accuracy (Kendra) combined with state-of-the-art natural language answer generation (Bedrock)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Kendra + Bedrock combination provides enterprise-grade retrieval accuracy from Kendra's ML-powered search with natural language answer synthesis from Bedrock's foundation models — grounded answers expressed fluently. Neither service alone delivers both: Kendra retrieves but doesn't generate; Bedrock generates but needs retrieval to ground answers in proprietary documents.",
         },
@@ -204,12 +204,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
           question:
             "How does Kendra enforce document-level access control so employees only see authorized documents?",
           options: [
-            "By creating separate indexes for each employee",
             "Through user context filtering using JWT tokens or ACLs attached to documents",
             "By requiring users to authenticate with the source system before each search",
+            "By creating separate indexes for each employee",
             "By encrypting documents so only authorized users can decrypt them",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Kendra enforces document-level access control through user context filtering: JWT/JSON tokens describing the user's group memberships filter results at query time, or ACLs attached to documents during ingestion define who can view each document. Separate indexes per user would be impractical. Source system re-authentication and encryption are not how Kendra filters results.",
         },
@@ -217,12 +217,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
           question:
             "Which identity federation standards does Amazon Kendra support for enterprise authentication?",
           options: [
-            "Only AWS IAM roles",
             "AWS IAM Identity Center, SAML 2.0, and OpenID Connect",
             "Only LDAP directory integration",
             "Kerberos and Active Directory only",
+            "Only AWS IAM roles",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Kendra integrates with AWS IAM Identity Center (SSO) and supports SAML 2.0 and OpenID Connect for federated identity with enterprise identity providers. It is not limited to IAM roles alone, LDAP, or Kerberos/Active Directory.",
         },
@@ -230,12 +230,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
           question:
             "Which security feature allows Amazon Kendra to be accessed from within a VPC without traffic traversing the public internet?",
           options: [
-            "AWS PrivateLink / VPC endpoints",
             "AWS WAF integration",
+            "AWS PrivateLink / VPC endpoints",
             "Network ACLs on the Kendra index",
             "S3 bucket policies on the document store",
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
             "VPC endpoints (powered by AWS PrivateLink) allow Kendra to be accessed from within a VPC without traffic traversing the public internet, meeting strict network isolation requirements. AWS WAF protects web applications. Network ACLs and S3 bucket policies are not mechanisms for private Kendra access.",
         },
@@ -278,12 +278,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
       question:
         "An employee asks their internal search system 'What is the company's parental leave policy?' and receives the exact policy text extracted from the HR handbook rather than a list of documents. Which AWS service powers this?",
       options: [
-        "Amazon OpenSearch Service with keyword ranking",
         "Amazon Kendra with natural language understanding",
         "Amazon Comprehend with entity extraction",
         "Amazon Lex with intent recognition",
+        "Amazon OpenSearch Service with keyword ranking",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Amazon Kendra understands natural language questions and returns direct answers extracted from indexed documents — exactly the behavior described. OpenSearch ranks documents by keywords. Comprehend extracts entities from text. Lex builds conversational chatbots with intent/slot modeling.",
     },
@@ -304,12 +304,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
       question:
         "Which Kendra feature would a company use to automatically redact sensitive employee data from HR documents before they are indexed and made searchable?",
       options: [
-        "User context filtering with ACLs",
         "Relevance tuning with attribute boosting",
         "Custom Document Enrichment (CDE) with a Lambda function",
         "Factoid query type with confidence filtering",
+        "User context filtering with ACLs",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Custom Document Enrichment invokes a Lambda function during document ingestion, allowing content modification (including redaction of sensitive data) before the document enters the Kendra index. User context filtering controls who can see documents at query time. Relevance tuning affects search ranking. Factoid queries affect answer type, not content.",
     },
@@ -317,12 +317,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
       question:
         "In a Kendra + Bedrock RAG architecture, what happens in the correct sequence when a user submits a query?",
       options: [
+        "Bedrock embeds the query → Kendra stores the embedding → Bedrock retrieves similar queries",
         "Bedrock generates an answer → Kendra validates it against documents",
         "Kendra retrieves relevant passages → passages are injected into Bedrock's prompt → Bedrock generates a grounded answer",
-        "Bedrock embeds the query → Kendra stores the embedding → Bedrock retrieves similar queries",
         "Kendra indexes Bedrock's training data → Bedrock queries Kendra at training time",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The correct RAG sequence is: (1) Kendra retrieves semantically relevant document passages, (2) those passages are injected into the Bedrock model's prompt as context, (3) Bedrock generates a natural language answer grounded in that context. Bedrock does not validate Kendra results, and Kendra does not store Bedrock embeddings.",
     },
@@ -330,12 +330,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
       question:
         "A Kendra user searches for 'How do I reset my password?' A document uses the phrase 'change your login credentials.' Will Kendra find it?",
       options: [
+        "Only if a custom vocabulary is configured mapping 'reset' to 'change'",
         "No — Kendra uses keyword matching and 'reset password' doesn't appear in the document",
         "Yes — Kendra understands synonyms and semantic meaning, so 'reset password' maps to 'change login credentials'",
         "Only if the document is boosted using relevance tuning",
-        "Only if a custom vocabulary is configured mapping 'reset' to 'change'",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Kendra uses ML-based semantic understanding, so it recognizes that 'reset password' and 'change login credentials' express the same intent even without shared keywords. This semantic understanding is a key differentiator from keyword-based search, which would miss the document entirely.",
     },
@@ -356,12 +356,12 @@ Kendra integrates with identity providers via AWS IAM Identity Center (SSO) and 
       question:
         "What is the difference between a Factoid question and a Descriptive question in Amazon Kendra?",
       options: [
-        "Factoid questions search structured databases; descriptive questions search unstructured documents",
         "Factoid questions have short, specific answers extracted from text; descriptive questions require longer explanatory passages",
         "Factoid questions use keyword matching; descriptive questions use semantic search",
+        "Factoid questions search structured databases; descriptive questions search unstructured documents",
         "There is no difference — Kendra treats all question types the same way",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Factoid questions have short, factual answers ('What is the maximum S3 object size?') that Kendra extracts as a brief text span. Descriptive questions require longer explanatory answers drawn from a relevant document passage. Both use Kendra's semantic understanding — the difference is the expected answer length and format.",
     },

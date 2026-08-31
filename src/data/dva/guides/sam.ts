@@ -98,12 +98,12 @@ The **Globals** section sets default property values that apply to all functions
           question:
             "What is the difference between AWS::Serverless::Api and AWS::Serverless::HttpApi in SAM?",
           options: [
+            "Api is the newer version that replaces HttpApi",
+            "HttpApi requires a VPC; Api is public by default",
             "HttpApi is API Gateway v2 (cheaper, lower latency, JWT auth); Api is REST API (more features)",
             "Api supports HTTP methods; HttpApi supports WebSockets only",
-            "HttpApi requires a VPC; Api is public by default",
-            "Api is the newer version that replaces HttpApi",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "AWS::Serverless::HttpApi creates an HTTP API (API Gateway v2) which is cheaper, has lower latency, and supports JWT authorizers natively. AWS::Serverless::Api creates a REST API with more features but higher cost and latency.",
         },
@@ -149,12 +149,12 @@ The \`samconfig.toml\` file stores deployment configuration — stack name, regi
           question:
             "What does 'sam sync --watch' do that makes it faster than 'sam deploy'?",
           options: [
-            "Detects code-only changes and updates Lambda directly without a full CloudFormation update",
-            "Builds the project in parallel across multiple CPU cores",
-            "Caches CloudFormation templates to avoid re-uploading to S3",
             "Skips validation steps to speed up the deployment pipeline",
+            "Builds the project in parallel across multiple CPU cores",
+            "Detects code-only changes and updates Lambda directly without a full CloudFormation update",
+            "Caches CloudFormation templates to avoid re-uploading to S3",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "sam sync --watch detects code-only changes and syncs them directly to Lambda without running a full CloudFormation stack update. This reduces deployment time from minutes to seconds, creating a fast inner development loop.",
         },
@@ -162,12 +162,12 @@ The \`samconfig.toml\` file stores deployment configuration — stack name, regi
           question:
             "What file does 'sam deploy --guided' create for future deployments?",
           options: [
-            "samconfig.toml",
             "sam-deploy.json",
             "template-config.yaml",
+            "samconfig.toml",
             ".sam/settings.toml",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "sam deploy --guided writes deployment configuration (stack name, region, S3 bucket, capabilities) to samconfig.toml. Subsequent 'sam deploy' calls read from this file for reproducible deployments.",
         },
@@ -236,12 +236,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
           question:
             "What is required on your local machine to run 'sam local invoke' or 'sam local start-api'?",
           options: [
-            "Docker, to run the Lambda runtime environment locally",
             "An active AWS account with Lambda permissions",
             "The AWS CDK toolkit installed",
+            "Docker, to run the Lambda runtime environment locally",
             "A running EC2 instance in the same region",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "SAM local testing commands require Docker because SAM pulls the appropriate Lambda runtime Docker image and runs your function code inside it, providing an accurate local representation of the Lambda execution environment.",
         },
@@ -289,12 +289,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
           question:
             "In a SAM + CodeBuild CI/CD pipeline, what two SAM CLI commands does the buildspec.yml typically run?",
           options: [
-            "sam build followed by sam deploy",
             "sam init followed by sam package",
             "sam validate followed by sam publish",
+            "sam build followed by sam deploy",
             "sam build followed by sam sync",
           ],
-          correctIndex: 0,
+          correctIndex: 2,
           explanation:
             "The standard SAM CI/CD pattern uses 'sam build' to compile and resolve dependencies, then 'sam deploy' to package artifacts to S3 and create/update the CloudFormation stack.",
         },
@@ -344,12 +344,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
       question:
         "A developer wants to deploy a SAM application for the first time. Which command should they run?",
       options: [
-        "sam deploy --guided",
-        "sam init --deploy",
-        "sam publish --first-run",
         "sam package --deploy",
+        "sam deploy --guided",
+        "sam publish --first-run",
+        "sam init --deploy",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "sam deploy --guided runs an interactive setup that prompts for stack name, region, S3 bucket, and capabilities, then writes the answers to samconfig.toml for future deployments.",
     },
@@ -370,12 +370,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
       question:
         "A SAM template defines 10 Lambda functions. A developer wants all functions to use Python 3.12 without repeating the Runtime property 10 times. What is the best approach?",
       options: [
-        "Use the Globals section to set Runtime: python3.12 for all functions",
-        "Create a custom CloudFormation macro to inject the runtime",
         "Use a for loop with CloudFormation conditions",
+        "Use the Globals section to set Runtime: python3.12 for all functions",
         "Set a default runtime in samconfig.toml",
+        "Create a custom CloudFormation macro to inject the runtime",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "The Globals section sets default properties for all functions. Setting Runtime: python3.12 in Globals.Function applies it to every Lambda function in the template, with individual functions able to override if needed.",
     },
@@ -383,12 +383,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
       question:
         "A developer is actively coding a Lambda function and wants changes to deploy in seconds rather than minutes. Which SAM command should they use?",
       options: [
-        "sam sync --watch",
-        "sam deploy --fast",
-        "sam build --incremental",
         "sam local hot-reload",
+        "sam sync --watch",
+        "sam build --incremental",
+        "sam deploy --fast",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "sam sync --watch detects code-only changes and updates Lambda directly without a full CloudFormation stack update, completing in seconds. It watches for file changes and continuously syncs.",
     },
@@ -409,12 +409,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
       question:
         "Which SAM command is used to run a Lambda function locally with a test event?",
       options: [
-        "sam local invoke FunctionName --event events/test.json",
+        "sam execute FunctionName --event events/test.json",
         "sam test invoke FunctionName --payload events/test.json",
         "sam run local FunctionName --event events/test.json",
-        "sam execute FunctionName --event events/test.json",
+        "sam local invoke FunctionName --event events/test.json",
       ],
-      correctIndex: 0,
+      correctIndex: 3,
       explanation:
         "sam local invoke runs a Lambda function in a Docker container matching the function's runtime. The --event flag specifies the JSON event file to pass to the handler.",
     },
@@ -435,12 +435,12 @@ For debugging, the \`--debug-port\` flag keeps the container running and exposes
       question:
         "A developer adds an Api event to an AWS::Serverless::Function. What CloudFormation resources does SAM automatically create?",
       options: [
-        "Lambda function, API Gateway REST API, stage, deployment, and invoke permission",
         "Lambda function and API Gateway only",
-        "Lambda function, API Gateway, and an IAM role",
+        "Lambda function, API Gateway REST API, stage, deployment, and invoke permission",
         "Lambda function and a CloudFront distribution",
+        "Lambda function, API Gateway, and an IAM role",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "When you add an Api event, SAM expands it into a Lambda function, an API Gateway REST API, stages, deployment, and the resource-based permission that allows API Gateway to invoke the function — all from a few lines of YAML.",
     },

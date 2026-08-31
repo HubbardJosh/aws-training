@@ -33,24 +33,24 @@ CloudWatch offers two resolution tiers. **Standard resolution** stores metrics a
           question:
             "What parameter do you set when calling PutMetricData to publish a high-resolution metric?",
           options: [
-            "Resolution=HIGH",
             "StorageResolution=1",
+            "Resolution=HIGH",
             "Granularity=SECOND",
             "MetricResolution=1s",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Setting StorageResolution=1 when calling PutMetricData publishes the metric at 1-second (high-resolution) granularity. The default is StorageResolution=60 (standard resolution, 1-minute granularity).",
         },
         {
           question: "What are CloudWatch dimensions used for?",
           options: [
-            "Grouping metrics into namespaces for billing purposes",
             "Identifying a specific metric instance using key-value pairs (e.g., InstanceId=i-1234)",
-            "Setting the TTL for metric data retention",
+            "Grouping metrics into namespaces for billing purposes",
             "Defining the unit of measurement for a custom metric",
+            "Setting the TTL for metric data retention",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Dimensions are key-value pairs that identify a specific metric instance within a namespace. For example, an EC2 CPU metric uses InstanceId as a dimension to distinguish metrics from different instances. You can filter and aggregate metrics by dimension values.",
         },
@@ -69,11 +69,11 @@ The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for La
             "Which EC2 metric is NOT published by default and requires the CloudWatch Agent?",
           options: [
             "CPU utilization",
-            "Network bytes in/out",
             "Memory utilization",
             "Disk read/write IOPS",
+            "Network bytes in/out",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Memory utilization is an operating-system-level metric that EC2 does not publish by default. You must install the CloudWatch Agent on the instance to collect memory metrics. CPU, network, and basic disk I/O are published by the EC2 service itself.",
         },
@@ -81,12 +81,12 @@ The **Embedded Metrics Format (EMF)** is a pattern specifically optimized for La
           question:
             "What is the Embedded Metrics Format (EMF) used for in Lambda?",
           options: [
-            "Streaming Lambda logs to Kinesis Data Streams",
-            "Publishing CloudWatch metrics by writing structured JSON to stdout without calling PutMetricData",
             "Formatting Lambda error messages for CloudWatch Logs Insights queries",
             "Compressing Lambda log output to reduce CloudWatch Logs storage costs",
+            "Streaming Lambda logs to Kinesis Data Streams",
+            "Publishing CloudWatch metrics by writing structured JSON to stdout without calling PutMetricData",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EMF lets Lambda functions publish metrics by writing specially formatted JSON (with an _aws envelope) to stdout. CloudWatch automatically extracts and publishes the metrics without an explicit API call, avoiding the latency overhead of calling PutMetricData from inside the function.",
         },
@@ -114,12 +114,12 @@ fields @timestamp, @message
           question:
             "What is the difference between a CloudWatch Logs log group and a log stream?",
           options: [
+            "Log groups are regional; log streams are global",
             "Log groups contain metrics; log streams contain log events",
             "Log groups are per application/service and hold retention settings; log streams are per source instance",
             "Log streams are for structured logs; log groups are for unstructured logs",
-            "Log groups are regional; log streams are global",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A log group is the organizational container per application or service, where you configure retention. A log stream is created per source instance — one per Lambda execution environment, EC2 instance, or ECS task — and contains the actual log events from that source.",
         },
@@ -127,12 +127,12 @@ fields @timestamp, @message
           question:
             "What is the purpose of a CloudWatch Logs Subscription Filter?",
           options: [
-            "Filtering log events before they are stored in a log group",
             "Streaming log data in near real-time to Lambda, Kinesis, or Firehose for processing",
             "Creating CloudWatch alarms based on log patterns",
             "Restricting which IAM principals can query a log group",
+            "Filtering log events before they are stored in a log group",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Subscription Filters stream log data in near real-time to destinations like Lambda, Kinesis Data Streams, Kinesis Firehose, or OpenSearch Service. This enables building real-time log processing pipelines and centralized logging architectures.",
         },
@@ -140,12 +140,12 @@ fields @timestamp, @message
           question:
             "A team wants to alarm on the number of ERROR log entries in a Lambda function's logs without modifying the function's code. What is the correct CloudWatch feature?",
           options: [
-            "CloudWatch Logs Insights query",
             "CloudWatch Subscription Filter",
             "CloudWatch Logs Metric Filter",
+            "CloudWatch Logs Insights query",
             "CloudWatch Synthetics",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "A Metric Filter extracts metric values from log text patterns without any code changes. You configure a filter pattern matching 'ERROR', and CloudWatch automatically publishes a count metric that you can create an alarm on. No code changes to the Lambda function are required.",
         },
@@ -165,24 +165,24 @@ When an alarm transitions to ALARM state, it can trigger actions including SNS n
           question:
             "What does setting 'Datapoints to alarm' to '3 of 5' mean for a CloudWatch Alarm?",
           options: [
-            "The alarm fires if the metric breaches the threshold in any 3 of the last 5 evaluation periods",
             "The alarm requires 3 consecutive breaches before firing, resetting after 5 periods",
             "The alarm samples 3 data points per evaluation period across 5 metrics",
             "The alarm fires after 3 minutes and resets after 5 minutes",
+            "The alarm fires if the metric breaches the threshold in any 3 of the last 5 evaluation periods",
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation:
             "Setting 'Datapoints to alarm' to '3 of 5' means the alarm fires when 3 out of the 5 most recent evaluation periods are in breach. This reduces false positives from transient spikes — a single brief spike won't trigger the alarm, but sustained elevated values will.",
         },
         {
           question: "What is a Composite Alarm in CloudWatch?",
           options: [
-            "An alarm that monitors multiple metrics simultaneously using Metric Math",
             "An alarm that combines multiple individual alarms using AND/OR logic into a single higher-level alarm",
             "An alarm that automatically scales EC2 instances based on multiple conditions",
+            "An alarm that monitors multiple metrics simultaneously using Metric Math",
             "An alarm that aggregates metrics from multiple AWS accounts",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A Composite Alarm combines the states of multiple alarms using AND/OR Boolean logic into a single alarm. This reduces noise — for example, you can require both high CPU AND high error rate before paging on-call, preventing alerts from isolated metric spikes.",
         },
@@ -212,24 +212,24 @@ CloudWatch automatically creates **service dashboards** for many AWS services �
           question:
             "Can a single CloudWatch Dashboard display metrics from multiple AWS accounts and regions?",
           options: [
-            "No — dashboards are strictly account and region scoped",
             "Yes — using CloudWatch cross-account observability to share metrics to a central monitoring account",
             "Yes — by creating a separate dashboard per account and linking them",
+            "No — dashboards are strictly account and region scoped",
             "Only if all accounts are in the same AWS Organization root",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "CloudWatch Dashboards support cross-account and cross-region views. You set up CloudWatch cross-account observability where monitored accounts share their metric data with a central monitoring account. This is the standard approach for multi-account observability.",
         },
         {
           question: "What are CloudWatch Service Dashboards?",
           options: [
-            "Custom dashboards that must be manually created for each service",
             "Pre-built dashboards automatically available for services like Lambda, API Gateway, and DynamoDB — no configuration needed",
             "Dashboards that aggregate billing costs by service",
             "Dashboards created by AWS Support for troubleshooting specific services",
+            "Custom dashboards that must be manually created for each service",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Service dashboards are pre-built CloudWatch dashboards automatically created for many AWS services. They appear under 'Service dashboards' in the console and provide key metrics for services like Lambda, API Gateway, and DynamoDB without requiring any configuration.",
         },
@@ -248,11 +248,11 @@ CloudWatch Alarms can publish to EventBridge when their state changes, enabling 
             "What is the relationship between CloudWatch Events and Amazon EventBridge?",
           options: [
             "They are completely separate services with different functionality",
+            "EventBridge replaced CloudWatch Events and all existing CloudWatch Events rules were deleted",
             "CloudWatch Events is the newer, expanded version of EventBridge",
             "CloudWatch Events is the original name — EventBridge is the current branding of the same underlying service with added features",
-            "EventBridge replaced CloudWatch Events and all existing CloudWatch Events rules were deleted",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "CloudWatch Events and EventBridge are the same underlying service. The branding changed to EventBridge when AWS added partner event buses, schema registry, API Destinations, and Pipes. CloudWatch Events rules still work, but new development should use EventBridge.",
         },
@@ -260,12 +260,12 @@ CloudWatch Alarms can publish to EventBridge when their state changes, enabling 
           question:
             "How can CloudWatch Alarms trigger automated remediation workflows?",
           options: [
-            "By directly invoking Lambda functions when threshold is breached",
-            "By publishing state change events to EventBridge, which routes to targets like Lambda or Step Functions",
-            "By writing to a CloudWatch Logs stream that a Lambda function polls",
             "By sending HTTP requests to a configured webhook URL",
+            "By writing to a CloudWatch Logs stream that a Lambda function polls",
+            "By publishing state change events to EventBridge, which routes to targets like Lambda or Step Functions",
+            "By directly invoking Lambda functions when threshold is breached",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "CloudWatch Alarms publish state change events to EventBridge when they transition between OK, ALARM, and INSUFFICIENT_DATA. EventBridge rules can match these events and route them to remediation targets like Lambda functions or Step Functions state machines.",
         },
@@ -287,12 +287,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
           question:
             "EC2 detailed monitoring vs. basic monitoring — what is the key difference?",
           options: [
+            "Detailed monitoring sends metrics to multiple regions; basic is single-region",
+            "Detailed monitoring includes CloudWatch Logs integration; basic does not",
             "Detailed monitoring adds memory and disk metrics; basic does not",
             "Detailed monitoring provides 1-minute metric granularity; basic provides 5-minute granularity",
-            "Detailed monitoring includes CloudWatch Logs integration; basic does not",
-            "Detailed monitoring sends metrics to multiple regions; basic is single-region",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EC2 basic monitoring provides metrics at 5-minute granularity for free. Enabling detailed monitoring gives 1-minute granularity at additional cost. Neither includes memory metrics — those require the CloudWatch Agent regardless of the monitoring mode.",
         },
@@ -302,10 +302,10 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
           options: [
             "Count and Latency",
             "4XXError and 5XXError",
-            "Detailed metrics (per-route) and access logging",
             "IntegrationLatency and CacheHitCount",
+            "Detailed metrics (per-route) and access logging",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "API Gateway's detailed metrics (per-route breakdowns) and access logging are both disabled by default and must be explicitly enabled per stage. The basic stage-level metrics (Count, Latency, 4XXError, 5XXError) are published automatically.",
         },
@@ -356,12 +356,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A team needs to monitor memory utilization on their EC2 instances. The metric is not appearing in CloudWatch. What is the most likely cause?",
       options: [
-        "Memory metrics require enabling detailed EC2 monitoring",
-        "Memory metrics are only available for EC2 instances in a VPC",
         "Memory metrics are not published by the EC2 service — the CloudWatch Agent must be installed",
         "Memory metrics require the instance to have an instance profile with CloudWatch permissions",
+        "Memory metrics require enabling detailed EC2 monitoring",
+        "Memory metrics are only available for EC2 instances in a VPC",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "EC2 does not publish memory utilization by default because it's an OS-level metric the hypervisor cannot observe. The CloudWatch Agent must be installed on the instance to collect and publish memory metrics. This is one of the most common EC2 monitoring gotchas.",
     },
@@ -369,12 +369,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A Lambda function generates thousands of invocations per second. A developer wants to publish a custom business metric (order count) per invocation without adding latency. Which approach is correct?",
       options: [
-        "Call PutMetricData in a background thread after the function returns",
         "Write structured JSON using the Embedded Metrics Format (EMF) to stdout",
         "Batch metric data and call PutMetricData every 60 seconds from a scheduled Lambda",
         "Use a Metric Filter on the Lambda log group to count invocations as a proxy",
+        "Call PutMetricData in a background thread after the function returns",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "EMF allows Lambda to publish metrics by writing structured JSON to stdout — no API call, no added latency. The Lambda runtime (or CloudWatch Logs agent) automatically extracts and publishes the metrics. This is the recommended pattern for high-throughput Lambda metric publishing.",
     },
@@ -382,12 +382,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "An operations team receives too many CloudWatch alarm notifications. CPU alarms, memory alarms, and error rate alarms all fire independently. How can they reduce alert noise while still being notified when the system is truly degraded?",
       options: [
-        "Increase the alarm thresholds so individual alarms fire less often",
         "Create a Composite Alarm combining CPU, memory, and error rate alarms with AND logic",
         "Disable individual alarms and rely on CloudWatch Anomaly Detection",
         "Increase the evaluation period to 1 hour so transient spikes don't trigger alarms",
+        "Increase the alarm thresholds so individual alarms fire less often",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "A Composite Alarm combines multiple alarm states using AND/OR logic. Requiring all three alarms (CPU AND memory AND error rate) to be in ALARM state before notifying eliminates false positives from isolated metric spikes, while still alerting when the system is genuinely degraded.",
     },
@@ -395,12 +395,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A security team wants to count all failed SSH login attempts logged in /var/log/auth.log on EC2 instances and alarm when the count exceeds 10 in 5 minutes. What combination of CloudWatch features is needed?",
       options: [
-        "CloudWatch Agent + Metric Filter + Alarm",
         "CloudWatch Agent + Subscription Filter + SNS",
         "CloudWatch Logs Insights + Alarm + SNS",
         "CloudWatch Synthetics + Metric Filter + Alarm",
+        "CloudWatch Agent + Metric Filter + Alarm",
       ],
-      correctIndex: 0,
+      correctIndex: 3,
       explanation:
         "The CloudWatch Agent collects /var/log/auth.log and ships it to CloudWatch Logs. A Metric Filter on the log group counts occurrences of failed SSH patterns. A CloudWatch Alarm on the resulting metric triggers when the count exceeds 10 in a 5-minute period.",
     },
@@ -408,12 +408,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A developer wants to query Lambda logs across multiple log groups for ERROR messages in the last hour and count them by function. Which CloudWatch feature enables this?",
       options: [
-        "Metric Filters with per-function dimensions",
         "CloudWatch Logs Insights with a query spanning multiple log groups",
+        "Metric Filters with per-function dimensions",
         "Subscription Filters streaming to Kinesis for aggregation",
         "CloudWatch Dashboards with Metric Math expressions",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "CloudWatch Logs Insights supports interactive queries across multiple log groups simultaneously using SQL-like syntax. You can filter for ERROR messages, aggregate by function name, and sort results — all interactively without needing to stream data elsewhere first.",
     },
@@ -434,12 +434,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A team needs to stream CloudWatch logs to an S3 bucket for long-term archival and to OpenSearch for real-time search. What is the most efficient architecture?",
       options: [
-        "Create two separate Subscription Filters: one to Kinesis Firehose (for S3) and one to OpenSearch Service directly",
         "Create a Subscription Filter to Lambda, which fans out to both S3 and OpenSearch",
-        "Use a Metric Filter to count log events and store results in S3",
+        "Create two separate Subscription Filters: one to Kinesis Firehose (for S3) and one to OpenSearch Service directly",
         "Export log groups to S3 daily using the CreateExportTask API and configure a separate pipeline for OpenSearch",
+        "Use a Metric Filter to count log events and store results in S3",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "You can create multiple Subscription Filters on a log group. One filter streams to Kinesis Firehose for S3 archival; another streams directly to OpenSearch Service. This provides near-real-time delivery to both destinations without requiring a Lambda fan-out function.",
     },
@@ -447,12 +447,12 @@ The most commonly used CloudWatch integration is **CloudWatch Alarms driving Aut
       question:
         "A company wants to monitor their REST API's health continuously and alert if specific user journeys break, even when there's no real user traffic. Which CloudWatch feature enables this?",
       options: [
-        "CloudWatch Anomaly Detection on API Gateway latency metrics",
-        "CloudWatch Synthetics canaries running scripted checks on a schedule",
         "Metric Filters on API Gateway access logs",
         "Composite Alarms combining 4XXError and 5XXError metrics",
+        "CloudWatch Anomaly Detection on API Gateway latency metrics",
+        "CloudWatch Synthetics canaries running scripted checks on a schedule",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "CloudWatch Synthetics allows you to define canary scripts that simulate user journeys against your API on a schedule. If the canary fails, an alarm fires — even when there's no real user traffic. This provides synthetic monitoring independent of actual traffic volume.",
     },

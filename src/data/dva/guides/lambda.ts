@@ -17,8 +17,8 @@ Lambda manages a fleet of **execution environments** (isolated micro-VMs). When 
       quiz: [
         {
           question: "What is the maximum timeout for a Lambda function?",
-          options: ["5 minutes", "15 minutes", "30 minutes", "1 hour"],
-          correctIndex: 1,
+          options: ["15 minutes", "5 minutes", "30 minutes", "1 hour"],
+          correctIndex: 0,
           explanation:
             "Lambda functions can run for up to 15 minutes per invocation. For longer workloads, use Step Functions or ECS.",
         },
@@ -26,12 +26,12 @@ Lambda manages a fleet of **execution environments** (isolated micro-VMs). When 
           question:
             "CPU power in Lambda scales proportionally with which setting?",
           options: [
-            "Timeout",
-            "Memory allocation",
             "Concurrency",
             "Layer count",
+            "Timeout",
+            "Memory allocation",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Lambda allocates CPU proportionally to memory. Doubling memory roughly doubles available CPU — there is no separate CPU knob.",
         },
@@ -39,12 +39,12 @@ Lambda manages a fleet of **execution environments** (isolated micro-VMs). When 
           question:
             "A Lambda execution environment is reused between invocations without re-initialization. This is called a:",
           options: [
-            "Cold start",
             "Warm start",
             "Provisioned start",
             "Hot reload",
+            "Cold start",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "A warm start reuses an existing frozen execution environment. The handler runs immediately without re-running initialization code.",
         },
@@ -65,27 +65,27 @@ Lambda manages a fleet of **execution environments** (isolated micro-VMs). When 
             "Which invocation type does API Gateway use when calling Lambda?",
           options: [
             "Asynchronous (Event)",
-            "Synchronous (RequestResponse)",
             "Polling-based (event source mapping)",
+            "Synchronous (RequestResponse)",
             "Scheduled",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "API Gateway uses synchronous invocation. The caller waits for Lambda to respond and receives the result directly.",
         },
         {
           question:
             "How many total attempts does Lambda make for a failed asynchronous invocation by default?",
-          options: ["1", "2", "3", "5"],
-          correctIndex: 2,
+          options: ["3", "1", "5", "2"],
+          correctIndex: 0,
           explanation:
             "Lambda retries twice after the initial attempt — 3 total. You can reduce this with MaximumRetryAttempts (0–2).",
         },
         {
           question:
             "Which service uses polling-based (event source mapping) invocation?",
-          options: ["S3", "SNS", "API Gateway", "SQS"],
-          correctIndex: 3,
+          options: ["SNS", "SQS", "S3", "API Gateway"],
+          correctIndex: 1,
           explanation:
             "SQS uses event source mapping — Lambda polls the queue on your behalf. S3 and SNS use asynchronous invocation; API Gateway uses synchronous.",
         },
@@ -113,8 +113,8 @@ Several strategies can reduce cold start impact. **Provisioned Concurrency** pre
         {
           question:
             "Which runtime typically has the fastest cold start time in Lambda?",
-          options: ["Java 21", ".NET 8", "Node.js 20.x", "Go 1.x"],
-          correctIndex: 2,
+          options: ["Node.js 20.x", "Go 1.x", "Java 21", ".NET 8"],
+          correctIndex: 0,
           explanation:
             "Node.js and Python start significantly faster than JVM-based (Java) or CLR-based (.NET) runtimes due to lighter initialization overhead.",
         },
@@ -155,12 +155,12 @@ When any concurrency limit is hit, Lambda returns **429 TooManyRequestsException
           question:
             "Which error code does Lambda return when a concurrency limit is reached?",
           options: [
-            "400 BadRequest",
             "429 TooManyRequestsException",
+            "400 BadRequest",
             "503 ServiceUnavailable",
             "500 InternalServerError",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Lambda returns HTTP 429 TooManyRequestsException when throttled. Callers should implement exponential backoff and retry.",
         },
@@ -182,16 +182,16 @@ When any concurrency limit is hit, Lambda returns **429 TooManyRequestsException
         {
           question:
             "Where does Lambda extract layer content inside the execution environment?",
-          options: ["/tmp", "/opt", "/var/task", "/lambda"],
-          correctIndex: 1,
+          options: ["/var/task", "/lambda", "/opt", "/tmp"],
+          correctIndex: 2,
           explanation:
             "Lambda extracts all attached layers to /opt. Your code can reference shared libraries and binaries from that path.",
         },
         {
           question:
             "How many Lambda Layers can be attached to a single function?",
-          options: ["1", "3", "5", "10"],
-          correctIndex: 2,
+          options: ["10", "3", "1", "5"],
+          correctIndex: 3,
           explanation:
             "You can attach up to 5 layers per function. Each layer is versioned independently and must be explicitly updated in the function config.",
         },
@@ -217,12 +217,12 @@ For secrets, the right pattern is to store them in **Secrets Manager** or **SSM 
           question:
             "Lambda aliases support weighted traffic shifting. What does this enable?",
           options: [
-            "Automatic rollback on errors",
             "Canary deployments between two function versions",
             "Multi-region failover",
+            "Automatic rollback on errors",
             "Reserved concurrency allocation",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Aliases can split traffic between two versions (e.g. 90%/10%), enabling canary deployments without CodeDeploy.",
         },
@@ -240,12 +240,12 @@ For **stream-based sources** (Kinesis, DynamoDB Streams), Lambda must process re
           question:
             "Why are Lambda Destinations preferred over DLQs for failed async invocations?",
           options: [
-            "They are cheaper",
             "They support more target services",
             "They include full invocation metadata, not just the original event",
+            "They are cheaper",
             "They retry automatically",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Destinations include the original event plus the response payload and request context. DLQs only capture the original event, making debugging harder.",
         },
@@ -274,12 +274,12 @@ When a Lambda function is attached to a VPC, it loses direct internet access —
           question:
             "A VPC-attached Lambda function needs to call an external public API. What is required?",
           options: [
+            "Nothing — VPC Lambda always has internet access",
             "An Internet Gateway attached to the Lambda subnet",
             "A NAT Gateway in a public subnet with a route from Lambda's private subnet",
             "A VPC Endpoint for the external API",
-            "Nothing — VPC Lambda always has internet access",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "VPC-attached Lambda loses direct internet access. A NAT Gateway in a public subnet allows outbound internet traffic from the private subnet Lambda runs in.",
         },
@@ -287,12 +287,12 @@ When a Lambda function is attached to a VPC, it loses direct internet access —
           question:
             "What is the most cost-effective way for a VPC Lambda to call Amazon S3?",
           options: [
-            "NAT Gateway",
             "Internet Gateway",
             "VPC Endpoint (PrivateLink)",
             "Transit Gateway",
+            "NAT Gateway",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "VPC Endpoints (PrivateLink) route traffic to S3, DynamoDB, and other AWS services privately without going through NAT or the internet — cheaper and more secure.",
         },
@@ -334,11 +334,11 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
             "What is the minimum SQS visibility timeout recommended when using Lambda as a consumer?",
           options: [
             "Equal to the Lambda timeout",
-            "3× the Lambda timeout",
             "6× the Lambda timeout",
             "10× the Lambda timeout",
+            "3× the Lambda timeout",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "AWS recommends the SQS visibility timeout be at least 6× the Lambda function timeout to prevent the message from becoming visible and being processed again while Lambda is still running.",
         },
@@ -347,11 +347,11 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
             "Which integration pattern lets Step Functions handle retries and orchestration so each Lambda stays focused on one operation?",
           options: [
             "SQS → Lambda",
+            "API Gateway → Lambda",
             "EventBridge → Lambda",
             "Step Functions → Lambda (Task state)",
-            "API Gateway → Lambda",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Step Functions uses Lambda as a Task state and manages retries, timeouts, and branching logic externally, keeping each Lambda function simple and single-purpose.",
         },
@@ -401,8 +401,8 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
     {
       question:
         "What is the maximum memory you can allocate to a Lambda function?",
-      options: ["1,024 MB", "3,008 MB", "6,144 MB", "10,240 MB"],
-      correctIndex: 3,
+      options: ["6,144 MB", "1,024 MB", "10,240 MB", "3,008 MB"],
+      correctIndex: 2,
       explanation:
         "Lambda supports memory from 128 MB up to 10,240 MB (10 GB). CPU scales proportionally with memory.",
     },
@@ -410,12 +410,12 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
       question:
         "Which feature pre-warms Lambda execution environments to eliminate cold starts entirely?",
       options: [
-        "Reserved Concurrency",
         "Provisioned Concurrency",
-        "Lambda Layers",
         "Aliases",
+        "Reserved Concurrency",
+        "Lambda Layers",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Provisioned Concurrency keeps environments initialized and ready. Reserved Concurrency caps scale but does not pre-warm.",
     },
@@ -423,12 +423,12 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
       question:
         "An async Lambda invocation fails all retry attempts. Where should you route the failed event to capture full metadata?",
       options: [
+        "S3 bucket",
         "Dead Letter Queue (DLQ)",
         "CloudWatch Logs",
         "Lambda Destination (OnFailure)",
-        "S3 bucket",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Lambda Destinations capture the full invocation record including the original event, response, and request context. DLQs only get the original event.",
     },
@@ -437,11 +437,11 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
         "A Lambda function attached to a VPC needs to reach DynamoDB without internet traffic. What is the best solution?",
       options: [
         "NAT Gateway",
-        "Internet Gateway",
         "VPC Endpoint (PrivateLink)",
+        "Internet Gateway",
         "Lambda@Edge",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "A VPC Endpoint for DynamoDB routes traffic privately within the AWS network — no NAT, no internet, lower cost and better security.",
     },
@@ -449,12 +449,12 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
       question:
         "You set Reserved Concurrency to 0 on a Lambda function. What happens?",
       options: [
-        "The function scales to the account default limit",
-        "The function is limited to 1 concurrent execution",
-        "The function is disabled — all invocations are throttled",
         "Provisioned Concurrency takes over",
+        "The function is limited to 1 concurrent execution",
+        "The function scales to the account default limit",
+        "The function is disabled — all invocations are throttled",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Reserved Concurrency of 0 means no execution environments are allocated. Every invocation is throttled with a 429 error.",
     },
@@ -462,20 +462,20 @@ For queue-based processing, **SQS → Lambda** via event source mapping lets Lam
       question:
         "What is the minimum recommended SQS visibility timeout when Lambda is the consumer?",
       options: [
-        "Equal to the Lambda timeout",
-        "3× the Lambda timeout",
         "6× the Lambda timeout",
         "Twice the batch window",
+        "3× the Lambda timeout",
+        "Equal to the Lambda timeout",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "AWS recommends visibility timeout ≥ 6× the function timeout to prevent messages from becoming visible and being re-processed while Lambda is still running.",
     },
     {
       question:
         "Lambda Layers are extracted to which path in the execution environment?",
-      options: ["/tmp", "/opt", "/var/task", "/lambda/layers"],
-      correctIndex: 1,
+      options: ["/var/task", "/lambda/layers", "/tmp", "/opt"],
+      correctIndex: 3,
       explanation:
         "Lambda extracts all attached layers to /opt. Your function code can reference shared libraries and binaries from there.",
     },

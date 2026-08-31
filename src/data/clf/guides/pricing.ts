@@ -25,12 +25,12 @@ Three key factors drive most AWS bills: **compute** (EC2, Lambda, Fargate), **st
           question:
             "Which of the following is NOT one of AWS's three core pricing principles?",
           options: [
-            "Pay for what you use",
+            "Pay a fixed monthly fee for all services",
             "Pay less when you use more",
             "Pay less when you reserve capacity",
-            "Pay a fixed monthly fee for all services",
+            "Pay for what you use",
           ],
-          correctIndex: 3,
+          correctIndex: 0,
           explanation:
             "The three AWS pricing principles are: pay for what you use (no upfront costs), pay less when you use more (volume discounts), and pay less when you reserve (discounts for 1- or 3-year commitments). AWS does not charge a fixed monthly fee — it is pay-as-you-go.",
         },
@@ -50,11 +50,11 @@ Three key factors drive most AWS bills: **compute** (EC2, Lambda, Fargate), **st
           question: "What are the three main cost drivers on most AWS bills?",
           options: [
             "Networking, security, and compliance",
+            "Regions, Availability Zones, and edge locations",
             "Compute, storage, and data transfer out",
             "IAM users, API calls, and CloudWatch metrics",
-            "Regions, Availability Zones, and edge locations",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The three main drivers of most AWS bills are compute (EC2, Lambda, Fargate), storage (S3, EBS, RDS), and data transfer out (data leaving AWS to the internet). Understanding these three dimensions helps prioritize cost optimization efforts.",
         },
@@ -89,12 +89,12 @@ The **AWS Pricing Calculator** (calculator.aws) lets you estimate your monthly b
           question:
             "A company is surprised by high data transfer costs on their AWS bill. Which direction of data transfer is charged?",
           options: [
-            "Data transferred into AWS from the internet (ingress)",
-            "Data transferred between services in the same AWS region",
-            "Data transferred out from AWS to the internet (egress)",
             "Data transferred between Availability Zones within a region",
+            "Data transferred between services in the same AWS region",
+            "Data transferred into AWS from the internet (ingress)",
+            "Data transferred out from AWS to the internet (egress)",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Data transferred out from AWS to the internet (egress) is charged per GB and can become significant at scale. Data transferred into AWS (ingress) is free. Data between services in the same region is generally free.",
         },
@@ -128,20 +128,20 @@ The **AWS Pricing Calculator** (calculator.aws) lets you estimate your monthly b
           question:
             "What is the difference between AWS Cost Explorer and AWS Budgets?",
           options: [
-            "Cost Explorer is for future cost estimation; Budgets is for analyzing past spending",
-            "Cost Explorer analyzes historical costs and forecasts; Budgets sets thresholds and sends alerts when spending exceeds them",
-            "Cost Explorer is only available with Enterprise Support; Budgets is available to all accounts",
             "They are the same tool with different names",
+            "Cost Explorer is for future cost estimation; Budgets is for analyzing past spending",
+            "Cost Explorer is only available with Enterprise Support; Budgets is available to all accounts",
+            "Cost Explorer analyzes historical costs and forecasts; Budgets sets thresholds and sends alerts when spending exceeds them",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Cost Explorer visualizes and analyzes your historical costs and usage (13 months of history, 3-month forecasts) to help you understand spending patterns. AWS Budgets lets you set thresholds and sends alerts (via email or SNS) when actual or forecasted spending exceeds those thresholds.",
         },
         {
           question:
             "How many months of cost history can AWS Cost Explorer display?",
-          options: ["3 months", "6 months", "13 months", "24 months"],
-          correctIndex: 2,
+          options: ["13 months", "6 months", "24 months", "3 months"],
+          correctIndex: 0,
           explanation:
             "AWS Cost Explorer displays up to 13 months of cost and usage history, plus forecasts for the next 3 months. This allows you to analyze spending trends over more than a year to identify patterns and anomalies.",
         },
@@ -176,12 +176,12 @@ Organizations provides not only consolidated billing but also **Service Control 
           question:
             "What is a key financial benefit of using AWS Organizations' consolidated billing?",
           options: [
+            "Data transfer between member accounts becomes completely free",
             "Member accounts receive a 50% discount on all services automatically",
             "All accounts' usage is aggregated, potentially qualifying for volume discount pricing tiers",
             "The management account gets free Reserved Instances for all member accounts",
-            "Data transfer between member accounts becomes completely free",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Consolidated billing aggregates all member accounts' usage for volume discount calculations. For example, if multiple accounts collectively use 110 TB of S3, they may qualify for a better price tier than any single account would achieve individually at 40 or 70 TB.",
         },
@@ -189,12 +189,12 @@ Organizations provides not only consolidated billing but also **Service Control 
           question:
             "What are Service Control Policies (SCPs) in AWS Organizations?",
           options: [
-            "IAM policies that apply to all users within a single AWS account",
             "Organization-wide permission guardrails that restrict what member accounts can do, regardless of their IAM policies",
             "Billing policies that control how costs are allocated between accounts",
             "Compliance policies that audit resource configurations across accounts",
+            "IAM policies that apply to all users within a single AWS account",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SCPs are organization-wide guardrails set by the management account that restrict what actions member accounts can perform, even if those accounts have IAM policies that would otherwise allow the action. For example, an SCP can prevent disabling CloudTrail across the entire organization.",
         },
@@ -202,12 +202,12 @@ Organizations provides not only consolidated billing but also **Service Control 
           question:
             "In consolidated billing, how does Reserved Instance sharing benefit an organization?",
           options: [
-            "Reserved Instances in one account can be applied to matching usage in other accounts in the organization",
-            "All member accounts automatically receive Reserved Instance discounts without purchasing them",
             "Reserved Instances purchased by any member account apply to the management account's usage",
+            "Reserved Instances in one account can be applied to matching usage in other accounts in the organization",
             "Reserved Instances can be sold between member accounts at market price",
+            "All member accounts automatically receive Reserved Instance discounts without purchasing them",
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
             "With consolidated billing, unused Reserved Instances in one account can be applied to matching instance usage in other accounts within the same organization. This maximizes RI utilization across the portfolio and reduces waste.",
         },
@@ -234,11 +234,11 @@ Organizations provides not only consolidated billing but also **Service Control 
             "What does 'right-sizing' mean in the context of AWS cost optimization?",
           options: [
             "Purchasing the largest available instance type to ensure you never run out of capacity",
+            "Using only AWS-managed services to eliminate the need for instance sizing decisions",
             "Choosing the correct instance type and size that matches your actual workload needs",
             "Splitting workloads across the maximum number of small instances",
-            "Using only AWS-managed services to eliminate the need for instance sizing decisions",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Right-sizing means selecting the instance type and size that best matches your actual workload requirements. Many organizations over-provision out of caution. AWS Compute Optimizer analyzes utilization and identifies opportunities to downsize without impacting performance.",
         },
@@ -246,12 +246,12 @@ Organizations provides not only consolidated billing but also **Service Control 
           question:
             "Why is resource tagging important for cost management in AWS?",
           options: [
-            "Tags are required by AWS for all resources or billing stops",
-            "Tags enable cost allocation reporting in Cost Explorer, showing which teams or projects are responsible for spending",
-            "Tags automatically apply Reserved Instance discounts to tagged resources",
             "Tags prevent unauthorized users from accessing tagged resources",
+            "Tags are required by AWS for all resources or billing stops",
+            "Tags automatically apply Reserved Instance discounts to tagged resources",
+            "Tags enable cost allocation reporting in Cost Explorer, showing which teams or projects are responsible for spending",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Resource tags (like Project, Environment, Team) allow you to filter and group costs in AWS Cost Explorer. Without consistent tagging, it is difficult to attribute spending to specific teams or projects, making cost accountability and optimization much harder.",
         },
@@ -259,12 +259,12 @@ Organizations provides not only consolidated billing but also **Service Control 
           question:
             "Which cost optimization strategy automatically moves S3 objects to cheaper storage classes as they age?",
           options: [
+            "S3 Lifecycle Policies",
             "S3 Versioning",
             "S3 Cross-Region Replication",
-            "S3 Lifecycle Policies",
             "S3 Intelligent-Tiering",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "S3 Lifecycle Policies automatically transition objects to cheaper storage classes (Standard-IA after 30 days, Glacier after 90 days) and expire objects that are no longer needed. This reduces storage costs without manual intervention.",
         },
@@ -309,12 +309,12 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "A company's AWS bill is unexpectedly high. They discover large charges for data leaving their VPC to the internet. Which type of data transfer is being charged?",
       options: [
+        "Data transfer out from AWS to the internet (egress)",
         "Data transfer into AWS from on-premises (ingress)",
         "Data transfer between EC2 instances in the same Availability Zone",
-        "Data transfer out from AWS to the internet (egress)",
         "Data transfer between S3 and EC2 in the same region",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Data transfer out from AWS to the internet (egress) is charged per GB and can become significant at scale. Data transfer into AWS (ingress) is free, and data transfer between services in the same region is generally also free.",
     },
@@ -322,20 +322,20 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "Which AWS tool should you use to estimate your monthly costs before deploying a new architecture?",
       options: [
-        "AWS Cost Explorer",
-        "AWS Budgets",
-        "AWS Pricing Calculator",
         "AWS Trusted Advisor",
+        "AWS Pricing Calculator",
+        "AWS Budgets",
+        "AWS Cost Explorer",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The AWS Pricing Calculator (calculator.aws) is specifically designed for estimating costs before deployment. Cost Explorer analyzes past spending. Budgets alerts on thresholds. Trusted Advisor identifies optimization opportunities in existing resources.",
     },
     {
       question:
         "Which AWS Free Tier type provides 1 million Lambda requests per month that never expire?",
-      options: ["12 Months Free", "Trials", "Always Free", "On-Demand Free"],
-      correctIndex: 2,
+      options: ["Always Free", "Trials", "On-Demand Free", "12 Months Free"],
+      correctIndex: 0,
       explanation:
         "The 'Always Free' tier is permanent and includes resources like 1 million Lambda requests per month and 25 GB of DynamoDB storage. This is distinct from '12 Months Free' offerings which expire after the first year of account creation.",
     },
@@ -343,12 +343,12 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "A company with 10 AWS accounts wants to combine their S3 usage across all accounts to qualify for volume pricing discounts. Which AWS feature enables this?",
       options: [
-        "S3 Cross-Region Replication",
         "AWS Organizations Consolidated Billing",
         "AWS Savings Plans",
         "S3 Intelligent-Tiering",
+        "S3 Cross-Region Replication",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AWS Organizations Consolidated Billing aggregates usage across all member accounts. If each account uses some S3 storage, the combined total may qualify for a better volume discount tier than any single account would achieve individually.",
     },
@@ -356,12 +356,12 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "What is the single highest-impact cost optimization for a company running predictable, sustained EC2 workloads?",
       options: [
-        "Using Spot Instances for all production workloads",
-        "Switching all workloads to Lambda",
         "Purchasing Reserved Instances or Savings Plans with 1- or 3-year commitments",
         "Moving to the smallest instance types available",
+        "Using Spot Instances for all production workloads",
+        "Switching all workloads to Lambda",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Reserved Instances and Savings Plans offer discounts up to 72% compared to On-Demand pricing for 1- or 3-year commitments. For predictable, sustained workloads, this is the single highest-impact cost reduction available.",
     },
@@ -369,11 +369,11 @@ Organizations provides not only consolidated billing but also **Service Control 
       question: "AWS Budgets differs from AWS Cost Explorer in which key way?",
       options: [
         "Budgets analyzes historical spending; Cost Explorer sets spending alerts",
-        "Cost Explorer analyzes historical spending and forecasts; Budgets sets thresholds and sends proactive alerts",
         "Budgets is only available with Business Support; Cost Explorer is available to all accounts",
+        "Cost Explorer analyzes historical spending and forecasts; Budgets sets thresholds and sends proactive alerts",
         "Cost Explorer requires tagging; Budgets works without any resource tags",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Cost Explorer is an analysis tool — it visualizes historical costs and usage and forecasts future spending. AWS Budgets is a proactive alerting tool — you set thresholds for spend or usage, and AWS notifies you via email or SNS when actual or forecasted spending approaches or exceeds the limit.",
     },
@@ -381,12 +381,12 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "Which cost optimization strategy would AWS Compute Optimizer help with?",
       options: [
-        "Identifying unused Reserved Instances that can be sold on the Marketplace",
         "Recommending right-sized instance types based on actual workload utilization",
+        "Identifying unused Reserved Instances that can be sold on the Marketplace",
         "Automatically moving S3 objects to cheaper storage classes",
         "Consolidating multiple AWS accounts to reduce per-account overhead",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AWS Compute Optimizer analyzes your actual resource utilization and recommends optimal instance types and sizes. It identifies over-provisioned resources where you could switch to a smaller or more cost-efficient instance family with no performance impact.",
     },
@@ -394,12 +394,12 @@ Organizations provides not only consolidated billing but also **Service Control 
       question:
         "Service Control Policies (SCPs) in AWS Organizations serve which purpose?",
       options: [
-        "Controlling which AWS services are billed to which department",
-        "Setting organization-wide permission guardrails that restrict what member accounts can do",
-        "Automatically applying Reserved Instance discounts across all accounts",
         "Enforcing resource tagging standards across all member accounts",
+        "Automatically applying Reserved Instance discounts across all accounts",
+        "Setting organization-wide permission guardrails that restrict what member accounts can do",
+        "Controlling which AWS services are billed to which department",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SCPs are organization-wide guardrails that restrict what actions member accounts can perform, even overriding IAM policies in those accounts. For example, an SCP can prevent all member accounts from creating resources in unauthorized regions or disabling AWS CloudTrail.",
     },

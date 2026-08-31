@@ -22,11 +22,11 @@ Topics have an Amazon Resource Name (ARN) and can be referenced across AWS accou
             "What is the key difference between Amazon SNS and Amazon SQS in terms of message delivery?",
           options: [
             "SNS delivers messages to one consumer at a time; SQS delivers to all subscribers",
-            "SNS delivers a message to all subscribers simultaneously (fan-out); SQS delivers each message to only one consumer",
             "SNS requires consumers to poll for messages; SQS pushes messages to subscribers",
             "SNS stores messages for up to 14 days; SQS delivers immediately with no retention",
+            "SNS delivers a message to all subscribers simultaneously (fan-out); SQS delivers each message to only one consumer",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "In SNS (pub/sub), a single message published to a topic is delivered to ALL subscribers simultaneously — this is fan-out. In SQS (queue), each message is consumed by only one consumer. SNS is push-based; SQS is pull-based.",
         },
@@ -34,11 +34,11 @@ Topics have an Amazon Resource Name (ARN) and can be referenced across AWS accou
           question: "In Amazon SNS, what is a 'topic'?",
           options: [
             "A filter that determines which subscribers receive which messages",
-            "A logical channel to which publishers send messages and from which subscribers receive them",
             "A dead letter queue for messages that fail delivery after all retries",
             "A policy document that defines message routing rules",
+            "A logical channel to which publishers send messages and from which subscribers receive them",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "An SNS topic is a logical channel for messages. Publishers send messages to a topic, and all subscribers to that topic receive every message published to it. Topics have an ARN and can be referenced across AWS accounts.",
         },
@@ -105,12 +105,12 @@ Each service operates independently and at its own pace. If the notifications se
           question:
             "An e-commerce platform publishes a single 'order placed' event and needs three independent services (inventory, fulfillment, notifications) to each process it. Which pattern best achieves this?",
           options: [
-            "Send the event to three separate SQS queues using three separate API calls",
-            "Use SNS + SQS fan-out: publish once to an SNS topic that delivers to three SQS queues",
-            "Use a single SQS FIFO queue shared by all three services",
             "Store the event in S3 and have each service poll for new objects",
+            "Send the event to three separate SQS queues using three separate API calls",
+            "Use a single SQS FIFO queue shared by all three services",
+            "Use SNS + SQS fan-out: publish once to an SNS topic that delivers to three SQS queues",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The SNS + SQS fan-out pattern is ideal here. The producer publishes a single message to an SNS topic, which delivers a copy to each of three SQS queues — one per service. Each service processes independently, providing loose coupling, scalability, and resilience.",
         },
@@ -128,12 +128,12 @@ This allows a single topic to serve diverse consumers without requiring publishe
           question:
             "An SNS topic receives order events with an attribute 'orderType' set to either 'wholesale' or 'retail'. A Lambda function should only process wholesale orders. How can this be achieved?",
           options: [
+            "Use an SQS FIFO queue between SNS and Lambda to filter messages by order type",
             "Create a separate SNS topic for each order type and publish to the correct topic",
             "Configure a filter policy on the Lambda subscription to only deliver messages where orderType is 'wholesale'",
             "Add an if-statement in the Lambda function to discard retail orders after they are delivered",
-            "Use an SQS FIFO queue between SNS and Lambda to filter messages by order type",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SNS filter policies let subscribers receive only the messages relevant to them. Configuring a filter policy on the Lambda subscription to match orderType='wholesale' means SNS will only invoke the Lambda function for wholesale orders, reducing unnecessary invocations.",
         },
@@ -154,11 +154,11 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
             "What happens to an SNS message if delivery to a subscriber endpoint fails after all retry attempts are exhausted?",
           options: [
             "SNS automatically re-publishes the message to the topic for redelivery",
-            "The message is permanently lost unless a Dead Letter Queue (DLQ) is configured on the subscription",
-            "SNS stores the message for 14 days and retries delivery indefinitely",
             "SNS sends an alert to the AWS account root email address",
+            "SNS stores the message for 14 days and retries delivery indefinitely",
+            "The message is permanently lost unless a Dead Letter Queue (DLQ) is configured on the subscription",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "If SNS exhausts all retry attempts without successful delivery, the message is permanently lost unless a Dead Letter Queue (DLQ) is configured on the subscription. With a DLQ, failed messages are sent there so they can be inspected and replayed.",
         },
@@ -212,8 +212,8 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
     {
       question:
         "Which of the following is NOT a valid SNS subscription protocol?",
-      options: ["Amazon SQS", "AWS Lambda", "Amazon RDS", "HTTP/HTTPS"],
-      correctIndex: 2,
+      options: ["Amazon RDS", "AWS Lambda", "HTTP/HTTPS", "Amazon SQS"],
+      correctIndex: 0,
       explanation:
         "Amazon RDS is not an SNS subscription protocol. Valid SNS subscription types include Email, Email-JSON, HTTP/HTTPS, Amazon SQS, AWS Lambda, SMS, and Mobile Push (APNs, FCM).",
     },
@@ -222,11 +222,11 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
         "A company publishes events to an SNS topic. They want multiple independent services to each receive and process every event without affecting one another. Which architecture should they use?",
       options: [
         "Subscribe all services directly to the SNS topic using Lambda subscriptions",
-        "Use a single SQS FIFO queue with all services polling the same queue",
         "Use SNS + SQS fan-out: subscribe one SQS queue per service to the SNS topic",
         "Configure SNS message filtering so each service receives only its own events",
+        "Use a single SQS FIFO queue with all services polling the same queue",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The SNS + SQS fan-out pattern is the standard approach. Each service has its own SQS queue subscribed to the SNS topic. SNS delivers a copy of every message to each queue, and each service consumes its queue independently — ensuring isolation and resilience.",
     },
@@ -234,11 +234,11 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
       question: "What is the purpose of an SNS filter policy?",
       options: [
         "To encrypt messages before they are delivered to subscribers",
+        "To route messages to different topics based on their content",
         "To limit the rate at which messages are published to a topic",
         "To allow subscribers to receive only messages that match specific attribute criteria",
-        "To route messages to different topics based on their content",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "An SNS filter policy is a JSON document configured on a subscription that specifies attribute values that must match for a message to be delivered. This lets subscribers receive only the messages relevant to them from a single topic.",
     },
@@ -246,12 +246,12 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
       question:
         "How does Amazon SNS deliver messages to subscribers — push or pull?",
       options: [
-        "Pull-based — subscribers poll the SNS topic for new messages",
         "Push-based — SNS pushes messages to subscriber endpoints automatically",
-        "Both — subscribers can choose push or pull at subscription time",
         "Batch-based — SNS collects messages and delivers them in scheduled batches",
+        "Both — subscribers can choose push or pull at subscription time",
+        "Pull-based — subscribers poll the SNS topic for new messages",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SNS is push-based — it pushes messages to subscriber endpoints automatically when a message is published. This is the opposite of SQS, which is pull-based (consumers poll the queue for messages).",
     },
@@ -259,12 +259,12 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
       question:
         "A company needs to send the same order event to an inventory service, a fulfillment service, and a notification service simultaneously when an order is placed. What is the recommended AWS architecture?",
       options: [
-        "Three separate SQS queues, with the order service making three separate API calls",
         "One SNS topic subscribed to by three SQS queues (fan-out pattern)",
-        "One SQS FIFO queue shared by all three services",
+        "Three separate SQS queues, with the order service making three separate API calls",
         "AWS EventBridge with three separate event buses",
+        "One SQS FIFO queue shared by all three services",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The SNS + SQS fan-out pattern is ideal: the order service publishes once to an SNS topic, and SNS delivers the message to three SQS queues simultaneously. Each service consumes its own queue independently, providing loose coupling and resilience.",
     },
@@ -272,12 +272,12 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
       question:
         "Which SNS topic type guarantees strict message ordering and exactly-once delivery?",
       options: [
+        "Ordered topics with sequence numbers assigned at publish time",
         "Standard topics with message deduplication enabled",
         "FIFO topics, which guarantee ordering and exactly-once delivery",
-        "Ordered topics with sequence numbers assigned at publish time",
         "Priority topics with weighted delivery to subscribers",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "SNS FIFO (First In, First Out) topics guarantee strict message ordering and exactly-once delivery, similar to SQS FIFO queues. FIFO topics can only deliver to SQS FIFO queues.",
     },
@@ -285,12 +285,12 @@ For the Cloud Practitioner exam, the key concepts are: SNS is pub/sub messaging 
       question:
         "A team configures a Dead Letter Queue (DLQ) on an SNS subscription. When does SNS send a message to the DLQ?",
       options: [
-        "When a message is published but no subscribers are currently active",
         "When SNS exhausts all retry attempts and still cannot deliver the message to the subscriber",
+        "When a message is published but no subscribers are currently active",
         "When a message exceeds the maximum message size limit for the subscription protocol",
         "When the subscriber explicitly rejects the message with an error response",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SNS sends a message to the Dead Letter Queue when it exhausts all retry attempts without successfully delivering the message to the subscriber endpoint. This prevents message loss and allows failed deliveries to be inspected and replayed.",
     },

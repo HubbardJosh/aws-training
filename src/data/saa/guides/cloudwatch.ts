@@ -19,11 +19,11 @@ export const cloudwatchGuide: ServiceGuide = {
             "An EC2 instance is running with basic monitoring enabled. At what interval does CloudWatch receive CPU utilization metrics?",
           options: [
             "Every 10 seconds",
-            "Every 1 minute",
             "Every 5 minutes",
             "Every 15 minutes",
+            "Every 1 minute",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "EC2 basic monitoring (the default) publishes metrics every 5 minutes. Detailed monitoring must be explicitly enabled to receive 1-minute granularity, which is required for faster-responding Auto Scaling policies.",
         },
@@ -45,11 +45,11 @@ export const cloudwatchGuide: ServiceGuide = {
             "How are CloudWatch metrics scoped to a specific resource within a namespace?",
           options: [
             "By the AWS account ID attached to each metric",
-            "By dimensions — key-value pairs like InstanceId or DBInstanceIdentifier",
-            "By metric name alone — each resource uses a unique metric name",
             "By the AWS region where the resource is deployed",
+            "By metric name alone — each resource uses a unique metric name",
+            "By dimensions — key-value pairs like InstanceId or DBInstanceIdentifier",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Dimensions are key-value pairs (e.g., InstanceId=i-12345) that scope metrics to a specific resource within a namespace. A namespace like AWS/EC2 can contain metrics for thousands of instances, differentiated by dimensions.",
         },
@@ -63,12 +63,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "A CloudWatch alarm has not received any metric data for 10 minutes. What state is the alarm in?",
           options: [
-            "OK — no data means no breach",
-            "ALARM — the absence of data is treated as a threshold breach",
             "INSUFFICIENT_DATA — not enough data to evaluate the threshold",
+            "ALARM — the absence of data is treated as a threshold breach",
+            "OK — no data means no breach",
             "DISABLED — alarms automatically disable when data stops flowing",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "CloudWatch alarms enter the INSUFFICIENT_DATA state when there is not enough metric data to evaluate the threshold. This is distinct from OK (metric is within bounds) and ALARM (metric breaches the threshold).",
         },
@@ -76,12 +76,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "A noisy alarm fires frequently due to brief CPU spikes that are not actually problematic. Which CloudWatch feature reduces false positives by alerting only when CPU is high AND disk I/O is simultaneously high?",
           options: [
-            "High-resolution metrics with 1-second granularity",
-            "Anomaly detection with a dynamic baseline band",
             "A composite alarm combining the CPU alarm and disk I/O alarm with AND logic",
+            "Anomaly detection with a dynamic baseline band",
             "A metric math expression averaging CPU and disk I/O",
+            "High-resolution metrics with 1-second granularity",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Composite alarms combine multiple child alarms using AND/OR logic, alerting only when all specified conditions are simultaneously true. This reduces noise from individual transient spikes that don't indicate a real problem.",
         },
@@ -108,12 +108,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "A team needs to query application logs from the past 7 days to find the top 10 error messages across multiple microservices. Which CloudWatch feature enables this?",
           options: [
-            "CloudWatch Dashboards with log widget panels",
-            "CloudWatch Logs Insights, which queries across multiple log groups with a purpose-built query language",
-            "Log metric filters that count ERROR occurrences",
             "CloudWatch Contributor Insights for log-based anomaly detection",
+            "CloudWatch Dashboards with log widget panels",
+            "Log metric filters that count ERROR occurrences",
+            "CloudWatch Logs Insights, which queries across multiple log groups with a purpose-built query language",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CloudWatch Logs Insights provides an interactive query interface to filter, aggregate, and visualize log data across multiple log groups. It can calculate statistics, find top contributors, and correlate events in a single query.",
         },
@@ -140,12 +140,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "Which EC2 metrics are NOT available in CloudWatch by default without installing the CloudWatch Agent?",
           options: [
-            "CPU utilization and network bytes in/out",
-            "Memory utilization and disk space utilization",
-            "Status check failures",
             "EBS read and write IOPS",
+            "Status check failures",
+            "Memory utilization and disk space utilization",
+            "CPU utilization and network bytes in/out",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Memory utilization and disk space utilization are OS-level metrics that EC2 basic monitoring does not expose. The CloudWatch Unified Agent must be installed and configured to collect these from the operating system and publish them as custom metrics.",
         },
@@ -154,11 +154,11 @@ export const cloudwatchGuide: ServiceGuide = {
             "A company wants to monitor orders per minute as a CloudWatch metric from their application. How is this accomplished?",
           options: [
             "Enable detailed monitoring on the EC2 instances running the application",
-            "Configure a log metric filter on the application log group",
             "Call the PutMetricData API from the application to publish a custom metric",
+            "Configure a log metric filter on the application log group",
             "Use X-Ray to trace order processing and generate CloudWatch metrics automatically",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Custom metrics are published to CloudWatch using the PutMetricData API call from any application. This enables business-level metrics (orders/min, sessions) to be monitored alongside AWS infrastructure metrics.",
         },
@@ -172,12 +172,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "A team needs to automatically invoke a Lambda function every weekday at 8 AM UTC. Which AWS service handles this scheduled trigger?",
           options: [
-            "CloudWatch Alarms with a scheduled action",
-            "Amazon EventBridge with a scheduled expression (cron rule)",
             "AWS Step Functions with a wait state",
+            "CloudWatch Alarms with a scheduled action",
             "CloudWatch Logs with a subscription filter",
+            "Amazon EventBridge with a scheduled expression (cron rule)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon EventBridge supports scheduled expressions using cron or rate syntax, making it the standard mechanism for periodic Lambda invocations. This is the successor to CloudWatch Events scheduled rules.",
         },
@@ -185,12 +185,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "Which statement best describes the relationship between Amazon EventBridge and CloudWatch Events?",
           options: [
-            "They are completely separate services with different pricing models",
-            "EventBridge replaces CloudWatch Events with additional features: schema registry, cross-account buses, and SaaS integrations",
             "CloudWatch Events is the newer service, offering advanced filtering that EventBridge lacks",
             "EventBridge is only for third-party SaaS integrations; CloudWatch Events handles AWS service events",
+            "They are completely separate services with different pricing models",
+            "EventBridge replaces CloudWatch Events with additional features: schema registry, cross-account buses, and SaaS integrations",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon EventBridge is the evolution of CloudWatch Events, offering all the same functionality plus additional features like a schema registry, cross-account event buses, and third-party SaaS source integrations. All new event-driven automation should use EventBridge.",
         },
@@ -204,12 +204,12 @@ export const cloudwatchGuide: ServiceGuide = {
           question:
             "A team running microservices on ECS wants to monitor CPU and memory usage at the individual container level. Which CloudWatch feature provides this?",
           options: [
-            "CloudWatch standard EC2 metrics with the CloudWatch Agent",
-            "CloudWatch Container Insights, which provides metrics at the cluster, service, task, and container level",
             "AWS X-Ray traces filtered by container ID",
             "CloudWatch Logs Insights querying ECS task logs",
+            "CloudWatch standard EC2 metrics with the CloudWatch Agent",
+            "CloudWatch Container Insights, which provides metrics at the cluster, service, task, and container level",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CloudWatch Container Insights collects and aggregates metrics from ECS, EKS, and Kubernetes at the cluster, service, task, and container level, including CPU, memory, disk, network, and container restart counts.",
         },
@@ -218,11 +218,11 @@ export const cloudwatchGuide: ServiceGuide = {
             "CloudWatch ServiceLens combines which data sources to create a service dependency map for microservice troubleshooting?",
           options: [
             "CloudWatch metrics and VPC Flow Logs",
-            "AWS X-Ray traces combined with CloudWatch metrics and logs",
             "CloudTrail API logs and CloudWatch Logs Insights",
+            "AWS X-Ray traces combined with CloudWatch metrics and logs",
             "Container Insights metrics and ALB access logs",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "CloudWatch ServiceLens integrates AWS X-Ray distributed traces with CloudWatch metrics and logs to create a service map, showing dependencies between components and identifying where latency and errors originate in microservice architectures.",
         },
@@ -268,12 +268,12 @@ export const cloudwatchGuide: ServiceGuide = {
       question:
         "An EC2 instance's memory utilization is not appearing in CloudWatch. What is the most likely cause and fix?",
       options: [
-        "Memory metrics require Detailed Monitoring — enable it in the EC2 console",
-        "Memory utilization is not published by EC2 by default — install and configure the CloudWatch Unified Agent to collect it",
         "Memory metrics are in the AWS/MemoryDB namespace, not AWS/EC2",
         "The EC2 instance IAM role needs the cloudwatch:GetMetricData permission",
+        "Memory metrics require Detailed Monitoring — enable it in the EC2 console",
+        "Memory utilization is not published by EC2 by default — install and configure the CloudWatch Unified Agent to collect it",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Memory utilization is an OS-level metric not captured by EC2 basic or detailed monitoring. The CloudWatch Unified Agent must be installed and configured to read memory from the OS and publish it as a custom metric.",
     },
@@ -281,12 +281,12 @@ export const cloudwatchGuide: ServiceGuide = {
       question:
         "A CloudWatch alarm should fire only when both CPU utilization exceeds 80% AND available disk space drops below 10%. How is this implemented?",
       options: [
+        "Create a composite alarm that combines the CPU alarm and the disk alarm with AND logic",
         "Create a single alarm on a metric math expression combining CPU and disk",
         "Create separate alarms for each metric and trigger an SNS topic from both",
-        "Create a composite alarm that combines the CPU alarm and the disk alarm with AND logic",
         "Use CloudWatch Anomaly Detection on a combined metric",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Composite alarms combine multiple child alarms using AND/OR logic. Using AND means the composite alarm only enters ALARM state when both child alarms are simultaneously in ALARM, reducing noise from individual transient conditions.",
     },
@@ -308,11 +308,11 @@ export const cloudwatchGuide: ServiceGuide = {
         "A team needs to invoke a Lambda function whenever an EC2 instance changes state (e.g., from running to stopped). Which service handles this automatically?",
       options: [
         "CloudWatch Alarms monitoring EC2 status checks",
-        "Amazon EventBridge with an EC2 state change event pattern rule",
         "CloudWatch Log metric filters on EC2 system logs",
+        "Amazon EventBridge with an EC2 state change event pattern rule",
         "AWS Config rules triggering Lambda on configuration changes",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Amazon EventBridge receives near-real-time events from AWS services including EC2 state change notifications. An event pattern rule matching EC2 instance state changes can automatically invoke a Lambda function.",
     },
@@ -328,12 +328,12 @@ export const cloudwatchGuide: ServiceGuide = {
       question:
         "A distributed application spans Lambda, API Gateway, and DynamoDB. A team wants to visualize the end-to-end request path and identify where latency is introduced. Which tooling provides this?",
       options: [
+        "CloudWatch Container Insights for Lambda and ECS workloads",
+        "VPC Flow Logs analyzed with Amazon Athena",
         "CloudWatch Logs Insights querying logs from all three services",
         "AWS X-Ray with CloudWatch ServiceLens providing a service dependency map",
-        "VPC Flow Logs analyzed with Amazon Athena",
-        "CloudWatch Container Insights for Lambda and ECS workloads",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "AWS X-Ray traces requests across distributed services, and CloudWatch ServiceLens combines these traces with CloudWatch metrics and logs into a service map that visually shows dependencies and latency sources.",
     },
@@ -341,20 +341,20 @@ export const cloudwatchGuide: ServiceGuide = {
       question:
         "A company wants to monitor how many orders per minute their e-commerce application processes as a CloudWatch metric. How should this metric be collected?",
       options: [
-        "Enable Detailed Monitoring on the EC2 instances running the application",
         "Create a log metric filter on the application log group counting order completion log lines",
-        "Use the CloudWatch Agent collectd plugin to forward JVM metrics",
         "Call PutMetricData from the application code after each order is processed",
+        "Enable Detailed Monitoring on the EC2 instances running the application",
+        "Use the CloudWatch Agent collectd plugin to forward JVM metrics",
       ],
-      correctIndex: 3,
+      correctIndex: 1,
       explanation:
         "Business metrics like orders per minute are published using the PutMetricData API directly from application code. This places custom metrics in a custom namespace alongside AWS service metrics for unified monitoring.",
     },
     {
       question:
         "Which CloudWatch alarm state indicates that the alarm has not received sufficient metric data to make a determination?",
-      options: ["OK", "ALARM", "INSUFFICIENT_DATA", "PENDING"],
-      correctIndex: 2,
+      options: ["INSUFFICIENT_DATA", "ALARM", "PENDING", "OK"],
+      correctIndex: 0,
       explanation:
         "The INSUFFICIENT_DATA state means CloudWatch does not have enough data points to evaluate the alarm's threshold — this occurs during initial setup, metric gaps, or when the metric has not been published. It is distinct from OK (within bounds) and ALARM (threshold breached).",
     },

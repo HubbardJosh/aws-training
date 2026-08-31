@@ -18,12 +18,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "A gaming application needs a leaderboard with O(log N) score updates and range queries. Which ElastiCache engine and data structure should be used?",
           options: [
-            "Memcached with a sorted list data structure",
             "Redis with sorted sets",
             "Memcached with integer counters",
             "Redis with a hash map keyed by player ID",
+            "Memcached with a sorted list data structure",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Redis sorted sets are the canonical data structure for leaderboards. They maintain scores in sorted order with O(log N) updates and support range queries (e.g., top 10 players), making them ideal for gaming leaderboards. Memcached does not support complex data structures.",
         },
@@ -31,12 +31,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "Which ElastiCache engine supports persistence, replication with automatic failover, and pub/sub messaging?",
           options: [
-            "Memcached — multi-threaded and horizontally scalable",
-            "Redis — feature-rich with persistence, HA replication, and pub/sub",
             "Both Memcached and Redis support these features",
             "Neither — ElastiCache is a pure in-memory cache with no persistence",
+            "Redis — feature-rich with persistence, HA replication, and pub/sub",
+            "Memcached — multi-threaded and horizontally scalable",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Redis supports persistence (RDB/AOF), replication with automatic failover (Multi-AZ), pub/sub messaging, sorted sets, and other complex data structures. Memcached supports none of these — it is a simple key-value cache.",
         },
@@ -45,11 +45,11 @@ export const elasticacheGuide: ServiceGuide = {
             "When is Memcached the appropriate ElastiCache engine choice?",
           options: [
             "When session data must survive a cache node failure",
-            "When the application needs sorted sets for leaderboards",
             "When the simplest possible pure key-value caching is needed with multi-threaded performance and horizontal sharding",
             "When pub/sub messaging between application components is required",
+            "When the application needs sorted sets for leaderboards",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Memcached is appropriate for simple key-value caching workloads that benefit from multi-threaded performance and horizontal sharding. It has no persistence, replication, or complex data structure support. Redis is required for any use case needing those features.",
         },
@@ -63,12 +63,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "How many read replica nodes can a Redis replication group (without Cluster Mode) have?",
           options: [
+            "Up to 15 replicas",
             "Up to 2 replicas",
             "Up to 5 replicas",
-            "Up to 15 replicas",
             "Unlimited replicas",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A Redis replication group without Cluster Mode supports up to 5 read replica nodes alongside the primary. These replicas serve read traffic and act as failover targets when Multi-AZ with auto-failover is enabled.",
         },
@@ -77,11 +77,11 @@ export const elasticacheGuide: ServiceGuide = {
             "What problem does Redis Cluster Mode Enabled solve that a single-primary replication group cannot?",
           options: [
             "It enables strongly consistent reads across all shards",
-            "It allows horizontal write scaling beyond the capacity of a single primary node by distributing the keyspace across multiple shards",
             "It supports multiple database indexes (db0 through db15) simultaneously",
             "It enables cross-region replication for disaster recovery",
+            "It allows horizontal write scaling beyond the capacity of a single primary node by distributing the keyspace across multiple shards",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Redis Cluster Mode distributes the keyspace across multiple shards (each with its own primary), enabling horizontal write scaling beyond a single node's capacity. Without Cluster Mode, only one node handles writes, limiting write throughput.",
         },
@@ -95,12 +95,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "Which caching strategy writes to both the cache and database simultaneously on every write, ensuring the cache always contains fresh data?",
           options: [
-            "Lazy loading (cache-aside)",
-            "Write-through",
             "Write-behind (write-back)",
             "Read-through",
+            "Write-through",
+            "Lazy loading (cache-aside)",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Write-through writes to both the cache and database simultaneously on every write. This ensures the cache is always fresh but adds write latency and may cache data that is never read again.",
         },
@@ -108,12 +108,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "What is the main drawback of lazy loading (cache-aside) caching strategy?",
           options: [
-            "It writes stale data to the cache on every write operation",
             "It requires changes to the database schema",
-            "Cache misses incur a three-step penalty: cache miss detection, database read, and cache write",
+            "It writes stale data to the cache on every write operation",
             "It does not support TTL expiration on cached items",
+            "Cache misses incur a three-step penalty: cache miss detection, database read, and cache write",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Lazy loading suffers from a cache miss penalty: the application must detect the miss, read from the database, then write to the cache before returning the result — three round trips instead of one. It also risks serving stale data if the TTL is too long.",
         },
@@ -128,11 +128,11 @@ export const elasticacheGuide: ServiceGuide = {
             "A web application stores HTTP sessions in memory on each EC2 instance. Users are tied to specific instances, preventing horizontal scaling. What is the recommended architectural fix?",
           options: [
             "Enable sticky sessions on the Application Load Balancer",
-            "Store sessions in ElastiCache Redis with a TTL equal to the session expiration time",
-            "Increase the size of each EC2 instance to handle more concurrent sessions",
             "Use DynamoDB for session storage with On-Demand capacity mode",
+            "Increase the size of each EC2 instance to handle more concurrent sessions",
+            "Store sessions in ElastiCache Redis with a TTL equal to the session expiration time",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Storing sessions in ElastiCache Redis decouples sessions from specific instances, allowing any application server to retrieve any user's session. This enables true stateless instances that can be scaled, replaced, or load-balanced freely.",
         },
@@ -160,11 +160,11 @@ export const elasticacheGuide: ServiceGuide = {
             "A compliance requirement mandates encryption at rest for the caching layer. Which ElastiCache engine supports this?",
           options: [
             "Memcached — it supports KMS encryption at rest",
-            "Redis — it supports KMS encryption at rest; Memcached does not",
             "Both Redis and Memcached support KMS encryption at rest",
+            "Redis — it supports KMS encryption at rest; Memcached does not",
             "Neither — ElastiCache does not support encryption at rest",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Redis supports encryption at rest using AWS KMS. Memcached does not support encryption at rest. For compliance-sensitive workloads requiring data protection at rest, Redis is the required engine.",
         },
@@ -172,12 +172,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "Which security configuration prevents direct internet access to an ElastiCache cluster?",
           options: [
-            "Enable Redis AUTH with a strong password",
-            "Deploy the cluster in private subnets with security groups allowing only application tier access",
-            "Use TLS encryption for all connections",
             "Enable Redis ACL users with read-only permissions",
+            "Enable Redis AUTH with a strong password",
+            "Use TLS encryption for all connections",
+            "Deploy the cluster in private subnets with security groups allowing only application tier access",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "ElastiCache clusters should always be deployed in private VPC subnets. Security groups restrict access to only the application tier (by referencing the app tier's security group), preventing any direct internet access.",
         },
@@ -193,10 +193,10 @@ export const elasticacheGuide: ServiceGuide = {
           options: [
             "volatile-lru — evicts keys with TTL only",
             "noeviction — returns an error when memory is full",
-            "allkeys-lru — evicts the least recently used key from all keys",
             "allkeys-random — evicts a random key from all keys",
+            "allkeys-lru — evicts the least recently used key from all keys",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "allkeys-lru evicts the least recently used key from all keys when memory is full. This is recommended for general caching because it keeps the most recently accessed data in cache regardless of whether a TTL was set.",
         },
@@ -204,12 +204,12 @@ export const elasticacheGuide: ServiceGuide = {
           question:
             "An ElastiCache Redis Cluster Mode instance needs more write throughput. What is the correct scaling approach?",
           options: [
-            "Add more read replica nodes to the existing shard",
             "Add additional shards — ElastiCache online resharding migrates hash slots without downtime",
+            "Add more read replica nodes to the existing shard",
             "Increase the node type for vertical scaling of write capacity",
             "Enable Multi-AZ failover to distribute write traffic across AZs",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "In Redis Cluster Mode, horizontal write scaling is achieved by adding shards. ElastiCache handles online resharding by migrating hash slots progressively without downtime. Adding replicas improves read throughput but does not increase write capacity.",
         },
@@ -255,12 +255,12 @@ export const elasticacheGuide: ServiceGuide = {
       question:
         "A web application needs to store HTTP session data that survives an EC2 instance failure and allows any server to handle any user's requests. Which solution is correct?",
       options: [
-        "Store sessions in the EC2 instance local file system",
-        "Use ALB sticky sessions to tie users to specific instances",
         "Store sessions in ElastiCache Redis with a TTL equal to the session timeout",
+        "Use ALB sticky sessions to tie users to specific instances",
+        "Store sessions in the EC2 instance local file system",
         "Store sessions in RDS MySQL for durability",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "ElastiCache Redis is the standard session store for stateless web applications. Sessions stored in Redis are accessible from any application instance and survive individual EC2 failures. This enables horizontal scaling without sticky sessions.",
     },
@@ -269,11 +269,11 @@ export const elasticacheGuide: ServiceGuide = {
         "Which ElastiCache engine should be used when the application requires a pub/sub messaging system between microservices?",
       options: [
         "Memcached — it has built-in pub/sub support",
+        "Neither — use Amazon SNS for pub/sub between microservices",
         "Redis — it supports pub/sub messaging natively",
         "Either engine — both support pub/sub equally",
-        "Neither — use Amazon SNS for pub/sub between microservices",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Redis supports pub/sub messaging natively. Memcached does not support pub/sub. For microservice messaging via an in-memory broker, Redis is the correct engine.",
     },
@@ -281,12 +281,12 @@ export const elasticacheGuide: ServiceGuide = {
       question:
         "A compliance requirement mandates encryption at rest for all data stores including the caching layer. Which ElastiCache configuration satisfies this?",
       options: [
-        "ElastiCache Memcached with KMS encryption enabled",
         "ElastiCache Redis with encryption at rest using AWS KMS",
         "ElastiCache Redis with in-transit TLS encryption only",
+        "ElastiCache Memcached with KMS encryption enabled",
         "Memcached with client-side encryption",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Only Redis supports encryption at rest via AWS KMS. Memcached does not support encryption at rest. For compliance requirements, Redis must be used.",
     },
@@ -308,11 +308,11 @@ export const elasticacheGuide: ServiceGuide = {
         "An ElastiCache Redis cluster is running out of memory and needs to scale horizontally for write capacity. Which approach achieves this?",
       options: [
         "Add more read replicas to the existing replication group",
-        "Enable Redis Cluster Mode and add shards to distribute the keyspace",
         "Increase the node instance type for more memory",
+        "Enable Redis Cluster Mode and add shards to distribute the keyspace",
         "Enable Multi-AZ failover to distribute write traffic",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Redis Cluster Mode distributes the keyspace across multiple shards, each with its own primary node. Adding shards increases both memory capacity and write throughput. Adding replicas only increases read capacity.",
     },
@@ -320,12 +320,12 @@ export const elasticacheGuide: ServiceGuide = {
       question:
         "What eviction policy should be configured for a Redis session store where data loss is unacceptable when memory is full?",
       options: [
-        "allkeys-lru — evict least recently used session",
-        "volatile-lru — evict sessions with TTL set",
         "noeviction — return an error on write when memory is full",
         "allkeys-random — evict a random session",
+        "volatile-lru — evict sessions with TTL set",
+        "allkeys-lru — evict least recently used session",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "noeviction returns an error when the cache is full rather than evicting data. For session stores where losing a session is unacceptable, noeviction forces the application to handle the error and prevents silent data loss.",
     },
@@ -333,24 +333,24 @@ export const elasticacheGuide: ServiceGuide = {
       question:
         "A gaming company needs a real-time leaderboard that maintains player scores in ranked order with fast updates. Which ElastiCache data structure is the correct choice?",
       options: [
-        "Memcached hash with player IDs as keys",
         "Redis hash map with player ID and score fields",
         "Redis sorted set with scores as the sort value",
+        "Memcached hash with player IDs as keys",
         "Redis list with score-player tuples",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Redis sorted sets maintain elements with associated scores in sorted order. ZADD (O log N) updates a score, ZRANGE retrieves a rank range, and ZRANK returns a player's rank — exactly the operations needed for a leaderboard.",
     },
     {
       question: "For which use case is Memcached more appropriate than Redis?",
       options: [
+        "Implementing a pub/sub event system between services",
+        "Maintaining a geospatial index of user locations",
         "Storing session data that must survive node failures",
         "Simple high-throughput key-value caching using multiple CPU cores with no persistence or HA needed",
-        "Maintaining a geospatial index of user locations",
-        "Implementing a pub/sub event system between services",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Memcached is multi-threaded and excels at simple key-value caching that benefits from multiple CPU cores. When persistence, high availability, complex data types, and pub/sub are not needed, Memcached's simplicity is an advantage.",
     },

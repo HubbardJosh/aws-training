@@ -23,12 +23,12 @@ The dividing line shifts depending on which AWS services you use, which is why u
           question:
             "According to the AWS Shared Responsibility Model, which of the following is AWS responsible for?",
           options: [
+            "Managing IAM users and their permissions",
             "Patching the operating systems on EC2 instances",
             "Configuring security groups and network ACLs",
             "Physical security of the data centers and underlying hardware",
-            "Managing IAM users and their permissions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "AWS is responsible for security OF the cloud, which includes physical data center security, hardware, networking equipment, and the hypervisor. Patching EC2 operating systems, configuring security groups, and managing IAM are all customer responsibilities.",
         },
@@ -61,12 +61,12 @@ A common exam scenario: if an EC2 instance is compromised because the customer d
           question:
             "A company's EC2 instance was compromised because the Linux operating system had an unpatched vulnerability. Who is responsible for this security failure?",
           options: [
-            "AWS, because they manage the EC2 service and its security",
-            "The customer, because patching EC2 guest operating systems is the customer's responsibility",
             "Both AWS and the customer share equal responsibility for OS patching",
             "The customer's internet service provider, because the exploit came from outside",
+            "AWS, because they manage the EC2 service and its security",
+            "The customer, because patching EC2 guest operating systems is the customer's responsibility",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Patching the guest operating system on EC2 instances is explicitly the customer's responsibility. AWS manages the underlying hypervisor and hardware, but the OS and everything above it belongs to the customer's side of the Shared Responsibility Model.",
         },
@@ -88,12 +88,12 @@ The general principle: the more managed a service is, the less infrastructure re
           question:
             "When using Amazon RDS, which of the following is the customer's responsibility?",
           options: [
-            "Patching the underlying database engine software",
-            "Managing the EC2 instances that host the database",
             "Configuring database user permissions and controlling network access via security groups",
             "Ensuring the physical hardware running the database is fault-tolerant",
+            "Managing the EC2 instances that host the database",
+            "Patching the underlying database engine software",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "For RDS, AWS handles the underlying EC2 infrastructure, OS, and database engine patching. The customer is responsible for database user permissions (grants), encryption settings, security group rules controlling access, and the data itself.",
         },
@@ -101,12 +101,12 @@ The general principle: the more managed a service is, the less infrastructure re
           question:
             "For AWS Lambda, what does the customer remain responsible for?",
           options: [
-            "Patching the Lambda runtime environment and underlying compute infrastructure",
-            "Managing the server capacity and scaling configuration for Lambda functions",
             "The function code, the IAM execution role permissions, and secrets management",
+            "Managing the server capacity and scaling configuration for Lambda functions",
             "Installing and configuring the operating system that runs Lambda functions",
+            "Patching the Lambda runtime environment and underlying compute infrastructure",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "AWS manages the Lambda compute infrastructure, runtime, and auto-scaling. The customer is responsible for the function code, the IAM execution role and its permissions, environment variables and secrets, and the business logic.",
         },
@@ -127,11 +127,11 @@ The general principle: the more managed a service is, the less infrastructure re
             "Which of the following is an example of a 'Shared Control' in the AWS Shared Responsibility Model?",
           options: [
             "Physical data center security — AWS owns it entirely",
+            "IAM user configuration — the customer owns it entirely",
             "Data encryption — the customer configures it entirely",
             "Patch management — AWS patches infrastructure while customers patch their EC2 OS and apps",
-            "IAM user configuration — the customer owns it entirely",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Patch management is a shared control: AWS patches the underlying infrastructure, hypervisors, and managed service software, while customers are responsible for patching their EC2 guest operating systems and application dependencies.",
         },
@@ -155,12 +155,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
           question:
             "A security audit finds that an S3 bucket has a misconfigured bucket policy allowing unintended public access. According to the Shared Responsibility Model, who is responsible for fixing this?",
           options: [
+            "AWS's Trusted Advisor team, which automatically fixes security misconfigurations",
             "AWS, because they are responsible for S3 service security",
             "The customer, because IAM policies and bucket policies are the customer's responsibility",
             "Both AWS and the customer share equal responsibility for bucket policy configuration",
-            "AWS's Trusted Advisor team, which automatically fixes security misconfigurations",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Bucket policies and access configurations are entirely the customer's responsibility. AWS provides the tools (S3, KMS, Block Public Access) but configuring them correctly falls on the customer's side of the Shared Responsibility Model.",
         },
@@ -206,12 +206,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "According to the Shared Responsibility Model, which of the following is always the customer's responsibility regardless of which AWS service is used?",
       options: [
-        "Patching the underlying operating system",
         "Physical security of the servers",
-        "Customer data and access control (IAM)",
+        "Patching the underlying operating system",
         "Availability zone infrastructure maintenance",
+        "Customer data and access control (IAM)",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Customer data and access control (IAM) are always the customer's responsibility regardless of the service. Even for fully managed services like DynamoDB and S3, the customer controls their data and who can access it.",
     },
@@ -219,12 +219,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "Which category of controls in the Shared Responsibility Model includes physical data center security and hardware lifecycle management?",
       options: [
+        "Compliance controls — managed by third-party auditors",
         "Shared controls — both AWS and the customer handle these together",
         "Customer specific controls — the customer handles these entirely",
         "AWS inherited controls — the customer fully inherits these from AWS",
-        "Compliance controls — managed by third-party auditors",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "AWS inherited controls are controls customers fully inherit from AWS without needing to implement or verify them. Physical and environmental controls such as data center security, temperature management, and hardware lifecycle are AWS inherited controls.",
     },
@@ -232,12 +232,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "A company uses Amazon RDS for their database. Which of the following is AWS responsible for?",
       options: [
+        "Configuring security groups to control network access to the database",
         "Defining database user permissions and roles",
         "Encrypting the data stored in the database",
         "Patching the underlying database engine software",
-        "Configuring security groups to control network access to the database",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "For RDS, AWS is responsible for patching the underlying database engine software, the OS, and the EC2 infrastructure. The customer is responsible for database user permissions, encryption configuration, security group rules, and the data itself.",
     },
@@ -271,12 +271,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "Which of the following is an example of a 'Customer Specific Control' under the Shared Responsibility Model?",
       options: [
-        "Patching the AWS hypervisor",
-        "Maintaining the physical security of AWS data centers",
         "Training AWS staff on security procedures",
         "Choosing to encrypt data at rest and defining acceptable use policies for applications",
+        "Maintaining the physical security of AWS data centers",
+        "Patching the AWS hypervisor",
       ],
-      correctIndex: 3,
+      correctIndex: 1,
       explanation:
         "Customer specific controls are entirely the customer's responsibility. Choosing to encrypt data at rest and in transit, data integrity authentication, and defining acceptable use policies for their applications are all customer specific controls.",
     },
@@ -284,12 +284,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "A company is evaluating whether to use EC2 or RDS for their database. From a Shared Responsibility perspective, what is a key difference?",
       options: [
-        "EC2 requires no OS patching; RDS requires patching the database engine",
-        "With EC2 the customer patches the OS; with RDS, AWS patches the database engine and OS",
-        "Both EC2 and RDS require the customer to patch the OS",
         "With RDS the customer patches the OS; with EC2, AWS manages the OS automatically",
+        "EC2 requires no OS patching; RDS requires patching the database engine",
+        "Both EC2 and RDS require the customer to patch the OS",
+        "With EC2 the customer patches the OS; with RDS, AWS patches the database engine and OS",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "With EC2, the customer is responsible for patching the guest OS and any database software installed. With RDS (a managed service), AWS is responsible for patching the database engine and OS. The customer's responsibility is reduced to data, permissions, and network configuration.",
     },
@@ -297,12 +297,12 @@ For the exam, the most tested concept is: **AWS secures the physical infrastruct
       question:
         "Under the Shared Responsibility Model, what is the customer responsible for when using AWS Lambda?",
       options: [
+        "Ensuring the physical hardware running Lambda functions is properly maintained",
+        "The function code, the IAM execution role permissions, and environment variable security",
         "Managing the underlying server infrastructure and auto-scaling configuration",
         "Patching the Lambda runtime environment when security updates are released",
-        "The function code, the IAM execution role permissions, and environment variable security",
-        "Ensuring the physical hardware running Lambda functions is properly maintained",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "AWS manages the Lambda compute infrastructure, runtime, and scaling. The customer is responsible for the function code, the IAM execution role and its permissions, environment variables and any secrets stored in them, and the business logic.",
     },

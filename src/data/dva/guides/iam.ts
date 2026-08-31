@@ -22,8 +22,8 @@ export const iamGuide: ServiceGuide = {
         {
           question:
             "Which IAM entity CANNOT be used as a principal in a resource-based policy?",
-          options: ["IAM User", "IAM Role", "IAM Group", "AWS Service"],
-          correctIndex: 2,
+          options: ["IAM User", "IAM Group", "IAM Role", "AWS Service"],
+          correctIndex: 1,
           explanation:
             "IAM Groups cannot appear as principals in resource-based policies. They are purely an administrative convenience for attaching identity-based policies to multiple users at once.",
         },
@@ -44,12 +44,12 @@ export const iamGuide: ServiceGuide = {
           question:
             "What type of credentials does STS return when a role is assumed?",
           options: [
+            "An X.509 certificate",
             "A permanent access key and secret key",
             "An AccessKeyId, SecretAccessKey, and SessionToken",
-            "An X.509 certificate",
             "A username and password",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "STS AssumeRole returns three pieces: an AccessKeyId, a SecretAccessKey, and a SessionToken. These temporary credentials expire automatically based on the configured session duration.",
         },
@@ -72,11 +72,11 @@ export const iamGuide: ServiceGuide = {
             "A developer has a permission boundary that allows only S3 and Lambda actions, but their identity policy also grants DynamoDB access. Can the developer access DynamoDB?",
           options: [
             "Yes, because the identity policy explicitly allows it",
-            "No, because the permission boundary blocks it",
             "Yes, if a resource policy on the DynamoDB table also allows it",
             "No, because DynamoDB is not a supported service for identity policies",
+            "No, because the permission boundary blocks it",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Permission boundaries define the maximum permissions an identity can have. Even if the identity policy grants DynamoDB access, the permission boundary acts as a ceiling and blocks any permissions not included in it.",
         },
@@ -98,11 +98,11 @@ export const iamGuide: ServiceGuide = {
             "What distinguishes an inline policy from a managed policy?",
           options: [
             "Inline policies support conditions; managed policies do not",
+            "Inline policies apply to all principals in an account; managed policies apply to one",
             "Inline policies are embedded in a single principal and deleted with it; managed policies are reusable",
             "Managed policies can only be created by AWS; inline policies are customer-created",
-            "Inline policies apply to all principals in an account; managed policies apply to one",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Inline policies are embedded directly in a single user, group, or role and are deleted when that principal is deleted. Managed policies (both AWS-managed and customer-managed) exist independently and can be attached to multiple principals.",
         },
@@ -148,12 +148,12 @@ One subtlety worth understanding is \`NotAction\`. Using \`Effect: Allow\` with 
           question:
             "What is the default outcome if no policy explicitly allows a requested action?",
           options: [
-            "Explicit Deny",
             "Implicit Deny",
-            "Allow (default-open)",
             "Depends on the resource type",
+            "Explicit Deny",
+            "Allow (default-open)",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The default outcome when no policy explicitly allows an action is an implicit deny. AWS defaults to denying access — there must be an explicit Allow somewhere in the applicable policies for access to be granted.",
         },
@@ -189,12 +189,12 @@ The \`Condition\` block supports over 40 operators and condition keys. Commonly 
           question:
             "Which condition key should you use in a Deny statement to enforce HTTPS-only access to an S3 bucket?",
           options: [
-            "aws:RequestedRegion",
-            "aws:SourceIp",
-            "aws:SecureTransport",
             "s3:TlsVersion",
+            "aws:SecureTransport",
+            "aws:SourceIp",
+            "aws:RequestedRegion",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "aws:SecureTransport evaluates to true when the request uses HTTPS/TLS. A Deny statement with Condition: {Bool: {aws:SecureTransport: false}} blocks all HTTP (non-TLS) requests to the bucket.",
         },
@@ -215,12 +215,12 @@ The \`Condition\` block supports over 40 operators and condition keys. Commonly 
           question:
             "The Principal element in an IAM policy document is only valid in which type of policy?",
           options: [
-            "Identity-based policies",
             "Permission boundaries",
-            "Resource-based policies",
             "Session policies",
+            "Identity-based policies",
+            "Resource-based policies",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The Principal element is only used in resource-based policies (like S3 bucket policies, KMS key policies, and SQS queue policies) to specify who can perform actions on the resource. Identity-based policies don't have a Principal element because the policy is attached to the principal directly.",
         },
@@ -259,12 +259,12 @@ For third-party integrations, the **ExternalId** condition in the trust policy p
           question:
             "What document on a role specifies which principals are allowed to assume it?",
           options: [
-            "Identity-based policy",
             "Permission boundary",
             "Trust policy",
+            "Identity-based policy",
             "Session policy",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The trust policy is a resource-based policy on the role itself that specifies which principals (users, roles, services, or accounts) are allowed to call sts:AssumeRole on that role.",
         },
@@ -284,12 +284,12 @@ In ECS, there are two separate roles to understand. The **task execution role** 
           question:
             "An ECS Fargate task needs to read from a DynamoDB table. Which role needs DynamoDB permissions?",
           options: [
+            "The service role, because ECS services manage task permissions",
             "The task execution role, because it manages all task permissions",
             "The task role, because it governs what the application code can access",
             "The container instance role, because Fargate uses EC2 underneath",
-            "The service role, because ECS services manage task permissions",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The task role is used by the application code running inside the container and must have the DynamoDB permissions. The task execution role is separate and only grants ECS agent permissions to pull images from ECR and write logs to CloudWatch.",
         },
@@ -297,12 +297,12 @@ In ECS, there are two separate roles to understand. The **task execution role** 
           question:
             "Where does the AWS SDK on an EC2 instance automatically retrieve temporary credentials from?",
           options: [
-            "AWS Secrets Manager",
             "The instance metadata service (IMDS) at 169.254.169.254",
             "AWS Systems Manager Parameter Store",
             "A locally cached credentials file at ~/.aws/credentials",
+            "AWS Secrets Manager",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The AWS SDK's credential chain automatically retrieves temporary credentials from the instance metadata service (IMDS) at 169.254.169.254 when running on EC2 with an instance profile. The credentials are refreshed automatically before expiration.",
         },
@@ -310,12 +310,12 @@ In ECS, there are two separate roles to understand. The **task execution role** 
           question:
             "Which role does the ECS agent use to pull container images from ECR?",
           options: [
-            "Task role",
             "Task execution role",
-            "Instance profile role",
             "Service-linked role",
+            "Instance profile role",
+            "Task role",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The task execution role is used by the ECS agent (not the application code) and must have permissions to pull images from ECR and write logs to CloudWatch. The task role is what the application code uses to call other AWS services.",
         },
@@ -341,12 +341,12 @@ Now any principal tagged \`payments\` automatically has access to any resource t
           question:
             "What is the primary advantage of Attribute-Based Access Control (ABAC) over traditional RBAC in large organizations?",
           options: [
-            "ABAC policies are evaluated faster than RBAC policies",
             "ABAC eliminates the need to update policies when new resources or team members are added",
             "ABAC supports more AWS services than RBAC",
+            "ABAC policies are evaluated faster than RBAC policies",
             "ABAC does not require IAM policy documents",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "ABAC uses tags on principals and resources to make authorization decisions. When resources and users are consistently tagged, a single policy automatically governs access without needing updates when new resources or team members are added.",
         },
@@ -355,11 +355,11 @@ Now any principal tagged \`payments\` automatically has access to any resource t
             "Which condition key compares a tag on the principal (caller) to a tag on the resource being accessed?",
           options: [
             "aws:ResourceTag/key vs aws:RequestTag/key",
-            "aws:PrincipalTag/key vs aws:ResourceTag/key",
-            "iam:PrincipalTag/key vs aws:ResourceTag/key",
             "aws:CallerTag/key vs aws:TargetTag/key",
+            "iam:PrincipalTag/key vs aws:ResourceTag/key",
+            "aws:PrincipalTag/key vs aws:ResourceTag/key",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "aws:PrincipalTag/key resolves to a tag on the principal making the request, and aws:ResourceTag/key resolves to a tag on the resource being accessed. Comparing them in a condition implements ABAC.",
         },
@@ -367,12 +367,12 @@ Now any principal tagged \`payments\` automatically has access to any resource t
           question:
             "What is the main operational risk of ABAC compared to explicit resource ARN policies?",
           options: [
-            "ABAC requires more API calls and has higher latency",
             "ABAC cannot be used with managed policies",
             "Inconsistent or missing tags can lead to over-granting or under-granting access",
             "ABAC is not supported for S3 and DynamoDB",
+            "ABAC requires more API calls and has higher latency",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "ABAC requires disciplined, consistent tagging of both principals and resources. If resources are missing tags or have incorrect tags, ABAC policies can unintentionally deny access (under-grant) or allow access to the wrong resources (over-grant).",
         },
@@ -390,12 +390,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
           question:
             "Which AWS service helps identify unused IAM permissions and externally shared resources?",
           options: [
-            "AWS Config",
-            "AWS Security Hub",
             "IAM Access Analyzer",
+            "AWS Config",
             "Amazon GuardDuty",
+            "AWS Security Hub",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "IAM Access Analyzer analyzes resource policies to identify resources that are shared with external principals and can identify unused permissions, helping enforce least privilege.",
         },
@@ -468,12 +468,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "What is the correct order of IAM policy evaluation for a same-account request?",
       options: [
-        "Identity policy → Resource policy → Permission boundary → Explicit Deny",
         "Explicit Deny → SCP → Resource policy → Permission boundary → Session policy → Identity policy → Implicit Deny",
-        "SCP → Explicit Deny → Identity policy → Resource policy",
         "Permission boundary → Identity policy → Resource policy → Explicit Deny",
+        "Identity policy → Resource policy → Permission boundary → Explicit Deny",
+        "SCP → Explicit Deny → Identity policy → Resource policy",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "IAM policy evaluation always starts with Explicit Deny (which always wins), then checks SCPs, resource-based policies, permission boundaries, session policies, and finally identity-based policies. If no explicit Allow is found, the result is an implicit deny.",
     },
@@ -481,12 +481,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "A developer's IAM role has a permission boundary that allows only EC2 and S3 actions. The role's identity policy grants full DynamoDB access. Can the developer access DynamoDB?",
       options: [
-        "Yes, because the identity policy explicitly grants DynamoDB access",
         "No, because permission boundaries set the maximum allowed permissions",
-        "Yes, if the DynamoDB table's resource policy allows the role",
         "No, because DynamoDB access always requires a separate role",
+        "Yes, if the DynamoDB table's resource policy allows the role",
+        "Yes, because the identity policy explicitly grants DynamoDB access",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Permission boundaries set the ceiling (maximum permissions) for an identity. Even if the identity policy grants DynamoDB access, the permission boundary limits what can actually be used. The effective permissions are the intersection of identity policy and permission boundary.",
     },
@@ -495,11 +495,11 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
         "Which of the following is the most secure way to provide AWS credentials to an application running on EC2?",
       options: [
         "Store access keys in /etc/aws/credentials on the instance",
-        "Pass access keys as environment variables in the launch template",
         "Use an IAM role attached via an EC2 instance profile",
         "Store access keys in AWS Secrets Manager and fetch them at startup",
+        "Pass access keys as environment variables in the launch template",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "IAM roles via EC2 instance profiles are the most secure approach. The SDK automatically retrieves temporary credentials from IMDS, credentials rotate automatically before expiry, and no long-term credentials are stored anywhere on the instance.",
     },
@@ -507,12 +507,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "An ECS task fails when trying to pull an image from ECR. Which role is most likely missing the required permissions?",
       options: [
+        "Service role — it governs ECS service operations",
         "Task role — it governs what the application can access",
         "Task execution role — it governs what the ECS agent can do",
-        "Service role — it governs ECS service operations",
         "Container instance profile — it governs the EC2 host",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The task execution role is used by the ECS agent to pull container images from ECR and write logs to CloudWatch. Missing ecr:GetAuthorizationToken or ecr:BatchGetImage permissions on the task execution role is a common cause of image pull failures.",
     },
@@ -520,12 +520,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "A third-party vendor needs to assume a role in your account. How do you prevent the confused deputy attack?",
       options: [
-        "Rotate the role ARN frequently",
         "Add an ExternalId condition to the role's trust policy",
         "Use a permission boundary on the role",
+        "Rotate the role ARN frequently",
         "Require MFA for role assumption using aws:MultiFactorAuthPresent",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "ExternalId in the trust policy prevents confused deputy attacks. The third party provides a secret ExternalId value; you add it as a required condition. An attacker who discovers your role ARN cannot assume it without also knowing the ExternalId.",
     },
@@ -534,11 +534,11 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
         "Which IAM policy type can grant cross-account access without requiring the external principal to have a matching identity policy?",
       options: [
         "Identity-based policy",
+        "Resource-based policy",
         "Permission boundary",
         "Service Control Policy (SCP)",
-        "Resource-based policy",
       ],
-      correctIndex: 3,
+      correctIndex: 1,
       explanation:
         "Resource-based policies (like S3 bucket policies and KMS key policies) can grant cross-account access by explicitly allowing a principal from another account. The external principal does not need a matching identity policy for resource-based policy access grants.",
     },
@@ -546,12 +546,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "Which condition key is used to enforce HTTPS-only connections to an S3 bucket?",
       options: [
-        "aws:EncryptionRequired",
-        "s3:RequireTLS",
-        "aws:SecureTransport",
         "aws:RequestedProtocol",
+        "s3:RequireTLS",
+        "aws:EncryptionRequired",
+        "aws:SecureTransport",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "aws:SecureTransport evaluates to true when the connection uses HTTPS. A bucket policy Deny statement with Condition: {Bool: {aws:SecureTransport: false}} blocks all unencrypted HTTP requests to the bucket.",
     },
@@ -559,12 +559,12 @@ Wherever possible, prefer **IAM roles over long-term access keys**. Roles provid
       question:
         "What happens to an inline policy when the IAM user, group, or role it is attached to is deleted?",
       options: [
-        "It is converted to a customer managed policy and preserved",
         "It is moved to an archive for 30 days before permanent deletion",
-        "It is deleted along with the principal",
+        "It is converted to a customer managed policy and preserved",
         "It must be manually detached before the principal can be deleted",
+        "It is deleted along with the principal",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Inline policies are embedded directly in a principal and are deleted when the principal is deleted. This is the key difference from managed policies, which exist independently and can be attached to multiple principals.",
     },

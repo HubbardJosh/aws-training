@@ -21,20 +21,20 @@ Events flow into **event buses**, which are the routing layer. The **default eve
           question:
             "Which EventBridge event bus automatically receives events from AWS services like EC2, S3, and CodePipeline?",
           options: [
+            "Service event bus",
             "Custom event bus",
             "Partner event bus",
             "Default event bus",
-            "Service event bus",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The default event bus automatically receives events from over 90 AWS services without any configuration. Custom event buses are for your own application events, and partner event buses receive events from SaaS providers.",
         },
         {
           question:
             "What is the maximum number of targets a single EventBridge rule can have?",
-          options: ["1", "3", "5", "10"],
-          correctIndex: 2,
+          options: ["1", "3", "10", "5"],
+          correctIndex: 3,
           explanation:
             "Each EventBridge rule can have up to 5 targets. A single event can match multiple rules, allowing it to be delivered to many targets — but each individual rule is limited to 5.",
         },
@@ -42,12 +42,12 @@ Events flow into **event buses**, which are the routing layer. The **default eve
           question:
             "How do you publish custom application events to EventBridge?",
           options: [
-            "By configuring a subscription on the default event bus",
             "By calling the PutEvents API on a custom event bus",
-            "By writing events to an SQS queue that EventBridge polls",
             "By registering a webhook with the EventBridge service",
+            "By configuring a subscription on the default event bus",
+            "By writing events to an SQS queue that EventBridge polls",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Applications publish custom events by calling the PutEvents API and specifying a custom event bus. The event must include source, detail-type, and detail fields following the EventBridge event envelope structure.",
         },
@@ -78,20 +78,20 @@ The key advantage over SNS filter policies is scope: EventBridge patterns match 
           question:
             "How are multiple conditions in an EventBridge event pattern combined?",
           options: [
-            "They are OR-ed — the event matches if any condition is true",
             "They are AND-ed — the event must match every specified condition",
-            "The first matching condition determines the result",
             "The developer specifies AND or OR using a logical operator field",
+            "The first matching condition determines the result",
+            "They are OR-ed — the event matches if any condition is true",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Multiple conditions in an EventBridge event pattern are AND-ed together — an event must match every specified field and value for the rule to trigger. Unspecified fields are ignored.",
         },
         {
           question:
             "Which EventBridge filter operator matches events where a field value is NOT in a specified list?",
-          options: ["prefix", "exists", "anything-but", "not-equals"],
-          correctIndex: 2,
+          options: ["anything-but", "prefix", "exists", "not-equals"],
+          correctIndex: 0,
           explanation:
             'The anything-but operator matches events where the field value is NOT in the specified list. For example, {"status": [{"anything-but": ["ERROR"]}]} matches events where status is anything except ERROR.',
         },
@@ -121,12 +121,12 @@ Unlike EventBridge rules, which only target EventBridge event buses, Scheduler c
         {
           question: "What is the Universal Target in EventBridge Scheduler?",
           options: [
-            "A target that routes events to all registered subscribers simultaneously",
             "The ability to invoke over 200 AWS service APIs directly without an intermediary Lambda",
-            "A catch-all target that handles events not matched by any rule",
             "An EventBridge bus that receives events from all AWS services",
+            "A target that routes events to all registered subscribers simultaneously",
+            "A catch-all target that handles events not matched by any rule",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The Universal Target allows EventBridge Scheduler to invoke over 200 AWS service APIs directly — Lambda, SQS, Step Functions, DynamoDB, and more — making any AWS API call schedulable without a Lambda intermediary.",
         },
@@ -157,12 +157,12 @@ The practical value is recovery from failures. Suppose a bug in your event consu
           question:
             "What is the primary use case for EventBridge Archive and Replay?",
           options: [
-            "Storing events permanently for compliance auditing",
             "Recovering from consumer failures by replaying missed events after fixing the consumer",
-            "Routing events to multiple targets simultaneously",
             "Scheduling events to be delivered at a future time",
+            "Storing events permanently for compliance auditing",
+            "Routing events to multiple targets simultaneously",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Archive and Replay enables recovery from consumer bugs or failures. Fix the consumer, then replay the archived events from before the failure window. The system recovers to a consistent state without manual re-processing.",
         },
@@ -171,11 +171,11 @@ The practical value is recovery from failures. Suppose a bug in your event consu
             "When replaying archived EventBridge events, at what rate are they re-sent?",
           options: [
             "As fast as possible — EventBridge replays events at maximum throughput",
-            "At approximately their original rate of occurrence",
             "One event per second regardless of the original rate",
             "At a configurable rate set by the developer",
+            "At approximately their original rate of occurrence",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EventBridge replays archived events at approximately their original rate of occurrence, preserving the temporal distribution of events during recovery.",
         },
@@ -183,12 +183,12 @@ The practical value is recovery from failures. Suppose a bug in your event consu
           question:
             "Which EventBridge feature allows testing a new event consumer against real historical production data?",
           options: [
-            "EventBridge Pipes with an enrichment step",
             "Schema Registry code bindings",
             "Archive and Replay filtered by a historical time range",
+            "EventBridge Pipes with an enrichment step",
             "EventBridge Scheduler with a one-time schedule",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Archive and Replay can replay historical events filtered by a time range onto an event bus. This allows testing a new consumer against real production event data before going live.",
         },
@@ -206,12 +206,12 @@ From any schema, you can generate **code bindings** in Java, Python, or TypeScri
           question:
             "What does enabling schema discovery on an EventBridge event bus do?",
           options: [
-            "It validates all incoming events against a pre-defined schema",
-            "It samples events flowing through and automatically infers their JSON schema",
             "It encrypts event payloads using the schema as a key",
             "It blocks events that don't match the registered schema",
+            "It validates all incoming events against a pre-defined schema",
+            "It samples events flowing through and automatically infers their JSON schema",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Schema discovery samples events flowing through the event bus and automatically infers JSON schemas from them. Schemas are versioned as events evolve over time.",
         },
@@ -233,11 +233,11 @@ From any schema, you can generate **code bindings** in Java, Python, or TypeScri
             "What problem do EventBridge Schema Registry code bindings solve?",
           options: [
             "They enable faster event routing by pre-compiling filter patterns",
-            "They provide compile-time type safety for event consumers, reducing schema drift bugs",
             "They compress event payloads to reduce data transfer costs",
+            "They provide compile-time type safety for event consumers, reducing schema drift bugs",
             "They validate event schemas at the producer before publishing",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Code bindings generate typed classes from event schemas, allowing consumers to work with type-safe objects instead of string-keyed JSON. This gives compile-time detection of field name typos and schema drift.",
         },
@@ -255,12 +255,12 @@ When an event matches a rule with an API Destination target, you can use an **In
           question:
             "What does an EventBridge API Destination Connection store?",
           options: [
+            "The rate limit and retry configuration",
+            "The event pattern filter for the destination",
             "The target endpoint URL and HTTP method",
             "Authentication credentials (API key, OAuth2, or basic auth) managed in Secrets Manager",
-            "The event pattern filter for the destination",
-            "The rate limit and retry configuration",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A Connection stores authentication credentials for the external API — API key, OAuth2 client credentials, or basic auth — in Secrets Manager. EventBridge manages token refresh automatically.",
         },
@@ -268,12 +268,12 @@ When an event matches a rule with an API Destination target, you can use an **In
           question:
             "How does EventBridge API Destinations handle traffic spikes that would exceed the target API's rate limit?",
           options: [
+            "It routes excess events to an SQS dead-letter queue",
+            "It automatically increases the rate limit by calling the target API's admin endpoint",
             "It drops excess events and logs them to CloudWatch",
             "It queues events and delivers them respecting the configured rate limit",
-            "It automatically increases the rate limit by calling the target API's admin endpoint",
-            "It routes excess events to an SQS dead-letter queue",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EventBridge queues events and respects the configured rate limit (max invocations per second). This prevents 429 errors from the downstream API during traffic spikes without dropping events.",
         },
@@ -319,12 +319,12 @@ For **cross-account routing**, you add a resource-based policy to the target eve
           question:
             "Cross-region EventBridge routing is useful for which architecture pattern?",
           options: [
-            "Consolidating all events into a single region for cost savings",
             "Disaster recovery — routing events from a primary region to a backup region for processing",
             "Reducing event latency by routing to the nearest region",
+            "Consolidating all events into a single region for cost savings",
             "Encrypting events during cross-region transfer",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Cross-region routing enables disaster recovery patterns where events from a primary region are processed in a backup region. It also supports multi-region event-driven architectures.",
         },
@@ -355,12 +355,12 @@ The key distinction from EventBridge rules is the topology: Pipes are point-to-p
           question:
             "What is the key topological difference between EventBridge Pipes and EventBridge Rules?",
           options: [
-            "Pipes support more target types than Rules",
-            "Pipes are point-to-point (one source, one target); Rules can fan out to multiple targets",
-            "Rules support filtering; Pipes do not",
             "Pipes require Lambda for enrichment; Rules can call services directly",
+            "Pipes support more target types than Rules",
+            "Rules support filtering; Pipes do not",
+            "Pipes are point-to-point (one source, one target); Rules can fan out to multiple targets",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EventBridge Pipes are point-to-point — one source connects to one target with optional filtering and enrichment. EventBridge Rules can fan out a single event pattern to up to 5 targets simultaneously.",
         },
@@ -368,12 +368,12 @@ The key distinction from EventBridge rules is the topology: Pipes are point-to-p
           question:
             "Which of the following is a valid EventBridge Pipes source?",
           options: [
-            "Amazon S3",
-            "Amazon SQS queue",
             "Amazon CloudFront",
+            "Amazon S3",
             "AWS CloudTrail",
+            "Amazon SQS queue",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EventBridge Pipes sources include SQS queues, Kinesis streams, DynamoDB Streams, MSK (Kafka), RabbitMQ, and ActiveMQ. Pipes handle the polling and batching for these sources without requiring custom Lambda polling code.",
         },
@@ -406,12 +406,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
           question:
             "Why might you route EventBridge events to SQS instead of directly to Lambda?",
           options: [
-            "Lambda cannot be a target for EventBridge rules",
             "SQS provides buffering and backpressure for high-volume workloads with independent processing rates and DLQ support",
-            "SQS is cheaper than Lambda for event processing",
             "EventBridge cannot retry Lambda invocations on failure",
+            "Lambda cannot be a target for EventBridge rules",
+            "SQS is cheaper than Lambda for event processing",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "EventBridge → SQS → Lambda adds a buffer layer with backpressure and DLQ support. For high-volume workloads where you need independent processing rates or guaranteed at-least-once delivery with retry, this is more resilient than direct EventBridge → Lambda.",
         },
@@ -478,12 +478,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
       question:
         "A consumer bug corrupts data for 2 hours before being discovered and fixed. After deploying the fix, how can you recover the missed events using EventBridge?",
       options: [
-        "Re-trigger all upstream services to re-emit their events",
         "Use Archive and Replay to re-send the archived events from the affected time window",
+        "Re-trigger all upstream services to re-emit their events",
         "Use EventBridge Pipes to backfill events from the source",
         "Query CloudTrail for the lost events and republish them manually",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Archive and Replay is designed for this exact scenario. Enable archiving, fix the consumer, then replay the archived events from before the bug window. The system recovers to a consistent state without manual intervention.",
     },
@@ -491,12 +491,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
       question:
         "Which EventBridge feature allows calling external APIs like Salesforce or PagerDuty as rule targets without writing Lambda code?",
       options: [
-        "EventBridge Pipes with enrichment",
-        "API Destinations with a Connection for auth",
-        "Schema Registry with code bindings",
         "EventBridge Scheduler with Universal Target",
+        "Schema Registry with code bindings",
+        "API Destinations with a Connection for auth",
+        "EventBridge Pipes with enrichment",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "API Destinations allow EventBridge to call external HTTP endpoints directly as rule targets. A Connection stores authentication credentials, and the rate limit prevents overwhelming the external API — no Lambda relay code needed.",
     },
@@ -543,12 +543,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
       question:
         "How does EventBridge event pattern matching differ from SNS subscription filter policies?",
       options: [
-        "EventBridge patterns use regex; SNS uses exact matches only",
         "EventBridge patterns match any JSON field in the event including nested detail fields; SNS filters only match MessageAttributes",
-        "SNS filter policies support more operators than EventBridge patterns",
         "EventBridge patterns are applied after delivery; SNS filters before delivery",
+        "SNS filter policies support more operators than EventBridge patterns",
+        "EventBridge patterns use regex; SNS uses exact matches only",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "EventBridge patterns can match any field in the event JSON including deeply nested fields in the detail object. SNS filter policies can only match against MessageAttributes — a flat set of key-value pairs attached separately to each message.",
     },
@@ -556,12 +556,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
       question:
         "What does the EventBridge Schema Registry's code binding feature provide?",
       options: [
+        "Automatic event routing based on the schema version",
         "Runtime validation that events conform to the registered schema",
         "Compile-time type-safe classes for event consumers in Java, Python, or TypeScript",
-        "Automatic event routing based on the schema version",
         "Schema versioning with automatic backward compatibility checks",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Code bindings generate typed classes from event schemas in Java, Python, or TypeScript. Consumers work with type-safe objects where the IDE can autocomplete fields and the compiler catches typos and schema drift at compile time.",
     },
@@ -569,12 +569,12 @@ Over 90 AWS services emit events to the default event bus automatically. You can
       question:
         "A CloudWatch Alarm fires for high error rate. What EventBridge pattern automates incident response?",
       options: [
-        "Configure CloudWatch to directly invoke Lambda — EventBridge is not needed",
-        "Create an EventBridge rule matching the alarm state change event that triggers a remediation Lambda",
         "Use EventBridge Pipes to stream CloudWatch metrics to Lambda",
+        "Configure CloudWatch to directly invoke Lambda — EventBridge is not needed",
         "Subscribe Lambda to an SNS topic that CloudWatch publishes to",
+        "Create an EventBridge rule matching the alarm state change event that triggers a remediation Lambda",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "CloudWatch Alarms emit state change events to the EventBridge default event bus. An EventBridge rule matching the alarm state change (e.g., from OK to ALARM) can trigger a Lambda for automated remediation — no polling or webhook configuration needed.",
     },

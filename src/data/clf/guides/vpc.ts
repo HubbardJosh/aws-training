@@ -33,12 +33,12 @@ VPCs are **region-scoped** — a single VPC spans all Availability Zones within 
           question:
             "What scope does an Amazon VPC have within the AWS infrastructure?",
           options: [
+            "Regional — a VPC spans all Availability Zones within one region but not across regions",
             "Global — a single VPC can span multiple AWS regions",
             "Availability Zone — each VPC is confined to a single AZ",
-            "Regional — a VPC spans all Availability Zones within one region but not across regions",
             "Account-level — a single VPC spans all regions in an AWS account",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "VPCs are region-scoped: a single VPC spans all Availability Zones within its region but does not extend across regions. You create subnets in specific AZs within the VPC to place resources in different AZs for high availability.",
         },
@@ -97,12 +97,12 @@ For most workloads, security groups are sufficient and NACLs provide an addition
           question:
             "What is the key difference between Security Groups and Network ACLs (NACLs) in a VPC?",
           options: [
-            "Security Groups are applied at the subnet level; NACLs are applied at the instance level",
-            "Security Groups are stateful (return traffic automatic); NACLs are stateless (must explicitly allow both directions)",
             "Security Groups support deny rules; NACLs only support allow rules",
             "Security Groups are free; NACLs incur additional charges per rule",
+            "Security Groups are stateful (return traffic automatic); NACLs are stateless (must explicitly allow both directions)",
+            "Security Groups are applied at the subnet level; NACLs are applied at the instance level",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Security Groups are stateful — allowing inbound traffic automatically allows the return traffic. NACLs are stateless — you must explicitly allow both inbound and outbound traffic for each connection. Security Groups operate at the instance level; NACLs at the subnet level.",
         },
@@ -110,12 +110,12 @@ For most workloads, security groups are sufficient and NACLs provide an addition
           question:
             "A security team wants to block all traffic from a specific IP range at the network level across an entire subnet. Which VPC security mechanism is most appropriate?",
           options: [
+            "A VPC endpoint policy that blocks traffic from the IP range",
             "A Security Group deny rule applied to all instances in the subnet",
             "A Network ACL (NACL) deny rule, which can block IP ranges at the subnet level",
             "An IAM policy that restricts network access from the specified IP range",
-            "A VPC endpoint policy that blocks traffic from the IP range",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "NACLs are the right tool for blocking specific IP ranges at the subnet level. Unlike Security Groups (which only support allow rules), NACLs support both allow and deny rules, and they operate at the subnet level — applying to all resources within the subnet.",
         },
@@ -135,12 +135,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
           question:
             "A private subnet EC2 instance needs to download security patches from the internet, but should not be directly reachable from the internet. What should be configured?",
           options: [
+            "An Elastic IP attached directly to the private EC2 instance",
+            "A VPC Endpoint for the software repository the instance downloads from",
             "An Internet Gateway attached to the private subnet's route table",
             "A NAT Gateway in a public subnet, with the private subnet's route table pointing to it",
-            "A VPC Endpoint for the software repository the instance downloads from",
-            "An Elastic IP attached directly to the private EC2 instance",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A NAT Gateway deployed in a public subnet allows private subnet instances to initiate outbound internet connections (for patch downloads, API calls, etc.) while remaining unreachable from the internet. The private subnet route table directs internet-bound traffic to the NAT Gateway.",
         },
@@ -164,12 +164,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
           question:
             "What is a key limitation of VPC Peering that AWS Transit Gateway solves?",
           options: [
-            "VPC Peering only works within a single AWS region; Transit Gateway enables cross-region connectivity",
             "VPC Peering is not transitive — A-to-B and B-to-C peering does not allow A to reach C; Transit Gateway provides hub-and-spoke connectivity",
-            "VPC Peering requires both VPCs to be in the same AWS account; Transit Gateway supports cross-account connections",
             "VPC Peering has a maximum bandwidth of 1 Gbps; Transit Gateway supports higher throughput",
+            "VPC Peering requires both VPCs to be in the same AWS account; Transit Gateway supports cross-account connections",
+            "VPC Peering only works within a single AWS region; Transit Gateway enables cross-region connectivity",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "VPC Peering is not transitive — if VPC A is peered with B, and B is peered with C, A cannot reach C through B. Managing many VPCs with peering requires N*(N-1)/2 connections. Transit Gateway solves this with a hub-and-spoke model that connects thousands of VPCs through a single gateway.",
         },
@@ -177,12 +177,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
           question:
             "A company wants to connect their on-premises data center to AWS with a dedicated private connection that bypasses the public internet for consistent bandwidth and lower latency. Which service should they use?",
           options: [
-            "AWS Site-to-Site VPN — an encrypted tunnel over the public internet",
-            "VPC Peering — a private connection between two VPCs",
-            "AWS Direct Connect — a dedicated private physical connection to AWS",
             "AWS Transit Gateway — a hub connecting VPCs and on-premises networks",
+            "AWS Direct Connect — a dedicated private physical connection to AWS",
+            "VPC Peering — a private connection between two VPCs",
+            "AWS Site-to-Site VPN — an encrypted tunnel over the public internet",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "AWS Direct Connect provides a dedicated, private physical connection from a customer's data center to AWS, bypassing the public internet. It offers consistent bandwidth, lower latency, and potentially lower data transfer costs — ideal for high-volume workloads with strict performance requirements.",
         },
@@ -226,12 +226,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
       question:
         "An EC2 instance in a private subnet needs to access the Amazon S3 API without routing traffic through the internet or a NAT Gateway. What should be configured?",
       options: [
-        "An Internet Gateway attached to the private subnet",
-        "A VPC Endpoint (Gateway type) for S3, which routes traffic privately to S3",
         "A NAT Gateway in the private subnet with an S3 route",
         "A Site-to-Site VPN tunnel from the VPC to the S3 service endpoint",
+        "An Internet Gateway attached to the private subnet",
+        "A VPC Endpoint (Gateway type) for S3, which routes traffic privately to S3",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "A VPC Gateway Endpoint for S3 allows resources in a VPC to communicate with S3 privately without going through the internet or a NAT Gateway. Gateway endpoints for S3 and DynamoDB are free and simply require adding a route to the subnet's route table.",
     },
@@ -239,12 +239,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
       question:
         "What AWS service would you use to connect hundreds of VPCs and multiple on-premises networks through a single managed hub?",
       options: [
-        "VPC Peering — creating direct connections between each pair of VPCs",
         "AWS Direct Connect — a physical connection to each VPC",
-        "AWS Transit Gateway — a hub-and-spoke service for connecting many VPCs and networks",
+        "VPC Peering — creating direct connections between each pair of VPCs",
         "AWS PrivateLink — for privately accessing services across VPCs",
+        "AWS Transit Gateway — a hub-and-spoke service for connecting many VPCs and networks",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "AWS Transit Gateway is a hub-and-spoke service that connects thousands of VPCs and on-premises networks through a single gateway. It eliminates the need for complex peering meshes and greatly simplifies network management at scale.",
     },
@@ -266,11 +266,11 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
         "A company wants to establish a fast, private connection from their data center to AWS with consistent throughput, but needs it deployed within days rather than weeks. Which option should they choose?",
       options: [
         "AWS Direct Connect — the fastest and most reliable option available immediately",
-        "AWS Site-to-Site VPN — an encrypted connection over the internet that can be set up quickly",
-        "VPC Peering — a private connection that can be configured rapidly",
         "AWS Transit Gateway — connects on-premises to AWS without any physical setup",
+        "VPC Peering — a private connection that can be configured rapidly",
+        "AWS Site-to-Site VPN — an encrypted connection over the internet that can be set up quickly",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "AWS Site-to-Site VPN can be set up quickly (minutes to hours) using software configuration and internet infrastructure. AWS Direct Connect requires physical fiber installation at a colocation facility which takes weeks to months. VPN is the right choice for speed of deployment.",
     },
@@ -291,12 +291,12 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
       question:
         "A company has three VPCs (A, B, C). VPC A is peered with VPC B, and VPC B is peered with VPC C. Can resources in VPC A communicate with resources in VPC C?",
       options: [
-        "Yes — traffic is automatically routed through VPC B via transitive peering",
         "No — VPC Peering is not transitive; A cannot reach C through B without a direct A-to-C peering connection",
-        "Yes — but only if VPC B has routing rules explicitly forwarding traffic between A and C",
         "No — VPC Peering is limited to two VPCs and cannot involve a third VPC",
+        "Yes — traffic is automatically routed through VPC B via transitive peering",
+        "Yes — but only if VPC B has routing rules explicitly forwarding traffic between A and C",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "VPC Peering is NOT transitive. Even though A-B and B-C peering connections exist, resources in VPC A cannot communicate with resources in VPC C through VPC B. A direct peering connection between A and C would be required, or AWS Transit Gateway should be used for hub-and-spoke connectivity.",
     },
@@ -304,24 +304,24 @@ An older approach used **NAT Instances** — EC2 instances you managed yourself 
       question:
         "Which of the following correctly describes how Security Groups handle return traffic?",
       options: [
-        "Security Groups are stateless — you must add explicit outbound rules to allow return traffic for inbound connections",
         "Security Groups are stateful — if an inbound rule allows traffic, the return traffic is automatically allowed without a separate outbound rule",
         "Security Groups block all return traffic by default — you must configure bidirectional allow rules",
+        "Security Groups are stateless — you must add explicit outbound rules to allow return traffic for inbound connections",
         "Security Groups delegate return traffic decisions to the Network ACL associated with the subnet",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Security Groups are stateful — when an inbound rule allows traffic, the return traffic for that connection is automatically allowed regardless of outbound rules. This differs from NACLs, which are stateless and require explicit rules for both inbound and outbound traffic.",
     },
     {
       question: "What does the default VPC in an AWS region provide?",
       options: [
-        "A pre-configured VPC with private subnets only, requiring manual IGW configuration for public access",
-        "A pre-configured VPC with public subnets in each AZ, an Internet Gateway, and default route tables so EC2 instances can launch with internet access immediately",
-        "A VPC with no subnets that must be fully configured before any resources can be launched",
         "A shared VPC that all AWS customers in the region use for their public-facing resources",
+        "A VPC with no subnets that must be fully configured before any resources can be launched",
+        "A pre-configured VPC with public subnets in each AZ, an Internet Gateway, and default route tables so EC2 instances can launch with internet access immediately",
+        "A pre-configured VPC with private subnets only, requiring manual IGW configuration for public access",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "AWS automatically creates a default VPC in each region with public subnets in each AZ, an Internet Gateway already attached, and default route tables configured. This allows EC2 instances to launch with internet connectivity immediately without any network configuration.",
     },

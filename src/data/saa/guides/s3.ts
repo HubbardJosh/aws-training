@@ -18,11 +18,11 @@ export const s3Guide: ServiceGuide = {
             "A company stores thumbnail images in S3 that can be regenerated from original source files if lost. They want the lowest-cost storage class that is still immediately accessible. Which storage class is most appropriate?",
           options: [
             "S3 Standard",
-            "S3 Standard-IA",
             "S3 One Zone-IA",
             "S3 Glacier Instant Retrieval",
+            "S3 Standard-IA",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "S3 One Zone-IA is appropriate for reproducible data (like thumbnails that can be regenerated) because it stores data in a single AZ at lower cost than Standard-IA. If the AZ fails, data is lost — but since thumbnails can be recreated, this risk is acceptable. One Zone-IA is cheaper than Standard-IA and still provides immediate millisecond access.",
         },
@@ -30,12 +30,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "A company has S3 objects with unpredictable and variable access patterns. They want to avoid retrieval fees and don't want to manage storage class transitions manually. Which storage class is best?",
           options: [
-            "S3 Standard",
-            "S3 Standard-IA",
             "S3 Intelligent-Tiering",
             "S3 Glacier Flexible Retrieval",
+            "S3 Standard",
+            "S3 Standard-IA",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "S3 Intelligent-Tiering automatically moves objects between Frequent Access, Infrequent Access, and Archive tiers based on observed access patterns, without retrieval fees. It is ideal when access patterns are unknown or variable, eliminating the need to manually manage storage class transitions while optimizing cost.",
         },
@@ -61,12 +61,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "With S3 versioning enabled, what happens when a user deletes an object?",
           options: [
-            "The object and all its versions are permanently deleted",
             "A delete marker is placed on the object, preserving all previous versions",
-            "The most recent version is deleted; earlier versions remain accessible",
+            "The object and all its versions are permanently deleted",
             "The object is moved to S3 Glacier for a 30-day grace period",
+            "The most recent version is deleted; earlier versions remain accessible",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "When versioning is enabled and a delete operation is performed without specifying a version ID, S3 places a delete marker on the object. The object appears deleted to normal GET requests, but all previous versions are preserved. You can restore the object by deleting the delete marker. This protects against accidental deletion.",
         },
@@ -87,12 +87,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "Which S3 replication type would be used to aggregate access logs from multiple source buckets in different accounts into a single central logging bucket in the same region?",
           options: [
-            "S3 Cross-Region Replication (CRR)",
             "S3 Same-Region Replication (SRR)",
-            "S3 Batch Replication",
             "S3 Lifecycle replication",
+            "S3 Cross-Region Replication (CRR)",
+            "S3 Batch Replication",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "S3 Same-Region Replication (SRR) copies objects to a destination bucket in the same AWS region, even from different accounts. It is used for log aggregation (collecting logs from multiple source buckets into one central bucket), maintaining live copies in a separate account, and meeting compliance requirements that keep data in the same region.",
         },
@@ -106,12 +106,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "Which S3 encryption option provides audit trails via CloudTrail and allows you to control key rotation, making it suitable for compliance-driven workloads?",
           options: [
-            "SSE-S3 (S3-managed keys)",
-            "SSE-KMS (AWS KMS-managed keys)",
             "SSE-C (customer-provided keys)",
             "Client-side encryption before upload",
+            "SSE-S3 (S3-managed keys)",
+            "SSE-KMS (AWS KMS-managed keys)",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "SSE-KMS uses customer-managed KMS keys, providing full audit trails of key usage via AWS CloudTrail and giving you control over key rotation, access policies, and key lifecycle. SSE-S3 uses AWS-managed keys with no audit trail or key control. SSE-C requires the customer to provide keys on every request, adding operational complexity.",
         },
@@ -119,12 +119,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "Which S3 feature overrides any ACL or bucket policy that would otherwise make objects publicly accessible, and is the recommended security default?",
           options: [
-            "SSE-KMS encryption on all objects",
             "S3 Block Public Access",
+            "SSE-KMS encryption on all objects",
             "IAM policies denying s3:GetObject",
             "Bucket policy with explicit deny for anonymous principals",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "S3 Block Public Access is an account-level and bucket-level setting that overrides any ACL or policy that would grant public access. Enabling it by default prevents accidental public exposure regardless of individual bucket or object permissions. It is the simplest and most reliable way to prevent public access to S3 data.",
         },
@@ -132,12 +132,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "A company wants to allow external partners to download a specific S3 object for the next 24 hours without giving them AWS credentials. What mechanism enables this?",
           options: [
-            "Make the object public using a bucket ACL",
-            "Create an IAM user for the partner with time-limited permissions",
             "Generate a presigned URL with a 24-hour expiration",
+            "Create an IAM user for the partner with time-limited permissions",
             "Share the bucket's ARN and the AWS account credentials",
+            "Make the object public using a bucket ACL",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "S3 Presigned URLs embed the necessary credentials and a time-limited signature to grant access to a specific S3 object. They expire after the configured duration, require no AWS credentials from the recipient, and do not require making the object publicly accessible. This is the recommended pattern for temporary, credential-free access to private S3 objects.",
         },
@@ -152,23 +152,23 @@ export const s3Guide: ServiceGuide = {
             "An architecture requires that multiple downstream services (inventory, analytics, notification) each process every S3 object upload event independently. Which S3 event notification target best supports this fan-out requirement?",
           options: [
             "S3 → Lambda (single function handling all downstream services)",
-            "S3 → SQS FIFO queue with message groups per service",
             "S3 → SNS topic with subscriptions for each downstream SQS queue or Lambda",
+            "S3 → SQS FIFO queue with message groups per service",
             "S3 → EventBridge → single target rule",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Publishing to an SNS topic enables fan-out — SNS delivers the S3 event to multiple subscriptions simultaneously (one per downstream service). Each service has its own SQS queue or Lambda subscriber, receives the event independently, and processes it at its own pace. This decouples the services and allows independent scaling.",
         },
         {
           question: "S3 Object Lambda is best suited for which use case?",
           options: [
-            "Transforming S3 event notifications before routing them to downstream services",
             "Applying Lambda-based transformations to data as it is retrieved from S3 via GET requests",
-            "Running Lambda functions triggered by S3 lifecycle transitions",
             "Encrypting objects in S3 using a custom Lambda key management function",
+            "Transforming S3 event notifications before routing them to downstream services",
+            "Running Lambda functions triggered by S3 lifecycle transitions",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "S3 Object Lambda intercepts S3 GET requests and invokes a Lambda function to transform the object data before returning it to the caller. This enables on-the-fly transformations like PII redaction, format conversion, or data enrichment without maintaining separate copies of transformed data in S3.",
         },
@@ -183,11 +183,11 @@ export const s3Guide: ServiceGuide = {
             "A company needs to upload 10 GB files to S3. What upload technique is required and recommended for objects of this size?",
           options: [
             "Standard single-part upload with chunked transfer encoding",
-            "Multipart Upload, which is required for objects over 5 GB",
             "S3 Transfer Acceleration with enhanced single-part upload",
+            "Multipart Upload, which is required for objects over 5 GB",
             "S3 Byte-Range upload with parallel parts",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Multipart Upload is required for objects larger than 5 GB and recommended for objects larger than 100 MB. It splits large objects into parts uploaded in parallel, improving throughput and enabling resumable uploads. S3 cannot accept a single-part upload larger than 5 GB.",
         },
@@ -195,12 +195,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "Users in Europe are experiencing slow upload times when uploading files to an S3 bucket in us-east-1. Which S3 feature can reduce upload latency by routing traffic through nearby edge locations?",
           options: [
-            "S3 Cross-Region Replication to a European bucket",
-            "S3 Transfer Acceleration",
             "Multipart Upload with parallel parts",
             "S3 Intelligent-Tiering for uploads",
+            "S3 Cross-Region Replication to a European bucket",
+            "S3 Transfer Acceleration",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 Transfer Acceleration routes upload traffic through the nearest AWS CloudFront edge location, which has an optimized high-bandwidth connection to the S3 bucket's region. This can significantly reduce upload latency for users who are geographically distant from the target bucket's region, at an additional cost per GB transferred.",
         },
@@ -214,12 +214,12 @@ export const s3Guide: ServiceGuide = {
           question:
             "An S3-hosted static website needs to serve content over HTTPS. What must be added to the architecture?",
           options: [
-            "Enable HTTPS on the S3 bucket's website endpoint",
-            "Add an ACM certificate directly to the S3 bucket",
-            "Place an Amazon CloudFront distribution in front of the S3 bucket",
             "Configure an Application Load Balancer with an SSL certificate in front of S3",
+            "Add an ACM certificate directly to the S3 bucket",
+            "Enable HTTPS on the S3 bucket's website endpoint",
+            "Place an Amazon CloudFront distribution in front of the S3 bucket",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The S3 static website endpoint only supports HTTP, not HTTPS. To serve content over HTTPS, you must place Amazon CloudFront in front of the S3 bucket. CloudFront supports HTTPS with ACM certificates, caches content at edge locations globally, and can enforce HTTPS-only access. An ALB cannot serve S3 static website content directly.",
         },
@@ -277,12 +277,12 @@ export const s3Guide: ServiceGuide = {
     {
       question: "What is the durability guarantee for S3 Standard storage?",
       options: [
-        "99.9% (three nines)",
-        "99.99% (four nines)",
         "99.999999999% (eleven nines)",
+        "99.99% (four nines)",
+        "99.9% (three nines)",
         "100%",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "S3 Standard (and all other S3 storage classes) provides 99.999999999% (11 nines) durability by redundantly storing data across multiple devices in multiple facilities. This makes the probability of data loss extremely small — roughly one object lost per 10 million objects per 10,000 years.",
     },
@@ -304,19 +304,19 @@ export const s3Guide: ServiceGuide = {
         "Which S3 storage class stores data in a single Availability Zone and is appropriate for reproducible data that can be regenerated if lost?",
       options: [
         "S3 Standard-IA",
-        "S3 One Zone-IA",
         "S3 Glacier Instant Retrieval",
+        "S3 One Zone-IA",
         "S3 Intelligent-Tiering",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "S3 One Zone-IA stores data in a single Availability Zone, making it cheaper than Standard-IA but with the risk of data loss if the AZ fails. It is appropriate for data that can be recreated (like thumbnails generated from originals, or secondary backup copies) where the lower cost justifies the reduced durability.",
     },
     {
       question:
         "Which S3 encryption option provides AWS CloudTrail audit logs of key usage and gives you control over key rotation?",
-      options: ["SSE-S3", "SSE-KMS", "SSE-C", "Client-side encryption"],
-      correctIndex: 1,
+      options: ["SSE-KMS", "SSE-C", "SSE-S3", "Client-side encryption"],
+      correctIndex: 0,
       explanation:
         "SSE-KMS uses customer-managed KMS keys, which generates CloudTrail audit logs for every key usage (encryption/decryption), giving you full visibility and control. You manage key rotation policies and access controls. SSE-S3 uses AWS-managed keys with no audit trail or key control available to customers.",
     },
@@ -324,20 +324,20 @@ export const s3Guide: ServiceGuide = {
       question:
         "A company wants to temporarily share a private S3 object with an external partner for 48 hours without granting them AWS credentials. What is the recommended approach?",
       options: [
+        "Share the S3 bucket ARN and the owner's access key",
         "Temporarily make the object public using a bucket ACL",
         "Create a temporary IAM user with S3 read permissions",
         "Generate a presigned URL with a 48-hour expiration",
-        "Share the S3 bucket ARN and the owner's access key",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Presigned URLs are time-limited URLs that embed the necessary authentication to access a specific S3 object. They expire after the configured duration (48 hours in this case), require no AWS credentials from the recipient, and do not require making the object publicly accessible. This is the safest and simplest approach for temporary access.",
     },
     {
       question:
         "Multipart Upload is required for S3 objects larger than what size?",
-      options: ["100 MB", "1 GB", "5 GB", "10 GB"],
-      correctIndex: 2,
+      options: ["5 GB", "10 GB", "1 GB", "100 MB"],
+      correctIndex: 0,
       explanation:
         "Multipart Upload is required for objects larger than 5 GB — S3 cannot accept a single-part upload exceeding this limit. It is recommended (but not required) for objects larger than 100 MB. Multipart Upload enables parallel uploads and resumable transfers, improving throughput for large objects.",
     },
@@ -358,12 +358,12 @@ export const s3Guide: ServiceGuide = {
       question:
         "Both S3 Cross-Region Replication and Same-Region Replication require which S3 feature enabled on both the source and destination buckets?",
       options: [
-        "S3 Transfer Acceleration",
         "Server-side encryption with KMS",
-        "Versioning",
         "S3 Lifecycle policies",
+        "S3 Transfer Acceleration",
+        "Versioning",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Both CRR and SRR require versioning to be enabled on both the source and destination buckets. Versioning allows S3 to track object versions and determine which objects and versions need to be replicated. Without versioning on both buckets, replication cannot be configured.",
     },

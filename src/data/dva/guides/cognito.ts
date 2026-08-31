@@ -22,12 +22,12 @@ Token lifetimes are configurable: Access and ID tokens default to 1 hour (minimu
           question:
             "Which Cognito token contains the user's identity claims such as email, name, and group memberships?",
           options: [
+            "Session Token",
             "Access Token",
             "Refresh Token",
             "ID Token",
-            "Session Token",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The ID Token contains identity claims about the authenticated user including their sub (unique ID), email, name, custom attributes, and group memberships. This is the token passed to your backend to identify who the user is.",
         },
@@ -42,12 +42,12 @@ Token lifetimes are configurable: Access and ID tokens default to 1 hour (minimu
           question:
             "Which Cognito token is used as the bearer token for API Gateway Cognito authorizers?",
           options: [
+            "Either ID or Refresh Token",
+            "Refresh Token",
             "ID Token",
             "Access Token",
-            "Refresh Token",
-            "Either ID or Refresh Token",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Access Token is used as the bearer token for API Gateway Cognito authorizers and for calling Cognito APIs directly. The ID Token is used for identifying the user to your own backend.",
         },
@@ -65,12 +65,12 @@ For OAuth 2.0 flows, **Authorization Code with PKCE** is the correct choice for 
           question:
             "Which OAuth 2.0 flow is correct for mobile apps and SPAs authenticating with Cognito?",
           options: [
-            "Client Credentials flow",
-            "Implicit flow",
             "Authorization Code flow with PKCE",
+            "Implicit flow",
             "Resource Owner Password flow",
+            "Client Credentials flow",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Authorization Code with PKCE is correct for mobile apps and SPAs. PKCE prevents authorization code interception without requiring a client secret, which cannot be securely stored in client-side code. The Implicit flow is deprecated.",
         },
@@ -90,12 +90,12 @@ For OAuth 2.0 flows, **Authorization Code with PKCE** is the correct choice for 
         {
           question: "What is a Cognito resource server used for?",
           options: [
-            "Hosting the Cognito hosted UI on a custom domain",
             "Defining custom OAuth 2.0 scopes for your own APIs",
             "Storing user profile data in DynamoDB",
+            "Hosting the Cognito hosted UI on a custom domain",
             "Configuring the token lifetime for app clients",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Resource servers define custom OAuth 2.0 scopes for your own APIs. A resource server represents your API and its scopes, which clients can request and include in Access Tokens for authorization.",
         },
@@ -127,11 +127,11 @@ Identity Pools assign different IAM roles based on authentication status. The **
             "What is the purpose of the unauthenticated role in a Cognito Identity Pool?",
           options: [
             "To grant admin-level AWS access for testing purposes",
-            "To provide limited AWS resource access to guest users who have not logged in",
-            "To allow the Identity Pool itself to call AWS services",
             "To handle token refresh for expired User Pool sessions",
+            "To allow the Identity Pool itself to call AWS services",
+            "To provide limited AWS resource access to guest users who have not logged in",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The unauthenticated role is assumed by guest users who have not authenticated. It enables anonymous access to specific AWS resources such as public S3 content or DynamoDB read-only access.",
         },
@@ -139,12 +139,12 @@ Identity Pools assign different IAM roles based on authentication status. The **
           question:
             "Which STS API action does a Cognito Identity Pool use internally to vend temporary credentials?",
           options: [
-            "AssumeRole",
             "AssumeRoleWithSAML",
-            "AssumeRoleWithWebIdentity",
+            "AssumeRole",
             "GetSessionToken",
+            "AssumeRoleWithWebIdentity",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Cognito Identity Pools call STS AssumeRoleWithWebIdentity internally when exchanging a provider token for temporary AWS credentials. This is the web identity federation mechanism.",
         },
@@ -165,11 +165,11 @@ The **Custom Authentication** flow uses three triggers in sequence (DefineAuthCh
             "Which Cognito Lambda trigger fires just before tokens are issued and allows modifying token claims?",
           options: [
             "Post-Confirmation",
-            "Pre-Authentication",
             "Pre-Token Generation",
             "Post-Authentication",
+            "Pre-Authentication",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The Pre-Token Generation trigger fires just before Cognito issues tokens. It allows you to add, modify, or remove claims in the ID Token and Access Token without changing the application's sign-in flow.",
         },
@@ -185,12 +185,12 @@ The **Custom Authentication** flow uses three triggers in sequence (DefineAuthCh
           question:
             "Which Cognito trigger enables transparent migration of users from a legacy auth system on their first sign-in?",
           options: [
-            "Pre-Sign-Up trigger",
             "Post-Confirmation trigger",
             "User Migration trigger",
+            "Pre-Sign-Up trigger",
             "Custom Authentication trigger",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The User Migration trigger fires when a user not found in Cognito attempts to sign in. The Lambda looks them up in the legacy system, and if found, migrates them to Cognito transparently — no password reset required.",
         },
@@ -255,12 +255,12 @@ One important limitation: the Cognito authorizer validates token authenticity bu
           question:
             "How does API Gateway's Cognito User Pool Authorizer validate a JWT without Lambda code?",
           options: [
-            "It calls Cognito's GetUser API on every request",
             "It checks the signature using the User Pool's JWKS endpoint and validates expiry and audience",
             "It decrypts the token using a KMS key shared with Cognito",
+            "It calls Cognito's GetUser API on every request",
             "It forwards the token to the Lambda function for validation",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "API Gateway's Cognito authorizer validates JWTs by fetching the User Pool's public JWKS (JSON Web Key Set) to verify the token signature, checking expiry, and validating the audience claim (app client ID) — all without Lambda code.",
         },
@@ -330,12 +330,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
           question:
             "Which AWS service does Cognito use for sending verification emails in production?",
           options: [
+            "Amazon SES",
             "Amazon SNS",
             "Amazon Pinpoint",
-            "Amazon SES",
             "AWS Lambda with SES integration",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Cognito uses Amazon SES for sending verification and confirmation emails. The default Cognito email has a low sending limit, so production applications with significant sign-up volume should configure Cognito to use their own SES identity.",
         },
@@ -353,12 +353,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
           question:
             "How can an S3 bucket policy restrict each user to their own prefix using Cognito Identity Pools?",
           options: [
-            "By using the aws:username condition key",
-            "By using the cognito-identity.amazonaws.com:sub claim in the bucket policy resource ARN",
             "By tagging each S3 object with the user's Cognito sub",
             "By using a Lambda authorizer on S3 API calls",
+            "By using the aws:username condition key",
+            "By using the cognito-identity.amazonaws.com:sub claim in the bucket policy resource ARN",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 bucket policies can use the cognito-identity.amazonaws.com:sub condition to restrict each user to their own prefix: arn:aws:s3:::bucket/${cognito-identity.amazonaws.com:sub}/*. This is evaluated per-request using the temporary credentials from the Identity Pool.",
         },
@@ -379,12 +379,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
           question:
             "In AppSync, how can you restrict a GraphQL type to users in the Admin Cognito group?",
           options: [
-            "By adding a Lambda authorizer that checks the cognito:groups claim",
-            'By using the @aws_auth(cognito_groups: ["Admin"]) directive in the GraphQL schema',
-            "By creating a separate AppSync API for admin users",
+            "By using the @aws_auth(cognito_groups: [\"Admin\"]) directive in the GraphQL schema",
+            'By adding a Lambda authorizer that checks the cognito:groups claim',
             "By filtering the resolver response based on the user's group",
+            "By creating a separate AppSync API for admin users",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             'AppSync natively supports Cognito User Pools as an authorization mode. The @aws_auth(cognito_groups: ["Admin"]) directive restricts access to a type or field to members of the specified Cognito group without any custom code.',
         },
@@ -433,12 +433,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
       question:
         "A developer needs to allow unauthenticated guest users to read public items from a DynamoDB table directly from the mobile app. Which Cognito component enables this?",
       options: [
-        "User Pool with a guest app client",
-        "Identity Pool unauthenticated role with DynamoDB read permissions",
-        "User Pool group with precedence 0",
         "Cognito Advanced Security Features guest mode",
+        "User Pool with a guest app client",
+        "User Pool group with precedence 0",
+        "Identity Pool unauthenticated role with DynamoDB read permissions",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The Identity Pool unauthenticated role is assumed by guest users who have not authenticated. By attaching DynamoDB read permissions to this role, anonymous users can access the table directly without signing in.",
     },
@@ -447,11 +447,11 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
         "A Cognito Lambda trigger takes 8 seconds to complete due to a slow DynamoDB write. What happens to the user's authentication?",
       options: [
         "The authentication succeeds but the trigger result is ignored",
+        "The user is placed in a pending state until the trigger completes",
         "The authentication fails because Lambda triggers must respond within 5 seconds",
         "Cognito retries the trigger up to 3 times before failing",
-        "The user is placed in a pending state until the trigger completes",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "All Cognito Lambda triggers must respond within 5 seconds. A trigger that takes 8 seconds will time out, causing the authentication flow to fail and returning an error to the user.",
     },
@@ -459,12 +459,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
       question:
         "Which Cognito token should a backend API validate to identify the calling user?",
       options: [
+        "Either the Access or Refresh Token — they contain the same claims",
+        "ID Token, because it contains identity claims like sub and email",
         "Access Token, because it contains AWS credentials",
         "Refresh Token, because it is the longest-lived",
-        "ID Token, because it contains identity claims like sub and email",
-        "Either the Access or Refresh Token — they contain the same claims",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The ID Token contains identity claims about the user — sub, email, name, group memberships, and custom attributes. Backend APIs validate the ID Token to identify who is making the request.",
     },
@@ -472,12 +472,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
       question:
         "A mobile app needs to let users upload photos directly to S3 using their own credentials. User Pool authentication is already in place. What is needed?",
       options: [
-        "An API Gateway endpoint that proxies the S3 upload",
         "A Cognito Identity Pool to exchange the User Pool JWT for temporary AWS credentials",
         "An IAM user with S3 permissions distributed with the app",
         "A Lambda function that generates pre-signed S3 URLs",
+        "An API Gateway endpoint that proxies the S3 upload",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "A Cognito Identity Pool exchanges the User Pool JWT for temporary AWS credentials via STS. The mobile app can then use those credentials to upload directly to S3 without routing through a backend.",
     },
@@ -498,12 +498,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
       question:
         "A developer wants to add a custom 'subscription_tier' claim to Cognito JWTs without changing the sign-in flow. Which trigger should they use?",
       options: [
-        "Post-Confirmation trigger",
         "Pre-Authentication trigger",
         "Pre-Token Generation trigger",
         "Custom Authentication trigger",
+        "Post-Confirmation trigger",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The Pre-Token Generation trigger fires just before Cognito issues tokens and allows modifying the claims that appear in the ID Token and Access Token. This is the correct way to inject custom claims without changing the sign-in flow.",
     },
@@ -524,12 +524,12 @@ Cognito uses **Amazon SES** for sending verification emails in production volume
       question:
         "What is the primary purpose of a Cognito User Pool compared to an Identity Pool?",
       options: [
-        "User Pool grants temporary AWS credentials; Identity Pool handles authentication",
         "User Pool handles authentication and issues JWTs; Identity Pool exchanges tokens for AWS credentials",
-        "User Pool stores user attributes in DynamoDB; Identity Pool manages OAuth scopes",
+        "User Pool grants temporary AWS credentials; Identity Pool handles authentication",
         "User Pool and Identity Pool are interchangeable — either can be used for authentication",
+        "User Pool stores user attributes in DynamoDB; Identity Pool manages OAuth scopes",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "User Pool = authentication (who are you? — handles sign-up, sign-in, MFA, issues JWTs). Identity Pool = authorization for AWS resources (what can you access? — exchanges tokens for temporary AWS credentials via STS).",
     },

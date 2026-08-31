@@ -32,12 +32,12 @@ When Textract processes a document, it returns a hierarchical block structure. A
           question:
             "What key advantage does Amazon Textract have over traditional OCR for document processing?",
           options: [
-            "Textract is faster at reading text from high-resolution images",
             "Textract understands document structure — it links form field labels to values, preserves table grids, and identifies layout elements — rather than just recognizing characters",
             "Textract supports more languages than standard OCR engines",
             "Textract can process handwritten text, which traditional OCR cannot do at all",
+            "Textract is faster at reading text from high-resolution images",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Textract's key differentiator is structural understanding. Traditional OCR converts pixels to characters but cannot determine structure. Textract uses ML to understand which text belongs to a form field label vs its value, which cells belong to which table, and what the layout hierarchy is.",
         },
@@ -54,11 +54,11 @@ When Textract processes a document, it returns a hierarchical block structure. A
             "Which Amazon Textract API and feature type would you use to extract form field labels and their corresponding values from an insurance claim form?",
           options: [
             "DetectDocumentText — it automatically links labels to values",
-            "AnalyzeDocument with FeatureTypes=['FORMS'] — it identifies and links key-value pairs",
             "AnalyzeDocument with FeatureTypes=['TABLES'] — form fields are stored as single-column tables",
             "AnalyzeDocument with FeatureTypes=['LAYOUT'] — it identifies all semantic regions including form fields",
+            "AnalyzeDocument with FeatureTypes=['FORMS'] — it identifies and links key-value pairs",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AnalyzeDocument with FORMS feature type extracts key-value pairs from documents — it identifies form field labels (keys) and their corresponding values and explicitly links them in the output. DetectDocumentText only extracts raw text without any structural linking.",
         },
@@ -67,11 +67,11 @@ When Textract processes a document, it returns a hierarchical block structure. A
             "You need to extract financial data from a table in a PDF report, preserving row and column structure. Which Textract API and feature type should you use?",
           options: [
             "DetectDocumentText — it preserves spatial layout including tables",
-            "AnalyzeDocument with FeatureTypes=['TABLES'] — it identifies tabular regions and returns cells with row/column positions",
             "AnalyzeDocument with FeatureTypes=['LAYOUT'] — LAYOUT mode captures all structural elements including tables",
             "AnalyzeDocument with FeatureTypes=['FORMS'] — financial tables are processed as multi-value form fields",
+            "AnalyzeDocument with FeatureTypes=['TABLES'] — it identifies tabular regions and returns cells with row/column positions",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AnalyzeDocument with TABLES feature type identifies tabular regions and returns cells with their row and column positions, preserving the grid structure. This is the correct choice when you need to extract structured tabular data with row/column relationships intact.",
         },
@@ -86,8 +86,8 @@ Queries use a question-answer model fine-tuned on document understanding. They w
         {
           question:
             "What is the maximum number of Queries you can submit per page in a single Amazon Textract AnalyzeDocument call?",
-          options: ["10", "20", "30", "50"],
-          correctIndex: 2,
+          options: ["20", "30", "10", "50"],
+          correctIndex: 1,
           explanation:
             "Amazon Textract supports up to 30 queries per page per AnalyzeDocument call. Queries allow you to ask specific natural language questions about a document and receive direct answers without parsing raw Block output.",
         },
@@ -95,12 +95,12 @@ Queries use a question-answer model fine-tuned on document understanding. They w
           question:
             "What advantage does the Textract Queries feature provide over parsing raw Block output?",
           options: [
-            "Queries are faster because they skip the ML inference step",
-            "Queries allow you to ask natural language questions and receive direct answers, eliminating the need to write heuristics to locate specific information in thousands of Block objects",
             "Queries support documents in more languages than the standard AnalyzeDocument API",
             "Queries can process documents without storing them in S3 first",
+            "Queries allow you to ask natural language questions and receive direct answers, eliminating the need to write heuristics to locate specific information in thousands of Block objects",
+            "Queries are faster because they skip the ML inference step",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Queries let you ask specific natural language questions ('What is the invoice number?') and receive direct answers, significantly reducing application code. Without Queries, you would need to write heuristics to search through potentially thousands of Block objects to find specific information.",
         },
@@ -116,20 +116,20 @@ The async pattern is essential for enterprise document automation where document
           question:
             "A legal firm needs to process 500-page contract PDFs stored in S3 with Amazon Textract. Which API pattern should they use?",
           options: [
-            "DetectDocumentText called once per page with the PDF split into individual images",
             "AnalyzeDocument with the PDF passed as raw bytes in a single synchronous call",
             "StartDocumentAnalysis to initiate an async job, receive SNS completion notification, then call GetDocumentAnalysis to retrieve results",
             "StartDocumentTextDetection with the async flag disabled for faster synchronous processing",
+            "DetectDocumentText called once per page with the PDF split into individual images",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Multi-page documents stored in S3 require async Textract APIs. The pattern is: StartDocumentAnalysis (or StartDocumentTextDetection) → Textract processes async → SNS notification on completion → GetDocumentAnalysis (paginated) to retrieve results. The sync APIs cannot handle multi-page PDFs.",
         },
         {
           question:
             "What is the maximum number of pages Amazon Textract can process in a single asynchronous text detection job?",
-          options: ["100 pages", "500 pages", "3,000 pages", "10,000 pages"],
-          correctIndex: 2,
+          options: ["10,000 pages", "3,000 pages", "100 pages", "500 pages"],
+          correctIndex: 1,
           explanation:
             "Amazon Textract's asynchronous StartDocumentTextDetection API can process documents up to 3,000 pages. This makes it suitable for lengthy contracts, large reports, and other enterprise document types that would far exceed any synchronous API limit.",
         },
@@ -147,12 +147,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
           question:
             "Which Amazon Textract API is specifically designed to extract structured fields from US driver's licenses and passports?",
           options: [
-            "AnalyzeDocument with FORMS feature type",
-            "AnalyzeExpense",
             "AnalyzeID",
+            "AnalyzeExpense",
+            "AnalyzeDocument with FORMS feature type",
             "DetectDocumentText with post-processing for identity fields",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "AnalyzeID is purpose-built for US identity documents (driver's licenses and passports). It extracts and normalizes fields like first name, last name, date of birth, expiration date, and document number — returning structured JSON without requiring custom field-parsing logic.",
         },
@@ -160,12 +160,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
           question:
             "How does Amazon Textract integrate with Amazon Augmented AI (A2I) for document processing?",
           options: [
-            "A2I automatically reprocesses any document where Textract returns zero blocks",
             "A2I routes documents to human reviewers when Textract's confidence scores fall below a configured threshold, enabling human-in-the-loop validation",
-            "A2I trains custom Textract models using human-reviewed documents as labeled training data",
             "A2I provides a visual UI for correcting Textract output before it is stored in S3",
+            "A2I trains custom Textract models using human-reviewed documents as labeled training data",
+            "A2I automatically reprocesses any document where Textract returns zero blocks",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "When Textract's confidence scores fall below a threshold, A2I routes the document to a human reviewer through a configurable workforce. This human-in-the-loop pattern ensures high accuracy for critical documents where automated extraction alone may be insufficient.",
         },
@@ -209,12 +209,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "A hospital needs to automatically extract patient name, date of birth, and insurance ID from scanned intake forms. Which Textract API and feature type is most appropriate?",
       options: [
-        "DetectDocumentText — it returns all text including form fields",
         "AnalyzeDocument with FeatureTypes=['FORMS'] — it links field labels to their values as key-value pairs",
-        "AnalyzeDocument with FeatureTypes=['LAYOUT'] — it identifies semantic regions including form sections",
         "AnalyzeID — it is purpose-built for medical intake forms",
+        "DetectDocumentText — it returns all text including form fields",
+        "AnalyzeDocument with FeatureTypes=['LAYOUT'] — it identifies semantic regions including form sections",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AnalyzeDocument with FORMS extracts key-value pairs — it links 'Patient Name' to 'John Smith', 'Date of Birth' to '01/15/1985', etc. AnalyzeID is specifically for US driver's licenses and passports, not general medical forms.",
     },
@@ -222,12 +222,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "What does the AnalyzeExpense API in Amazon Textract return for a scanned receipt?",
       options: [
-        "A list of words and lines with bounding boxes, identical to DetectDocumentText",
         "Structured data including vendor name, total amount, tax amount, line items, quantities, and prices — suitable for accounts payable automation",
         "A key-value pair for every printed label on the receipt, identical to AnalyzeDocument FORMS",
         "Only the total amount and vendor name — other line items require manual parsing",
+        "A list of words and lines with bounding boxes, identical to DetectDocumentText",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "AnalyzeExpense is purpose-built for receipts and invoices. It returns structured data including vendor name, total amount, tax amount, and line items with quantities and prices in a normalized format designed for accounts payable automation workflows.",
     },
@@ -235,12 +235,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "You want to ask 'What is the effective date of this contract?' across thousands of different contract templates with varying layouts. Which Textract feature handles this most efficiently?",
       options: [
-        "AnalyzeDocument with FORMS — it will find the 'Effective Date' key-value pair in each contract",
         "Textract Queries — you pose the question and Textract locates the answer regardless of layout",
+        "AnalyzeDocument with FORMS — it will find the 'Effective Date' key-value pair in each contract",
         "DetectDocumentText with downstream regex matching to find date patterns",
         "AnalyzeLending — it classifies contract types and extracts dates automatically",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Textract Queries are ideal for this use case. You pose a natural language question ('What is the effective date?') and Textract finds the answer regardless of how different vendors lay out their contracts — eliminating the need to write layout-specific heuristics for each template.",
     },
@@ -248,12 +248,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "Which Textract async API pattern is correct for processing a multi-page PDF stored in S3?",
       options: [
-        "AnalyzeDocument → poll GetDocumentStatus until complete → retrieve results",
         "StartDocumentAnalysis → receive SNS notification → GetDocumentAnalysis (paginated)",
+        "AnalyzeDocument → poll GetDocumentStatus until complete → retrieve results",
         "DetectDocumentText with async=true parameter → results streamed via Kinesis",
         "StartDocumentTextDetection → poll S3 output bucket for the result file",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The correct async pattern is: StartDocumentAnalysis (initiates the job) → Textract processes and sends completion to SNS → your application receives the SNS notification → GetDocumentAnalysis with pagination to retrieve Block results. This pattern applies to both StartDocumentAnalysis and StartDocumentTextDetection.",
     },
@@ -261,12 +261,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "A financial services company uses Textract to extract data from loan applications. For 5% of applications, confidence scores are low. How should they handle these?",
       options: [
-        "Resubmit those documents using a different Textract API for a second opinion",
-        "Discard low-confidence extractions and require customers to re-submit cleaner documents",
         "Integrate Amazon A2I to route low-confidence documents to human reviewers for validation",
         "Lower the confidence threshold so all extractions are accepted automatically",
+        "Resubmit those documents using a different Textract API for a second opinion",
+        "Discard low-confidence extractions and require customers to re-submit cleaner documents",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Amazon Augmented AI (A2I) is the correct integration for low-confidence Textract results. A2I routes those documents to a human review workforce, ensuring accuracy for critical decisions without discarding valid documents or lowering quality standards.",
     },
@@ -287,12 +287,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "Which Amazon Textract API would an accounts payable team use to automatically process invoices from multiple vendors?",
       options: [
-        "AnalyzeDocument with FORMS — invoices are treated as key-value form documents",
-        "DetectDocumentText — the team parses vendor name and totals from raw text",
         "AnalyzeExpense — it is purpose-built for receipts and invoices with structured field extraction",
+        "DetectDocumentText — the team parses vendor name and totals from raw text",
+        "AnalyzeDocument with FORMS — invoices are treated as key-value form documents",
         "AnalyzeID — it handles commercial identity documents including vendor tax IDs",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "AnalyzeExpense is purpose-built for receipts and invoices, automatically extracting vendor name, total amount, tax amount, and line items in a structured format. This eliminates the need for custom post-processing logic to parse these fields from raw text or generic form extraction.",
     },
@@ -300,12 +300,12 @@ Textract integrates naturally with **Amazon Augmented AI (A2I)** for human revie
       question:
         "In Amazon Textract output, what does a KEY_VALUE_SET Block type represent?",
       options: [
-        "A table cell that contains both a row key and a column value",
-        "A form field consisting of a label (KEY) linked to its corresponding value (VALUE) in the document",
         "A database entry mapping a document ID to its S3 location",
         "A metadata block containing the document's page count and processing confidence",
+        "A table cell that contains both a row key and a column value",
+        "A form field consisting of a label (KEY) linked to its corresponding value (VALUE) in the document",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "KEY_VALUE_SET Blocks represent form fields. Each KEY_VALUE_SET contains a KEY Block (the form label, e.g., 'Date of Birth') linked via a relationship to a VALUE Block (the filled-in answer, e.g., '01/15/1985'). This is the structural output from AnalyzeDocument with FORMS enabled.",
     },

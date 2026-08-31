@@ -23,12 +23,12 @@ The **CodeDeploy Agent** is a daemon that runs on EC2 and on-premises instances.
           question:
             "Which compute platforms require the CodeDeploy Agent to be installed?",
           options: [
+            "Only on-premises instances — EC2 uses EC2 instance connect",
             "EC2, Lambda, and ECS — all platforms require the agent",
             "Lambda and ECS only — EC2 uses API-based deployments",
             "EC2 and on-premises instances — Lambda and ECS do not need the agent",
-            "Only on-premises instances — EC2 uses EC2 instance connect",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "The CodeDeploy Agent is required on EC2 and on-premises instances — it polls for deployment work, downloads the revision, and executes lifecycle hooks. Lambda and ECS deployments do not require an agent; CodeDeploy manages traffic shifting directly through Lambda aliases and ALB target groups.",
         },
@@ -36,11 +36,11 @@ The **CodeDeploy Agent** is a daemon that runs on EC2 and on-premises instances.
           question: "What is a CodeDeploy deployment group?",
           options: [
             "A set of buildspec.yml files used across multiple deployments",
-            "The set of deployment targets (EC2 instances by tag, an ASG, a Lambda alias, or ECS service) within a CodeDeploy application",
             "A group of developers with permission to trigger deployments",
             "A collection of AppSpec files stored in S3",
+            "The set of deployment targets (EC2 instances by tag, an ASG, a Lambda alias, or ECS service) within a CodeDeploy application",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A deployment group defines the specific targets for a deployment within a CodeDeploy application. For EC2, this is instances selected by tag or ASG membership. For Lambda, it's an alias. For ECS, it's a specific service. The deployment group also holds the deployment configuration (pace of traffic shifting).",
         },
@@ -61,11 +61,11 @@ For **Lambda**, CodeDeploy manages traffic shifting between two function version
             "Which deployment type is available ONLY for EC2/On-Premises in CodeDeploy?",
           options: [
             "Blue/green deployment",
-            "Canary deployment",
             "In-place deployment",
+            "Canary deployment",
             "Linear deployment",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "In-place deployment is available only for EC2 and on-premises targets. It installs the new version on existing instances, which are briefly out of service during the update. Lambda and ECS use blue/green strategies with traffic shifting — there is no in-place option for those platforms.",
         },
@@ -86,12 +86,12 @@ For **Lambda**, CodeDeploy manages traffic shifting between two function version
           question:
             "In ECS blue/green deployments, what mechanism does CodeDeploy use to shift traffic?",
           options: [
-            "Route 53 weighted routing between two ECS clusters",
             "Two ALB target groups — blue for current traffic, green for the new task revision",
-            "Two separate ECS clusters with DNS failover",
+            "Route 53 weighted routing between two ECS clusters",
             "Lambda@Edge routing requests between two ECS services",
+            "Two separate ECS clusters with DNS failover",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "ECS blue/green deployments use two ALB target groups. The blue target group carries current live traffic; the green target group receives the new task revision. CodeDeploy shifts traffic from blue to green using the ALB listener rules, supporting Canary, Linear, and AllAtOnce strategies.",
         },
@@ -149,11 +149,11 @@ The EC2 lifecycle event order is: ApplicationStop → DownloadBundle → BeforeI
             "What is the correct EC2 lifecycle event order in a CodeDeploy AppSpec?",
           options: [
             "BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService",
-            "ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService",
-            "DownloadBundle → BeforeInstall → Install → ApplicationStart → ValidateService → ApplicationStop",
             "Install → BeforeInstall → AfterInstall → ApplicationStart → ValidateService",
+            "DownloadBundle → BeforeInstall → Install → ApplicationStart → ValidateService → ApplicationStop",
+            "ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The EC2 lifecycle event order is: ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService. If any hook script fails, the deployment fails and CodeDeploy can automatically roll back.",
         },
@@ -161,12 +161,12 @@ The EC2 lifecycle event order is: ApplicationStop → DownloadBundle → BeforeI
           question:
             "In a Lambda AppSpec file, what does the BeforeAllowTraffic hook allow you to do?",
           options: [
-            "Validate the Lambda function's IAM permissions before deployment",
             "Run validation code (smoke tests, warmup) before any real user traffic reaches the new Lambda version",
-            "Configure the Lambda alias to point to the new version",
             "Check CloudWatch alarms before the traffic shift begins",
+            "Configure the Lambda alias to point to the new version",
+            "Validate the Lambda function's IAM permissions before deployment",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The BeforeAllowTraffic hook runs your validation code before CodeDeploy shifts any traffic to the new Lambda version. If this hook fails, CodeDeploy rolls back without ever exposing users to the new version. This is the safest point to run smoke tests and warmup requests.",
         },
@@ -183,12 +183,12 @@ For Lambda specifically, the **BeforeAllowTraffic** hook is especially powerful.
         {
           question: "What does a CodeDeploy rollback actually do?",
           options: [
-            "Reverts all file changes and restores the previous application state",
-            "Triggers a new deployment of the previously working revision — it does not undo changes",
-            "Restores the EC2 instance from an EBS snapshot taken before deployment",
             "Reverts the ALB target group registration to the previous state",
+            "Reverts all file changes and restores the previous application state",
+            "Restores the EC2 instance from an EBS snapshot taken before deployment",
+            "Triggers a new deployment of the previously working revision — it does not undo changes",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "A CodeDeploy rollback is not an undo operation — it triggers a new deployment using the previously working revision. The old revision files must still be available in S3 or GitHub. For Lambda and ECS blue/green, rollback is nearly instantaneous since it's just a traffic shift back to the original version.",
         },
@@ -196,12 +196,12 @@ For Lambda specifically, the **BeforeAllowTraffic** hook is especially powerful.
           question:
             "What are the two triggers for automatic rollback in CodeDeploy?",
           options: [
-            "Deployment timeout and health check failure",
             "Deployment failure (lifecycle hook fails) and CloudWatch Alarm breach",
-            "SNS notification failure and EventBridge rule mismatch",
+            "Deployment timeout and health check failure",
             "S3 artifact unavailability and IAM permission error",
+            "SNS notification failure and EventBridge rule mismatch",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "CodeDeploy supports automatic rollback on two triggers: (1) deployment failure, where any lifecycle hook script fails, and (2) CloudWatch Alarm breach, where a metric like error rate or latency spikes after deployment. The CloudWatch Alarm integration provides a safety net based on real application health.",
         },
@@ -219,12 +219,12 @@ During the shift, CloudWatch monitors your configured alarms. If any alarm fires
           question:
             "What Lambda resource must exist before CodeDeploy can perform alias traffic shifting?",
           options: [
+            "An EventBridge rule to trigger the deployment",
             "A Lambda layer containing the deployment configuration",
             "Published Lambda function versions and an alias — $LATEST cannot be used for traffic shifting",
-            "An EventBridge rule to trigger the deployment",
             "A Lambda destination configured on the function",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda alias traffic shifting requires published function versions (not $LATEST) and an alias that points to the stable version. CodeDeploy shifts traffic between versions through the alias. $LATEST is not a version and cannot be used with CodeDeploy traffic shifting.",
         },
@@ -233,11 +233,11 @@ During the shift, CloudWatch monitors your configured alarms. If any alarm fires
             "What happens during a Lambda canary deployment if a CloudWatch alarm fires?",
           options: [
             "The deployment pauses and waits for manual approval to continue",
-            "CodeDeploy immediately shifts all traffic back to the original Lambda version",
             "The alarm is ignored — CodeDeploy completes the shift regardless",
             "CodeDeploy shifts to 50% and waits for the alarm to clear",
+            "CodeDeploy immediately shifts all traffic back to the original Lambda version",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "If a CloudWatch alarm fires during a Lambda canary deployment, CodeDeploy immediately shifts 100% of traffic back to the original version. This automatic rollback on alarm provides a safety net — if the new version causes elevated error rates or latency, the system reverts without manual intervention.",
         },
@@ -257,12 +257,12 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
           question:
             "When a new EC2 instance launches in an Auto Scaling Group integrated with CodeDeploy, what happens?",
           options: [
-            "The instance launches with the base AMI and must be manually updated",
-            "The instance automatically receives the latest deployed CodeDeploy revision",
-            "CodeDeploy pauses the deployment until the new instance is manually registered",
             "The instance is immediately terminated and replaced by a pre-baked AMI",
+            "CodeDeploy pauses the deployment until the new instance is manually registered",
+            "The instance automatically receives the latest deployed CodeDeploy revision",
+            "The instance launches with the base AMI and must be manually updated",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "When CodeDeploy is integrated with an Auto Scaling Group, new instances launching due to scaling automatically receive the latest deployed revision. The ASG lifecycle hooks connect to CodeDeploy to ensure fleet consistency — without this, new instances would run the base AMI code.",
         },
@@ -337,12 +337,12 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
       question:
         "A developer needs to run smoke tests against a new Lambda version before any real user traffic reaches it. Which CodeDeploy hook should be used?",
       options: [
-        "AfterAllowTraffic",
         "BeforeInstall",
         "BeforeAllowTraffic",
         "ValidateService",
+        "AfterAllowTraffic",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "BeforeAllowTraffic runs before CodeDeploy shifts any traffic to the new Lambda version. If the hook's Lambda function fails, CodeDeploy rolls back without exposing users to the new version. AfterAllowTraffic runs after traffic is already flowing — failures still trigger rollback but users may have already been affected.",
     },
@@ -351,11 +351,11 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
         "An on-premises server needs to be managed by CodeDeploy. What prerequisite must be met?",
       options: [
         "The server must be accessible via AWS Systems Manager Session Manager",
-        "The CodeDeploy Agent must be installed on the server",
-        "The server must run Amazon Linux 2",
         "The server must have an IAM instance profile attached",
+        "The server must run Amazon Linux 2",
+        "The CodeDeploy Agent must be installed on the server",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The CodeDeploy Agent must be installed and running on on-premises servers (and EC2 instances). The agent polls CodeDeploy for deployment work, downloads the revision, and executes lifecycle hooks. No agent is needed for Lambda or ECS deployments.",
     },
@@ -363,12 +363,12 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
       question:
         "What is the key difference between blue/green rollback and in-place rollback in CodeDeploy?",
       options: [
-        "Blue/green rollback is manual; in-place rollback is automatic",
         "Blue/green rollback is nearly instantaneous (shift traffic back); in-place rollback re-deploys the previous revision to existing instances",
+        "Blue/green rollback is manual; in-place rollback is automatic",
         "In-place rollback uses snapshots; blue/green rollback uses DNS switching",
         "They are identical — both trigger a new deployment of the previous revision",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Blue/green rollback is nearly instantaneous — CodeDeploy simply shifts ALB traffic back to the old target group (blue), since the old environment was kept running. In-place rollback requires re-deploying the previous revision to existing instances by running installation scripts again, which takes time.",
     },
@@ -389,12 +389,12 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
       question:
         "Which CodeDeploy deployment strategy adds 10% of traffic to a new Lambda version every minute until reaching 100%?",
       options: [
+        "Rolling10Percent",
         "Canary10Percent10Minutes",
         "AllAtOnce",
         "Linear10PercentEvery1Minute",
-        "Rolling10Percent",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Linear10PercentEvery1Minute increases the percentage of traffic going to the new Lambda version by 10% each minute, reaching 100% after 10 minutes. During this time, CloudWatch alarms are monitored and any alarm triggers an automatic rollback.",
     },
@@ -403,11 +403,11 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
         "A CodeDeploy deployment to EC2 fails at the AfterInstall hook. What happens next by default?",
       options: [
         "The deployment retries the AfterInstall hook up to 3 times",
-        "The deployment fails and CodeDeploy can automatically roll back by re-deploying the previous revision",
         "The deployment skips AfterInstall and continues to ApplicationStart",
+        "The deployment fails and CodeDeploy can automatically roll back by re-deploying the previous revision",
         "The instance is terminated and replaced by a new one from the AMI",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "If any lifecycle hook script fails, the deployment fails. If automatic rollback on deployment failure is configured, CodeDeploy triggers a new deployment of the previously working revision. CodeDeploy does not retry individual hooks — failure means failure.",
     },
@@ -415,12 +415,12 @@ CodeDeploy publishes deployment events to **SNS** and **EventBridge**, enabling 
       question:
         "For an ECS blue/green deployment using CodeDeploy, what does 'green' represent?",
       options: [
-        "The ECS cluster running the current stable version",
         "The new ALB target group receiving the new ECS task revision",
+        "The ECS cluster running the current stable version",
         "The production environment after the deployment is complete",
         "The canary percentage of traffic being tested",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "In CodeDeploy ECS blue/green deployments, the green target group receives the new ECS task revision. The blue target group carries current live traffic. CodeDeploy shifts traffic from blue to green, and the old blue tasks are terminated after the bake time. Rollback means shifting traffic back to blue.",
     },

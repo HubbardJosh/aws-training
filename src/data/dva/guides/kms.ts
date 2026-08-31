@@ -24,11 +24,11 @@ export const kmsGuide: ServiceGuide = {
             "What is the monthly cost of a Customer Managed Key (CMK) in AWS KMS?",
           options: [
             "Free — only API calls are charged",
+            "$5 per month with unlimited API calls",
             "$0.10 per month plus API call charges",
             "$1 per month plus $0.03 per 10,000 API calls",
-            "$5 per month with unlimited API calls",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Customer Managed Keys cost $1 per month per key plus $0.03 per 10,000 API calls. AWS Managed Keys are free to use (only API calls made on your behalf are charged).",
         },
@@ -47,8 +47,8 @@ export const kmsGuide: ServiceGuide = {
         {
           question:
             "Which S3 encryption option requires the customer to supply the encryption key on every API request?",
-          options: ["SSE-S3", "SSE-KMS", "SSE-C", "Client-Side Encryption"],
-          correctIndex: 2,
+          options: ["Client-Side Encryption", "SSE-C", "SSE-KMS", "SSE-S3"],
+          correctIndex: 1,
           explanation:
             "SSE-C (Server-Side Encryption with Customer-Provided Keys) requires you to supply the key material on every request. S3 uses it to encrypt or decrypt but never stores the key — only an HMAC for verification. All SSE-C requests must use HTTPS.",
         },
@@ -68,12 +68,12 @@ export const kmsGuide: ServiceGuide = {
           question:
             "What is a critical limitation of Customer Managed Keys with imported (BYOK) key material?",
           options: [
-            "They cannot be used with S3 encryption",
             "Automatic rotation is not available — manual rotation required",
-            "They cost twice as much as KMS-generated keys",
             "They cannot be used in cross-account scenarios",
+            "They cost twice as much as KMS-generated keys",
+            "They cannot be used with S3 encryption",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Keys with imported (BYOK) material do not support automatic rotation. You must rotate manually by creating a new CMK and updating all aliases and application references. Additionally, deleting the imported material is irreversible and permanently locks out encrypted data.",
         },
@@ -95,11 +95,11 @@ export const kmsGuide: ServiceGuide = {
             "Which key material origin provides FIPS 140-2 Level 3 single-tenant HSM isolation?",
           options: [
             "KMS-generated (default)",
+            "AWS Managed Keys",
             "External (BYOK)",
             "Custom Key Store (CloudHSM)",
-            "AWS Managed Keys",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Custom Key Store backed by CloudHSM stores key material in your own dedicated CloudHSM cluster, providing single-tenant HSM isolation with FIPS 140-2 Level 3 certification. KMS-managed HSMs are FIPS 140-2 validated but multi-tenant.",
         },
@@ -118,8 +118,8 @@ The practical benefits are significant: there's no size limit on the data you en
         {
           question:
             "What is the maximum data size that KMS can directly encrypt with the Encrypt API?",
-          options: ["1 KB", "4 KB", "64 KB", "1 MB"],
-          correctIndex: 1,
+          options: ["64 KB", "1 MB", "4 KB", "1 KB"],
+          correctIndex: 2,
           explanation:
             "KMS's direct Encrypt API is limited to 4 KB. For data larger than 4 KB, use envelope encryption: call GenerateDataKey to get a Data Encryption Key, use the DEK to encrypt your data locally, then store the encrypted DEK alongside the ciphertext.",
         },
@@ -140,12 +140,12 @@ The practical benefits are significant: there's no size limit on the data you en
           question:
             "What KMS API variant returns only the encrypted DEK without the plaintext, suitable for deferred encryption?",
           options: [
-            "GenerateDataKey",
-            "GenerateDataKeyPair",
             "GenerateDataKeyWithoutPlaintext",
+            "GenerateDataKeyPair",
+            "GenerateDataKey",
             "CreateDataKey",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "GenerateDataKeyWithoutPlaintext returns only the encrypted DEK with no plaintext version. This is useful for pre-generating keys that will be used for future encryption operations, avoiding the security risk of having plaintext key material in memory when not immediately needed.",
         },
@@ -165,12 +165,12 @@ For **cross-account key sharing**, two things must both be true: the key policy 
           question:
             "An IAM policy grants kms:Decrypt on a CMK ARN, but the key policy does not mention the IAM principal. Can the principal decrypt data?",
           options: [
-            "Yes, IAM policies are sufficient for KMS access",
             "No, the key policy must also allow access for IAM policies to be effective",
+            "Yes, IAM policies are sufficient for KMS access",
             "Yes, if the principal is in the same account as the key",
             "No, but only because cross-account access is not configured",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "IAM policies alone cannot grant access to a KMS CMK. The key policy is the primary access control mechanism and must also allow the action. The default key policy includes a delegation statement that allows IAM policies to work, but without it, IAM policies have no effect.",
         },
@@ -178,12 +178,12 @@ For **cross-account key sharing**, two things must both be true: the key policy 
           question:
             "What condition key restricts a KMS key so it can only be used through a specific AWS service (e.g., S3)?",
           options: [
-            "kms:CallerService",
-            "kms:ViaService",
             "aws:SourceService",
             "kms:AllowedService",
+            "kms:CallerService",
+            "kms:ViaService",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "kms:ViaService restricts key usage to calls originating from a specific AWS service. For example, setting kms:ViaService to 's3.us-east-1.amazonaws.com' prevents direct KMS API calls and allows the key only when S3 is calling KMS on the caller's behalf.",
         },
@@ -216,20 +216,20 @@ When you enable **automatic rotation** on a CMK with KMS-generated material, KMS
           question:
             "When automatic KMS key rotation occurs, what happens to data that was encrypted with the old key material?",
           options: [
-            "It must be manually re-encrypted with the new key material",
-            "It becomes inaccessible until re-encrypted",
-            "It can still be decrypted — KMS retains all old key material versions",
             "It is automatically re-encrypted with the new key material in the background",
+            "It becomes inaccessible until re-encrypted",
+            "It must be manually re-encrypted with the new key material",
+            "It can still be decrypted — KMS retains all old key material versions",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "KMS retains all historical key material versions and automatically uses the correct version when decrypting. Data encrypted with old key material remains fully accessible without any re-encryption. The key ID, ARN, and aliases remain unchanged, so applications require no updates.",
         },
         {
           question:
             "What is the minimum waiting period when scheduling a KMS key for deletion?",
-          options: ["1 day", "7 days", "14 days", "30 days"],
-          correctIndex: 1,
+          options: ["14 days", "30 days", "7 days", "1 day"],
+          correctIndex: 2,
           explanation:
             "The minimum waiting period for scheduled KMS key deletion is 7 days (maximum is 30 days). During this window the key is disabled and cannot be used, but deletion can be cancelled. After the waiting period, deletion is permanent and irreversible.",
         },
@@ -237,12 +237,12 @@ When you enable **automatic rotation** on a CMK with KMS-generated material, KMS
           question:
             "You need to rotate a BYOK (imported key material) CMK. What is the correct approach?",
           options: [
-            "Enable automatic rotation in the KMS console",
-            "Use the RotateKey API to rotate the imported material",
-            "Create a new CMK, update aliases and application references, then re-encrypt data",
             "Import new key material under the same CMK ARN",
+            "Create a new CMK, update aliases and application references, then re-encrypt data",
+            "Use the RotateKey API to rotate the imported material",
+            "Enable automatic rotation in the KMS console",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Keys with imported material do not support automatic rotation. Manual rotation requires creating a new CMK, updating all aliases and application configurations to point to the new key, keeping the old key enabled until all data is re-encrypted, then disabling the old key.",
         },
@@ -262,12 +262,12 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
           question:
             "What exception does KMS return when decryption is attempted with a different encryption context than was used during encryption?",
           options: [
-            "AccessDeniedException",
-            "InvalidKeyUsageException",
             "InvalidCiphertextException",
             "ContextMismatchException",
+            "AccessDeniedException",
+            "InvalidKeyUsageException",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "KMS returns InvalidCiphertextException when the encryption context provided during decryption does not match the context used during encryption. The context must be exactly identical — even a single character difference causes decryption to fail.",
         },
@@ -275,11 +275,11 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
           question: "Is the encryption context itself encrypted in KMS?",
           options: [
             "Yes, it is encrypted along with the data",
+            "No, but it is hashed and stored securely",
             "No, it is stored as plaintext additional authenticated data (AAD)",
             "Yes, but only the values — keys are stored in plaintext",
-            "No, but it is hashed and stored securely",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The encryption context is NOT encrypted — it is stored and logged as plaintext additional authenticated data (AAD). Its security value comes from being cryptographically bound to the ciphertext, not from being secret. It is logged verbatim in CloudTrail.",
         },
@@ -287,12 +287,12 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
           question:
             "What is the primary security benefit of using encryption context?",
           options: [
-            "It allows decryption without KMS access in an emergency",
             "It prevents ciphertext from being used in a different context than intended",
+            "It allows decryption without KMS access in an emergency",
             "It reduces the cost of KMS API calls by caching context",
             "It enables automatic key rotation when context values change",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Encryption context cryptographically binds ciphertext to its intended use case. Even if an attacker captures the ciphertext and the correct context values, they still need KMS access — and the ciphertext cannot be decrypted in a different context (e.g., moved to a different user's session store).",
         },
@@ -312,12 +312,12 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
           question:
             "What does the S3 Bucket Key feature do to reduce KMS costs?",
           options: [
-            "It compresses objects before encrypting them",
             "It generates a short-lived bucket-level DEK in S3, reducing per-object KMS API calls by up to 99%",
-            "It caches decrypted objects in memory to avoid repeated KMS calls",
             "It switches from SSE-KMS to SSE-S3 for low-value objects automatically",
+            "It compresses objects before encrypting them",
+            "It caches decrypted objects in memory to avoid repeated KMS calls",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "S3 Bucket Keys reduce KMS API call volume by generating a short-lived bucket-level DEK within S3. S3 uses this bucket-level DEK to encrypt individual objects without calling KMS per-object, only refreshing the bucket DEK periodically. This reduces KMS calls by up to 99% for heavily accessed buckets.",
         },
@@ -338,12 +338,12 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
           question:
             "Every call to GetSecretValue on an AWS Secrets Manager secret triggers what KMS action?",
           options: [
-            "kms:GenerateDataKey",
             "kms:Decrypt",
             "kms:Encrypt",
+            "kms:GenerateDataKey",
             "kms:DescribeKey",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Secrets Manager encrypts secrets at rest using KMS. Every GetSecretValue call internally triggers a kms:Decrypt operation to decrypt the secret value. This counts against your KMS request quota and can add cost for high-frequency secret access patterns.",
         },
@@ -407,11 +407,11 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
         "A KMS key policy does not include a delegation statement allowing IAM policies to work. A developer's IAM role has kms:Decrypt permission on the key. Can the developer decrypt data?",
       options: [
         "Yes, IAM policies always override key policies",
-        "No, without the delegation statement in the key policy, IAM policies have no effect",
-        "Yes, if the developer is in the same AWS account as the key",
         "No, but only because the developer needs kms:DescribeKey permission first",
+        "Yes, if the developer is in the same AWS account as the key",
+        "No, without the delegation statement in the key policy, IAM policies have no effect",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "The key policy is the primary access control for KMS CMKs. IAM policies can only grant KMS access if the key policy includes a delegation statement allowing the account to use IAM for access control. Without this statement, IAM policies are ineffective regardless of what they grant.",
     },
@@ -431,12 +431,12 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
     {
       question: "What does kms:ViaService allow you to enforce?",
       options: [
-        "That a KMS key can only be used by principals in specific VPCs",
         "That a KMS key can only be called through a specific AWS service (e.g., S3 or Secrets Manager)",
         "That a KMS key can only be used during business hours",
+        "That a KMS key can only be used by principals in specific VPCs",
         "That KMS calls must originate from specific IP addresses",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "kms:ViaService restricts a KMS key so it can only be used when the API call originates from a specific AWS service. For example, setting it to 's3.us-east-1.amazonaws.com' allows the key only for S3 encryption operations, blocking direct kms:Decrypt calls from application code.",
     },
@@ -470,20 +470,20 @@ Encryption context is also logged verbatim in CloudTrail, which makes it a usefu
       question:
         "A compliance requirement mandates that you can prove you control the key material and can permanently revoke access to encrypted data. Which key material origin satisfies this?",
       options: [
-        "KMS-generated (default)",
-        "AWS Managed Keys",
-        "External (BYOK — Bring Your Own Key)",
         "Any key type — all CMKs support this",
+        "External (BYOK — Bring Your Own Key)",
+        "AWS Managed Keys",
+        "KMS-generated (default)",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "BYOK (imported key material) satisfies this requirement: you generated the key material outside AWS, you can prove ownership, and you can permanently delete the key material from KMS at any time, rendering all encrypted data inaccessible — proving you can revoke access.",
     },
     {
       question:
         "What is the minimum key deletion waiting period you can configure for a KMS CMK?",
-      options: ["1 day", "3 days", "7 days", "14 days"],
-      correctIndex: 2,
+      options: ["7 days", "1 day", "3 days", "14 days"],
+      correctIndex: 0,
       explanation:
         "The minimum waiting period for scheduled KMS key deletion is 7 days (configurable up to 30 days). During this window the key is disabled and deletion can be cancelled. After the waiting period expires, deletion is permanent and irreversible.",
     },

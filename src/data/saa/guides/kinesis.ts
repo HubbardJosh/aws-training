@@ -63,20 +63,20 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "A team wants to stream application logs to Amazon S3 in near-real time without writing any consumer code. Which Kinesis service is most appropriate?",
           options: [
+            "Amazon MSK with S3 connector",
+            "Kinesis Data Analytics with SQL output",
             "Kinesis Data Streams with a custom consumer Lambda",
             "Kinesis Data Firehose",
-            "Kinesis Data Analytics with SQL output",
-            "Amazon MSK with S3 connector",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Kinesis Data Firehose is purpose-built for managed delivery of streaming data to destinations like S3, Redshift, and OpenSearch without requiring consumer code or shard management. It handles buffering, compression, and delivery automatically, making it the correct choice when you want managed streaming delivery without custom processing code.",
         },
         {
           question:
             "What is the minimum latency for Kinesis Data Firehose delivery?",
-          options: ["1 second", "10 seconds", "60 seconds", "5 minutes"],
-          correctIndex: 2,
+          options: ["60 seconds", "10 seconds", "1 second", "5 minutes"],
+          correctIndex: 0,
           explanation:
             "Kinesis Data Firehose delivers data in near-real time with a minimum latency of 60 seconds (or when the buffer size threshold is reached). This buffer-based delivery model means Firehose is not suitable for use cases requiring sub-minute real-time processing — Kinesis Data Streams with a custom consumer is needed for sub-second latency.",
         },
@@ -85,11 +85,11 @@ export const kinesisGuide: ServiceGuide = {
             "How can Kinesis Data Firehose convert JSON records to Parquet format before delivering to S3?",
           options: [
             "By enabling columnar compression in the Firehose delivery stream settings",
-            "By attaching a Lambda transformation function to the Firehose delivery stream",
             "By using a Glue ETL job triggered by Firehose",
+            "By attaching a Lambda transformation function to the Firehose delivery stream",
             "By configuring an S3 lifecycle rule to convert format on arrival",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Kinesis Data Firehose can invoke a Lambda function to transform records before delivery. This Lambda function can convert JSON to Parquet or ORC format, filter records, enrich data, or perform any other transformation. The transformed records are then delivered to the destination (S3, Redshift, etc.).",
         },
@@ -103,12 +103,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "A team needs to detect anomalies in a stream of IoT sensor data using complex stateful processing with event-time windowing and custom logic. Which Kinesis Data Analytics option should they use?",
           options: [
-            "Kinesis Data Analytics SQL interface",
-            "Kinesis Data Firehose with Lambda transformation",
             "Amazon Managed Service for Apache Flink (Kinesis Data Analytics for Flink)",
+            "Kinesis Data Firehose with Lambda transformation",
             "Kinesis Data Streams with a polling consumer",
+            "Kinesis Data Analytics SQL interface",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Amazon Managed Service for Apache Flink is the right choice for complex stateful stream processing including event-time windowing, pattern detection, and custom logic beyond what SQL can express. The SQL interface is better suited to straightforward windowed aggregations and filtering, but cannot handle the complex stateful processing required for sophisticated anomaly detection.",
         },
@@ -116,12 +116,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "Kinesis Data Analytics SQL processes streaming data from which sources?",
           options: [
+            "From any AWS service that supports EventBridge events",
+            "From Amazon S3 buckets and DynamoDB tables only",
             "Only from Amazon SQS queues",
             "From Kinesis Data Streams or Kinesis Data Firehose",
-            "From Amazon S3 buckets and DynamoDB tables only",
-            "From any AWS service that supports EventBridge events",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Kinesis Data Analytics SQL reads from Kinesis Data Streams or Kinesis Data Firehose as input sources. It applies continuous SQL queries and writes results to output streams, Firehose, or Lambda for downstream processing.",
         },
@@ -134,8 +134,8 @@ export const kinesisGuide: ServiceGuide = {
         {
           question:
             "A Kinesis Data Stream needs to handle 8 MB/s of ingest throughput. How many shards are required in Provisioned mode?",
-          options: ["4 shards", "8 shards", "16 shards", "24 shards"],
-          correctIndex: 1,
+          options: ["8 shards", "24 shards", "4 shards", "16 shards"],
+          correctIndex: 0,
           explanation:
             "Each shard provides 1 MB/s of ingest capacity. For 8 MB/s of throughput, you need 8 shards (8 MB/s ÷ 1 MB/s per shard). You also need to verify the read side: 8 shards × 2 MB/s read = 16 MB/s of total read capacity, which must be sufficient for all consumers.",
         },
@@ -143,12 +143,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "Which Kinesis Data Streams capacity mode automatically scales shard count based on traffic without manual management?",
           options: [
-            "Provisioned mode with auto-scaling enabled",
             "On-Demand mode",
-            "Enhanced Fan-Out mode",
             "Burst mode",
+            "Enhanced Fan-Out mode",
+            "Provisioned mode with auto-scaling enabled",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "On-Demand mode automatically scales shard capacity based on observed throughput peaks, scaling up instantly and scaling down after 24 hours of reduced traffic. This eliminates the need for manual shard management, making it ideal for unpredictable workloads. Provisioned mode requires manual shard count adjustments via resharding.",
         },
@@ -156,12 +156,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "A Kinesis stream has consistently low throughput for the last month. To reduce costs while keeping the stream operational, what resharding operation should be performed?",
           options: [
-            "Shard splitting to increase parallelism",
             "Shard merging to combine adjacent shards",
+            "Shard splitting to increase parallelism",
             "Enabling On-Demand mode to reduce active shards",
             "Decreasing the data retention period",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Shard merging combines two adjacent shards into one, halving the cost for that partition range. When throughput is consistently low, merging shards reduces the per-shard hourly cost without impacting throughput capacity requirements. Splitting would increase shard count and cost, not decrease it.",
         },
@@ -175,12 +175,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "A company receives clickstream events that must be processed by three independent consumer applications simultaneously, each maintaining its own processing position. Which service is most appropriate?",
           options: [
-            "Amazon SQS Standard queue",
-            "Amazon SQS FIFO queue",
-            "Amazon Kinesis Data Streams",
             "Amazon SNS with a single subscription",
+            "Amazon SQS FIFO queue",
+            "Amazon SQS Standard queue",
+            "Amazon Kinesis Data Streams",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Kinesis Data Streams supports multiple independent consumers, each maintaining their own checkpoint (sequence number position) in the stream. All consumers see the same data, enabling replay and independent processing. SQS deletes messages after consumption, making it impossible for multiple consumers to independently process the same messages.",
         },
@@ -188,12 +188,12 @@ export const kinesisGuide: ServiceGuide = {
           question:
             "Which is a key advantage of Kinesis Data Streams over Amazon SQS for streaming workloads?",
           options: [
-            "Kinesis is cheaper than SQS for all use cases",
-            "Kinesis retains data for replay; SQS deletes messages after consumption",
             "Kinesis supports more message types than SQS",
             "Kinesis has lower latency than SQS for all operations",
+            "Kinesis retains data for replay; SQS deletes messages after consumption",
+            "Kinesis is cheaper than SQS for all use cases",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Kinesis Data Streams retains records for up to 365 days, allowing multiple consumers to replay data from any point in the retention window. SQS destructively removes messages after a consumer successfully processes them, making replay impossible. This retention and replay capability is a fundamental advantage of Kinesis for multi-consumer streaming.",
         },
@@ -208,11 +208,11 @@ export const kinesisGuide: ServiceGuide = {
             "A Lambda function is configured as a consumer of a Kinesis Data Stream. The function processes a batch of 100 records and 3 records fail. What happens by default?",
           options: [
             "Only the 3 failed records are retried",
+            "The stream shard is paused until the failures are resolved",
             "The entire batch of 100 records is retried because Lambda checkpoints at the batch level",
             "Failed records are moved to a DLQ automatically",
-            "The stream shard is paused until the failures are resolved",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "By default, when a Lambda function fails to process any record in a Kinesis batch, the entire batch is retried. To avoid reprocessing the 97 successfully handled records, you should enable 'Report Batch Item Failures', which allows Lambda to return only the IDs of the failed records, so only those are retried.",
         },
@@ -221,11 +221,11 @@ export const kinesisGuide: ServiceGuide = {
             "A hot shard issue is observed in a Kinesis Data Stream where most records are routing to a single shard. What is the most likely cause?",
           options: [
             "The stream has too many consumers",
+            "Enhanced Fan-Out is not enabled",
             "The partition key has low cardinality, causing most records to hash to the same shard",
             "The data retention period is too long",
-            "Enhanced Fan-Out is not enabled",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A hot shard occurs when records disproportionately route to a single shard. This is caused by a low-cardinality partition key where most values hash to the same shard. Choosing a high-cardinality partition key (such as a user ID or request ID) distributes records evenly across all shards.",
         },
@@ -270,8 +270,8 @@ export const kinesisGuide: ServiceGuide = {
     {
       question:
         "How many MB/s of write capacity does a single Kinesis Data Stream shard provide?",
-      options: ["0.5 MB/s", "1 MB/s", "2 MB/s", "5 MB/s"],
-      correctIndex: 1,
+      options: ["5 MB/s", "0.5 MB/s", "1 MB/s", "2 MB/s"],
+      correctIndex: 2,
       explanation:
         "Each Kinesis Data Stream shard provides 1 MB/s or 1,000 records/s of write (ingest) capacity. The read capacity is 2 MB/s per shard. These limits determine how many shards are required for a given throughput requirement.",
     },
@@ -279,12 +279,12 @@ export const kinesisGuide: ServiceGuide = {
       question:
         "Which Kinesis service requires no consumer code and delivers streaming data directly to S3, Redshift, or OpenSearch?",
       options: [
-        "Kinesis Data Streams",
-        "Kinesis Data Firehose",
         "Amazon Managed Service for Apache Flink",
         "Kinesis Video Streams",
+        "Kinesis Data Streams",
+        "Kinesis Data Firehose",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Kinesis Data Firehose is a fully managed delivery service that requires no consumer code. It buffers, compresses, and delivers streaming data to destinations including S3, Redshift, OpenSearch, and Splunk, with optional Lambda-based transformation before delivery.",
     },
@@ -292,12 +292,12 @@ export const kinesisGuide: ServiceGuide = {
       question:
         "A Kinesis Data Stream consumer needs dedicated 2 MB/s throughput per shard regardless of how many other consumers are reading the same stream. Which feature provides this?",
       options: [
+        "On-Demand mode with automatic scaling",
         "Provisioned mode with reserved throughput",
         "Shard splitting to add more read capacity",
         "Enhanced Fan-Out with HTTP/2 push delivery",
-        "On-Demand mode with automatic scaling",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Enhanced Fan-Out registers consumers for a dedicated 2 MB/s throughput per shard, delivered via HTTP/2 push rather than polling. This dedicated throughput is independent of how many other consumers are reading the stream, eliminating read throughput contention.",
     },
@@ -313,12 +313,12 @@ export const kinesisGuide: ServiceGuide = {
       question:
         "A streaming application needs to detect complex patterns across multiple input streams with custom stateful logic. Which Kinesis Analytics option is appropriate?",
       options: [
-        "Kinesis Data Analytics SQL interface",
-        "Kinesis Data Firehose with Lambda transformation",
-        "Amazon Managed Service for Apache Flink",
         "Kinesis Data Streams with polling consumers",
+        "Amazon Managed Service for Apache Flink",
+        "Kinesis Data Firehose with Lambda transformation",
+        "Kinesis Data Analytics SQL interface",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics for Flink) supports complex stateful stream processing with multiple input streams, event-time windowing, pattern detection, and custom application logic. The SQL interface is limited to simpler aggregations and does not support the full expressiveness of Flink.",
     },
@@ -326,12 +326,12 @@ export const kinesisGuide: ServiceGuide = {
       question:
         "Why is a high-cardinality value recommended as a Kinesis partition key?",
       options: [
-        "High-cardinality keys reduce the data retention period",
         "High-cardinality keys distribute records evenly across shards, preventing hot shards",
         "High-cardinality keys enable Enhanced Fan-Out automatically",
+        "High-cardinality keys reduce the data retention period",
         "High-cardinality keys reduce the per-record cost in Kinesis",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The partition key is hashed to determine which shard receives each record. A low-cardinality partition key (such as a boolean or a value with few distinct values) causes most records to hash to the same shard, creating a hot shard. A high-cardinality key (such as a user ID or UUID) distributes records evenly across all shards.",
     },
@@ -339,12 +339,12 @@ export const kinesisGuide: ServiceGuide = {
       question:
         "What happens by default when a Lambda function fails to process a Kinesis Data Stream batch?",
       options: [
-        "Only the failed records are retried",
         "The entire batch is retried from the beginning",
         "Failed records are automatically sent to a DLQ",
         "The shard iterator is advanced past the failed batch",
+        "Only the failed records are retried",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "By default, Lambda retries the entire batch when any record fails. To retry only failed records and avoid reprocessing successes, you must enable 'Report Batch Item Failures' on the Lambda event source mapping, which allows Lambda to return specific failed message IDs for targeted retry.",
     },
@@ -353,11 +353,11 @@ export const kinesisGuide: ServiceGuide = {
         "Which Kinesis Data Streams capacity mode is best suited for workloads with unpredictable traffic patterns?",
       options: [
         "Provisioned mode with manual resharding",
-        "On-Demand mode with automatic scaling",
         "Enhanced Fan-Out mode",
+        "On-Demand mode with automatic scaling",
         "Extended retention mode",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "On-Demand mode automatically scales shard capacity based on observed throughput peaks without requiring manual shard management. It scales up instantly when traffic increases and scales down after 24 hours of reduced traffic, making it ideal for unpredictable or variable workloads. Provisioned mode is more cost-effective for stable, predictable throughput.",
     },

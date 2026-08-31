@@ -22,11 +22,11 @@ For global applications and disaster recovery, **Aurora Global Database** replic
             "How many copies of data does Aurora automatically maintain, and across how many Availability Zones?",
           options: [
             "2 copies across 2 AZs",
-            "3 copies across 3 AZs",
             "6 copies across 3 AZs",
             "6 copies across 6 AZs",
+            "3 copies across 3 AZs",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Aurora automatically maintains 6 copies of your data across 3 Availability Zones at the storage layer. This storage-level replication is what gives Aurora its high durability and enables fast automated failover.",
         },
@@ -34,12 +34,12 @@ For global applications and disaster recovery, **Aurora Global Database** replic
           question:
             "What is the unique capability of Aurora Backtrack compared to standard RDS point-in-time recovery?",
           options: [
-            "Backtrack can restore data from up to 365 days ago",
             "Backtrack rewinds the existing cluster to a prior point without creating a new instance or endpoint",
             "Backtrack can restore individual tables rather than the whole database",
+            "Backtrack can restore data from up to 365 days ago",
             "Backtrack works for all Aurora engine types including PostgreSQL",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Aurora Backtrack rewinds the existing database cluster to a prior point in time without creating a new instance — the endpoint remains the same. Standard PITR always creates a new RDS instance with a new endpoint. Backtrack is only available for Aurora MySQL.",
         },
@@ -47,12 +47,12 @@ For global applications and disaster recovery, **Aurora Global Database** replic
           question:
             "What is the cross-region replication lag for Aurora Global Database?",
           options: [
-            "Under 100 milliseconds",
-            "Under 1 second",
-            "1–5 minutes",
             "Up to 15 minutes",
+            "Under 100 milliseconds",
+            "1–5 minutes",
+            "Under 1 second",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Aurora Global Database replicates across regions with less than 1 second of lag. In the event of a regional failure, failover to a secondary region can be completed in under a minute, making it suitable for global disaster recovery scenarios.",
         },
@@ -72,12 +72,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "A company needs their RDS database to automatically recover from an Availability Zone failure with minimal downtime. Which feature should they enable?",
           options: [
-            "Read Replicas — they provide automatic failover",
             "Multi-AZ — it provides synchronous standby and automatic failover",
-            "Aurora Serverless — it handles AZ failures automatically",
             "RDS Proxy — it absorbs failover events",
+            "Aurora Serverless — it handles AZ failures automatically",
+            "Read Replicas — they provide automatic failover",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Multi-AZ maintains a synchronous standby replica in a different AZ. On primary failure, RDS automatically updates the DNS record to point to the standby within 60–120 seconds. Read Replicas use asynchronous replication and are for read scaling, not automatic HA failover.",
         },
@@ -98,12 +98,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "What type of replication do RDS Read Replicas use, and what is the implication?",
           options: [
-            "Synchronous — reads from replicas always reflect the latest writes",
             "Asynchronous — there may be a small propagation lag before changes appear on replicas",
-            "Synchronous — but replicas are read-only and can't accept writes",
+            "Synchronous — reads from replicas always reflect the latest writes",
             "Asynchronous — data on replicas is eventually consistent with up to 5 minutes of lag",
+            "Synchronous — but replicas are read-only and can't accept writes",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Read Replicas use asynchronous replication, meaning there is a small propagation delay before writes on the primary appear on the replica. Applications must tolerate slightly stale reads when using replicas. Multi-AZ uses synchronous replication to ensure zero data loss on failover.",
         },
@@ -131,12 +131,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "When you perform a Point-in-Time Recovery restore of an RDS instance, what is created?",
           options: [
-            "The existing instance is restored in-place to the target time",
             "A new RDS instance with a new endpoint is created",
-            "A read replica is created from the specified point in time",
+            "The existing instance is restored in-place to the target time",
             "The existing instance is rolled back and the endpoint remains the same",
+            "A read replica is created from the specified point in time",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "RDS PITR always creates a new RDS instance with a new endpoint — it never restores in-place. Your application must be updated to point to the new endpoint after recovery. This is different from Aurora Backtrack, which rewinds the existing cluster with the same endpoint.",
         },
@@ -144,12 +144,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "For a Multi-AZ RDS instance, where does AWS take the automated backup from?",
           options: [
-            "The primary instance, causing brief I/O suspension",
-            "The standby replica, to avoid I/O impact on the primary",
             "A separate dedicated backup instance",
+            "The primary instance, causing brief I/O suspension",
             "Alternates between primary and standby on each backup",
+            "The standby replica, to avoid I/O impact on the primary",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "For Multi-AZ instances, RDS takes automated backups from the standby replica to avoid I/O suspension on the primary database. This ensures automated backups do not impact production query performance.",
         },
@@ -171,20 +171,20 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "An unencrypted RDS instance needs to be encrypted. What is the correct process?",
           options: [
-            "Modify the instance to enable encryption — it applies with the next maintenance window",
-            "Take a snapshot, copy it with encryption enabled, restore a new encrypted instance from the copy",
             "Enable encryption at the parameter group level and restart the instance",
+            "Modify the instance to enable encryption — it applies with the next maintenance window",
             "Attach a KMS key to the existing instance using the RDS console",
+            "Take a snapshot, copy it with encryption enabled, restore a new encrypted instance from the copy",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "RDS encryption must be enabled at creation time and cannot be enabled on a running instance. The three-step process is: (1) take a snapshot, (2) copy the snapshot with encryption enabled specifying the KMS key, (3) restore a new encrypted instance from the encrypted snapshot.",
         },
         {
           question:
             "IAM Database Authentication tokens for RDS are valid for how long?",
-          options: ["5 minutes", "15 minutes", "1 hour", "12 hours"],
-          correctIndex: 1,
+          options: ["15 minutes", "1 hour", "12 hours", "5 minutes"],
+          correctIndex: 0,
           explanation:
             "IAM Database Authentication tokens are valid for 15 minutes. The token is generated using generate-db-auth-token and passed as the database password. This eliminates the need to store long-term database passwords in environment variables for ephemeral workloads like Lambda.",
         },
@@ -192,12 +192,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "Which parameter enforces TLS-only connections for a PostgreSQL RDS instance?",
           options: [
-            "require_secure_transport=ON",
-            "rds.force_ssl=1",
             "ssl_required=true",
             "enforce_tls=1",
+            "require_secure_transport=ON",
+            "rds.force_ssl=1",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "rds.force_ssl=1 in the parameter group enforces TLS-only connections for PostgreSQL RDS instances. For MySQL, the equivalent parameter is require_secure_transport=ON. Without enforcement, clients may connect unencrypted.",
         },
@@ -220,11 +220,11 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
             "Why is RDS Proxy particularly important for Lambda functions that access RDS?",
           options: [
             "Lambda functions cannot connect to RDS directly without a proxy",
+            "Lambda requires RDS Proxy for IAM Database Authentication to work",
             "Lambda can create thousands of concurrent connections, exhausting RDS connection limits — Proxy pools connections",
             "RDS Proxy provides faster query execution for serverless workloads",
-            "Lambda requires RDS Proxy for IAM Database Authentication to work",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda functions can scale to thousands of concurrent executions, each potentially opening a new database connection. This quickly exhausts the database's connection limit. RDS Proxy maintains a pooled set of connections to the database and multiplexes many Lambda connections through fewer database connections.",
         },
@@ -271,11 +271,11 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
             "A Lambda function in a VPC needs to connect to an RDS database. What is required for this to work?",
           options: [
             "The RDS instance must have a public endpoint enabled",
+            "RDS Proxy must be used — Lambda cannot connect directly to RDS",
             "The Lambda function must be deployed in the same VPC as RDS",
             "An Internet Gateway must be configured in the VPC",
-            "RDS Proxy must be used — Lambda cannot connect directly to RDS",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Lambda must be configured with VPC settings (subnets and security groups) to access RDS, since RDS instances are in private subnets with no public endpoint. The Lambda function's VPC configuration must allow it to reach the RDS instance's security group.",
         },
@@ -283,12 +283,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "What pattern does RDS + ElastiCache typically use for caching database query results?",
           options: [
-            "Write-through — data is written to cache and DB simultaneously",
             "Lazy-loading — check cache first, query DB on miss, write result to cache",
             "Read-ahead — pre-populate cache based on predicted access patterns",
+            "Write-through — data is written to cache and DB simultaneously",
             "Write-behind — write to cache first, sync to DB asynchronously",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The lazy-loading (also called cache-aside) pattern checks the cache first; on a miss, queries the database and writes the result to the cache for future reads. This is the most common caching pattern for RDS + ElastiCache and can reduce database query load significantly on read-heavy workloads.",
         },
@@ -296,12 +296,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
           question:
             "What AWS service enables near-zero-downtime migration of an on-premises database to RDS?",
           options: [
-            "AWS DataSync",
-            "AWS Database Migration Service (DMS)",
             "AWS Snowball Edge",
             "AWS Transfer Family",
+            "AWS Database Migration Service (DMS)",
+            "AWS DataSync",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "AWS Database Migration Service (DMS) supports continuous replication from source to target database while the source remains online. This enables near-zero-downtime migrations with only seconds of final cutover downtime when you update the application's connection string.",
         },
@@ -352,12 +352,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
       question:
         "A read-heavy application is overwhelming the primary RDS instance. Which feature addresses this?",
       options: [
-        "Enable Multi-AZ to distribute read traffic to the standby",
-        "Create Read Replicas and configure the application to send reads to them",
-        "Enable storage auto-scaling to handle more read capacity",
         "Use RDS Proxy to pool read connections on the primary",
+        "Enable storage auto-scaling to handle more read capacity",
+        "Create Read Replicas and configure the application to send reads to them",
+        "Enable Multi-AZ to distribute read traffic to the standby",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Read Replicas are designed for read scaling — they use asynchronous replication and provide their own endpoints for read queries. The Multi-AZ standby is not accessible for reads; it only serves as a failover target.",
     },
@@ -365,12 +365,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
       question:
         "Which RDS feature provides synchronous replication and automatic DNS failover within 60–120 seconds?",
       options: [
+        "Aurora Global Database",
         "Read Replicas with automatic promotion",
         "Multi-AZ deployment",
-        "Aurora Global Database",
         "RDS Proxy with failover absorption",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Multi-AZ uses synchronous replication to a standby in a different AZ. On primary failure, RDS automatically updates the DNS record to point to the standby within 60–120 seconds. Applications using the RDS endpoint reconnect transparently.",
     },
@@ -378,12 +378,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
       question:
         "You need to migrate an existing unencrypted RDS instance to use KMS encryption. What is the correct sequence?",
       options: [
-        "Enable encryption in Modify Instance → apply immediately",
-        "Snapshot → copy snapshot with encryption → restore new encrypted instance",
         "Enable encryption at the storage level → restart the instance",
         "Create a read replica with encryption → promote the replica",
+        "Snapshot → copy snapshot with encryption → restore new encrypted instance",
+        "Enable encryption in Modify Instance → apply immediately",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "RDS encryption cannot be enabled on a running instance. The three-step process is: (1) create a snapshot of the unencrypted instance, (2) copy the snapshot specifying a KMS key (which creates an encrypted copy), (3) restore a new RDS instance from the encrypted snapshot.",
     },
@@ -392,19 +392,19 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
         "Lambda functions are causing too many connections to an Aurora database, leading to errors. What is the recommended solution?",
       options: [
         "Increase Lambda reserved concurrency to limit connections",
-        "Use RDS Proxy to pool connections between Lambda and Aurora",
         "Switch from Aurora to DynamoDB for better Lambda compatibility",
+        "Use RDS Proxy to pool connections between Lambda and Aurora",
         "Increase Aurora's max_connections parameter",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "RDS Proxy pools connections to Aurora and multiplexes thousands of Lambda connections through a smaller set of database connections. This prevents connection exhaustion caused by Lambda's potentially high concurrency, and the proxy also absorbs failover events.",
     },
     {
       question:
         "What is the maximum automated backup retention period for RDS?",
-      options: ["7 days", "14 days", "30 days", "35 days"],
-      correctIndex: 3,
+      options: ["35 days", "30 days", "7 days", "14 days"],
+      correctIndex: 0,
       explanation:
         "RDS automated backup retention can be set from 1 to 35 days. The default is 7 days. Within the retention window, Point-in-Time Recovery allows restoring to any second. Manual snapshots are kept indefinitely until explicitly deleted.",
     },
@@ -413,11 +413,11 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
         "Aurora Backtrack is available for which database engine and what makes it unique?",
       options: [
         "Aurora PostgreSQL — it creates a new instance from a snapshot faster than standard PITR",
-        "Aurora MySQL — it rewinds the existing cluster to a prior time without creating a new instance",
         "All Aurora engines — it provides faster PITR than standard automated backups",
         "Aurora MySQL — it requires a separate backtrack-enabled replica to be running",
+        "Aurora MySQL — it rewinds the existing cluster to a prior time without creating a new instance",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Aurora Backtrack is available only for Aurora MySQL. Its key advantage is that it rewinds the existing Aurora cluster in-place to a previous point in time — the database stays on the same instance with the same endpoint. Standard PITR always creates a new instance with a new endpoint.",
     },
@@ -425,12 +425,12 @@ The summary: Multi-AZ handles the case where your primary goes down. Read replic
       question:
         "Which RDS authentication method generates a short-lived token valid for 15 minutes, eliminating stored passwords?",
       options: [
-        "Secrets Manager dynamic credentials",
-        "IAM Database Authentication",
-        "KMS token authentication",
         "Cognito identity federation for RDS",
+        "KMS token authentication",
+        "IAM Database Authentication",
+        "Secrets Manager dynamic credentials",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "IAM Database Authentication generates a short-lived authentication token (valid for 15 minutes) using the AWS CLI or SDK generate-db-auth-token command. The token is passed as the database password, eliminating the need to store long-term credentials for MySQL and PostgreSQL RDS instances.",
     },

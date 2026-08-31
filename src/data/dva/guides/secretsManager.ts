@@ -29,8 +29,8 @@ The cost model is straightforward: $0.40 per secret per month plus $0.05 per 10,
         {
           question:
             "Which staging label does GetSecretValue return by default when no version is specified?",
-          options: ["AWSCURRENT", "AWSPENDING", "AWSPREVIOUS", "AWSLATEST"],
-          correctIndex: 0,
+          options: ["AWSLATEST", "AWSCURRENT", "AWSPENDING", "AWSPREVIOUS"],
+          correctIndex: 1,
           explanation:
             "GetSecretValue returns the AWSCURRENT staging label by default — the currently active version of the secret. AWSPENDING holds the new value during rotation, and AWSPREVIOUS holds the prior active version after rotation completes.",
         },
@@ -80,12 +80,12 @@ During the rotation window, both the old and new passwords are valid, which mean
           question:
             "An application caches its database password and Secrets Manager rotates the secret. The next request fails with an authentication error. What should the application do?",
           options: [
-            "Retry immediately without refreshing — the rotation may not have completed",
             "Catch the auth failure, call GetSecretValue to refresh the cached value, then retry once",
-            "Wait 60 seconds for the old password to be re-enabled, then retry",
             "Check AWSPREVIOUS staging label and fall back to the previous credential",
+            "Wait 60 seconds for the old password to be re-enabled, then retry",
+            "Retry immediately without refreshing — the rotation may not have completed",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The correct pattern for cached secrets is: catch authentication failure → call GetSecretValue to refresh the cache → retry authentication once. This handles rotation transparently. Retrying without refreshing will fail again with the same stale credential.",
         },
@@ -105,12 +105,12 @@ For **Lambda functions**, the pattern is to call \`GetSecretValue\` during initi
           question:
             "In an ECS Fargate task definition that references Secrets Manager secrets, which IAM role needs the secretsmanager:GetSecretValue permission?",
           options: [
-            "The task role (used by application code at runtime)",
-            "The task execution role (used by ECS infrastructure at task launch)",
-            "The ECS service-linked role",
             "The container instance role",
+            "The ECS service-linked role",
+            "The task execution role (used by ECS infrastructure at task launch)",
+            "The task role (used by application code at runtime)",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The task execution role needs secretsmanager:GetSecretValue. This role is used by the ECS infrastructure (not the application) to fetch secrets at task launch time and inject them as environment variables. The task role is what application code uses for AWS API calls during runtime.",
         },
@@ -157,11 +157,11 @@ The key actions to know are \`secretsmanager:GetSecretValue\` (read the current 
             "Which IAM condition key restricts a role to only access the AWSCURRENT version of a secret?",
           options: [
             "secretsmanager:SecretId",
-            "secretsmanager:ResourceTag",
             "secretsmanager:VersionStage",
             "secretsmanager:CurrentVersion",
+            "secretsmanager:ResourceTag",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The secretsmanager:VersionStage condition key restricts which staging labels a role can access. This lets you grant one role access only to AWSCURRENT (the active credential) while the rotation Lambda can access AWSPENDING (the new credential being set up).",
         },
@@ -181,12 +181,12 @@ The practical decision rule: if the secret needs to rotate automatically — esp
           question:
             "A team stores feature flags and non-sensitive configuration values for their application. Which service is the most cost-effective choice?",
           options: [
-            "Secrets Manager — it supports any key-value data",
             "SSM Parameter Store Standard — free for up to 10,000 parameters",
             "SSM Parameter Store Advanced — required for application configuration",
+            "Secrets Manager — it supports any key-value data",
             "DynamoDB — provides lower latency than Parameter Store",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SSM Parameter Store Standard is free for up to 10,000 parameters with values up to 4 KB. For non-sensitive configuration values and feature flags that don't need automatic rotation, it's the most cost-effective choice. Secrets Manager ($0.40/secret/month) is justified only when automatic rotation or cross-account access is required.",
         },
@@ -195,11 +195,11 @@ The practical decision rule: if the secret needs to rotate automatically — esp
             "Which capability does Secrets Manager have that SSM Parameter Store lacks?",
           options: [
             "Encryption at rest with KMS",
-            "Built-in automatic credential rotation with managed Lambda functions",
             "Integration with ECS task definitions",
             "CloudTrail auditing of API calls",
+            "Built-in automatic credential rotation with managed Lambda functions",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Secrets Manager's defining differentiator is built-in automatic rotation with managed Lambda functions for RDS, Redshift, DocumentDB, and ElastiCache. Parameter Store supports KMS encryption (SecureString), ECS injection, and CloudTrail auditing — but does not have built-in automatic rotation.",
         },
@@ -217,12 +217,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
           question:
             "A global application runs in us-east-1 and eu-west-1. The database credential is stored in Secrets Manager in us-east-1. What happens to the replica in eu-west-1 when the primary secret rotates?",
           options: [
+            "The replica continues to use the old credential until its own rotation schedule triggers",
             "The replica must be manually updated after the primary rotates",
             "Secrets Manager automatically pushes the new value to all replicas after rotation",
-            "The replica continues to use the old credential until its own rotation schedule triggers",
             "The replica is temporarily unavailable during the rotation window",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "When a primary secret rotates, Secrets Manager automatically pushes the updated value to all replica regions. Applications in secondary regions read from their local replica and always get the current credential without any additional orchestration.",
         },
@@ -255,12 +255,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
           question:
             "Every GetSecretValue API call triggers which AWS service internally to decrypt the secret value?",
           options: [
-            "AWS IAM",
-            "AWS KMS",
             "AWS CloudHSM",
             "AWS Certificate Manager",
+            "AWS IAM",
+            "AWS KMS",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Every secret in Secrets Manager is encrypted at rest with AWS KMS. When GetSecretValue is called, Secrets Manager internally calls KMS Decrypt to decrypt the secret value. This KMS call is logged in CloudTrail, providing a complete audit trail of every secret access.",
         },
@@ -309,12 +309,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
       question:
         "A production database password must rotate automatically every 30 days with no application downtime. Which service should manage this credential?",
       options: [
-        "SSM Parameter Store Advanced with a parameter expiration policy",
         "AWS Secrets Manager with a built-in RDS rotation Lambda",
-        "AWS KMS with an automatic key rotation policy",
         "SSM Parameter Store SecureString with a custom EventBridge rotation rule",
+        "AWS KMS with an automatic key rotation policy",
+        "SSM Parameter Store Advanced with a parameter expiration policy",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Secrets Manager is designed for automatic credential rotation. Its built-in RDS rotation Lambda handles all four rotation phases (createSecret, setSecret, testSecret, finishSecret) with no downtime, since both old and new passwords are valid during the rotation window.",
     },
@@ -335,12 +335,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
       question:
         "A Lambda function caches a database password from Secrets Manager at initialization. After rotation, the next database connection fails. What is the correct recovery pattern?",
       options: [
-        "Restart the Lambda function to force re-initialization with the new secret",
         "Catch the auth failure, call GetSecretValue to refresh the cached value, then retry once",
         "Fall back to the AWSPREVIOUS staging label which still has a valid credential",
         "Wait 5 minutes for the old password to be re-activated, then retry",
+        "Restart the Lambda function to force re-initialization with the new secret",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "The standard rotation-aware caching pattern is: catch auth failure → call GetSecretValue to refresh the cache → retry once. This detects rotation transparently without requiring application restarts or manual intervention.",
     },
@@ -361,20 +361,20 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
       question:
         "A developer needs to inject a database password from Secrets Manager into a CloudFormation resource property. Which syntax is correct?",
       options: [
+        "!Ref secretsmanager:MySecret:password",
         "{{resolve:secretsmanager:MySecret:SecretString:password}}",
         "${secretsmanager:MySecret.password}",
-        "!Ref secretsmanager:MySecret:password",
         "{{ssm-secure:/MySecret/password}}",
       ],
-      correctIndex: 0,
+      correctIndex: 1,
       explanation:
         "The CloudFormation dynamic reference syntax for Secrets Manager is {{resolve:secretsmanager:SecretName:SecretString:fieldName}}. This injects the specified field from the secret's JSON value directly into the resource property at deploy time.",
     },
     {
       question:
         "Which staging label holds the new credential being prepared during a Secrets Manager rotation?",
-      options: ["AWSCURRENT", "AWSPENDING", "AWSPREVIOUS", "AWSNEW"],
-      correctIndex: 1,
+      options: ["AWSPENDING", "AWSCURRENT", "AWSNEW", "AWSPREVIOUS"],
+      correctIndex: 0,
       explanation:
         "AWSPENDING holds the new credential being set up during rotation. After rotation completes, AWSPENDING is promoted to AWSCURRENT, and the previously active version receives the AWSPREVIOUS label.",
     },
@@ -382,12 +382,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
       question:
         "A company stores feature flags and non-sensitive endpoint URLs for their microservices. Which service is the most cost-effective?",
       options: [
-        "Secrets Manager — supports any configuration data",
         "SSM Parameter Store Standard — free for up to 10,000 parameters with 4 KB values",
-        "SSM Parameter Store Advanced — required for microservice configuration",
         "AWS AppConfig — the only service designed for feature flags",
+        "SSM Parameter Store Advanced — required for microservice configuration",
+        "Secrets Manager — supports any configuration data",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SSM Parameter Store Standard is free for non-sensitive configuration data like feature flags and endpoint URLs. Secrets Manager ($0.40/secret/month) is only justified when automatic rotation or cross-account access is required.",
     },
@@ -395,12 +395,12 @@ Each replica costs $0.40 per month per region, the same as the primary. Replicat
       question:
         "A global application runs in two regions. The database credential is stored as a Secrets Manager secret with multi-region replication enabled. When rotation occurs in the primary region, what happens to the replica?",
       options: [
-        "The replica must be manually rotated separately",
         "Secrets Manager automatically pushes the rotated value to all replicas",
+        "The replica must be manually rotated separately",
         "The replica is promoted to primary during the rotation window",
         "The replica becomes temporarily unavailable until replication completes",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "When the primary secret rotates, Secrets Manager automatically pushes the new value to all replica regions. Applications reading from their local regional replica always have the current credential without manual synchronization.",
     },

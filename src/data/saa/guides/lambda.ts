@@ -16,8 +16,8 @@ export const lambdaGuide: ServiceGuide = {
         {
           question:
             "An S3 event notification triggers a Lambda function that fails during execution. How many total attempts does Lambda make by default for this asynchronous invocation?",
-          options: ["1 attempt", "2 attempts", "3 attempts", "5 attempts"],
-          correctIndex: 2,
+          options: ["2 attempts", "1 attempt", "5 attempts", "3 attempts"],
+          correctIndex: 3,
           explanation:
             "For asynchronous invocations (such as S3 event notifications), Lambda retries failed invocations up to 2 additional times, for a total of 3 attempts. If all attempts fail, the event can be captured by a configured DLQ or Lambda Destination for further investigation.",
         },
@@ -58,11 +58,11 @@ export const lambdaGuide: ServiceGuide = {
             "A critical Lambda function is occasionally starved of concurrency because other functions in the account consume the shared limit. What feature guarantees dedicated concurrency for this function?",
           options: [
             "Provisioned concurrency",
-            "Reserved concurrency",
             "Enhanced concurrency mode",
+            "Reserved concurrency",
             "Lambda@Edge deployment",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Reserved concurrency allocates a dedicated pool of concurrency to a specific function, guaranteeing it is never starved by other functions consuming the account's shared concurrency limit. It also simultaneously caps the function's maximum concurrency. Provisioned concurrency pre-warms environments to eliminate cold starts, but does not prevent starvation.",
         },
@@ -70,12 +70,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "A latency-sensitive API backed by Lambda experiences intermittent cold start delays of 500ms on the first request after a period of inactivity. What is the recommended solution?",
           options: [
-            "Increase the Lambda function's memory allocation",
-            "Enable Reserved concurrency for the function",
             "Enable Provisioned concurrency for the function",
+            "Enable Reserved concurrency for the function",
+            "Increase the Lambda function's memory allocation",
             "Move the function to a container image deployment",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Provisioned concurrency pre-initializes a specified number of execution environments, eliminating cold start latency. These environments are kept warm and ready to respond instantly. Increasing memory can reduce cold start duration but does not eliminate it. Provisioned concurrency is the definitive solution for cold start elimination in latency-sensitive workloads.",
         },
@@ -83,12 +83,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "What is the default account-level concurrent execution limit for Lambda in a single region?",
           options: [
+            "1,000 concurrent executions",
             "100 concurrent executions",
             "500 concurrent executions",
-            "1,000 concurrent executions",
             "10,000 concurrent executions",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "The default account-level concurrency limit is 1,000 concurrent executions per region, shared across all Lambda functions in the account. This limit can be increased via a service quota request. If one function uses all 1,000, other functions will be throttled until concurrency becomes available.",
         },
@@ -115,12 +115,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "An API endpoint receives traffic spikes that would overwhelm a downstream database. Which pattern should be used to buffer requests and process them at a sustainable rate?",
           options: [
-            "SNS fan-out to multiple Lambda functions",
             "SQS queue between the API and Lambda for queue-based load leveling",
-            "EventBridge scheduled rule to throttle processing",
             "Lambda reserved concurrency set to match database capacity",
+            "SNS fan-out to multiple Lambda functions",
+            "EventBridge scheduled rule to throttle processing",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "The queue-based load leveling pattern places an SQS queue between the API and Lambda. The queue absorbs traffic bursts, and Lambda processes messages at a controlled rate determined by the batch size and concurrency settings, preventing the downstream database from being overwhelmed. This decouples the spike absorption from the processing rate.",
         },
@@ -134,12 +134,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "A Lambda function shares a large machine learning library (150 MB) with 10 other functions. What is the best way to avoid including this library in each function's deployment package?",
           options: [
-            "Upload the library to S3 and download it at function initialization",
-            "Use a Lambda Layer to package the shared library once and attach it to all functions",
-            "Use a container image deployment for each function",
             "Store the library in /tmp and share it across invocations",
+            "Upload the library to S3 and download it at function initialization",
+            "Use a container image deployment for each function",
+            "Use a Lambda Layer to package the shared library once and attach it to all functions",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Lambda Layers are purpose-built for sharing common dependencies (libraries, runtimes, configuration) across multiple functions. The layer is uploaded once and attached to multiple functions, reducing each function's deployment package size and enabling centralized updates. The /tmp directory is ephemeral per execution environment and cannot be shared across functions.",
         },
@@ -155,12 +155,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "How can a Lambda deployment gradually shift traffic from version 1 to version 2 to enable a canary or blue/green release?",
           options: [
-            "Using Lambda Layers with version pinning",
             "Using a Lambda alias with weighted traffic shifting between two versions",
+            "Using Lambda Layers with version pinning",
             "Using a separate Lambda function per version behind an ALB",
             "Using Lambda@Edge for geographic traffic shifting",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Lambda aliases can be configured with weighted traffic shifting to send a percentage of invocations to one version and the remainder to another. For example, 90% to v1 and 10% to v2 enables canary testing. Once confident, traffic can be shifted to 100% v2. This enables blue/green and canary deployments at the Lambda function level.",
         },
@@ -176,10 +176,10 @@ export const lambdaGuide: ServiceGuide = {
           options: [
             "Attach an Elastic IP to the Lambda function",
             "Deploy the Lambda function in a public subnet with an Internet Gateway",
-            "Add a NAT Gateway in a public subnet and update the private subnet's route table",
             "Enable VPC peering between the Lambda VPC and the internet",
+            "Add a NAT Gateway in a public subnet and update the private subnet's route table",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "When a Lambda function is in a private VPC subnet, it loses direct internet access. To enable outbound internet connectivity, a NAT Gateway must be deployed in a public subnet, and the private subnet's route table must route 0.0.0.0/0 traffic to the NAT Gateway. Lambda functions in a VPC cannot directly use an Internet Gateway.",
         },
@@ -206,12 +206,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "A team is building a simple Lambda proxy API and wants the lowest cost and lowest latency API Gateway option. Which API Gateway type should they choose?",
           options: [
+            "Private API with VPC endpoint",
             "REST API (API Gateway v1) with usage plans",
             "HTTP API (API Gateway v2)",
             "WebSocket API",
-            "Private API with VPC endpoint",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "HTTP APIs (API Gateway v2) are faster and cheaper than REST APIs for Lambda proxy integrations. They support JWT and IAM authorization and are the recommended choice when the advanced features of REST APIs (request/response transformation, usage plans, service proxy integrations) are not needed.",
         },
@@ -219,12 +219,12 @@ export const lambdaGuide: ServiceGuide = {
           question:
             "Which API Gateway feature allows a Lambda function to validate a bearer token and return an IAM policy to authorize or deny the request?",
           options: [
-            "Usage Plans with API Keys",
-            "Lambda Authorizer (Custom Authorizer)",
-            "Cognito User Pool Authorizer",
             "IAM authorization with SigV4 signing",
+            "Cognito User Pool Authorizer",
+            "Lambda Authorizer (Custom Authorizer)",
+            "Usage Plans with API Keys",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "A Lambda Authorizer executes a Lambda function to validate the incoming bearer token or request parameters and returns an IAM policy document that allows or denies the request. This enables custom authentication schemes beyond what built-in JWT or Cognito authorizers support.",
         },
@@ -269,8 +269,8 @@ export const lambdaGuide: ServiceGuide = {
     {
       question:
         "An S3 event notification invokes a Lambda function asynchronously. The function fails on the first attempt. How many more times will Lambda retry by default?",
-      options: ["0 more times", "1 more time", "2 more times", "4 more times"],
-      correctIndex: 2,
+      options: ["0 more times", "2 more times", "4 more times", "1 more time"],
+      correctIndex: 1,
       explanation:
         "For asynchronous Lambda invocations, Lambda automatically retries failed executions up to 2 additional times (for a total of 3 attempts) with delays between attempts. If all 3 attempts fail, the event can be sent to a DLQ or Lambda Destination for further handling.",
     },
@@ -278,12 +278,12 @@ export const lambdaGuide: ServiceGuide = {
       question:
         "A Lambda function requires guaranteed concurrency even when other functions in the account are consuming the shared limit. Which feature provides this?",
       options: [
-        "Provisioned concurrency",
-        "Reserved concurrency",
-        "Lambda@Edge deployment",
         "Increasing the account concurrency limit",
+        "Provisioned concurrency",
+        "Lambda@Edge deployment",
+        "Reserved concurrency",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Reserved concurrency allocates a dedicated concurrency pool to a specific function, ensuring it is never starved by other functions. It also caps the function's maximum concurrency. Provisioned concurrency pre-warms environments to eliminate cold starts, not to guarantee concurrency availability.",
     },
@@ -291,12 +291,12 @@ export const lambdaGuide: ServiceGuide = {
       question:
         "A Lambda function needs to access an RDS database in a private subnet AND call an external payment API over the internet. What VPC configuration is required?",
       options: [
-        "Attach the Lambda to a public subnet with an Internet Gateway",
-        "Use VPC peering between the Lambda VPC and the payment provider",
-        "Attach the Lambda to a private subnet and add a NAT Gateway in a public subnet",
         "Use an interface VPC endpoint for the external payment API",
+        "Attach the Lambda to a private subnet and add a NAT Gateway in a public subnet",
+        "Use VPC peering between the Lambda VPC and the payment provider",
+        "Attach the Lambda to a public subnet with an Internet Gateway",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "A Lambda function in a private subnet has access to VPC resources like RDS but no direct internet access. To reach external internet services, traffic from the private subnet must route through a NAT Gateway in a public subnet. The NAT Gateway allows outbound-only internet connectivity.",
     },
@@ -304,12 +304,12 @@ export const lambdaGuide: ServiceGuide = {
       question:
         "Which Lambda deployment package type supports up to 10 GB and is suitable for workloads with large ML models or complex dependency trees?",
       options: [
-        "ZIP deployment with Lambda Layers",
-        "Container image deployment",
         "S3-hosted ZIP with extended size limit",
         "Lambda@Edge deployment",
+        "Container image deployment",
+        "ZIP deployment with Lambda Layers",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Container image deployments support images up to 10 GB, which is significantly larger than the 250 MB unzipped ZIP limit. Container images are ideal for workloads with large ML models, complex dependency trees, or requirements for specific OS packages. The image must implement the Lambda Runtime Interface.",
     },
@@ -318,11 +318,11 @@ export const lambdaGuide: ServiceGuide = {
         "Which API Gateway type is cheaper and faster for simple Lambda proxy integrations?",
       options: [
         "REST API (API Gateway v1)",
-        "HTTP API (API Gateway v2)",
         "WebSocket API",
         "GraphQL API via AppSync",
+        "HTTP API (API Gateway v2)",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "HTTP APIs (API Gateway v2) have lower latency and lower cost than REST APIs for Lambda proxy integrations. They are the recommended choice for simple use cases. REST APIs are needed only when advanced features like request/response transformation, usage plans, or direct service integrations are required.",
     },
@@ -330,12 +330,12 @@ export const lambdaGuide: ServiceGuide = {
       question:
         "A Lambda function processes SQS messages in batches of 10. Three messages in a batch fail. What is the default behavior?",
       options: [
-        "Only the 3 failed messages are retried",
         "All 10 messages in the batch are retried",
-        "Failed messages are sent to the SQS DLQ immediately",
         "The batch is split into successful and failed sub-batches",
+        "Only the 3 failed messages are retried",
+        "Failed messages are sent to the SQS DLQ immediately",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "By default, if any message in an SQS batch fails, the entire batch becomes visible again and all messages are retried, including the 7 that succeeded. To retry only the failed messages, you must enable 'Report Batch Item Failures' on the event source mapping, which lets Lambda return only the IDs of failed messages.",
     },
@@ -343,12 +343,12 @@ export const lambdaGuide: ServiceGuide = {
       question:
         "How can a Lambda function progressively roll out a new version, sending 10% of traffic to the new version while keeping 90% on the old version?",
       options: [
-        "Use two separate Lambda functions behind a weighted ALB listener rule",
         "Use a Lambda alias with weighted traffic shifting between two published versions",
         "Use Lambda@Edge with geographic routing",
+        "Use two separate Lambda functions behind a weighted ALB listener rule",
         "Deploy the new version as a Lambda Layer and gradually update functions",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Lambda aliases support weighted traffic shifting, allowing a percentage of invocations to be directed to one version and the remainder to another. This enables canary deployments (e.g., 10% new, 90% old) that can be gradually shifted as confidence grows, all through a single alias endpoint.",
     },
@@ -357,11 +357,11 @@ export const lambdaGuide: ServiceGuide = {
         "Which AWS service should orchestrate a multi-step Lambda workflow with branching logic, error handling, and retries, rather than embedding this logic in the Lambda code itself?",
       options: [
         "Amazon EventBridge with multiple rules",
-        "Amazon SNS with conditional filtering",
         "AWS Step Functions state machine",
         "Amazon SQS FIFO queue with message groups",
+        "Amazon SNS with conditional filtering",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "AWS Step Functions provides a visual state machine for orchestrating Lambda functions with branching, parallel execution, error catching, and configurable retries. Keeping orchestration logic in Step Functions (rather than in Lambda code) makes workflows observable, maintainable, and easier to debug.",
     },

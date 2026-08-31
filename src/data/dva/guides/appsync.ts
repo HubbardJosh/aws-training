@@ -47,12 +47,12 @@ Each field in a Query, Mutation, or Subscription type is wired to a **resolver**
           question:
             "Which AppSync resolver type chains multiple functions to call multiple data sources in sequence?",
           options: [
+            "Batch resolver",
             "Unit resolver",
             "Pipeline resolver",
-            "Batch resolver",
             "Proxy resolver",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Pipeline resolvers chain multiple functions in sequence, enabling calls to multiple data sources, business logic application, and authorization checks before and after the primary operation. Unit resolvers handle a single data source call.",
         },
@@ -60,12 +60,12 @@ Each field in a Query, Mutation, or Subscription type is wired to a **resolver**
           question:
             "What does the @aws_subscribe directive do in an AppSync schema?",
           options: [
-            "Restricts access to authenticated users only",
             "Links a subscription field to the mutations that trigger it",
-            "Enables caching for the subscribed field",
             "Creates a webhook for external systems",
+            "Enables caching for the subscribed field",
+            "Restricts access to authenticated users only",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "@aws_subscribe links a subscription field to the mutations that cause real-time updates to be pushed to subscribed clients. When the listed mutations execute, AppSync pushes results over WebSocket.",
         },
@@ -125,12 +125,12 @@ Both approaches have access to the **\`$ctx\` context object**, which is the cen
           question:
             "In an AppSync resolver, where do you find the caller's Cognito JWT claims?",
           options: [
-            "$ctx.args.claims",
             "$ctx.identity.claims",
+            "$ctx.args.claims",
             "$ctx.request.headers",
             "$ctx.source.identity",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "$ctx.identity contains the caller's identity information — Cognito claims, IAM principal, or API key depending on the auth mode configured. $ctx.args holds GraphQL field arguments.",
         },
@@ -139,19 +139,19 @@ Both approaches have access to the **\`$ctx\` context object**, which is the cen
             "Which AppSync resolver language is currently recommended for new development?",
           options: [
             "VTL (Velocity Template Language)",
+            "JSON mapping documents",
             "JavaScript resolvers",
             "Python resolvers",
-            "JSON mapping documents",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "JavaScript resolvers are the current recommended approach — they are more readable, easier to test locally, and familiar to most developers. VTL is the legacy approach still supported for existing resolvers.",
         },
         {
           question:
             "After a data source call, where does AppSync store the raw result for the response mapping template?",
-          options: ["$ctx.args", "$ctx.result", "$ctx.source", "$ctx.prev"],
-          correctIndex: 1,
+          options: ["$ctx.args", "$ctx.prev", "$ctx.source", "$ctx.result"],
+          correctIndex: 3,
           explanation:
             "$ctx.result contains the data source response after the request completes. The response mapping template transforms this into the GraphQL result shape. $ctx.error contains any error from the data source.",
         },
@@ -201,12 +201,12 @@ Authorization can be applied at the type level with schema directives like \`@aw
           question:
             "How do you restrict an AppSync type to only users in the 'Admin' Cognito group?",
           options: [
-            '@aws_iam(roles: ["Admin"])',
             '@aws_auth(cognito_groups: ["Admin"])',
-            '@aws_cognito(group: "Admin")',
             '@aws_restrict(group: "Admin")',
+            '@aws_iam(roles: ["Admin"])',
+            '@aws_cognito(group: "Admin")',
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             '@aws_auth(cognito_groups: ["Admin"]) is the schema directive for type-level authorization by Cognito group. It can also be applied at the individual field level for fine-grained control.',
         },
@@ -246,12 +246,12 @@ Server-side subscription filters let you control which events each subscriber re
           question:
             "An AppSync subscription fires when a matching mutation occurs. What happens if no mutation occurs?",
           options: [
-            "AppSync polls the data source every 30 seconds",
-            "The WebSocket connection times out immediately",
-            "Nothing — subscriptions are push-only and only fire on mutations",
             "AppSync sends a heartbeat with the last known data",
+            "Nothing — subscriptions are push-only and only fire on mutations",
+            "The WebSocket connection times out immediately",
+            "AppSync polls the data source every 30 seconds",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "AppSync subscriptions are purely push-based. Subscribed clients only receive updates when a mutation that matches the @aws_subscribe directive executes — no polling or periodic delivery occurs.",
         },
@@ -296,11 +296,11 @@ Cache TTL is configurable from 1 second to 3,600 seconds per resolver. You can s
             "What is the maximum TTL you can configure for AppSync resolver caching?",
           options: [
             "300 seconds",
-            "600 seconds",
             "1,800 seconds",
             "3,600 seconds",
+            "600 seconds",
           ],
-          correctIndex: 3,
+          correctIndex: 2,
           explanation:
             "AppSync resolver cache TTL is configurable from 1 second to 3,600 seconds (1 hour). The right TTL depends on how frequently the data changes and how stale you can tolerate.",
         },
@@ -320,12 +320,12 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
           question:
             "A team wants to add full-text search to their AppSync + DynamoDB app. What is the recommended pattern?",
           options: [
-            "Use DynamoDB's built-in search feature",
-            "Write to DynamoDB, stream changes via DynamoDB Streams to OpenSearch, serve search queries from OpenSearch through AppSync",
-            "Use Lambda resolvers to scan DynamoDB on every search query",
             "Use CloudSearch as an AppSync data source",
+            "Use DynamoDB's built-in search feature",
+            "Use Lambda resolvers to scan DynamoDB on every search query",
+            "Write to DynamoDB, stream changes via DynamoDB Streams to OpenSearch, serve search queries from OpenSearch through AppSync",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The recommended pattern: DynamoDB as the primary store, DynamoDB Streams to sync changes to OpenSearch, and an AppSync OpenSearch data source to serve full-text search queries.",
         },
@@ -333,12 +333,12 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
           question:
             "When using Amplify's Data category, what AWS services are automatically provisioned behind the scenes?",
           options: [
-            "API Gateway and Lambda",
             "AppSync and DynamoDB",
             "ElasticSearch and Lambda",
+            "API Gateway and Lambda",
             "RDS and API Gateway",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Amplify's Data category provisions an AppSync GraphQL API and DynamoDB tables (one per model). It also generates a strongly typed TypeScript client and configures IAM permissions.",
         },
@@ -388,12 +388,12 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
       question:
         "AppSync subscriptions push updates to clients when which event occurs?",
       options: [
-        "A scheduled CloudWatch event fires",
-        "A matching mutation executes",
         "The WebSocket TTL expires",
         "A client polls the subscription endpoint",
+        "A scheduled CloudWatch event fires",
+        "A matching mutation executes",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "AppSync subscriptions are triggered by mutations. The @aws_subscribe directive links a subscription field to the mutations that cause real-time updates to be pushed over WebSocket.",
     },
@@ -402,11 +402,11 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
         "Which AppSync resolver language is currently recommended for new development?",
       options: [
         "VTL (Velocity Template Language)",
+        "Java",
         "Python",
         "JavaScript",
-        "Java",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "JavaScript resolvers are the current recommended approach — more readable, easier to test locally, and familiar to most developers compared to VTL.",
     },
@@ -415,23 +415,23 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
         "An AppSync API must serve both anonymous public users and authenticated Cognito users with different data access. What is the correct configuration?",
       options: [
         "Create two separate AppSync APIs",
+        "Use IAM authorization with public and private roles",
         "Enable both API Key and Cognito User Pools authorization modes simultaneously",
         "Use a Lambda authorizer to route between modes",
-        "Use IAM authorization with public and private roles",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "AppSync supports enabling multiple authorization modes simultaneously. API Key can serve anonymous users while Cognito User Pools serves authenticated users, with field-level directives controlling access.",
     },
     {
       question: "A pipeline resolver in AppSync is used when you need to:",
       options: [
-        "Cache resolver responses for better performance",
         "Call multiple data sources or apply multi-step logic in a single resolver",
         "Enable real-time subscriptions",
         "Connect to an on-premises database",
+        "Cache resolver responses for better performance",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "Pipeline resolvers chain multiple functions in sequence, enabling calls to multiple data sources and complex business logic within a single resolver execution.",
     },
@@ -439,19 +439,19 @@ AppSync integrates directly with **EventBridge** as a target data source, lettin
       question:
         "What does $ctx.identity.claims contain in an AppSync resolver using Cognito?",
       options: [
-        "The raw API key value",
-        "The IAM role ARN of the caller",
         "The JWT claims from the Cognito token (sub, email, groups, etc.)",
         "The GraphQL field arguments",
+        "The raw API key value",
+        "The IAM role ARN of the caller",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "$ctx.identity.claims contains the JWT claims from the Cognito token — including sub, email, cognito:groups, and custom attributes — available for authorization decisions in resolvers.",
     },
     {
       question: "AppSync server-side caching is backed by which AWS service?",
-      options: ["DynamoDB DAX", "CloudFront", "ElastiCache", "Lambda@Edge"],
-      correctIndex: 2,
+      options: ["CloudFront", "ElastiCache", "DynamoDB DAX", "Lambda@Edge"],
+      correctIndex: 1,
       explanation:
         "AppSync's server-side caching is backed by ElastiCache managed by AppSync. You configure TTL and caching mode without provisioning or managing the cache infrastructure yourself.",
     },

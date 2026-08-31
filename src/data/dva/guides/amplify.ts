@@ -66,12 +66,12 @@ Custom domains are fully managed: connect your domain and Amplify automatically 
           question:
             "Which AWS service does Amplify use to provision TLS certificates when you connect a custom domain?",
           options: [
-            "AWS IAM",
-            "AWS CloudHSM",
             "AWS Certificate Manager (ACM)",
+            "AWS CloudHSM",
+            "AWS IAM",
             "AWS Secrets Manager",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "When you connect a custom domain to Amplify Hosting, Amplify automatically provisions an ACM certificate in us-east-1 and configures the CloudFront distribution to use it.",
         },
@@ -107,12 +107,12 @@ The TypeScript definitions map to real AWS services under the hood: Auth provisi
         {
           question: "In Amplify Gen 2, how is the backend defined?",
           options: [
-            "By running interactive CLI prompts such as 'amplify add auth'",
-            "By writing TypeScript code that is version-controlled alongside the frontend",
             "By uploading CloudFormation JSON files to S3",
+            "By running interactive CLI prompts such as 'amplify add auth'",
             "By configuring resources in the AWS console and exporting them",
+            "By writing TypeScript code that is version-controlled alongside the frontend",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amplify Gen 2 moves from CLI-based prompts to code-first TypeScript definitions. The backend resource files live in the amplify/ directory alongside frontend code and are deployed automatically on push.",
         },
@@ -120,12 +120,12 @@ The TypeScript definitions map to real AWS services under the hood: Auth provisi
           question:
             "What AWS services does the Amplify Gen 2 'Data' category provision under the hood?",
           options: [
-            "API Gateway and RDS",
-            "AppSync and DynamoDB",
             "Lambda and S3",
+            "API Gateway and RDS",
             "Kinesis and DynamoDB",
+            "AppSync and DynamoDB",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Amplify Data category provisions an AppSync GraphQL API with DynamoDB tables — one table per model in your schema. Authorization rules are declared at the schema level and translated into AppSync resolvers.",
         },
@@ -169,12 +169,12 @@ The \`@aws-amplify/ui-react\` package provides pre-built UI components. The \`<A
           question:
             "What does the Amplify Library's fetchAuthSession() function return?",
           options: [
+            "A pre-signed S3 URL for the authenticated user",
             "An IAM access key and secret for the current user",
             "The current user's JWT tokens (ID, Access, Refresh)",
-            "A pre-signed S3 URL for the authenticated user",
             "The Cognito Identity Pool credentials only",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "fetchAuthSession() retrieves the current user's JWT tokens from Cognito without requiring you to understand the underlying Cognito flows. It returns the ID token, Access token, and Refresh token.",
         },
@@ -182,12 +182,12 @@ The \`@aws-amplify/ui-react\` package provides pre-built UI components. The \`<A
           question:
             "Which Amplify UI component provides a complete sign-in and sign-up flow in a single import?",
           options: [
+            "<Authenticator>",
             "<AuthProvider>",
             "<CognitoLogin>",
-            "<Authenticator>",
             "<SignInForm>",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "The <Authenticator> component from @aws-amplify/ui-react delivers a complete sign-in and sign-up flow including state management, error messages, and verification code screens — all from one import.",
         },
@@ -195,11 +195,11 @@ The \`@aws-amplify/ui-react\` package provides pre-built UI components. The \`<A
           question: "What does generateClient() from 'aws-amplify/api' return?",
           options: [
             "A REST API client pre-configured with API Gateway endpoints",
-            "A typed GraphQL client that infers types from the Amplify schema",
             "An SQS client for sending messages to queues",
+            "A typed GraphQL client that infers types from the Amplify schema",
             "A DynamoDB DocumentClient for direct table access",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "generateClient() returns a typed AppSync GraphQL client that infers query and mutation types from your Amplify schema at compile time, catching type errors before deployment.",
         },
@@ -223,12 +223,12 @@ AppSync subscriptions work automatically with the Amplify client — when you pe
           question:
             "Which Amplify authorization rule restricts access so that users can only read and write their own records?",
           options: [
+            "allow.private()",
             "allow.authenticated()",
             "allow.owner()",
-            "allow.private()",
             "allow.groups(['Users'])",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "allow.owner() is the most common authorization rule. It stores the creating user's Cognito user ID on each item and restricts read/write access to that owner only.",
         },
@@ -236,12 +236,12 @@ AppSync subscriptions work automatically with the Amplify client — when you pe
           question:
             "What transport protocol do AppSync subscriptions use for real-time updates in Amplify?",
           options: [
-            "HTTP long polling",
-            "WebSocket",
             "Server-Sent Events",
+            "HTTP long polling",
             "UDP",
+            "WebSocket",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AppSync subscriptions use WebSocket connections to push real-time updates to subscribed clients when mutations occur. The Amplify client handles this automatically with no additional configuration.",
         },
@@ -249,12 +249,12 @@ AppSync subscriptions work automatically with the Amplify client — when you pe
           question:
             "What two Cognito resources does the Amplify Auth category create?",
           options: [
-            "User Pool and IAM Role",
-            "User Pool and Identity Pool",
-            "Identity Pool and STS endpoint",
             "User Pool and Hosted UI only",
+            "User Pool and IAM Role",
+            "Identity Pool and STS endpoint",
+            "User Pool and Identity Pool",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Amplify Auth category provisions both a Cognito User Pool (the user directory for authentication) and an Identity Pool (which exchanges tokens for temporary AWS credentials for direct AWS service access).",
         },
@@ -271,8 +271,8 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
         {
           question:
             "In Amplify Storage, which prefix allows all authenticated users to read an object but only the owner to write it?",
-          options: ["public/", "protected/", "private/", "shared/"],
-          correctIndex: 1,
+          options: ["shared/", "public/", "protected/", "private/"],
+          correctIndex: 2,
           explanation:
             "The protected/ prefix in Amplify Storage makes objects readable by all authenticated users but writable only by the owning user. public/ is world-readable, and private/ is accessible only to the owner.",
         },
@@ -280,12 +280,12 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
           question:
             "Which AWS service does the Amplify Analytics category connect to for user engagement tracking?",
           options: [
-            "Amazon Kinesis",
-            "Amazon CloudWatch",
-            "Amazon Pinpoint",
             "Amazon QuickSight",
+            "Amazon Pinpoint",
+            "Amazon CloudWatch",
+            "Amazon Kinesis",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "The Amplify Analytics category connects to Amazon Pinpoint for user engagement analytics — recording events, tracking conversion funnels, and powering targeted notification campaigns.",
         },
@@ -293,12 +293,12 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
           question:
             "What AWS service does Amplify Hosting use for CDN delivery of frontend assets?",
           options: [
-            "Amazon S3 static website hosting",
-            "Amazon CloudFront",
             "AWS Global Accelerator",
+            "Amazon S3 static website hosting",
             "Amazon API Gateway",
+            "Amazon CloudFront",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amplify Hosting uses CloudFront as its CDN layer. When you connect a custom domain, Amplify manages the CloudFront distribution, ACM certificate, and Route 53 records automatically.",
         },
@@ -360,12 +360,12 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
       question:
         "An Amplify Hosting project has a main branch deployed to production. A developer pushes to a feature branch. What does Amplify automatically create?",
       options: [
-        "A new AWS account for the feature branch",
-        "A unique preview URL for the feature branch deployment",
         "A CloudFormation stack that must be manually approved",
+        "A new AWS account for the feature branch",
         "A pull request in the connected GitHub repository",
+        "A unique preview URL for the feature branch deployment",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Amplify Hosting automatically creates a unique URL for each branch deployment. Feature branches and pull requests each get their own preview URL without any manual configuration.",
     },
@@ -374,19 +374,19 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
         "Which component from @aws-amplify/ui-react delivers a complete authentication UI including sign-up, sign-in, and MFA in a single import?",
       options: [
         "<CognitoAuth>",
-        "<AuthFlow>",
         "<Authenticator>",
         "<SignInWidget>",
+        "<AuthFlow>",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "The <Authenticator> component provides a complete sign-in and sign-up flow — including state management, error messages, and verification code screens — in a single import from @aws-amplify/ui-react.",
     },
     {
       question:
         "A team uses Amplify Storage. They want objects uploaded by users to be readable by any authenticated user but only modifiable by the uploader. Which S3 prefix should they use?",
-      options: ["public/", "protected/", "private/", "shared/"],
-      correctIndex: 1,
+      options: ["public/", "shared/", "private/", "protected/"],
+      correctIndex: 3,
       explanation:
         "The protected/ prefix allows all authenticated users to read objects but only the owner to write. public/ allows anyone to read; private/ restricts all access to the owner only.",
     },
@@ -407,12 +407,12 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
       question:
         "Which two Cognito resources does the Amplify Auth category provision for every application?",
       options: [
-        "A User Pool and an IAM Role",
-        "A User Pool and an Identity Pool",
         "An Identity Pool and an STS endpoint",
         "A User Pool and a Hosted Zone",
+        "A User Pool and an Identity Pool",
+        "A User Pool and an IAM Role",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "The Amplify Auth category always provisions both a Cognito User Pool (authentication — handles sign-up, sign-in, MFA) and an Identity Pool (authorization — exchanges tokens for temporary AWS credentials for direct service access).",
     },
@@ -434,11 +434,11 @@ Amplify Functions are Lambda functions that you can use as AppSync resolvers, AP
         "A developer calls fetchAuthSession() from the Amplify Auth library. What does this return?",
       options: [
         "The user's IAM access key and secret key",
-        "The user's current JWT tokens without requiring a new sign-in",
         "A pre-signed URL for the user's S3 folder",
+        "The user's current JWT tokens without requiring a new sign-in",
         "The user's Cognito Identity Pool unique identifier only",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "fetchAuthSession() retrieves the current user's JWT tokens (ID token, Access token, and session metadata) without requiring re-authentication. It handles token refresh automatically if the current tokens are expired.",
     },

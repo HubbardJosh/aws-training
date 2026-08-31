@@ -19,8 +19,8 @@ An important consistency change happened in December 2020: S3 now provides **str
       quiz: [
         {
           question: "What is the maximum size of a single S3 object?",
-          options: ["5 GB", "50 GB", "5 TB", "50 TB"],
-          correctIndex: 2,
+          options: ["50 GB", "50 TB", "5 GB", "5 TB"],
+          correctIndex: 3,
           explanation:
             "S3 supports objects up to 5 TB. Single-part PUT is limited to 5 GB; multipart upload is required for objects larger than 5 GB.",
         },
@@ -28,12 +28,12 @@ An important consistency change happened in December 2020: S3 now provides **str
           question:
             "Since December 2020, what consistency model does S3 provide for all operations?",
           options: [
+            "Causal consistency",
+            "Read-your-writes consistency for new objects only",
             "Eventual consistency",
             "Strong read-after-write consistency",
-            "Read-your-writes consistency for new objects only",
-            "Causal consistency",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 now provides strong read-after-write consistency for all operations including PUTs, overwrites, and DELETEs — no stale reads after a successful write.",
         },
@@ -66,12 +66,12 @@ The Glacier tier exists for archival at very low storage cost. **S3 Glacier Inst
           question:
             "Which storage class automatically moves objects between tiers based on actual access patterns?",
           options: [
-            "S3 Standard-IA",
-            "S3 Intelligent-Tiering",
             "S3 One Zone-IA",
             "S3 Glacier Instant Retrieval",
+            "S3 Standard-IA",
+            "S3 Intelligent-Tiering",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 Intelligent-Tiering monitors access patterns and moves objects automatically — ideal when you cannot predict access frequency.",
         },
@@ -104,12 +104,12 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
           question:
             "Which lifecycle action moves objects to a cheaper storage class after a configured number of days?",
           options: [
-            "Expiration action",
             "Transition action",
-            "Replication action",
             "Versioning action",
+            "Expiration action",
+            "Replication action",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Transition actions change the storage class after N days. Expiration actions permanently delete objects.",
         },
@@ -130,16 +130,16 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
         {
           question:
             "Multipart upload is required for S3 objects larger than what size?",
-          options: ["100 MB", "1 GB", "5 GB", "10 GB"],
-          correctIndex: 2,
+          options: ["5 GB", "1 GB", "10 GB", "100 MB"],
+          correctIndex: 0,
           explanation:
             "Single-part PUT supports objects up to 5 GB; multipart upload is required beyond that. It is recommended for objects over 100 MB for resilience and parallel upload speed.",
         },
         {
           question:
             "What is the maximum expiry duration of a presigned URL created by an IAM user?",
-          options: ["1 hour", "24 hours", "7 days", "30 days"],
-          correctIndex: 2,
+          options: ["30 days", "7 days", "1 hour", "24 hours"],
+          correctIndex: 1,
           explanation:
             "Presigned URLs created by IAM users expire in up to 7 days. URLs created by IAM roles expire no later than the role session duration, which may be shorter.",
         },
@@ -147,12 +147,12 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
           question:
             "S3 Transfer Acceleration improves upload speed by routing traffic through which AWS service's edge locations?",
           options: [
-            "Route 53",
             "CloudFront",
-            "Global Accelerator",
             "Direct Connect",
+            "Route 53",
+            "Global Accelerator",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Transfer Acceleration uses CloudFront edge locations to route uploads over the AWS backbone, bypassing congested public internet paths.",
         },
@@ -174,12 +174,12 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
           question:
             "Which S3 access control mechanism overrides both bucket policies and ACLs?",
           options: [
-            "S3 Access Points",
             "IAM identity policies",
             "Block Public Access",
+            "S3 Access Points",
             "Object Ownership",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Block Public Access is the master override — it prevents public access regardless of what bucket policies or ACLs say. It can be set at the account or bucket level.",
         },
@@ -187,12 +187,12 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
           question:
             "What is the recommended way to grant cross-account access to an S3 bucket?",
           options: [
+            "S3 Access Points only",
+            "IAM role in the source account",
             "S3 ACLs",
             "Bucket Policy with cross-account principal",
-            "IAM role in the source account",
-            "S3 Access Points only",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Bucket policies support cross-account grants using the full IAM policy language. ACLs are a legacy mechanism AWS recommends disabling.",
         },
@@ -219,12 +219,12 @@ Policies can be scoped to the entire bucket or filtered by key prefix and object
         {
           question: "What does S3 Bucket Keys do when SSE-KMS is enabled?",
           options: [
-            "Generates a separate KMS key per object",
-            "Reduces KMS API calls by up to 99% using a short-lived bucket-level key",
-            "Enables client-side encryption automatically",
             "Disables CloudTrail logging for KMS calls",
+            "Generates a separate KMS key per object",
+            "Enables client-side encryption automatically",
+            "Reduces KMS API calls by up to 99% using a short-lived bucket-level key",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "S3 Bucket Keys generate a bucket-level data key in S3, reducing the number of KMS API calls by up to 99% and lowering cost and quota pressure.",
         },
@@ -244,12 +244,12 @@ An important limitation: replication only applies to new objects created after t
           question:
             "What happens when you delete a versioned S3 object without specifying a version ID?",
           options: [
-            "The object and all versions are permanently deleted",
-            "The latest version is permanently deleted",
             "A delete marker is added; all versions remain",
+            "The object and all versions are permanently deleted",
             "The bucket is locked until deletion is confirmed",
+            "The latest version is permanently deleted",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "Deleting without a version ID adds a delete marker. The object appears deleted but all versions remain accessible by version ID.",
         },
@@ -257,12 +257,12 @@ An important limitation: replication only applies to new objects created after t
           question:
             "Cross-Region Replication does NOT replicate which of the following?",
           options: [
-            "New objects created after the rule is configured",
-            "Objects encrypted with SSE-KMS",
-            "Objects that existed before the replication rule was created",
             "Objects filtered by prefix",
+            "Objects that existed before the replication rule was created",
+            "Objects encrypted with SSE-KMS",
+            "New objects created after the rule is configured",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "CRR only applies to new objects created after the rule is configured. Existing objects must be copied manually using S3 Batch Operations.",
         },
@@ -293,8 +293,8 @@ An important operational characteristic: S3 event notifications are delivered **
         {
           question:
             "Which S3 event notification target provides the most flexible routing, content-based filtering, and event replay?",
-          options: ["SQS", "SNS", "Lambda", "EventBridge"],
-          correctIndex: 3,
+          options: ["SQS", "SNS", "EventBridge", "Lambda"],
+          correctIndex: 2,
           explanation:
             "EventBridge supports rich content-based filtering, 20+ target types, cross-account delivery, and event archiving/replay — the most flexible option.",
         },
@@ -312,12 +312,12 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
           question:
             "What is the recommended way to serve a private S3 bucket through CloudFront?",
           options: [
-            "Enable public read on the bucket",
-            "Use Origin Access Identity (OAI)",
             "Use Origin Access Control (OAC)",
+            "Use Origin Access Identity (OAI)",
             "Configure a bucket policy allowing all CloudFront IPs",
+            "Enable public read on the bucket",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "OAC is the current recommended mechanism. It restricts bucket access to only your CloudFront distribution, keeping the bucket private while CloudFront serves content globally.",
         },
@@ -351,11 +351,11 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
             "Why use presigned URLs for client-side S3 uploads instead of routing through your application server?",
           options: [
             "Presigned URLs support larger file sizes",
-            "They bypass S3 encryption requirements",
             "They save application server bandwidth and compute cost",
+            "They bypass S3 encryption requirements",
             "They are required for multipart uploads",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Presigned URLs let clients upload directly to S3 without the file passing through your server, eliminating the bandwidth and compute cost of proxying large uploads.",
         },
@@ -363,12 +363,12 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
           question:
             "Which AWS service pair enables serverless SQL analytics directly on S3 data without an ETL pipeline?",
           options: [
-            "S3 + RDS",
-            "S3 + Athena",
             "S3 + Redshift",
             "S3 + DynamoDB",
+            "S3 + RDS",
+            "S3 + Athena",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Athena queries S3 data directly with standard SQL at no fixed cost — you pay per data scanned. No ETL or database server required.",
         },
@@ -418,8 +418,8 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
     {
       question:
         "Multipart upload is required for S3 objects larger than what size?",
-      options: ["100 MB", "1 GB", "5 GB", "10 GB"],
-      correctIndex: 2,
+      options: ["5 GB", "1 GB", "10 GB", "100 MB"],
+      correctIndex: 0,
       explanation:
         "Single-part PUT supports up to 5 GB. Multipart is required beyond that and recommended for objects over 100 MB.",
     },
@@ -427,12 +427,12 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
       question:
         "Which S3 storage class automatically moves objects between access tiers with no manual rules?",
       options: [
-        "S3 Standard-IA",
         "S3 Intelligent-Tiering",
         "S3 Glacier Flexible Retrieval",
         "S3 One Zone-IA",
+        "S3 Standard-IA",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "S3 Intelligent-Tiering monitors access patterns and moves objects automatically, charging a small per-object monitoring fee.",
     },
@@ -440,12 +440,12 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
       question:
         "Which access control feature overrides all bucket policies and ACLs to prevent public access?",
       options: [
-        "S3 Access Points",
         "Bucket versioning",
-        "Block Public Access",
         "Object Ownership",
+        "S3 Access Points",
+        "Block Public Access",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "Block Public Access is the master override. It can be set at the account level to prevent public access across all buckets regardless of other policies.",
     },
@@ -453,32 +453,32 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
       question:
         "What must both the source and destination bucket have enabled for S3 Cross-Region Replication to work?",
       options: [
-        "Static website hosting",
         "Versioning",
         "Block Public Access disabled",
         "SSE-KMS encryption",
+        "Static website hosting",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "CRR and SRR both require versioning enabled on source and destination buckets.",
     },
     {
       question:
         "Which SSE option gives you full CloudTrail audit logs of every S3 encrypt/decrypt operation?",
-      options: ["SSE-S3", "SSE-C", "SSE-KMS", "Client-Side Encryption"],
-      correctIndex: 2,
+      options: ["SSE-KMS", "SSE-S3", "Client-Side Encryption", "SSE-C"],
+      correctIndex: 0,
       explanation:
         "SSE-KMS uses KMS keys. Every KMS API call is logged in CloudTrail, giving you a complete audit trail of who accessed which object.",
     },
     {
       question: "S3 event notifications guarantee which delivery semantics?",
       options: [
-        "Exactly-once",
         "At-most-once",
-        "At-least-once",
+        "Exactly-once",
         "Ordered FIFO",
+        "At-least-once",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "S3 notifications are at-least-once. Processors must be idempotent to handle duplicate deliveries safely.",
     },
@@ -487,11 +487,11 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
         "What is the current recommended mechanism to restrict S3 bucket access to only a CloudFront distribution?",
       options: [
         "Origin Access Identity (OAI)",
-        "Origin Access Control (OAC)",
         "Bucket policy with CloudFront IP ranges",
         "S3 Access Points",
+        "Origin Access Control (OAC)",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "OAC is the current recommended replacement for OAI. It keeps the bucket private and allows only your CloudFront distribution to access it.",
     },
@@ -499,12 +499,12 @@ For data analytics use cases, S3 pairs naturally with **Amazon Athena**, which p
       question:
         "Which lifecycle rule type prevents accumulating storage charges from abandoned multipart uploads?",
       options: [
-        "Transition action to Glacier",
-        "Expiration action on current versions",
         "Abort incomplete multipart uploads",
         "MFA Delete",
+        "Transition action to Glacier",
+        "Expiration action on current versions",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Aborting incomplete multipart uploads after 7 days cleans up upload parts that were never completed, eliminating the associated storage cost.",
     },

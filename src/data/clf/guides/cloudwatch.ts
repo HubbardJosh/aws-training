@@ -36,12 +36,12 @@ You can also publish your own **custom metrics** from your applications using th
           question:
             "Which of the following metrics does EC2 NOT report to CloudWatch by default without additional configuration?",
           options: [
-            "CPUUtilization",
-            "NetworkIn",
             "Memory utilization",
+            "NetworkIn",
+            "CPUUtilization",
             "DiskReadOps",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "EC2 does not report memory utilization to CloudWatch by default. You must install the CloudWatch Agent on the instance and configure it to collect memory metrics. This is a frequently tested exam topic.",
         },
@@ -49,11 +49,11 @@ You can also publish your own **custom metrics** from your applications using th
           question: "What are CloudWatch custom metrics used for?",
           options: [
             "Replacing default AWS service metrics with more accurate measurements",
-            "Publishing application-specific data like active user sessions or orders per minute",
             "Creating metrics from CloudTrail audit logs",
             "Monitoring metrics from non-AWS cloud providers",
+            "Publishing application-specific data like active user sessions or orders per minute",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Custom metrics allow you to publish application-specific data to CloudWatch using the CloudWatch API or agents. Examples include tracking active user sessions, queue processing rates, or business metrics like orders per minute.",
         },
@@ -89,24 +89,24 @@ Common alarm patterns include: CPU exceeding 90% for 5 consecutive minutes trigg
           question:
             "When a CloudWatch Alarm enters the ALARM state because CPU utilization exceeded 90%, which of the following actions can it trigger?",
           options: [
-            "Only send an email notification",
-            "SNS notification, EC2 actions, or Auto Scaling actions",
-            "Automatically terminate the EC2 instance",
             "Create a CloudFormation Change Set",
+            "Automatically terminate the EC2 instance",
+            "SNS notification, EC2 actions, or Auto Scaling actions",
+            "Only send an email notification",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "When an alarm enters the ALARM state it can trigger: SNS notifications (email, SMS, other AWS services), EC2 actions (stop, terminate, reboot, recover), Auto Scaling actions (add or remove instances), or Systems Manager Automation runbooks.",
         },
         {
           question: "What is the purpose of a CloudWatch Composite Alarm?",
           options: [
-            "To monitor multiple metrics simultaneously by averaging their values",
             "To combine multiple alarms with boolean logic (AND/OR) for sophisticated alerting conditions",
+            "To monitor multiple metrics simultaneously by averaging their values",
             "To create alarms that span multiple AWS accounts",
             "To automatically resolve alarms after a configurable timeout period",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Composite Alarms combine multiple alarms using boolean logic (AND/OR). This allows sophisticated alerting like 'alert only if CPU is high AND network throughput is low,' reducing alert noise from individual metric fluctuations.",
         },
@@ -128,12 +128,12 @@ The **CloudWatch Logs Agent** and **CloudWatch Unified Agent** run on EC2 instan
           question:
             "In CloudWatch Logs, what is the difference between a Log Group and a Log Stream?",
           options: [
-            "Log Groups store raw logs; Log Streams store parsed and indexed logs",
-            "Log Groups are typically per application or service; Log Streams are typically per resource instance",
             "Log Groups are for AWS service logs; Log Streams are for application logs",
             "Log Groups can span multiple regions; Log Streams are region-specific",
+            "Log Groups are typically per application or service; Log Streams are typically per resource instance",
+            "Log Groups store raw logs; Log Streams store parsed and indexed logs",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Log Groups are containers for related logs, typically one per application or service. Log Streams are sequences of log events from a specific source, typically one per resource instance (e.g., one stream per EC2 instance).",
         },
@@ -141,12 +141,12 @@ The **CloudWatch Logs Agent** and **CloudWatch Unified Agent** run on EC2 instan
           question:
             "Lambda functions automatically send their logs to which service without any additional configuration?",
           options: [
-            "Amazon S3",
             "Amazon Kinesis Data Firehose",
             "Amazon CloudWatch Logs",
+            "Amazon S3",
             "AWS CloudTrail",
           ],
-          correctIndex: 2,
+          correctIndex: 1,
           explanation:
             "Lambda functions automatically write their logs (stdout/stderr and invocation details) to Amazon CloudWatch Logs without any configuration. Each Lambda function gets its own Log Group.",
         },
@@ -154,11 +154,11 @@ The **CloudWatch Logs Agent** and **CloudWatch Unified Agent** run on EC2 instan
           question: "What do CloudWatch Metric Filters enable you to do?",
           options: [
             "Filter CloudWatch metrics so only the most important ones appear in dashboards",
+            "Convert CloudWatch metrics into log events for long-term storage in S3",
             "Extract metric data from log events, such as counting ERROR log lines as a metric",
             "Automatically create alarms on all metrics that exceed baseline thresholds",
-            "Convert CloudWatch metrics into log events for long-term storage in S3",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Metric Filters extract metric data from CloudWatch Logs events. For example, a filter that counts log lines containing 'ERROR' publishes that count as a metric, allowing you to alarm when error rates increase even though the data originates in logs.",
         },
@@ -178,24 +178,24 @@ Scheduled rules in EventBridge (formerly CloudWatch Events) work like a serverle
           question:
             "CloudWatch Dashboards support which of the following capabilities?",
           options: [
+            "Storing metric data for long-term analysis in Amazon S3",
+            "Automatically resolving alarms when metrics return to normal",
             "Displaying metrics from only a single AWS service per dashboard",
             "Displaying metrics from multiple services and multiple regions on a single dashboard",
-            "Automatically resolving alarms when metrics return to normal",
-            "Storing metric data for long-term analysis in Amazon S3",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "CloudWatch Dashboards are cross-region and can display metrics and alarms from multiple AWS services across multiple regions on a single screen, providing a unified operational view.",
         },
         {
           question: "Amazon EventBridge was formerly known as which service?",
           options: [
-            "Amazon CloudWatch Alarms",
             "AWS CloudTrail",
-            "Amazon CloudWatch Events",
+            "Amazon CloudWatch Alarms",
             "AWS SNS",
+            "Amazon CloudWatch Events",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "Amazon EventBridge was formerly known as Amazon CloudWatch Events. Both names may appear on the exam. EventBridge detects changes in AWS environments and routes events to target services like Lambda, SNS, and SQS.",
         },
@@ -203,12 +203,12 @@ Scheduled rules in EventBridge (formerly CloudWatch Events) work like a serverle
           question:
             "Which EventBridge feature works like a serverless cron job to invoke targets on a defined schedule?",
           options: [
+            "Dead letter queues",
             "Event buses",
             "Scheduled rules",
             "Event patterns",
-            "Dead letter queues",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "EventBridge scheduled rules allow you to define a schedule (e.g., every day at 8 AM UTC) and automatically invoke a target (Lambda, SNS, SQS, Step Functions) on that schedule without managing any servers.",
         },
@@ -230,24 +230,24 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
           question:
             "Why must you install the CloudWatch Agent on EC2 instances to monitor memory utilization?",
           options: [
-            "The CloudWatch Agent is required to monitor any EC2 metrics",
-            "Memory utilization is not reported to CloudWatch by EC2 by default",
             "The CloudWatch Agent enables more frequent metric reporting for all metrics",
             "Memory metrics require encryption that only the agent provides",
+            "The CloudWatch Agent is required to monitor any EC2 metrics",
+            "Memory utilization is not reported to CloudWatch by EC2 by default",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "EC2 does not report memory utilization to CloudWatch by default because memory data requires an agent running inside the OS. You must install the CloudWatch Agent and configure it to collect memory metrics. This is a frequently tested exam fact.",
         },
         {
           question: "What does CloudWatch Container Insights provide?",
           options: [
-            "Security scanning of container images stored in Amazon ECR",
-            "Metrics and logs collection for containerized applications on ECS and EKS",
             "Automated right-sizing recommendations for ECS task definitions",
+            "Security scanning of container images stored in Amazon ECR",
             "Cost reporting for individual containers running on Fargate",
+            "Metrics and logs collection for containerized applications on ECS and EKS",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Container Insights collects, aggregates, and summarizes metrics and logs from containerized applications on Amazon ECS and EKS. It provides pre-built dashboards for cluster, service, and task-level performance data.",
         },
@@ -318,12 +318,12 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
       question:
         "A developer notices that memory utilization is not appearing in CloudWatch metrics for their EC2 instances. What is the most likely cause?",
       options: [
-        "Memory metrics require the Enterprise support plan to access",
-        "EC2 does not report memory utilization by default; the CloudWatch Agent must be installed",
-        "Memory metrics are only available in the us-east-1 region",
         "Detailed monitoring must be enabled to see memory utilization",
+        "Memory metrics require the Enterprise support plan to access",
+        "Memory metrics are only available in the us-east-1 region",
+        "EC2 does not report memory utilization by default; the CloudWatch Agent must be installed",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "EC2 does not report memory utilization to CloudWatch by default. The CloudWatch Agent must be installed on the instance and configured to collect memory metrics. Enabling detailed monitoring only increases CPU and other default metric frequency, not memory.",
     },
@@ -331,12 +331,12 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
       question:
         "Which CloudWatch feature allows you to search and analyze log data using an interactive query language?",
       options: [
-        "Metric Filters",
         "CloudWatch Dashboards",
         "CloudWatch Log Insights",
         "CloudWatch Contributor Insights",
+        "Metric Filters",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "CloudWatch Log Insights provides an interactive query language to search and analyze log data. You can filter logs by error patterns, aggregate counts by time, and correlate events across log groups.",
     },
@@ -344,12 +344,12 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
       question:
         "What is the maximum retention period for logs stored in Amazon CloudWatch Logs?",
       options: [
+        "Indefinitely (never expires)",
         "30 days",
         "1 year",
         "10 years",
-        "Indefinitely (never expires)",
       ],
-      correctIndex: 2,
+      correctIndex: 3,
       explanation:
         "CloudWatch Logs supports configurable retention periods from 1 day to 10 years. You set the retention policy on each Log Group. Without a retention policy, logs are kept indefinitely but you pay for ongoing storage.",
     },
@@ -357,12 +357,12 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
       question:
         "Amazon EventBridge (formerly CloudWatch Events) can be used to invoke a Lambda function on a recurring schedule. This is analogous to which traditional computing concept?",
       options: [
-        "A message queue consumer",
-        "A cron job",
-        "A web server process",
         "A background daemon",
+        "A web server process",
+        "A cron job",
+        "A message queue consumer",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "EventBridge scheduled rules work like a serverless cron job. You define a schedule (e.g., every day at 8 AM UTC) and EventBridge automatically invokes a target like Lambda on that schedule without any server to manage.",
     },
@@ -383,12 +383,12 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
       question:
         "What is the difference between EC2 basic monitoring and detailed monitoring in CloudWatch?",
       options: [
+        "Basic monitoring is automatic; detailed monitoring requires the CloudWatch Agent",
+        "Basic monitoring only tracks CPU; detailed monitoring tracks all available metrics",
         "Basic monitoring is free with 5-minute intervals; detailed monitoring costs extra and provides 1-minute intervals",
         "Basic monitoring provides 1-minute intervals; detailed monitoring provides 1-second intervals",
-        "Basic monitoring only tracks CPU; detailed monitoring tracks all available metrics",
-        "Basic monitoring is automatic; detailed monitoring requires the CloudWatch Agent",
       ],
-      correctIndex: 0,
+      correctIndex: 2,
       explanation:
         "EC2 basic monitoring is free and reports metrics at 5-minute intervals. Detailed monitoring costs extra and switches to 1-minute intervals for more granular visibility, which is useful for Auto Scaling and troubleshooting.",
     },
@@ -397,11 +397,11 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
         "Which CloudWatch feature extracts numeric data from log events so you can set alarms on patterns found in log files?",
       options: [
         "Log Insights queries",
-        "Metric Filters",
         "Container Insights",
+        "Metric Filters",
         "Log subscriptions",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Metric Filters scan log events for specified patterns and increment a CloudWatch metric when a match is found. For example, a filter counting log lines containing 'ERROR' creates a metric you can alarm on, bridging logs and metrics.",
     },

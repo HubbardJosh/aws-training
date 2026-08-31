@@ -20,11 +20,11 @@ Forecast is purpose-built for time series, which means it understands concepts l
             "Which of the following use cases is Amazon Forecast specifically designed for?",
           options: [
             "Classifying customer sentiment from product reviews",
-            "Predicting future values from historical time-series data such as demand, energy consumption, or web traffic",
-            "Detecting anomalies in log files using unsupervised learning",
             "Recommending products based on user interaction history",
+            "Detecting anomalies in log files using unsupervised learning",
+            "Predicting future values from historical time-series data such as demand, energy consumption, or web traffic",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon Forecast is purpose-built for time-series forecasting — predicting future values (demand, energy, traffic, staffing) from historical patterns. Sentiment classification is Amazon Comprehend. Log anomaly detection uses different services. Product recommendations are Amazon Personalize.",
         },
@@ -66,12 +66,12 @@ A **Predictor** is a trained forecasting model. When you create a predictor, you
           question:
             "What is the recommended approach for creating a Predictor in Amazon Forecast?",
           options: [
-            "Manually selecting ARIMA for all time-series workloads",
             "AutoPredictor, which trains multiple algorithms and ensembles the best performers",
-            "DeepAR+ because it always outperforms statistical models",
             "Prophet because it is the most widely used open-source forecasting model",
+            "Manually selecting ARIMA for all time-series workloads",
+            "DeepAR+ because it always outperforms statistical models",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "AutoPredictor is the recommended approach — it automatically trains multiple algorithms (DeepAR+, Prophet, ARIMA, ETS, NPTS, CNN-QR), evaluates each, and ensembles the best performers to minimize forecast error. No single algorithm is universally best; AutoPredictor selects the optimal combination for your specific data.",
         },
@@ -79,20 +79,20 @@ A **Predictor** is a trained forecasting model. When you create a predictor, you
           question:
             "What does the 'forecast horizon' specify when creating a Predictor in Amazon Forecast?",
           options: [
+            "The granularity of the time-series data (daily, weekly, hourly)",
             "The number of historical data points required for training",
             "How far into the future the model will generate predictions",
             "The number of algorithms AutoPredictor will evaluate",
-            "The granularity of the time-series data (daily, weekly, hourly)",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "The forecast horizon specifies how far into the future predictions are generated (e.g., 12 weeks ahead). Forecast frequency (daily, weekly, hourly) is specified separately. The number of historical data points and algorithms evaluated are separate configuration aspects not called the 'horizon'.",
         },
         {
           question:
             "Which algorithm available in Amazon Forecast is based on a recurrent neural network architecture?",
-          options: ["ARIMA", "ETS (exponential smoothing)", "DeepAR+", "NPTS"],
-          correctIndex: 2,
+          options: ["DeepAR+", "ETS (exponential smoothing)", "ARIMA", "NPTS"],
+          correctIndex: 0,
           explanation:
             "DeepAR+ is a deep learning algorithm based on recurrent neural networks, capable of learning complex patterns across many related time series simultaneously. ARIMA and ETS are classical statistical models. NPTS (non-parametric time series) is a non-parametric statistical approach.",
         },
@@ -108,12 +108,12 @@ You query forecasts via the **QueryForecast** API, specifying an item ID and opt
           question:
             "Amazon Forecast returns P10, P50, and P90 quantile predictions. What does P90 represent?",
           options: [
-            "The model is 90% confident the prediction is correct",
             "There is a 90% probability the actual value will be below this prediction",
-            "The prediction uses 90% of the training data",
             "The model achieves 90% accuracy on the validation set",
+            "The prediction uses 90% of the training data",
+            "The model is 90% confident the prediction is correct",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "P90 means there is a 90% probability the actual value will be at or below this value. A retailer ordering to P90 minimizes stockout risk (accepting some overstock). P50 is the median estimate. P10 means only 10% probability the actual falls below this. These are quantile predictions, not accuracy metrics.",
         },
@@ -129,12 +129,12 @@ You query forecasts via the **QueryForecast** API, specifying an item ID and opt
           question:
             "How do you query predictions for a specific item in Amazon Forecast?",
           options: [
-            "Export all predictions to S3 and query from there",
-            "Use the QueryForecast API specifying the item ID",
             "Query the Predictor directly using the model ARN",
             "Subscribe to an SNS topic that publishes predictions per item",
+            "Export all predictions to S3 and query from there",
+            "Use the QueryForecast API specifying the item ID",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The QueryForecast API allows real-time querying of predictions for a specific item ID (with optional filters). Forecast Export Jobs write all predictions to S3 in bulk for batch consumption. There is no direct Predictor query API or SNS subscription mechanism for individual item predictions.",
         },
@@ -150,12 +150,12 @@ Best practices for accurate forecasting: provide at least two full seasonal cycl
           question:
             "How does Amazon Forecast evaluate Predictor accuracy without a separate test dataset you provide?",
           options: [
-            "It uses cross-validation on the entire training dataset",
-            "It uses backtesting — training on a portion of historical data and evaluating against the held-out recent period",
-            "It compares predictions against a synthetic benchmark dataset",
             "It requires you to provide a separate labeled test set",
+            "It compares predictions against a synthetic benchmark dataset",
+            "It uses backtesting — training on a portion of historical data and evaluating against the held-out recent period",
+            "It uses cross-validation on the entire training dataset",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Forecast evaluates accuracy through backtesting — it holds out the most recent period of your historical data as a test set and measures how well predictions for that period match actual values. You do not need to provide a separate test dataset; Forecast creates the test split from your historical data automatically.",
         },
@@ -164,11 +164,11 @@ Best practices for accurate forecasting: provide at least two full seasonal cycl
             "What are the primary accuracy metrics reported by Amazon Forecast for Predictor evaluation?",
           options: [
             "Accuracy, Precision, Recall, and F1 score",
-            "WAPE, RMSE, and quantile loss",
             "MAE, R-squared, and AUC-ROC",
+            "WAPE, RMSE, and quantile loss",
             "Cross-entropy loss and perplexity",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Forecast reports WAPE (weighted absolute percentage error), RMSE (root mean squared error), and quantile loss for each requested quantile. Lower values are better for all metrics. Accuracy/Precision/Recall/F1 are classification metrics. MAE and R-squared are regression metrics but not the primary Forecast metrics. Cross-entropy and perplexity are language model metrics.",
         },
@@ -198,11 +198,11 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
             "What input data format does Amazon Forecast accept when importing historical data from S3?",
           options: [
             "JSON and XML only",
-            "CSV and Parquet",
-            "Avro and ORC",
             "JSONL and TSV",
+            "Avro and ORC",
+            "CSV and Parquet",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "Amazon Forecast accepts historical data stored in S3 in CSV or Parquet format. JSON, XML, Avro, ORC, JSONL, and TSV are not supported input formats for Forecast dataset imports.",
         },
@@ -211,11 +211,11 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
             "Which AWS service can be used to orchestrate a recurring Forecast pipeline (import data → train predictor → generate forecast → export results) on a schedule?",
           options: [
             "Amazon Kinesis Data Streams",
-            "AWS Step Functions or Amazon EventBridge Scheduler",
-            "Amazon SQS with Lambda triggers",
             "AWS Glue workflows only",
+            "Amazon SQS with Lambda triggers",
+            "AWS Step Functions or Amazon EventBridge Scheduler",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "AWS Step Functions (for complex DAG workflows) or Amazon EventBridge Scheduler (for cron-based triggering) are the recommended services for orchestrating recurring Forecast pipeline cycles. Kinesis is for real-time streaming. SQS/Lambda can trigger jobs but are not the primary orchestration mechanism. Glue is for ETL, not Forecast orchestration.",
         },
@@ -223,12 +223,12 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
           question:
             "A business analyst wants to visualize Amazon Forecast output predictions in a dashboard. Which AWS service is the most natural integration?",
           options: [
+            "Amazon Comprehend",
             "Amazon SageMaker Studio",
             "Amazon QuickSight",
-            "Amazon Comprehend",
             "AWS Glue DataBrew",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Amazon QuickSight is AWS's BI and visualization service, and Forecast outputs (written to S3 in CSV/Parquet) can be consumed by QuickSight for dashboard visualization. SageMaker Studio is a ML development IDE. Comprehend is NLP. Glue DataBrew is for data preparation, not visualization.",
         },
@@ -272,12 +272,12 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
       question:
         "A retailer has weekly sales data for 5,000 products over 3 years, with known promotion schedules and product category metadata. Which Amazon Forecast dataset types should they use?",
       options: [
-        "Target Time Series only",
-        "Target Time Series and Item Metadata only",
         "Target Time Series, Related Time Series (promotions), and Item Metadata (category)",
+        "Target Time Series and Item Metadata only",
         "Related Time Series and Item Metadata only",
+        "Target Time Series only",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "They should use all three dataset types: Target Time Series (weekly sales history), Related Time Series (promotion schedule — a time-varying feature known in advance), and Item Metadata (product category — a static attribute). Using all available data generally improves forecast accuracy.",
     },
@@ -285,12 +285,12 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
       question:
         "A company wants Amazon Forecast to automatically select the best forecasting algorithm rather than choosing one manually. What should they use?",
       options: [
-        "DeepAR+ with default hyperparameters",
         "ARIMA with manual hyperparameter tuning",
         "AutoPredictor",
+        "DeepAR+ with default hyperparameters",
         "A SageMaker HPO job over Forecast algorithms",
       ],
-      correctIndex: 2,
+      correctIndex: 1,
       explanation:
         "AutoPredictor is specifically designed to automatically train, evaluate, and ensemble multiple Forecast algorithms (DeepAR+, Prophet, ARIMA, ETS, NPTS, CNN-QR) and select the best combination for the data. Manual algorithm selection and SageMaker HPO are unnecessary when AutoPredictor is available.",
     },
@@ -299,11 +299,11 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
         "An energy company needs to forecast electricity consumption for the next 30 days. Their historical data shows strong weekly and annual seasonality. What best practice should they follow for training data?",
       options: [
         "Provide at least 30 days of history matching the forecast horizon",
+        "Use only the most recent 90 days for recency bias",
         "Provide at least two full seasonal cycles — at least two years of data given annual seasonality",
         "Provide exactly one year of history regardless of seasonal patterns",
-        "Use only the most recent 90 days for recency bias",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Forecast best practice recommends at least two full seasonal cycles of history. With annual seasonality, that means at least two years of data so the model can learn consistent year-over-year patterns. Using only the forecast horizon length (30 days) or only recent data would severely limit model accuracy.",
     },
@@ -319,20 +319,20 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
       question:
         "What is the difference between Related Time Series and Item Metadata in Amazon Forecast?",
       options: [
-        "Related Time Series is required; Item Metadata is required for all datasets",
-        "Related Time Series contains time-varying features (price, promotions); Item Metadata contains static item attributes (category, brand)",
-        "Related Time Series is for training only; Item Metadata is used only at prediction time",
         "There is no difference — they are two names for the same dataset type",
+        "Related Time Series is for training only; Item Metadata is used only at prediction time",
+        "Related Time Series contains time-varying features (price, promotions); Item Metadata contains static item attributes (category, brand)",
+        "Related Time Series is required; Item Metadata is required for all datasets",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "Related Time Series contains features that change over time (price per week, promotional flags, temperature) that influence the target metric. Item Metadata contains static, non-time-varying attributes of items (product category, brand, region). Both are optional but improve accuracy. Neither is required — only Target Time Series is required.",
     },
     {
       question:
         "Which Amazon Forecast accuracy metric is described as the 'weighted absolute percentage error'?",
-      options: ["RMSE", "WAPE", "R-squared", "Quantile loss"],
-      correctIndex: 1,
+      options: ["Quantile loss", "R-squared", "WAPE", "RMSE"],
+      correctIndex: 2,
       explanation:
         "WAPE (weighted absolute percentage error) measures forecast accuracy as a percentage, weighting errors by the magnitude of the actual values. RMSE (root mean squared error) penalizes large errors more heavily. R-squared measures explained variance. Quantile loss measures accuracy for a specific quantile prediction.",
     },
@@ -341,11 +341,11 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
         "A company launches a brand new product with no sales history. How does Amazon Forecast generate predictions for this cold-start item?",
       options: [
         "Forecast returns zero predictions until the item accumulates 12 data points",
-        "Forecast uses item metadata and related time series to borrow patterns from similar items with history",
         "Cold-start items must use a separate manually trained SageMaker model",
         "Forecast uses the average of all other items as the cold-start prediction",
+        "Forecast uses item metadata and related time series to borrow patterns from similar items with history",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "Amazon Forecast handles cold-start natively by using item metadata (category, brand) and related time series to identify similar items with history and borrow their forecasting patterns. Zero predictions, mandatory SageMaker models, and simple averages are not the correct approach — Forecast's metadata integration handles this automatically.",
     },
@@ -353,12 +353,12 @@ Forecast outputs land back in S3, where they can be consumed by Amazon QuickSigh
       question:
         "After Amazon Forecast exports predictions to S3, which AWS service would a business analyst use to create an interactive dashboard visualizing forecast vs actual demand?",
       options: [
-        "Amazon SageMaker Canvas",
-        "AWS Glue DataBrew",
         "Amazon QuickSight",
         "Amazon Athena",
+        "Amazon SageMaker Canvas",
+        "AWS Glue DataBrew",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "Amazon QuickSight is the AWS BI visualization service for creating interactive dashboards and charts. Forecast S3 outputs can be connected to QuickSight as a data source. Athena can query the S3 data with SQL but is not a visualization tool. SageMaker Canvas and Glue DataBrew are for ML and data preparation, not dashboarding.",
     },

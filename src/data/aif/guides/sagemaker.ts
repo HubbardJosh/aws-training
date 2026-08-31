@@ -20,12 +20,12 @@ At the highest level, SageMaker provides **managed compute** (you specify instan
           question:
             "What is the core design philosophy behind Amazon SageMaker as an ML platform?",
           options: [
-            "To provide pre-trained foundation models that customers can use without any training",
             "To integrate all phases of the ML lifecycle (data prep, training, evaluation, deployment, monitoring) into a single managed service",
+            "To provide pre-trained foundation models that customers can use without any training",
             "To replace data scientists with automated AutoML pipelines that require no human involvement",
             "To provide a serverless inference platform for models trained outside of AWS",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SageMaker's design philosophy is that ML projects follow a predictable lifecycle, and each phase has distinct infrastructure needs. By integrating all phases (data preparation, feature engineering, training, evaluation, deployment, monitoring) into one platform, it eliminates the brittle pipelines created by stitching together separate tools.",
         },
@@ -33,12 +33,12 @@ At the highest level, SageMaker provides **managed compute** (you specify instan
           question:
             "Where does Amazon SageMaker store datasets and trained model artifacts?",
           options: [
-            "Amazon DynamoDB for datasets; Amazon ECR for model artifacts",
             "Amazon EFS exclusively for both datasets and model artifacts",
-            "Amazon S3 for datasets and model artifacts; Amazon EFS for shared file systems in training clusters",
+            "Amazon DynamoDB for datasets; Amazon ECR for model artifacts",
             "Amazon RDS for structured datasets; Amazon S3 for unstructured model artifacts",
+            "Amazon S3 for datasets and model artifacts; Amazon EFS for shared file systems in training clusters",
           ],
-          correctIndex: 2,
+          correctIndex: 3,
           explanation:
             "SageMaker uses Amazon S3 as the primary storage for both training datasets and model artifacts (model.tar.gz files). Amazon EFS is used for shared file systems in distributed training clusters where multiple nodes need simultaneous access to the same files.",
         },
@@ -56,12 +56,12 @@ At the highest level, SageMaker provides **managed compute** (you specify instan
           question:
             "What problem does Amazon SageMaker Feature Store's dual online/offline architecture solve?",
           options: [
-            "It reduces storage costs by tiering features between hot and cold storage",
-            "It eliminates training-serving skew by ensuring both training jobs and real-time inference use consistent, versioned feature definitions",
-            "It allows multiple ML models to share the same training dataset without data duplication",
             "It provides automatic feature importance ranking to identify which features to include",
+            "It allows multiple ML models to share the same training dataset without data duplication",
+            "It eliminates training-serving skew by ensuring both training jobs and real-time inference use consistent, versioned feature definitions",
+            "It reduces storage costs by tiering features between hot and cold storage",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Training-serving skew occurs when the features used during training are computed differently than those used at inference time. Feature Store eliminates this by maintaining a single versioned feature definition used by both the offline store (for training) and the online store (for real-time inference).",
         },
@@ -70,11 +70,11 @@ At the highest level, SageMaker provides **managed compute** (you specify instan
             "Which SageMaker Feature Store tier provides low-latency reads for real-time inference, and what backs it?",
           options: [
             "The offline store, backed by Amazon S3 in Parquet format",
-            "The online store, backed by Amazon DynamoDB",
-            "The online store, backed by Amazon ElastiCache for Redis",
             "The real-time store, backed by Amazon Kinesis Data Streams",
+            "The online store, backed by Amazon ElastiCache for Redis",
+            "The online store, backed by Amazon DynamoDB",
           ],
-          correctIndex: 1,
+          correctIndex: 3,
           explanation:
             "The Feature Store online store provides low-latency reads for real-time inference and is backed by Amazon DynamoDB. The offline store (backed by S3 in Parquet format) is used for training, where high throughput matters more than low latency.",
         },
@@ -92,12 +92,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
           question:
             "What is required when using SageMaker Spot Training to ensure training can resume if a Spot Instance is interrupted?",
           options: [
+            "Setting a maximum training duration that is shorter than typical Spot interruption windows",
             "Using only SageMaker built-in algorithms, which handle interruptions automatically",
             "Enabling automatic checkpointing so training progress is saved and can be resumed",
             "Using a minimum of two instances so training continues on the remaining instance",
-            "Setting a maximum training duration that is shorter than typical Spot interruption windows",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "Spot Training requires checkpointing to be enabled. When a Spot Instance is reclaimed, the training job saves its state as a checkpoint to S3. When a new Spot Instance becomes available, training resumes from the checkpoint rather than starting over.",
         },
@@ -126,12 +126,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
           question:
             "Which optimization strategy does SageMaker Automatic Model Tuning use by default to focus hyperparameter search on the most promising regions?",
           options: [
+            "Bayesian optimization — using results from previous trials to guide the search toward better configurations",
             "Grid search — exhaustively testing every combination in the defined ranges",
             "Genetic algorithms — evolving hyperparameter configurations across generations",
-            "Bayesian optimization — using results from previous trials to guide the search toward better configurations",
             "Simulated annealing — gradually narrowing the search space based on a temperature schedule",
           ],
-          correctIndex: 2,
+          correctIndex: 0,
           explanation:
             "SageMaker Automatic Model Tuning uses Bayesian optimization by default. It runs parallel training jobs, observes which configurations produce better metrics, and uses a probabilistic model to focus subsequent trials on the most promising hyperparameter regions — more efficient than grid or random search.",
         },
@@ -140,11 +140,11 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
             "What is the hierarchy of tracking objects in Amazon SageMaker Experiments?",
           options: [
             "Experiment → Run → Artifact",
+            "Pipeline → Experiment → Model Version",
             "Experiment → Trial → Trial Component",
             "Project → Experiment → Training Job",
-            "Pipeline → Experiment → Model Version",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
             "SageMaker Experiments uses the hierarchy: Experiment (top-level grouping) → Trials (individual runs within the experiment) → Trial Components (individual jobs such as training, processing, or notebook runs that make up a trial).",
         },
@@ -162,12 +162,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
           question:
             "You need to run predictions on 50 million records in S3 overnight. No real-time inference is needed. Which SageMaker deployment option is most appropriate?",
           options: [
-            "Real-Time Endpoint — scale it up for the overnight job then scale it back down",
             "Batch Transform — runs inference on large S3 datasets asynchronously and writes results back to S3",
-            "Serverless Inference — it automatically scales to handle large burst workloads",
+            "Real-Time Endpoint — scale it up for the overnight job then scale it back down",
             "Multi-Model Endpoint — it can load all 50 million records as individual models",
+            "Serverless Inference — it automatically scales to handle large burst workloads",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "Batch Transform is designed for bulk offline inference. It reads input data from S3, runs predictions in parallel across a fleet of instances, and writes results back to S3 — without requiring a persistent endpoint. It is the correct choice for periodic bulk scoring jobs.",
         },
@@ -198,12 +198,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
           question:
             "Which of the following drift types does Amazon SageMaker Model Monitor detect?",
           options: [
-            "Infrastructure drift, cost drift, latency drift, and availability drift",
             "Data quality drift, model quality drift, bias drift, and feature attribution drift",
+            "Infrastructure drift, cost drift, latency drift, and availability drift",
             "Training data drift, validation data drift, test data drift, and production data drift",
             "Label drift, feature drift, prediction drift, and accuracy drift",
           ],
-          correctIndex: 1,
+          correctIndex: 0,
           explanation:
             "SageMaker Model Monitor detects four drift types: data quality drift (input features diverging from training baseline), model quality drift (prediction quality degrading), bias drift (protected attribute distributions shifting), and feature attribution drift (SHAP values changing). All four are exam-relevant.",
         },
@@ -275,12 +275,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
       question:
         "What triggers an automated retraining pipeline in a SageMaker MLOps setup when model performance degrades in production?",
       options: [
-        "SageMaker Pipelines detects accuracy drops and automatically retrains the model",
         "SageMaker Model Monitor detects drift and sends alerts to CloudWatch, which can trigger EventBridge rules to kick off retraining",
         "SageMaker Model Registry marks the current model as Deprecated when accuracy falls below threshold",
+        "SageMaker Pipelines detects accuracy drops and automatically retrains the model",
         "SageMaker Experiments automatically initiates a new experiment when validation metrics worsen",
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explanation:
         "SageMaker Model Monitor continuously monitors live traffic for drift. When drift thresholds are breached, it sends alerts to CloudWatch. CloudWatch alarms can trigger EventBridge rules that kick off retraining pipelines — creating a closed-loop MLOps system.",
     },
@@ -288,12 +288,12 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
       question:
         "Which SageMaker feature would you use to build a reproducible, versioned, end-to-end ML workflow that includes data processing, training, evaluation, and conditional model registration steps?",
       options: [
-        "SageMaker Experiments",
-        "SageMaker Automatic Model Tuning",
         "SageMaker Pipelines",
         "SageMaker Model Registry",
+        "SageMaker Automatic Model Tuning",
+        "SageMaker Experiments",
       ],
-      correctIndex: 2,
+      correctIndex: 0,
       explanation:
         "SageMaker Pipelines provides a DAG-based workflow engine for ML. You define steps (Processing, Training, Evaluation, Condition, Register) using a Python SDK, and SageMaker orchestrates them in order. Pipelines are versioned, auditable, and can be triggered from CI/CD systems.",
     },
@@ -328,11 +328,11 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
         "Which SageMaker built-in algorithm would you use for an NLP text classification task on large document corpora?",
       options: [
         "K-Means — it clusters documents into categories",
-        "BlazingText — it provides fast Word2Vec and text classification implementations",
         "Linear Learner — it applies linear models to text feature vectors",
+        "BlazingText — it provides fast Word2Vec and text classification implementations",
         "XGBoost — it provides gradient boosting for structured NLP features",
       ],
-      correctIndex: 1,
+      correctIndex: 2,
       explanation:
         "BlazingText is SageMaker's built-in algorithm for NLP tasks including Word2Vec embeddings and text classification. It is highly optimized for speed and scale. XGBoost and Linear Learner work on structured features rather than raw text, and K-Means is for unsupervised clustering.",
     },
@@ -354,11 +354,11 @@ SageMaker offers a library of **built-in algorithms** (XGBoost, Linear Learner, 
         "What does SageMaker Clarify specifically add to the SageMaker platform?",
       options: [
         "Automated data labeling and human review workflows for training data preparation",
-        "Bias detection (pre- and post-training) and model explainability using SHAP values",
-        "Real-time monitoring of model drift in production endpoints",
         "Hyperparameter optimization using Bayesian search across training jobs",
+        "Real-time monitoring of model drift in production endpoints",
+        "Bias detection (pre- and post-training) and model explainability using SHAP values",
       ],
-      correctIndex: 1,
+      correctIndex: 3,
       explanation:
         "SageMaker Clarify provides bias detection (pre-training data imbalance metrics and post-training prediction disparity metrics) and model explainability (SHAP values for feature attribution). It is the responsible AI tooling layer within the SageMaker platform.",
     },
