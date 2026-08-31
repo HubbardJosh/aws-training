@@ -6,6 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import CodeHighlighter from "react-native-code-highlighter";
+import {
+  atomOneDark,
+  atomOneLight,
+} from "react-syntax-highlighter/dist/cjs/styles/hljs";
 import { AbbreviatedText } from "../components/AbbreviatedText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -43,6 +48,7 @@ interface InlineQuizProps {
   sectionBody: string;
   onComplete: () => void;
   colors: ThemeColors;
+  isDark: boolean;
 }
 
 function InlineQuiz({
@@ -51,6 +57,7 @@ function InlineQuiz({
   sectionBody,
   onComplete,
   colors,
+  isDark,
 }: InlineQuizProps) {
   const qStyles = makeQuizStyles(colors);
   const [started, setStarted] = useState(false);
@@ -66,7 +73,7 @@ function InlineQuiz({
   if (!started) {
     return (
       <View style={{ gap: spacing.md }}>
-        <MarkdownBody text={sectionBody} colors={colors} />
+        <MarkdownBody text={sectionBody} colors={colors} isDark={isDark} />
         <TouchableOpacity
           style={[qStyles.startPrompt, { borderColor: accentColor + "44" }]}
           onPress={() => setStarted(true)}
@@ -167,7 +174,9 @@ function InlineQuiz({
             </TouchableOpacity>
           </View>
         </View>
-        {showBody && <MarkdownBody text={sectionBody} colors={colors} />}
+        {showBody && (
+          <MarkdownBody text={sectionBody} colors={colors} isDark={isDark} />
+        )}
       </View>
     );
   }
@@ -545,7 +554,7 @@ export default function GuideDetailScreen() {
   const route = useRoute<RouteT>();
   const { certMeta } = useCert();
   const { guides: allGuides } = useCertData();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const DOMAIN_META = getDomainMeta(colors);
   const guide = allGuides.find((g) => g.id === route.params.id);
   const [activeTab, setActiveTab] = useState<Tab>("content");
@@ -757,9 +766,14 @@ export default function GuideDetailScreen() {
                           sectionBody={section.body}
                           onComplete={() => handleSectionComplete(i)}
                           colors={colors}
+                          isDark={isDark}
                         />
                       ) : (
-                        <MarkdownBody text={section.body} colors={colors} />
+                        <MarkdownBody
+                          text={section.body}
+                          colors={colors}
+                          isDark={isDark}
+                        />
                       )}
                     </View>
                   )}
@@ -849,13 +863,14 @@ export default function GuideDetailScreen() {
 
 type BodyToken =
   | { kind: "line"; index: number; content: string }
-  | { kind: "codeBlock"; index: number; lines: string[] };
+  | { kind: "codeBlock"; index: number; lines: string[]; language: string };
 
 function tokenizeBody(lines: string[]): BodyToken[] {
   const tokens: BodyToken[] = [];
   let i = 0;
   while (i < lines.length) {
     if (lines[i].trim().startsWith("```")) {
+      const language = lines[i].trim().slice(3).trim() || "typescript";
       const codeLines: string[] = [];
       i++;
       while (i < lines.length && !lines[i].trim().startsWith("```")) {
@@ -867,6 +882,7 @@ function tokenizeBody(lines: string[]): BodyToken[] {
         kind: "codeBlock",
         index: tokens.length,
         lines: codeLines,
+        language,
       });
     } else {
       tokens.push({ kind: "line", index: tokens.length, content: lines[i] });
@@ -876,7 +892,15 @@ function tokenizeBody(lines: string[]): BodyToken[] {
   return tokens;
 }
 
-function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
+function MarkdownBody({
+  text,
+  colors,
+  isDark,
+}: {
+  text: string;
+  colors: ThemeColors;
+  isDark: boolean;
+}) {
   const mdStyles = makeMdStyles(colors);
   const tokens = tokenizeBody(text.split("\n"));
 
@@ -884,9 +908,26 @@ function MarkdownBody({ text, colors }: { text: string; colors: ThemeColors }) {
     <View style={{ gap: 6 }}>
       {tokens.map((token) => {
         if (token.kind === "codeBlock") {
+          const codeBg = isDark ? "#282c34" : "#fafafa";
           return (
-            <View key={token.index} style={mdStyles.codeLine}>
-              <Text style={mdStyles.codeText}>{token.lines.join("\n")}</Text>
+            <View
+              key={token.index}
+              style={[mdStyles.codeContainer, { backgroundColor: codeBg }]}
+            >
+              <CodeHighlighter
+                hljsStyle={isDark ? atomOneDark : atomOneLight}
+                textStyle={mdStyles.codeText}
+                containerStyle={mdStyles.codeInner}
+                scrollViewProps={{
+                  horizontal: true,
+                  showsHorizontalScrollIndicator: false,
+                  style: { backgroundColor: codeBg },
+                  contentContainerStyle: { backgroundColor: codeBg },
+                }}
+                language={token.language ?? "typescript"}
+              >
+                {token.lines.join("\n")}
+              </CodeHighlighter>
             </View>
           );
         }
@@ -1234,18 +1275,25 @@ function makeMdStyles(colors: ThemeColors) {
       paddingHorizontal: 4,
       borderRadius: 4,
     },
+    codeContainer: {
+      borderRadius: radius.sm,
+      overflow: "hidden",
+      marginVertical: 2,
+    },
+    codeInner: {
+      padding: 10,
+    },
+    codeText: {
+      fontFamily: "monospace",
+      fontSize: 12,
+      lineHeight: 18,
+    },
     codeLine: {
       backgroundColor: colors.surfaceElevated,
       borderRadius: radius.sm,
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xs,
       marginVertical: 2,
-    },
-    codeText: {
-      fontFamily: "monospace",
-      fontSize: fontSize.xs,
-      color: colors.accent,
-      lineHeight: 18,
     },
     bulletRow: {
       flexDirection: "row",
