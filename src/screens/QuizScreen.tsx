@@ -342,7 +342,10 @@ export default function QuizScreen() {
               </Text>
             </View>
           </View>
-          <Text style={styles.questionText}>{currentQ.question}</Text>
+          <AbbreviatedText
+            text={currentQ.question}
+            style={styles.questionText}
+          />
         </View>
 
         {/* Options */}
@@ -411,9 +414,10 @@ export default function QuizScreen() {
                   )}
                 </View>
               </View>
-              <Text style={[styles.optionText, { color: textColor }]}>
-                {option}
-              </Text>
+              <AbbreviatedText
+                text={option}
+                style={{ ...styles.optionText, color: textColor }}
+              />
               {submitted && icon && (
                 <Ionicons
                   name={icon as any}
@@ -465,9 +469,10 @@ export default function QuizScreen() {
                         size={14}
                         color={colors.incorrect}
                       />
-                      <Text style={styles.wrongReasonLabel} numberOfLines={1}>
-                        {currentQ.options[idx]}
-                      </Text>
+                      <AbbreviatedText
+                        text={currentQ.options[idx]}
+                        style={styles.wrongReasonLabel}
+                      />
                     </View>
                     <AbbreviatedText
                       text={currentQ.optionExplanations![idx]}
