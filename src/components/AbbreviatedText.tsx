@@ -12,7 +12,8 @@ import {
 import { AIF_ABBREVIATIONS } from "../data/aif/abbreviations";
 import { CLF_ABBREVIATIONS } from "../data/clf/abbreviations";
 import { DVA_ABBREVIATIONS } from "../data/dva/abbreviations";
-import { colors, fontSize, radius, spacing } from "../utils/theme";
+import { useTheme } from "../context/ThemeContext";
+import { fontSize, radius, spacing } from "../utils/theme";
 
 // ─── Abbreviation registry ────────────────────────────────────────────────────
 
@@ -89,7 +90,6 @@ const TooltipContext = createContext<TooltipCtx>({ show: () => {} });
 const TOOLTIP_WIDTH = 300;
 const TOOLTIP_GAP = 12;
 const SCREEN_PADDING = 12;
-// Offset below the tap point to clear the finger/word.
 const TAP_Y_OFFSET = 20;
 
 export function AbbreviationTooltipProvider({
@@ -97,6 +97,7 @@ export function AbbreviationTooltipProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   const [entry, setEntry] = useState<TooltipEntry>({
     visible: false,
     abbr: "",
@@ -158,14 +159,44 @@ export function AbbreviationTooltipProvider({
             <TouchableWithoutFeedback>
               <View
                 style={[
-                  tipStyles.card,
+                  {
+                    position: "absolute",
+                    backgroundColor: colors.surfaceElevated,
+                    borderRadius: radius.lg,
+                    borderWidth: 1,
+                    borderColor: colors.accent + "44",
+                    padding: spacing.md,
+                    gap: spacing.sm,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.45,
+                    shadowRadius: 16,
+                    elevation: 16,
+                  },
                   { left: pos.left, top: pos.top, width: TOOLTIP_WIDTH },
                 ]}
                 onLayout={(e) => handleCardLayout(e.nativeEvent.layout.height)}
               >
-                <Text style={tipStyles.abbr}>{entry.abbr}</Text>
-                <View style={tipStyles.divider} />
-                <Text style={tipStyles.def}>{entry.definition}</Text>
+                <Text
+                  style={{
+                    fontSize: fontSize.lg,
+                    fontWeight: "800",
+                    color: colors.accent,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {entry.abbr}
+                </Text>
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+                <Text
+                  style={{
+                    fontSize: fontSize.sm,
+                    color: colors.textSecondary,
+                    lineHeight: 20,
+                  }}
+                >
+                  {entry.definition}
+                </Text>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -185,9 +216,14 @@ interface Props {
 }
 
 export function AbbreviatedText({ text, style, bold, center }: Props) {
+  const { colors } = useTheme();
   const { show } = useContext(TooltipContext);
 
   const baseStyle: TextStyle = {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    lineHeight: 22,
+    flexShrink: 1,
     ...(style ?? {}),
     ...(bold ? { fontWeight: "700", color: colors.textPrimary } : {}),
   };
@@ -197,18 +233,14 @@ export function AbbreviatedText({ text, style, bold, center }: Props) {
 
   if (!hasAbbr) {
     return (
-      <Text
-        style={[styles.base, baseStyle, center ? styles.centered : undefined]}
-      >
+      <Text style={[baseStyle, center ? { textAlign: "center" } : undefined]}>
         {text}
       </Text>
     );
   }
 
   return (
-    <Text
-      style={[styles.base, baseStyle, center ? styles.centered : undefined]}
-    >
+    <Text style={[baseStyle, center ? { textAlign: "center" } : undefined]}>
       {tokens.map((token, i) => {
         if (token.type === "abbr") {
           const handlePress = (evt: GestureResponderEvent) => {
@@ -218,7 +250,15 @@ export function AbbreviatedText({ text, style, bold, center }: Props) {
             });
           };
           return (
-            <Text key={i} style={tipStyles.abbrText} onPress={handlePress}>
+            <Text
+              key={i}
+              style={{
+                color: colors.accent,
+                fontSize: fontSize.sm,
+                fontWeight: "700",
+              }}
+              onPress={handlePress}
+            >
               {token.text}
             </Text>
           );
@@ -228,53 +268,3 @@ export function AbbreviatedText({ text, style, bold, center }: Props) {
     </Text>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  base: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 22,
-    flexShrink: 1,
-  },
-  centered: {
-    textAlign: "center",
-  },
-});
-
-const tipStyles = StyleSheet.create({
-  abbrText: {
-    color: colors.textPrimary,
-    fontSize: fontSize.sm,
-  },
-  card: {
-    position: "absolute",
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.accent + "44",
-    padding: spacing.md,
-    gap: spacing.sm,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
-    elevation: 16,
-  },
-  abbr: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.accent,
-    letterSpacing: 0.5,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  def: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-});

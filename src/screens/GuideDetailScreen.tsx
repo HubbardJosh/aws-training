@@ -995,7 +995,6 @@ function InlineText({ text, colors }: { text: string; colors: ThemeColors }) {
               key={i}
               text={part.slice(2, -2)}
               style={mdStyles.boldInline}
-              bold
             />
           );
         }
