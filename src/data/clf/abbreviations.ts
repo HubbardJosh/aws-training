@@ -51,6 +51,7 @@ export const CLF_ABBREVIATIONS: Record<string, string> = {
   CW: "CloudWatch — monitoring, logging, and alerting for AWS resources",
   SNS: "Simple Notification Service — pub/sub messaging and mobile push notifications",
   SQS: "Simple Queue Service — fully managed message queuing service",
+  DLQ: "Dead-Letter Queue — holds messages that failed processing after max retries",
 
   // Cloud concepts
   AZ: "Availability Zone — isolated data centre within an AWS Region",
