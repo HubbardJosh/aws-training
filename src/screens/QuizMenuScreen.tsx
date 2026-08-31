@@ -10,11 +10,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import { Domain } from "../types";
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -30,6 +37,9 @@ export default function QuizMenuScreen() {
   const navigation = useNavigation<Nav>();
   const { certMeta } = useCert();
   const { quizQuestions } = useCertData();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const DOMAIN_META = getDomainMeta(colors);
   const [selectedDomain, setSelectedDomain] = useState<Domain | "all">("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"
@@ -45,6 +55,45 @@ export default function QuizMenuScreen() {
 
   const canStart = available.length > 0;
   const actualCount = Math.min(selectedCount, available.length);
+
+  const QUICK_MODES = [
+    {
+      label: "Exam Simulation",
+      description: "40 mixed questions · timed · all domains",
+      domain: "all" as const,
+      difficulty: "all" as const,
+      count: 40,
+      icon: "school",
+      color: colors.primary,
+    },
+    {
+      label: "Hard Questions Only",
+      description: "Challenge mode · all domains",
+      domain: "all" as const,
+      difficulty: "hard" as const,
+      count: 10,
+      icon: "flame",
+      color: colors.hard,
+    },
+    {
+      label: "Security Deep Dive",
+      description: "IAM, KMS, Cognito, Secrets Manager",
+      domain: "security" as const,
+      difficulty: "all" as const,
+      count: 10,
+      icon: "shield-checkmark",
+      color: colors.security,
+    },
+    {
+      label: "Deployment Sprint",
+      description: "CodePipeline, SAM, CDK, ECS",
+      domain: "deployment" as const,
+      difficulty: "all" as const,
+      count: 10,
+      icon: "rocket",
+      color: colors.deployment,
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -291,179 +340,146 @@ export default function QuizMenuScreen() {
   );
 }
 
-const QUICK_MODES = [
-  {
-    label: "Exam Simulation",
-    description: "40 mixed questions · timed · all domains",
-    domain: "all" as const,
-    difficulty: "all" as const,
-    count: 40,
-    icon: "school",
-    color: colors.primary,
-  },
-  {
-    label: "Hard Questions Only",
-    description: "Challenge mode · all domains",
-    domain: "all" as const,
-    difficulty: "hard" as const,
-    count: 10,
-    icon: "flame",
-    color: colors.hard,
-  },
-  {
-    label: "Security Deep Dive",
-    description: "IAM, KMS, Cognito, Secrets Manager",
-    domain: "security" as const,
-    difficulty: "all" as const,
-    count: 10,
-    icon: "shield-checkmark",
-    color: colors.security,
-  },
-  {
-    label: "Deployment Sprint",
-    description: "CodePipeline, SAM, CDK, ECS",
-    domain: "deployment" as const,
-    difficulty: "all" as const,
-    count: 10,
-    icon: "rocket",
-    color: colors.deployment,
-  },
-];
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: { padding: spacing.md },
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md },
+    title: {
+      fontSize: fontSize.xxl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
 
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
+    examCard: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      backgroundColor: colors.primary + "15",
+      borderRadius: radius.md,
+      padding: spacing.md,
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    examCardText: { flex: 1 },
+    examCardTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.primary,
+    },
+    examCardSub: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+      lineHeight: 18,
+    },
 
-  examCard: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: colors.primary + "15",
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  examCardText: { flex: 1 },
-  examCardTitle: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.primary,
-  },
-  examCardSub: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-    lineHeight: 18,
-  },
+    sectionLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+      marginTop: spacing.md,
+    },
 
-  sectionLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-    marginTop: spacing.md,
-  },
+    optionRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    optionRowActive: {
+      borderColor: colors.primary + "66",
+      backgroundColor: colors.primary + "0D",
+    },
+    domainIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    optionText: { flex: 1 },
+    optionLabel: {
+      fontSize: fontSize.md,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    optionSub: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
 
-  optionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  optionRowActive: {
-    borderColor: colors.primary + "66",
-    backgroundColor: colors.primary + "0D",
-  },
-  domainIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  optionText: { flex: 1 },
-  optionLabel: {
-    fontSize: fontSize.md,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  optionSub: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
+    pillRow: {
+      flexDirection: "row",
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    pill: {
+      borderWidth: 1,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 2,
+    },
+    pillText: { fontSize: fontSize.sm, fontWeight: "700" },
 
-  pillRow: { flexDirection: "row", gap: spacing.xs, marginBottom: spacing.sm },
-  pill: {
-    borderWidth: 1,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-  },
-  pillText: { fontSize: fontSize.sm, fontWeight: "700" },
+    availableRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      marginVertical: spacing.sm,
+    },
+    availableText: { fontSize: fontSize.sm, fontWeight: "600" },
 
-  availableRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    marginVertical: spacing.sm,
-  },
-  availableText: { fontSize: fontSize.sm, fontWeight: "600" },
+    startBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.primary,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md + 2,
+      marginBottom: spacing.lg,
+    },
+    startBtnDisabled: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    startBtnText: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+      color: colors.secondary,
+    },
 
-  startBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
-    marginBottom: spacing.lg,
-  },
-  startBtnDisabled: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  startBtnText: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.secondary,
-  },
-
-  quickMode: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  quickModeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+    quickMode: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    quickModeIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.md,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
+}

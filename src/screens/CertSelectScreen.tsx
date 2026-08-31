@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize } from "../utils/theme";
+import { spacing, radius, fontSize, ThemeColors } from "../utils/theme";
 import {
   useCert,
   CertificationId,
@@ -18,6 +18,7 @@ import {
   CertMeta,
 } from "../context/CertContext";
 import { RootStackParamList } from "../navigation";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -71,6 +72,8 @@ const CERT_GROUPS: CertGroup[] = [
 export default function CertSelectScreen() {
   const navigation = useNavigation<Nav>();
   const { certId, setCert } = useCert();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
 
   const handleSelect = (id: CertificationId) => {
     setCert(id);
@@ -193,136 +196,138 @@ export default function CertSelectScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: {
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-  },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: {
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+    },
 
-  header: {
-    alignItems: "center",
-    marginBottom: spacing.xl,
-  },
-  logoWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.xl,
-    backgroundColor: colors.primary + "18",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: "900",
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-  },
+    header: {
+      alignItems: "center",
+      marginBottom: spacing.xl,
+    },
+    logoWrap: {
+      width: 72,
+      height: 72,
+      borderRadius: radius.xl,
+      backgroundColor: colors.primary + "18",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: spacing.md,
+    },
+    title: {
+      fontSize: fontSize.xxl,
+      fontWeight: "900",
+      color: colors.textPrimary,
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      fontSize: fontSize.md,
+      color: colors.textSecondary,
+    },
 
-  group: {
-    marginBottom: spacing.lg,
-  },
-  groupHeader: {
-    marginBottom: spacing.sm,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
-    paddingLeft: spacing.sm,
-  },
-  groupLevel: {
-    fontSize: fontSize.xs,
-    fontWeight: "800",
-    color: colors.primary,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  groupDesc: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
+    group: {
+      marginBottom: spacing.lg,
+    },
+    groupHeader: {
+      marginBottom: spacing.sm,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+      paddingLeft: spacing.sm,
+    },
+    groupLevel: {
+      fontSize: fontSize.xs,
+      fontWeight: "800",
+      color: colors.primary,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+    },
+    groupDesc: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
 
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.md,
-  },
-  iconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.lg,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cardText: { flex: 1, gap: 3 },
-  cardTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  certCode: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-  },
-  activeBadge: {
-    borderRadius: radius.full,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  activeBadgeText: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-  },
-  certName: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  examInfo: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 1,
-  },
-  progressionStack: {
-    marginTop: spacing.xs,
-    gap: 3,
-  },
-  progressionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  progressionLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    fontWeight: "600",
-  },
-  progressionText: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-  },
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.xl,
+      padding: spacing.lg,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.md,
+    },
+    iconWrap: {
+      width: 56,
+      height: 56,
+      borderRadius: radius.lg,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    cardText: { flex: 1, gap: 3 },
+    cardTitleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+    },
+    certCode: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+    },
+    activeBadge: {
+      borderRadius: radius.full,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    activeBadgeText: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+    },
+    certName: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    examInfo: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 1,
+    },
+    progressionStack: {
+      marginTop: spacing.xs,
+      gap: 3,
+    },
+    progressionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    progressionLabel: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      fontWeight: "600",
+    },
+    progressionText: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+    },
 
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    justifyContent: "center",
-    marginTop: spacing.sm,
-    paddingBottom: spacing.lg,
-  },
-  footerText: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-  },
-});
+    footer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      justifyContent: "center",
+      marginTop: spacing.sm,
+      paddingBottom: spacing.lg,
+    },
+    footerText: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+    },
+  });
+}

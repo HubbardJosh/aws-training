@@ -11,12 +11,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import { RootStackParamList } from "../navigation";
 import { loadProgress } from "../utils/storage";
 import { UserProgress } from "../types";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -27,11 +34,13 @@ export default function GuideListScreen() {
   const navigation = useNavigation<Nav>();
   const { certMeta } = useCert();
   const { guides: allGuides } = useCertData();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const DOMAIN_META = getDomainMeta(colors);
   const [search, setSearch] = useState("");
   const [domain, setDomain] = useState<DomainFilter>("all");
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
-  // Reload progress each time screen comes into focus so read indicators update
   useFocusEffect(
     useCallback(() => {
       loadProgress(certMeta.storageKey).then(setProgress);
@@ -230,109 +239,111 @@ export default function GuideListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: { padding: spacing.md },
 
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
+    title: {
+      fontSize: fontSize.xxl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
 
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    marginBottom: spacing.sm,
-  },
-  searchIcon: { marginRight: spacing.sm },
-  searchInput: {
-    flex: 1,
-    color: colors.textPrimary,
-    fontSize: fontSize.md,
-    padding: 0,
-  },
+    searchRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      marginBottom: spacing.sm,
+    },
+    searchIcon: { marginRight: spacing.sm },
+    searchInput: {
+      flex: 1,
+      color: colors.textPrimary,
+      fontSize: fontSize.md,
+      padding: 0,
+    },
 
-  filterRow: { marginBottom: spacing.sm },
-  chip: {
-    borderWidth: 1,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    marginRight: spacing.xs,
-  },
-  chipText: { fontSize: fontSize.sm, fontWeight: "600" },
+    filterRow: { marginBottom: spacing.sm },
+    chip: {
+      borderWidth: 1,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 2,
+      marginRight: spacing.xs,
+    },
+    chipText: { fontSize: fontSize.sm, fontWeight: "600" },
 
-  resultCount: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-  },
+    resultCount: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      marginBottom: spacing.sm,
+    },
 
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cardCompleted: {
-    borderColor: colors.correct + "44",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: spacing.sm,
-  },
-  cardInfo: { flex: 1 },
-  cardTitle: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  cardTagline: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  domainBadge: {
-    borderRadius: radius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  domainText: { fontSize: fontSize.xs, fontWeight: "600" },
-  sectionCount: { fontSize: fontSize.xs, color: colors.textMuted },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cardCompleted: {
+      borderColor: colors.correct + "44",
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: spacing.sm,
+    },
+    iconBox: {
+      width: 36,
+      height: 36,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: spacing.sm,
+    },
+    cardInfo: { flex: 1 },
+    cardTitle: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    cardTagline: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    cardFooter: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    domainBadge: {
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    domainText: { fontSize: fontSize.xs, fontWeight: "600" },
+    sectionCount: { fontSize: fontSize.xs, color: colors.textMuted },
 
-  empty: {
-    alignItems: "center",
-    paddingVertical: spacing.xxl,
-    gap: spacing.md,
-  },
-  emptyText: { fontSize: fontSize.md, color: colors.textMuted },
-});
+    empty: {
+      alignItems: "center",
+      paddingVertical: spacing.xxl,
+      gap: spacing.md,
+    },
+    emptyText: { fontSize: fontSize.md, color: colors.textMuted },
+  });
+}

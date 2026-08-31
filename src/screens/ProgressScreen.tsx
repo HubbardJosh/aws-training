@@ -11,7 +11,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import {
   loadProgress,
   saveProgress,
@@ -32,6 +38,7 @@ import { UserProgress, Domain, QuizAttempt, WeakTopic } from "../types";
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -47,6 +54,8 @@ export default function ProgressScreen() {
   const { certMeta } = useCert();
   const { flashcards, guides: allGuides } = useCertData();
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const { colors } = useTheme();
+  const DOMAIN_META = getDomainMeta(colors);
 
   useEffect(() => {
     loadProgress(certMeta.storageKey).then(setProgress);
@@ -180,6 +189,8 @@ export default function ProgressScreen() {
 
   if (!progress) return null;
 
+  const styles = makeStyles(colors);
+
   const topicsWithProgress = allGuides.filter(
     (g) => progress.guideProgress[g.id] !== undefined,
   );
@@ -234,7 +245,7 @@ export default function ProgressScreen() {
             </Text>
           </View>
           <View style={styles.readinessRight}>
-            <ReadinessGauge pct={overallAccuracy} />
+            <ReadinessGauge pct={overallAccuracy} colors={colors} />
           </View>
         </View>
 
@@ -265,14 +276,20 @@ export default function ProgressScreen() {
             />
           </View>
           <View style={styles.masteryLegend}>
-            <LegendDot color={colors.correct} label={`Known (${knownCards})`} />
+            <LegendDot
+              color={colors.correct}
+              label={`Known (${knownCards})`}
+              colors={colors}
+            />
             <LegendDot
               color={colors.warning}
               label={`Learning (${learningCards})`}
+              colors={colors}
             />
             <LegendDot
               color={colors.border}
               label={`Unseen (${unseenCards})`}
+              colors={colors}
             />
           </View>
           <Text style={styles.masteryTotal}>
@@ -314,14 +331,17 @@ export default function ProgressScreen() {
             <LegendDot
               color={colors.correct}
               label={`Completed (${guidesCompleted})`}
+              colors={colors}
             />
             <LegendDot
               color={colors.warning}
               label={`In progress (${guidesViewed - guidesCompleted})`}
+              colors={colors}
             />
             <LegendDot
               color={colors.border}
               label={`Unread (${totalGuides - guidesViewed})`}
+              colors={colors}
             />
           </View>
           <Text style={styles.masteryTotal}>
@@ -390,7 +410,6 @@ export default function ProgressScreen() {
                 </View>
               </View>
 
-              {/* Quiz accuracy bar */}
               <View style={styles.barRow}>
                 <Text style={styles.barLabel}>Quiz</Text>
                 <View style={styles.barBg}>
@@ -411,7 +430,6 @@ export default function ProgressScreen() {
                 </View>
               </View>
 
-              {/* Cards mastery bar */}
               <View style={styles.barRow}>
                 <Text style={styles.barLabel}>Cards</Text>
                 <View style={styles.barBg}>
@@ -451,6 +469,7 @@ export default function ProgressScreen() {
             <WeakTopicRow
               key={topic.service}
               topic={topic}
+              colors={colors}
               onToggleReview={() => handleToggleReview(topic.service)}
               onPractice={() =>
                 navigation.navigate("Quiz", {
@@ -477,7 +496,7 @@ export default function ProgressScreen() {
           </View>
         ) : (
           recentHistory.map((attempt) => (
-            <HistoryRow key={attempt.id} attempt={attempt} />
+            <HistoryRow key={attempt.id} attempt={attempt} colors={colors} />
           ))
         )}
 
@@ -489,34 +508,39 @@ export default function ProgressScreen() {
             color={colors.primary}
             value={progress.totalQuestionsAnswered}
             label="Questions"
+            colors={colors}
           />
           <MiniStat
             icon="checkmark-circle"
             color={colors.correct}
             value={progress.totalCorrect}
             label="Correct"
+            colors={colors}
           />
           <MiniStat
             icon="trophy"
             color={colors.accent}
             value={progress.quizHistory.length}
             label="Quizzes"
+            colors={colors}
           />
           <MiniStat
             icon="book"
             color={colors.warning}
             value={knownCards + learningCards}
             label="Cards Studied"
+            colors={colors}
           />
           <MiniStat
             icon="library"
             color={colors.accent}
             value={guidesCompleted}
             label="Guides Done"
+            colors={colors}
           />
         </View>
 
-        {/* ── Reset ─────────────────────────────────── */}
+        {/* Reset */}
         {(() => {
           const studiedCardCount = knownCards + learningCards;
           const domainsWithAttempts = DOMAINS.filter(
@@ -534,27 +558,26 @@ export default function ProgressScreen() {
             <>
               <Text style={styles.sectionTitle}>Reset Progress</Text>
 
-              {/* Flashcards — only if any studied */}
               {studiedCardCount > 0 && (
                 <ResetCategoryRow
                   label="Flashcards"
                   detail={`${studiedCardCount} of ${totalCards} studied`}
                   icon="layers-outline"
                   onReset={handleResetAllFlashcards}
+                  colors={colors}
                 />
               )}
 
-              {/* Quizzes — only if any taken */}
               {progress.quizHistory.length > 0 && (
                 <ResetCategoryRow
                   label="Quiz History"
                   detail={`${progress.quizHistory.length} quiz${progress.quizHistory.length !== 1 ? "zes" : ""} · ${progress.totalQuestionsAnswered} questions answered`}
                   icon="help-circle-outline"
                   onReset={handleResetAllQuizzes}
+                  colors={colors}
                 />
               )}
 
-              {/* Domains — only domains with attempts */}
               {domainsWithAttempts.length > 0 && (
                 <View style={styles.resetGroup}>
                   <View style={styles.resetGroupHeader}>
@@ -613,7 +636,6 @@ export default function ProgressScreen() {
                 </View>
               )}
 
-              {/* Guides — only topics with progress */}
               {topicsWithProgress.length > 0 && (
                 <View style={styles.resetGroup}>
                   <View style={styles.resetGroupHeader}>
@@ -673,7 +695,6 @@ export default function ProgressScreen() {
           );
         })()}
 
-        {/* Reset all */}
         <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
           <Ionicons name="trash-outline" size={18} color={colors.incorrect} />
           <Text style={styles.resetBtnText}>Reset Everything</Text>
@@ -685,7 +706,8 @@ export default function ProgressScreen() {
   );
 }
 
-function ReadinessGauge({ pct }: { pct: number }) {
+function ReadinessGauge({ pct, colors }: { pct: number; colors: ThemeColors }) {
+  const styles = makeStyles(colors);
   const color =
     pct >= 80 ? colors.correct : pct >= 60 ? colors.warning : colors.incorrect;
   return (
@@ -702,7 +724,16 @@ function ReadinessGauge({ pct }: { pct: number }) {
   );
 }
 
-function LegendDot({ color, label }: { color: string; label: string }) {
+function LegendDot({
+  color,
+  label,
+  colors,
+}: {
+  color: string;
+  label: string;
+  colors: ThemeColors;
+}) {
+  const styles = makeStyles(colors);
   return (
     <View style={styles.legendDot}>
       <View style={[styles.dot, { backgroundColor: color }]} />
@@ -713,13 +744,16 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 function WeakTopicRow({
   topic,
+  colors,
   onToggleReview,
   onPractice,
 }: {
   topic: WeakTopic;
+  colors: ThemeColors;
   onToggleReview: () => void;
   onPractice: () => void;
 }) {
+  const styles = makeStyles(colors);
   const lastMissed = new Date(topic.lastMissed).toLocaleDateString();
   return (
     <View
@@ -767,7 +801,15 @@ function WeakTopicRow({
   );
 }
 
-function HistoryRow({ attempt }: { attempt: QuizAttempt }) {
+function HistoryRow({
+  attempt,
+  colors,
+}: {
+  attempt: QuizAttempt;
+  colors: ThemeColors;
+}) {
+  const styles = makeStyles(colors);
+  const DOMAIN_META = getDomainMeta(colors);
   const pct = Math.round((attempt.score / attempt.total) * 100);
   const passed = pct >= 72;
   const date = new Date(attempt.date);
@@ -817,12 +859,15 @@ function MiniStat({
   color,
   value,
   label,
+  colors,
 }: {
   icon: string;
   color: string;
   value: number;
   label: string;
+  colors: ThemeColors;
 }) {
+  const styles = makeStyles(colors);
   return (
     <View style={[styles.miniStat, { borderColor: color + "33" }]}>
       <Ionicons name={icon as any} size={18} color={color} />
@@ -837,12 +882,15 @@ function ResetCategoryRow({
   detail,
   icon,
   onReset,
+  colors,
 }: {
   label: string;
   detail: string;
   icon: string;
   onReset: () => void;
+  colors: ThemeColors;
 }) {
+  const styles = makeStyles(colors);
   return (
     <View style={styles.topicResetRow}>
       <Ionicons name={icon as any} size={18} color={colors.textMuted} />
@@ -858,400 +906,402 @@ function ResetCategoryRow({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: { padding: spacing.md },
 
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
+    title: {
+      fontSize: fontSize.xxl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
 
-  readinessCard: {
-    flexDirection: "row",
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-  },
-  readinessLeft: { flex: 1 },
-  readinessLabel: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    fontWeight: "600",
-  },
-  readinessScore: { fontSize: 48, fontWeight: "900", lineHeight: 56 },
-  readinessSub: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
-  readinessRight: { alignItems: "center" },
+    readinessCard: {
+      flexDirection: "row",
+      backgroundColor: colors.surface,
+      borderRadius: radius.xl,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+    },
+    readinessLeft: { flex: 1 },
+    readinessLabel: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
+    readinessScore: { fontSize: 48, fontWeight: "900", lineHeight: 56 },
+    readinessSub: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    readinessRight: { alignItems: "center" },
 
-  gaugeContainer: { alignItems: "center", gap: 4 },
-  gaugeOuter: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.full,
-    borderWidth: 3,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  gaugeInner: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.full,
-    borderWidth: 3,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  gaugeText: { fontSize: fontSize.md, fontWeight: "900" },
-  gaugeLabel: { fontSize: fontSize.xs, fontWeight: "800", letterSpacing: 1 },
+    gaugeContainer: { alignItems: "center", gap: 4 },
+    gaugeOuter: {
+      width: 80,
+      height: 80,
+      borderRadius: radius.full,
+      borderWidth: 3,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    gaugeInner: {
+      width: 64,
+      height: 64,
+      borderRadius: radius.full,
+      borderWidth: 3,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    gaugeText: { fontSize: fontSize.md, fontWeight: "900" },
+    gaugeLabel: { fontSize: fontSize.xs, fontWeight: "800", letterSpacing: 1 },
 
-  sectionTitle: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    marginTop: spacing.xs,
-  },
+    sectionTitle: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.textPrimary,
+      marginBottom: spacing.sm,
+      marginTop: spacing.xs,
+    },
 
-  masteryCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  masteryBar: {
-    flexDirection: "row",
-    height: 12,
-    borderRadius: radius.full,
-    overflow: "hidden",
-    gap: 2,
-  },
-  masterySegment: { borderRadius: radius.full },
-  masteryLegend: { flexDirection: "row", gap: spacing.md },
-  legendDot: { flexDirection: "row", alignItems: "center", gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: radius.full },
-  legendLabel: { fontSize: fontSize.xs, color: colors.textSecondary },
-  masteryTotal: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    textAlign: "center",
-  },
+    masteryCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    masteryBar: {
+      flexDirection: "row",
+      height: 12,
+      borderRadius: radius.full,
+      overflow: "hidden",
+      gap: 2,
+    },
+    masterySegment: { borderRadius: radius.full },
+    masteryLegend: { flexDirection: "row", gap: spacing.md },
+    legendDot: { flexDirection: "row", alignItems: "center", gap: 6 },
+    dot: { width: 8, height: 8, borderRadius: radius.full },
+    legendLabel: { fontSize: fontSize.xs, color: colors.textSecondary },
+    masteryTotal: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      textAlign: "center",
+    },
 
-  domainCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  domainHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
-  domainIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  domainInfo: { flex: 1 },
-  domainLabel: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  domainWeight: { fontSize: fontSize.xs, color: colors.textSecondary },
-  domainScoreBox: { alignItems: "flex-end" },
-  domainScore: { fontSize: fontSize.xl, fontWeight: "800" },
-  domainAttempted: { fontSize: fontSize.xs, color: colors.textMuted },
+    domainCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    domainHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+    domainIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    domainInfo: { flex: 1 },
+    domainLabel: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    domainWeight: { fontSize: fontSize.xs, color: colors.textSecondary },
+    domainScoreBox: { alignItems: "flex-end" },
+    domainScore: { fontSize: fontSize.xl, fontWeight: "800" },
+    domainAttempted: { fontSize: fontSize.xs, color: colors.textMuted },
 
-  barRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
-  barLabel: {
-    width: 32,
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    fontWeight: "600",
-  },
-  barBg: {
-    flex: 1,
-    height: 6,
-    backgroundColor: colors.border,
-    borderRadius: radius.full,
-    overflow: "hidden",
-  },
-  barFill: { height: "100%", borderRadius: radius.full },
-  barCount: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    minWidth: 36,
-    textAlign: "right",
-  },
+    barRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+    barLabel: {
+      width: 32,
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      fontWeight: "600",
+    },
+    barBg: {
+      flex: 1,
+      height: 6,
+      backgroundColor: colors.border,
+      borderRadius: radius.full,
+      overflow: "hidden",
+    },
+    barFill: { height: "100%", borderRadius: radius.full },
+    barCount: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      minWidth: 36,
+      textAlign: "right",
+    },
 
-  weakTopicRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  weakTopicRowFlagged: {
-    borderColor: colors.warning + "55",
-    backgroundColor: colors.warning + "08",
-  },
-  weakTopicLeft: { flex: 1, gap: 3 },
-  weakTopicHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    flexWrap: "wrap",
-  },
-  weakTopicService: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  reviewBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: colors.warning + "22",
-    borderRadius: radius.sm,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  reviewBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: colors.warning,
-  },
-  weakTopicMeta: { fontSize: fontSize.xs, color: colors.textSecondary },
-  weakTopicActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  weakTopicBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  weakTopicBtnActive: {
-    borderColor: colors.warning + "55",
-    backgroundColor: colors.warning + "15",
-  },
-  weakTopicBtnInactive: {
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  practiceBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-  },
-  practiceBtnText: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
+    weakTopicRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    weakTopicRowFlagged: {
+      borderColor: colors.warning + "55",
+      backgroundColor: colors.warning + "08",
+    },
+    weakTopicLeft: { flex: 1, gap: 3 },
+    weakTopicHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      flexWrap: "wrap",
+    },
+    weakTopicService: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    reviewBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+      backgroundColor: colors.warning + "22",
+      borderRadius: radius.sm,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    reviewBadgeText: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: colors.warning,
+    },
+    weakTopicMeta: { fontSize: fontSize.xs, color: colors.textSecondary },
+    weakTopicActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+    },
+    weakTopicBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+    },
+    weakTopicBtnActive: {
+      borderColor: colors.warning + "55",
+      backgroundColor: colors.warning + "15",
+    },
+    weakTopicBtnInactive: {
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    practiceBtn: {
+      backgroundColor: colors.primary,
+      borderRadius: radius.sm,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 6,
+    },
+    practiceBtnText: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
 
-  emptyHistory: {
-    alignItems: "center",
-    paddingVertical: spacing.xl,
-    gap: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.md,
-  },
-  emptyHistoryText: { fontSize: fontSize.sm, color: colors.textMuted },
+    emptyHistory: {
+      alignItems: "center",
+      paddingVertical: spacing.xl,
+      gap: spacing.sm,
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.md,
+    },
+    emptyHistoryText: { fontSize: fontSize.sm, color: colors.textMuted },
 
-  historyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  historyIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.full,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  historyInfo: { flex: 1 },
-  historyTitle: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  historySub: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  historyScore: { fontSize: fontSize.lg, fontWeight: "800" },
+    historyRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      gap: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    historyIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: radius.full,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    historyInfo: { flex: 1 },
+    historyTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    historySub: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    historyScore: { fontSize: fontSize.lg, fontWeight: "800" },
 
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  miniStat: {
-    width: "47%",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    alignItems: "center",
-    gap: 4,
-    borderWidth: 1,
-  },
-  miniStatValue: {
-    fontSize: fontSize.xl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  miniStatLabel: { fontSize: fontSize.xs, color: colors.textSecondary },
+    statsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    miniStat: {
+      width: "47%",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      alignItems: "center",
+      gap: 4,
+      borderWidth: 1,
+    },
+    miniStatValue: {
+      fontSize: fontSize.xl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    miniStatLabel: { fontSize: fontSize.xs, color: colors.textSecondary },
 
-  resetGroup: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: "hidden",
-    marginBottom: spacing.sm,
-  },
-  resetGroupHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  resetGroupLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  resetGroupHeaderRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  resetGroupSub: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-  },
-  resetAllLink: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    color: colors.incorrect,
-  },
-  resetDomainIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  groupRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    gap: spacing.sm,
-  },
-  groupRowDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  topicResetList: {
-    gap: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  topicResetRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.sm,
-  },
-  topicResetInfo: { flex: 1 },
-  topicResetName: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  topicResetMeta: {
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  topicResetBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    borderWidth: 1,
-    borderColor: colors.incorrect + "55",
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
-  },
-  topicResetBtnText: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    color: colors.incorrect,
-  },
-  resetBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.incorrect + "15",
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.incorrect + "44",
-    marginTop: spacing.sm,
-  },
-  resetBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.incorrect,
-  },
-});
+    resetGroup: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+      marginBottom: spacing.sm,
+    },
+    resetGroupHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    resetGroupLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    resetGroupHeaderRight: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+    resetGroupSub: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+    },
+    resetAllLink: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      color: colors.incorrect,
+    },
+    resetDomainIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    groupRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      gap: spacing.sm,
+    },
+    groupRowDivider: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    topicResetRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    topicResetInfo: { flex: 1 },
+    topicResetName: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    topicResetMeta: {
+      fontSize: fontSize.xs,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    topicResetBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      borderWidth: 1,
+      borderColor: colors.incorrect + "55",
+      borderRadius: radius.sm,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 5,
+    },
+    topicResetBtnText: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      color: colors.incorrect,
+    },
+    resetBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.incorrect + "15",
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.incorrect + "44",
+      marginTop: spacing.sm,
+    },
+    resetBtnText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.incorrect,
+    },
+  });
+}

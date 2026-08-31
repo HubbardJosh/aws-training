@@ -11,7 +11,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import { AbbreviatedText } from "../components/AbbreviatedText";
 import {
   QuizQuestion,
@@ -29,6 +35,7 @@ import {
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Route = RouteProp<RootStackParamList, "Quiz">;
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -48,6 +55,8 @@ export default function QuizScreen() {
   const { domain, difficulty, count, service } = route.params;
   const { certMeta } = useCert();
   const { quizQuestions } = useCertData();
+  const { colors } = useTheme();
+  const DOMAIN_META = getDomainMeta(colors);
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -106,7 +115,6 @@ export default function QuizScreen() {
       if (timerRef.current) clearInterval(timerRef.current);
       setFinished(true);
 
-      // Calculate score and persist
       let correct = 0;
       const finalAnswers = newAnswers;
       questions.forEach((q, i) => {
@@ -187,6 +195,8 @@ export default function QuizScreen() {
       .toString()
       .padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
+  const styles = makeStyles(colors);
+
   if (questions.length === 0) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -205,7 +215,6 @@ export default function QuizScreen() {
     [...selectedOptions].sort().join(",") ===
       [...currentQ.correctIndices].sort().join(",");
 
-  // Score so far
   const scoredSoFar = answers.slice(0, currentIndex).filter((a, i) => {
     if (!a) return false;
     return (
@@ -444,7 +453,6 @@ export default function QuizScreen() {
               </Text>
             </View>
 
-            {/* Per-option "why wrong" breakdown when answer is incorrect */}
             {!isCorrect &&
               currentQ.optionExplanations &&
               selectedOptions
@@ -543,256 +551,258 @@ export default function QuizScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+    emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  headerBtn: { padding: spacing.xs },
-  headerCenter: { flex: 1, alignItems: "center", gap: 4 },
-  headerCount: {
-    fontSize: fontSize.md,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  domainTag: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.full,
-  },
-  domainTagText: { fontSize: fontSize.xs, fontWeight: "700" },
-  timerBox: { flexDirection: "row", alignItems: "center", gap: 4 },
-  timerText: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textSecondary,
-    minWidth: 42,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    headerBtn: { padding: spacing.xs },
+    headerCenter: { flex: 1, alignItems: "center", gap: 4 },
+    headerCount: {
+      fontSize: fontSize.md,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    domainTag: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: radius.full,
+    },
+    domainTagText: { fontSize: fontSize.xs, fontWeight: "700" },
+    timerBox: { flexDirection: "row", alignItems: "center", gap: 4 },
+    timerText: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textSecondary,
+      minWidth: 42,
+    },
 
-  progressBg: {
-    height: 3,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.md,
-    borderRadius: radius.full,
-    overflow: "hidden",
-    marginBottom: spacing.xs,
-  },
-  progressFill: { height: "100%", borderRadius: radius.full },
+    progressBg: {
+      height: 3,
+      backgroundColor: colors.border,
+      marginHorizontal: spacing.md,
+      borderRadius: radius.full,
+      overflow: "hidden",
+      marginBottom: spacing.xs,
+    },
+    progressFill: { height: "100%", borderRadius: radius.full },
 
-  scoreTracker: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  scoreTrackerText: { fontSize: fontSize.xs, color: colors.textSecondary },
-  typeBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
-  },
-  typeBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
+    scoreTracker: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    scoreTrackerText: { fontSize: fontSize.xs, color: colors.textSecondary },
+    typeBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: radius.full,
+    },
+    typeBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
 
-  scroll: { flex: 1 },
-  scrollContent: { padding: spacing.md, gap: spacing.sm },
+    scroll: { flex: 1 },
+    scrollContent: { padding: spacing.md, gap: spacing.sm },
 
-  questionCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.xs,
-  },
-  questionMeta: {
-    flexDirection: "row",
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  serviceBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
-  },
-  serviceBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
-  diffBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
-  },
-  diffBadgeText: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    textTransform: "capitalize",
-  },
-  questionText: {
-    fontSize: fontSize.md,
-    fontWeight: "600",
-    color: colors.textPrimary,
-    lineHeight: 24,
-  },
+    questionCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.xs,
+    },
+    questionMeta: {
+      flexDirection: "row",
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    serviceBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: radius.full,
+    },
+    serviceBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
+    diffBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: radius.full,
+    },
+    diffBadgeText: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      textTransform: "capitalize",
+    },
+    questionText: {
+      fontSize: fontSize.md,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      lineHeight: 24,
+    },
 
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    gap: spacing.sm,
-  },
-  optionLeft: { width: 24, alignItems: "center" },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: radius.full,
-    borderWidth: 2,
-    borderColor: colors.border,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  radioDot: { width: 8, height: 8, borderRadius: radius.full },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: colors.border,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  checkMark: { width: 10, height: 10, borderRadius: 2 },
-  optionText: { flex: 1, fontSize: fontSize.sm, lineHeight: 20 },
+    option: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: spacing.md,
+      borderRadius: radius.md,
+      borderWidth: 1.5,
+      gap: spacing.sm,
+    },
+    optionLeft: { width: 24, alignItems: "center" },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: radius.full,
+      borderWidth: 2,
+      borderColor: colors.border,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    radioDot: { width: 8, height: 8, borderRadius: radius.full },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderRadius: 5,
+      borderWidth: 2,
+      borderColor: colors.border,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    checkMark: { width: 10, height: 10, borderRadius: 2 },
+    optionText: { flex: 1, fontSize: fontSize.sm, lineHeight: 20 },
 
-  explanationCard: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  explanationHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  explanationTitle: { fontSize: fontSize.md, fontWeight: "800" },
+    explanationCard: {
+      backgroundColor: colors.surfaceElevated,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      borderWidth: 1,
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    explanationHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+    explanationTitle: { fontSize: fontSize.md, fontWeight: "800" },
 
-  wrongReasonBox: {
-    backgroundColor: colors.incorrect + "11",
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.incorrect + "33",
-    padding: spacing.sm,
-    gap: 4,
-  },
-  wrongReasonHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  wrongReasonLabel: {
-    flex: 1,
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    color: colors.incorrect,
-  },
-  wrongReasonText: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    lineHeight: 18,
-  },
+    wrongReasonBox: {
+      backgroundColor: colors.incorrect + "11",
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.incorrect + "33",
+      padding: spacing.sm,
+      gap: 4,
+    },
+    wrongReasonHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    wrongReasonLabel: {
+      flex: 1,
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      color: colors.incorrect,
+    },
+    wrongReasonText: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
 
-  correctReasonBox: {
-    backgroundColor: colors.correct + "0D",
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.correct + "33",
-    padding: spacing.sm,
-    gap: 6,
-  },
-  explanationSubHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  explanationSubTitle: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    color: colors.correct,
-  },
+    correctReasonBox: {
+      backgroundColor: colors.correct + "0D",
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.correct + "33",
+      padding: spacing.sm,
+      gap: 6,
+    },
+    explanationSubHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    explanationSubTitle: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      color: colors.correct,
+    },
 
-  explanationText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
-  tag: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  tagText: { fontSize: fontSize.xs, color: colors.textMuted },
+    explanationText: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      lineHeight: 22,
+    },
+    tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
+    tag: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    tagText: { fontSize: fontSize.xs, color: colors.textMuted },
 
-  bottomBar: {
-    padding: spacing.md,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  submitBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    alignItems: "center",
-  },
-  submitBtnDisabled: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  submitBtnText: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.secondary,
-  },
+    bottomBar: {
+      padding: spacing.md,
+      paddingTop: spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    submitBtn: {
+      backgroundColor: colors.primary,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      alignItems: "center",
+    },
+    submitBtnDisabled: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    submitBtnText: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+      color: colors.secondary,
+    },
 
-  nextBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.accent,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-  },
-  nextBtnText: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.secondary,
-  },
+    nextBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.accent,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+    },
+    nextBtnText: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+      color: colors.secondary,
+    },
 
-  finishBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.correct,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-  },
-  finishBtnText: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.secondary,
-  },
-});
+    finishBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.correct,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+    },
+    finishBtnText: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+      color: colors.secondary,
+    },
+  });
+}

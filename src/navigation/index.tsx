@@ -3,9 +3,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../utils/theme";
+import { spacing } from "../utils/theme";
 import { CertProvider } from "../context/CertContext";
 import { AbbreviationTooltipProvider } from "../components/AbbreviatedText";
+import { useTheme } from "../context/ThemeContext";
 
 import CertSelectScreen from "../screens/CertSelectScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -39,6 +40,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function TabNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       initialRouteName="Guides"

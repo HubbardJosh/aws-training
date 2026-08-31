@@ -11,13 +11,20 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import { AbbreviatedText } from "../components/AbbreviatedText";
 import { FlashCard, Domain, Difficulty, UserProgress } from "../types";
 import { loadProgress, saveProgress } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Route = RouteProp<RootStackParamList, "FlashCard">;
 
@@ -39,6 +46,8 @@ export default function FlashCardScreen() {
   const { domain, difficulty, service } = route.params;
   const { certMeta } = useCert();
   const { flashcards } = useCertData();
+  const { colors } = useTheme();
+  const DOMAIN_META = getDomainMeta(colors);
 
   const [cards, setCards] = useState<FlashCard[]>([]);
   const [index, setIndex] = useState(0);
@@ -47,9 +56,7 @@ export default function FlashCardScreen() {
   const [sessionKnown, setSessionKnown] = useState(0);
   const [sessionLearning, setSessionLearning] = useState(0);
 
-  // Fade between front and back
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  // Slide between cards
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -79,7 +86,6 @@ export default function FlashCardScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-    // Toggle after fade-out starts so the new content appears on fade-in
     setTimeout(() => setFlipped((f) => !f), 120);
   }, [fadeAnim]);
 
@@ -137,6 +143,8 @@ export default function FlashCardScreen() {
     },
     [currentCard, progress, index, cards.length, navigateCard],
   );
+
+  const styles = makeStyles(colors);
 
   if (cards.length === 0) {
     return (
@@ -222,7 +230,6 @@ export default function FlashCardScreen() {
               activeOpacity={0.97}
             >
               {!flipped ? (
-                /* ── FRONT ── */
                 <>
                   <View style={styles.cardTopRow}>
                     <View
@@ -339,7 +346,6 @@ export default function FlashCardScreen() {
                   </View>
                 </>
               ) : (
-                /* ── BACK ── */
                 <ScrollView
                   contentContainerStyle={styles.backContent}
                   showsVerticalScrollIndicator={false}
@@ -489,223 +495,225 @@ export default function FlashCardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  headerBtn: { padding: spacing.xs },
-  headerCenter: { flex: 1, alignItems: "center" },
-  headerCount: {
-    fontSize: fontSize.lg,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  headerDomain: { fontSize: fontSize.xs, color: colors.textSecondary },
-  sessionStats: { flexDirection: "row", alignItems: "center", gap: 4 },
-  sessionStat: { fontSize: fontSize.sm, fontWeight: "700", marginRight: 6 },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    headerBtn: { padding: spacing.xs },
+    headerCenter: { flex: 1, alignItems: "center" },
+    headerCount: {
+      fontSize: fontSize.lg,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    headerDomain: { fontSize: fontSize.xs, color: colors.textSecondary },
+    sessionStats: { flexDirection: "row", alignItems: "center", gap: 4 },
+    sessionStat: { fontSize: fontSize.sm, fontWeight: "700", marginRight: 6 },
 
-  progressBarBg: {
-    height: 3,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.md,
-    borderRadius: radius.full,
-    overflow: "hidden",
-    marginBottom: spacing.md,
-  },
-  progressBarFill: { height: "100%", borderRadius: radius.full },
+    progressBarBg: {
+      height: 3,
+      backgroundColor: colors.border,
+      marginHorizontal: spacing.md,
+      borderRadius: radius.full,
+      overflow: "hidden",
+      marginBottom: spacing.md,
+    },
+    progressBarFill: { height: "100%", borderRadius: radius.full },
 
-  cardContainer: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    justifyContent: "center",
-  },
-  cardSlide: { height: CARD_HEIGHT },
-  cardInner: { flex: 1 },
+    cardContainer: {
+      flex: 1,
+      paddingHorizontal: spacing.md,
+      justifyContent: "center",
+    },
+    cardSlide: { height: CARD_HEIGHT },
+    cardInner: { flex: 1 },
 
-  card: {
-    flex: 1,
-    borderRadius: radius.xl,
-    borderWidth: 1.5,
-    overflow: "hidden",
-  },
+    card: {
+      flex: 1,
+      borderRadius: radius.xl,
+      borderWidth: 1.5,
+      overflow: "hidden",
+    },
 
-  cardTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  serviceBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-  },
-  serviceBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
-  diffBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-  },
-  diffBadgeText: {
-    fontSize: fontSize.xs,
-    fontWeight: "700",
-    textTransform: "capitalize",
-  },
+    cardTopRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    serviceBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+    },
+    serviceBadgeText: { fontSize: fontSize.xs, fontWeight: "700" },
+    diffBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+    },
+    diffBadgeText: {
+      fontSize: fontSize.xs,
+      fontWeight: "700",
+      textTransform: "capitalize",
+    },
 
-  cardBody: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cardIcon: { marginBottom: spacing.md },
-  questionText: {
-    fontSize: fontSize.lg,
-    fontWeight: "600",
-    color: colors.textPrimary,
-    textAlign: "center",
-    lineHeight: 26,
-  },
+    cardBody: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    cardIcon: { marginBottom: spacing.md },
+    questionText: {
+      fontSize: fontSize.lg,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      textAlign: "center",
+      lineHeight: 26,
+    },
 
-  cardFooter: {
-    alignItems: "center",
-    paddingBottom: spacing.md,
-    gap: spacing.xs,
-  },
-  cardHint: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  hintText: { fontSize: fontSize.xs, color: colors.textMuted },
-  statusIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: radius.full,
-  },
-  statusText: { fontSize: fontSize.xs, fontWeight: "600" },
+    cardFooter: {
+      alignItems: "center",
+      paddingBottom: spacing.md,
+      gap: spacing.xs,
+    },
+    cardHint: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    },
+    hintText: { fontSize: fontSize.xs, color: colors.textMuted },
+    statusIndicator: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+    },
+    statusText: { fontSize: fontSize.xs, fontWeight: "600" },
 
-  backContent: { padding: spacing.md, paddingBottom: spacing.lg },
-  answerLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textSecondary,
-  },
-  answerText: {
-    fontSize: fontSize.md,
-    color: colors.textPrimary,
-    lineHeight: 24,
-    marginVertical: spacing.md,
-  },
-  keyPointsSection: { marginBottom: spacing.md },
-  keyPointsLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  keyPoint: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 8,
-    gap: spacing.sm,
-  },
-  bullet: { width: 6, height: 6, borderRadius: radius.full, marginTop: 7 },
-  keyPointText: {
-    flex: 1,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
-  tag: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  tagText: { fontSize: fontSize.xs, color: colors.textMuted },
+    backContent: { padding: spacing.md, paddingBottom: spacing.lg },
+    answerLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textSecondary,
+    },
+    answerText: {
+      fontSize: fontSize.md,
+      color: colors.textPrimary,
+      lineHeight: 24,
+      marginVertical: spacing.md,
+    },
+    keyPointsSection: { marginBottom: spacing.md },
+    keyPointsLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    keyPoint: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 8,
+      gap: spacing.sm,
+    },
+    bullet: { width: 6, height: 6, borderRadius: radius.full, marginTop: 7 },
+    keyPointText: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+    tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
+    tag: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    tagText: { fontSize: fontSize.xs, color: colors.textMuted },
 
-  controls: { padding: spacing.md, paddingTop: spacing.sm, gap: spacing.sm },
-  navRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  navBtn: { padding: spacing.xs },
-  navBtnDisabled: { opacity: 0.3 },
-  flipBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm + 4,
-    borderRadius: radius.full,
-  },
-  flipBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
+    controls: { padding: spacing.md, paddingTop: spacing.sm, gap: spacing.sm },
+    navRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    navBtn: { padding: spacing.xs },
+    navBtnDisabled: { opacity: 0.3 },
+    flipBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm + 4,
+      borderRadius: radius.full,
+    },
+    flipBtnText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
 
-  ratingRow: { flexDirection: "row", gap: spacing.sm },
-  ratingBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    borderWidth: 1.5,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-  },
-  ratingBtnText: { fontSize: fontSize.md, fontWeight: "700" },
+    ratingRow: { flexDirection: "row", gap: spacing.sm },
+    ratingBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      borderWidth: 1.5,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+    },
+    ratingBtnText: { fontSize: fontSize.md, fontWeight: "700" },
 
-  doneBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.accent,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm + 4,
-  },
-  doneBtnText: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
+    doneBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.accent,
+      borderRadius: radius.md,
+      paddingVertical: spacing.sm + 4,
+    },
+    doneBtnText: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
 
-  empty: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
-  backBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-  },
-  backBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
-});
+    empty: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      gap: spacing.md,
+    },
+    emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
+    backBtn: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.md,
+    },
+    backBtnText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
+  });
+}

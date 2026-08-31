@@ -10,7 +10,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import {
   loadProgress,
   getDomainAccuracy,
@@ -18,6 +24,7 @@ import {
 } from "../utils/storage";
 import { UserProgress, Domain } from "../types";
 import { RootStackParamList } from "../navigation";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -31,6 +38,9 @@ const DOMAINS: Domain[] = [
 export default function QuizResultScreen() {
   const navigation = useNavigation<Nav>();
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const DOMAIN_META = getDomainMeta(colors);
 
   useEffect(() => {
     loadProgress().then(setProgress);
@@ -61,7 +71,7 @@ export default function QuizResultScreen() {
 
   const { score, total, timeSeconds } = lastAttempt;
   const pct = Math.round((score / total) * 100);
-  const passed = pct >= 72; // ~720/1000 scaled
+  const passed = pct >= 72;
   const formatTime = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
 
   const overallAccuracy = getOverallAccuracy(progress);
@@ -293,18 +303,21 @@ export default function QuizResultScreen() {
             value={progress.totalQuestionsAnswered.toString()}
             icon="help-circle"
             color={colors.primary}
+            colors={colors}
           />
           <StatBox
             label="Overall Accuracy"
             value={`${overallAccuracy}%`}
             icon="checkmark-circle"
             color={colors.correct}
+            colors={colors}
           />
           <StatBox
             label="Quizzes Taken"
             value={progress.quizHistory.length.toString()}
             icon="trophy"
             color={colors.accent}
+            colors={colors}
           />
           <StatBox
             label="Best Quiz Score"
@@ -315,6 +328,7 @@ export default function QuizResultScreen() {
             }
             icon="star"
             color={colors.warning}
+            colors={colors}
           />
         </View>
 
@@ -357,12 +371,15 @@ function StatBox({
   value,
   icon,
   color,
+  colors,
 }: {
   label: string;
   value: string;
   icon: string;
   color: string;
+  colors: ThemeColors;
 }) {
+  const styles = makeStyles(colors);
   return (
     <View style={[styles.statBox, { borderColor: color + "33" }]}>
       <Ionicons name={icon as any} size={20} color={color} />
@@ -389,203 +406,205 @@ const RECOMMENDATIONS: Record<Domain, string> = {
     "Practice applying AI services to real-world scenarios and building end-to-end AI-powered solutions.",
 };
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.md },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      gap: spacing.md,
+    },
+    emptyText: { fontSize: fontSize.lg, color: colors.textMuted },
 
-  hero: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    alignItems: "center",
-    borderWidth: 1.5,
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  heroIcon: {
-    width: 88,
-    height: 88,
-    borderRadius: radius.full,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing.xs,
-  },
-  heroTitle: { fontSize: fontSize.xxl, fontWeight: "800" },
-  heroScore: { fontSize: fontSize.lg, color: colors.textSecondary },
-  pctCircle: { alignItems: "center", marginVertical: spacing.xs },
-  pctText: { fontSize: fontSize.xxxl, fontWeight: "900" },
-  pctSub: { fontSize: fontSize.sm, color: colors.textSecondary },
-  heroStats: { flexDirection: "row", gap: spacing.lg },
-  heroStat: { flexDirection: "row", alignItems: "center", gap: 4 },
-  heroStatText: { fontSize: fontSize.sm, color: colors.textSecondary },
-  passBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    backgroundColor: colors.correct + "15",
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  passBannerText: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.correct,
-  },
+    hero: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.xl,
+      padding: spacing.lg,
+      alignItems: "center",
+      borderWidth: 1.5,
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    heroIcon: {
+      width: 88,
+      height: 88,
+      borderRadius: radius.full,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: spacing.xs,
+    },
+    heroTitle: { fontSize: fontSize.xxl, fontWeight: "800" },
+    heroScore: { fontSize: fontSize.lg, color: colors.textSecondary },
+    pctCircle: { alignItems: "center", marginVertical: spacing.xs },
+    pctText: { fontSize: fontSize.xxxl, fontWeight: "900" },
+    pctSub: { fontSize: fontSize.sm, color: colors.textSecondary },
+    heroStats: { flexDirection: "row", gap: spacing.lg },
+    heroStat: { flexDirection: "row", alignItems: "center", gap: 4 },
+    heroStatText: { fontSize: fontSize.sm, color: colors.textSecondary },
+    passBanner: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      backgroundColor: colors.correct + "15",
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    passBannerText: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.correct,
+    },
 
-  sectionTitle: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    marginTop: spacing.xs,
-  },
+    sectionTitle: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.textPrimary,
+      marginBottom: spacing.sm,
+      marginTop: spacing.xs,
+    },
 
-  domainRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  domainIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  domainInfo: { flex: 1 },
-  domainTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  domainLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  domainAcc: { fontSize: fontSize.sm, fontWeight: "700" },
-  miniBarBg: {
-    height: 4,
-    backgroundColor: colors.border,
-    borderRadius: radius.full,
-    overflow: "hidden",
-  },
-  miniBarFill: { height: "100%", borderRadius: radius.full },
+    domainRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      gap: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    domainIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    domainInfo: { flex: 1 },
+    domainTopRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 6,
+    },
+    domainLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    domainAcc: { fontSize: fontSize.sm, fontWeight: "700" },
+    miniBarBg: {
+      height: 4,
+      backgroundColor: colors.border,
+      borderRadius: radius.full,
+      overflow: "hidden",
+    },
+    miniBarFill: { height: "100%", borderRadius: radius.full },
 
-  recCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xs,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  recIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  recText: { flex: 1 },
-  recTitle: {
-    fontSize: fontSize.sm,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  recSub: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-    lineHeight: 18,
-  },
+    recCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xs,
+      gap: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    recIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.md,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    recText: { flex: 1 },
+    recTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    recSub: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+      lineHeight: 18,
+    },
 
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  statBox: {
-    width: "47%",
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    alignItems: "center",
-    gap: 4,
-    borderWidth: 1,
-  },
-  statValue: {
-    fontSize: fontSize.xl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  statLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    textAlign: "center",
-  },
+    statsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    statBox: {
+      width: "47%",
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      alignItems: "center",
+      gap: 4,
+      borderWidth: 1,
+    },
+    statValue: {
+      fontSize: fontSize.xl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    statLabel: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      textAlign: "center",
+    },
 
-  actions: { flexDirection: "row", gap: spacing.sm },
-  retryBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-  },
-  retryBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
-  homeBtn2: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary + "55",
-  },
-  homeBtnText2: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.primary,
-  },
+    actions: { flexDirection: "row", gap: spacing.sm },
+    retryBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.primary,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+    },
+    retryBtnText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
+    homeBtn2: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.primary + "55",
+    },
+    homeBtnText2: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.primary,
+    },
 
-  homeBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-  },
-  homeBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
-});
+    homeBtn: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.md,
+    },
+    homeBtnText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
+  });
+}

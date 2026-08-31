@@ -10,10 +10,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { colors, spacing, radius, fontSize, DOMAIN_META } from "../utils/theme";
+import {
+  spacing,
+  radius,
+  fontSize,
+  getDomainMeta,
+  ThemeColors,
+} from "../utils/theme";
 import { Domain } from "../types";
 import { RootStackParamList } from "../navigation";
 import { useCertData } from "../context/useCertData";
+import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -28,6 +35,9 @@ const DIFFICULTIES = ["all", "easy", "medium", "hard"] as const;
 export default function StudyScreen() {
   const navigation = useNavigation<Nav>();
   const { flashcards } = useCertData();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const DOMAIN_META = getDomainMeta(colors);
   const SERVICES = [...new Set(flashcards.map((c) => c.service))].sort();
   const [selectedDomain, setSelectedDomain] = useState<Domain | "all">("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
@@ -68,6 +78,7 @@ export default function StudyScreen() {
             active={selectedDomain === "all"}
             color={colors.primary}
             onPress={() => setSelectedDomain("all")}
+            colors={colors}
           />
           {DOMAINS.map((d) => (
             <FilterChip
@@ -76,6 +87,7 @@ export default function StudyScreen() {
               active={selectedDomain === d}
               color={DOMAIN_META[d].color}
               onPress={() => setSelectedDomain(d)}
+              colors={colors}
             />
           ))}
         </ScrollView>
@@ -104,6 +116,7 @@ export default function StudyScreen() {
                       : colors.hard
               }
               onPress={() => setSelectedDifficulty(d)}
+              colors={colors}
             />
           ))}
         </ScrollView>
@@ -220,12 +233,15 @@ function FilterChip({
   active,
   color,
   onPress,
+  colors,
 }: {
   label: string;
   active: boolean;
   color: string;
   onPress: () => void;
+  colors: ThemeColors;
 }) {
+  const styles = makeStyles(colors);
   return (
     <TouchableOpacity
       style={[
@@ -245,103 +261,105 @@ function FilterChip({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
-  content: { padding: spacing.md },
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1 },
+    content: { padding: spacing.md },
 
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: "800",
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
+    title: {
+      fontSize: fontSize.xxl,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: fontSize.sm,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
 
-  filterLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  filterRow: { marginBottom: spacing.md },
+    filterLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginBottom: spacing.xs,
+    },
+    filterRow: { marginBottom: spacing.md },
 
-  chip: {
-    borderWidth: 1,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    marginRight: spacing.xs,
-  },
-  chipText: { fontSize: fontSize.sm, fontWeight: "600" },
+    chip: {
+      borderWidth: 1,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 2,
+      marginRight: spacing.xs,
+    },
+    chipText: { fontSize: fontSize.sm, fontWeight: "600" },
 
-  startAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  startAllText: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.secondary,
-  },
+    startAllBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      backgroundColor: colors.primary,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    startAllText: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.secondary,
+    },
 
-  serviceCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  serviceHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-  serviceIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: spacing.sm,
-  },
-  serviceInfo: { flex: 1 },
-  serviceName: {
-    fontSize: fontSize.md,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  serviceMeta: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  difficultyDots: { flexDirection: "row", gap: 3, marginRight: spacing.xs },
-  dot: { width: 7, height: 7, borderRadius: radius.full },
+    serviceCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    serviceHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: spacing.sm,
+    },
+    serviceIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: radius.sm,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: spacing.sm,
+    },
+    serviceInfo: { flex: 1 },
+    serviceName: {
+      fontSize: fontSize.md,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    serviceMeta: {
+      fontSize: fontSize.xs,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    difficultyDots: { flexDirection: "row", gap: 3, marginRight: spacing.xs },
+    dot: { width: 7, height: 7, borderRadius: radius.full },
 
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
-  tag: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: radius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  tagText: { fontSize: fontSize.xs, color: colors.textMuted },
+    tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
+    tag: {
+      backgroundColor: colors.surfaceElevated,
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    tagText: { fontSize: fontSize.xs, color: colors.textMuted },
 
-  empty: {
-    alignItems: "center",
-    paddingVertical: spacing.xxl,
-    gap: spacing.md,
-  },
-  emptyText: { fontSize: fontSize.md, color: colors.textMuted },
-});
+    empty: {
+      alignItems: "center",
+      paddingVertical: spacing.xxl,
+      gap: spacing.md,
+    },
+    emptyText: { fontSize: fontSize.md, color: colors.textMuted },
+  });
+}
