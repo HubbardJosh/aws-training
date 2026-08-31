@@ -114,9 +114,9 @@ Several strategies can reduce cold start impact. **Provisioned Concurrency** pre
           question:
             "Which runtime typically has the fastest cold start time in Lambda?",
           options: ["Node.js 20.x", "Go 1.x", "Java 21", ".NET 8"],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation:
-            "Node.js and Python start significantly faster than JVM-based (Java) or CLR-based (.NET) runtimes due to lighter initialization overhead.",
+            "Go compiles to a native binary with no managed runtime startup overhead, giving it the fastest cold starts among Lambda runtimes. Node.js and Python are also relatively fast (no JVM/CLR to initialize), but Go's native binary initialization is consistently faster. Java and .NET have the slowest cold starts due to JVM and CLR initialization costs.",
         },
       ],
     },

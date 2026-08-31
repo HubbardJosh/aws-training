@@ -46,10 +46,10 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "When a Lambda function takes longer than the SQS visibility timeout to process a message, the message becomes visible again and can be picked up by another invocation — causing duplicate processing. The fix is to set the visibility timeout to at least 6× the function timeout. FIFO queues actually prevent duplicates. Reserved concurrency of 0 would disable the function entirely. Long polling affects how fast messages are received, not duplicates.",
     optionExplanations: [
-      "Correct. When a Lambda function's execution time exceeds the SQS visibility timeout, the message becomes visible again and another Lambda invocation picks it up — causing the same message to be processed more than once. The fix is to set visibility timeout to at least 6× the function timeout.",
-      "Incorrect. FIFO queues actually prevent duplicate delivery with their deduplication window — they would reduce duplicates, not cause them.",
       "Incorrect. Reserved concurrency of 0 would prevent any concurrent executions, effectively disabling the function entirely — it would not cause duplicate processing.",
+      "Correct. When a Lambda function's execution time exceeds the SQS visibility timeout, the message becomes visible again and another Lambda invocation picks it up — causing the same message to be processed more than once. The fix is to set visibility timeout to at least 6× the function timeout.",
       "Incorrect. Long polling affects how quickly Lambda detects messages in the queue; it has no impact on whether messages are processed more than once.",
+      "Incorrect. FIFO queues actually prevent duplicate delivery with their deduplication window — they would reduce duplicates, not cause them.",
     ],
     tags: ["lambda", "sqs", "visibility-timeout", "duplicate"],
   },
@@ -1387,10 +1387,10 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "SQS Standard queues provide at-least-once delivery — a message may be delivered more than once even if successfully processed and deleted. This is a fundamental characteristic of Standard queues. The visibility timeout (30s) was not exceeded (25s < 30s) and DeleteMessage was called before expiry, but SQS can still deliver duplicate copies that were already stored internally. Applications using Standard SQS must be idempotent. Use FIFO queues if exactly-once is required.",
     optionExplanations: [
-      "Incorrect. This describes how a duplicate might manifest, but the root cause is SQS Standard at-least-once delivery semantics — the distributed backend may store multiple copies of a message, so a second copy can arrive even after the first was successfully processed and deleted.",
-      "Incorrect. The visibility timeout was 30 seconds and the consumer finished and deleted the message in 25 seconds, so the timeout was not exceeded; this is not the cause of the duplicate in this scenario.",
-      "Correct. SQS Standard queues provide at-least-once delivery, meaning the same message may be stored and delivered as more than one copy in the queue's distributed backend. Even when the first consumer deleted the message before the visibility timeout expired, a duplicate copy already in flight can still be delivered to another consumer.",
       "Incorrect. The DeleteMessage API does not have a known propagation delay of 10 seconds; once acknowledged, the message is removed. The duplicate delivery in this scenario stems from at-least-once delivery semantics, not a delete lag.",
+      "Incorrect. The visibility timeout was 30 seconds and the consumer finished and deleted the message in 25 seconds, so the timeout was not exceeded; this is not the cause of the duplicate in this scenario.",
+      "Incorrect. This describes how a duplicate might manifest, but the root cause is SQS Standard at-least-once delivery semantics — the distributed backend may store multiple copies of a message, so a second copy can arrive even after the first was successfully processed and deleted.",
+      "Correct. SQS Standard queues provide at-least-once delivery, meaning the same message may be stored and delivered as more than one copy in the queue's distributed backend. Even when the first consumer deleted the message before the visibility timeout expired, a duplicate copy already in flight can still be delivered to another consumer.",
     ],
     tags: ["sqs", "at-least-once", "duplicate", "standard-queue", "idempotent"],
   },
