@@ -31,6 +31,7 @@ import {
   saveProgress,
   touchStreak,
   recordWrongAnswers,
+  recordMissedQuestion,
 } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
@@ -151,7 +152,30 @@ export default function QuizScreen() {
         if (!isCorrect) wrongServices.push(q.service);
       });
 
-      const withWeak = recordWrongAnswers(progress, wrongServices);
+      let withMissed = progress;
+      questions.forEach((q, i) => {
+        const ans = finalAnswers[i];
+        if (!ans) return;
+        const sorted = [...ans].sort().join(",");
+        const expected = [...q.correctIndices].sort().join(",");
+        if (sorted !== expected) {
+          const correctLabels = q.correctIndices
+            .map((ci) => q.options[ci])
+            .join(" / ");
+          withMissed = recordMissedQuestion(withMissed, {
+            question: q.question,
+            options: q.options,
+            correctIndex: q.correctIndices[0],
+            explanation:
+              q.type === "multi"
+                ? `Correct: ${correctLabels}\n\n${q.explanation}`
+                : q.explanation,
+            source: q.service,
+          });
+        }
+      });
+
+      const withWeak = recordWrongAnswers(withMissed, wrongServices);
       const updated: UserProgress = touchStreak({
         ...withWeak,
         quizHistory: [attempt, ...progress.quizHistory].slice(0, 50),

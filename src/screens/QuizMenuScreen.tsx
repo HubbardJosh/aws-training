@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   spacing,
@@ -17,8 +17,9 @@ import {
   getDomainMeta,
   ThemeColors,
 } from "../utils/theme";
-import { Domain } from "../types";
+import { Domain, UserProgress } from "../types";
 import { RootStackParamList } from "../navigation";
+import { loadProgress, getMissedQuestions } from "../utils/storage";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
 import { useTheme } from "../context/ThemeContext";
@@ -40,11 +41,20 @@ export default function QuizMenuScreen() {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const DOMAIN_META = getDomainMeta(colors);
+  const [progress, setProgress] = useState<UserProgress | null>(null);
   const [selectedDomain, setSelectedDomain] = useState<Domain | "all">("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "all" | "easy" | "medium" | "hard"
   >("all");
   const [selectedCount, setSelectedCount] = useState(10);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress(certMeta.storageKey).then(setProgress);
+    }, [certMeta.storageKey]),
+  );
+
+  const missedCount = progress ? getMissedQuestions(progress).length : 0;
 
   const available = quizQuestions.filter((q) => {
     const domainMatch = selectedDomain === "all" || q.domain === selectedDomain;
@@ -100,6 +110,26 @@ export default function QuizMenuScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Text style={styles.title}>Practice Quiz</Text>
         <Text style={styles.subtitle}>Configure your quiz session</Text>
+
+        {/* Missed questions */}
+        {missedCount > 0 && (
+          <TouchableOpacity
+            style={styles.missedBtn}
+            onPress={() => navigation.navigate("MissedQuestions")}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close-circle" size={15} color={colors.incorrect} />
+            <Text style={styles.missedBtnText}>
+              Review {missedCount} missed question
+              {missedCount !== 1 ? "s" : ""}
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={colors.incorrect + "99"}
+            />
+          </TouchableOpacity>
+        )}
 
         {/* Exam info */}
         <View style={styles.examCard}>
@@ -355,6 +385,25 @@ function makeStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       color: colors.textSecondary,
       marginBottom: spacing.md,
+    },
+
+    missedBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      backgroundColor: colors.incorrect + "12",
+      borderWidth: 1,
+      borderColor: colors.incorrect + "44",
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      marginBottom: spacing.md,
+    },
+    missedBtnText: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.incorrect,
     },
 
     examCard: {
