@@ -31,7 +31,7 @@ import {
   saveProgress,
   touchStreak,
   recordWrongAnswers,
-  recordMissedQuestion,
+  recordMissedQuizQuestion,
 } from "../utils/storage";
 import { RootStackParamList } from "../navigation";
 import { useCert } from "../context/CertContext";
@@ -162,7 +162,7 @@ export default function QuizScreen() {
           const correctLabels = q.correctIndices
             .map((ci) => q.options[ci])
             .join(" / ");
-          withMissed = recordMissedQuestion(withMissed, {
+          withMissed = recordMissedQuizQuestion(withMissed, {
             question: q.question,
             options: q.options,
             correctIndex: q.correctIndices[0],

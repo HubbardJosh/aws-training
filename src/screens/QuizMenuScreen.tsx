@@ -19,7 +19,7 @@ import {
 } from "../utils/theme";
 import { Domain, UserProgress } from "../types";
 import { RootStackParamList } from "../navigation";
-import { loadProgress, getMissedQuestions } from "../utils/storage";
+import { loadProgress, getMissedQuizQuestions } from "../utils/storage";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
 import { useTheme } from "../context/ThemeContext";
@@ -54,7 +54,7 @@ export default function QuizMenuScreen() {
     }, [certMeta.storageKey]),
   );
 
-  const missedCount = progress ? getMissedQuestions(progress).length : 0;
+  const missedCount = progress ? getMissedQuizQuestions(progress).length : 0;
 
   const available = quizQuestions.filter((q) => {
     const domainMatch = selectedDomain === "all" || q.domain === selectedDomain;
@@ -111,26 +111,6 @@ export default function QuizMenuScreen() {
         <Text style={styles.title}>Practice Quiz</Text>
         <Text style={styles.subtitle}>Configure your quiz session</Text>
 
-        {/* Missed questions */}
-        {missedCount > 0 && (
-          <TouchableOpacity
-            style={styles.missedBtn}
-            onPress={() => navigation.navigate("MissedQuestions")}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="close-circle" size={15} color={colors.incorrect} />
-            <Text style={styles.missedBtnText}>
-              Review {missedCount} missed question
-              {missedCount !== 1 ? "s" : ""}
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={14}
-              color={colors.incorrect + "99"}
-            />
-          </TouchableOpacity>
-        )}
-
         {/* Exam info */}
         <View style={styles.examCard}>
           <Ionicons
@@ -145,6 +125,28 @@ export default function QuizMenuScreen() {
             <Text style={styles.examCardSub}>{certMeta.examInfo}</Text>
           </View>
         </View>
+
+        {/* Missed questions */}
+        {missedCount > 0 && (
+          <TouchableOpacity
+            style={styles.missedBtn}
+            onPress={() =>
+              navigation.navigate("MissedQuestions", { source: "quiz" })
+            }
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close-circle" size={15} color={colors.incorrect} />
+            <Text style={styles.missedBtnText}>
+              Review {missedCount} missed question
+              {missedCount !== 1 ? "s" : ""}
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={colors.incorrect + "99"}
+            />
+          </TouchableOpacity>
+        )}
 
         {/* Domain */}
         <Text style={styles.sectionLabel}>Domain</Text>
@@ -397,7 +399,7 @@ function makeStyles(colors: ThemeColors) {
       borderRadius: radius.md,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      marginBottom: spacing.md,
+      marginBottom: spacing.sm,
     },
     missedBtnText: {
       flex: 1,

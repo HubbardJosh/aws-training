@@ -28,6 +28,7 @@ const defaultProgress: UserProgress = {
   guideProgress: {},
   weakTopics: {},
   missedQuestions: {},
+  missedQuizQuestions: {},
 };
 
 export async function loadProgress(
@@ -47,6 +48,7 @@ export async function loadProgress(
       guideProgress: parsed.guideProgress ?? {},
       weakTopics: parsed.weakTopics ?? {},
       missedQuestions: parsed.missedQuestions ?? {},
+      missedQuizQuestions: parsed.missedQuizQuestions ?? {},
     };
   } catch {
     return defaultProgress;
@@ -322,9 +324,49 @@ export function removeMissedQuestion(
   return { ...progress, missedQuestions: updated };
 }
 
-/** Return missed questions sorted by missCount descending. */
+/** Return guide missed questions sorted by missCount descending. */
 export function getMissedQuestions(progress: UserProgress): MissedQuestion[] {
   return Object.values(progress.missedQuestions).sort(
+    (a, b) => b.missCount - a.missCount,
+  );
+}
+
+/** Record a main quiz question as missed. Increments missCount if already present. */
+export function recordMissedQuizQuestion(
+  progress: UserProgress,
+  question: Omit<MissedQuestion, "id" | "missedAt" | "missCount">,
+): UserProgress {
+  const id = hashString(question.question);
+  const existing = progress.missedQuizQuestions[id];
+  return {
+    ...progress,
+    missedQuizQuestions: {
+      ...progress.missedQuizQuestions,
+      [id]: {
+        ...question,
+        id,
+        missedAt: existing?.missedAt ?? new Date().toISOString(),
+        missCount: (existing?.missCount ?? 0) + 1,
+      },
+    },
+  };
+}
+
+/** Remove a question from the main quiz missed list (user dismissed it). */
+export function removeMissedQuizQuestion(
+  progress: UserProgress,
+  id: string,
+): UserProgress {
+  const updated = { ...progress.missedQuizQuestions };
+  delete updated[id];
+  return { ...progress, missedQuizQuestions: updated };
+}
+
+/** Return main quiz missed questions sorted by missCount descending. */
+export function getMissedQuizQuestions(
+  progress: UserProgress,
+): MissedQuestion[] {
+  return Object.values(progress.missedQuizQuestions).sort(
     (a, b) => b.missCount - a.missCount,
   );
 }

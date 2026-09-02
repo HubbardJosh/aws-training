@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, CommonActions } from "@react-navigation/native";
+import {
+  useNavigation,
+  CommonActions,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   spacing,
@@ -21,7 +25,9 @@ import {
   loadProgress,
   getDomainAccuracy,
   getOverallAccuracy,
+  getMissedQuizQuestions,
 } from "../utils/storage";
+import { useCert } from "../context/CertContext";
 import { UserProgress, Domain } from "../types";
 import { RootStackParamList } from "../navigation";
 import { useTheme } from "../context/ThemeContext";
@@ -37,17 +43,21 @@ const DOMAINS: Domain[] = [
 
 export default function QuizResultScreen() {
   const navigation = useNavigation<Nav>();
+  const { certMeta } = useCert();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const DOMAIN_META = getDomainMeta(colors);
 
-  useEffect(() => {
-    loadProgress().then(setProgress);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress(certMeta.storageKey).then(setProgress);
+    }, [certMeta.storageKey]),
+  );
 
   if (!progress) return null;
 
+  const missedCount = getMissedQuizQuestions(progress).length;
   const lastAttempt = progress.quizHistory[0];
   if (!lastAttempt) {
     return (
@@ -360,6 +370,27 @@ export default function QuizResultScreen() {
           </TouchableOpacity>
         </View>
 
+        {missedCount > 0 && (
+          <TouchableOpacity
+            style={styles.missedBtn}
+            onPress={() =>
+              navigation.navigate("MissedQuestions", { source: "quiz" })
+            }
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close-circle" size={15} color={colors.incorrect} />
+            <Text style={styles.missedBtnText}>
+              Review {missedCount} missed question
+              {missedCount !== 1 ? "s" : ""}
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={colors.incorrect + "99"}
+            />
+          </TouchableOpacity>
+        )}
+
         <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
@@ -593,6 +624,25 @@ function makeStyles(colors: ThemeColors) {
       fontSize: fontSize.md,
       fontWeight: "700",
       color: colors.primary,
+    },
+
+    missedBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      backgroundColor: colors.incorrect + "12",
+      borderWidth: 1,
+      borderColor: colors.incorrect + "44",
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      marginTop: spacing.sm,
+    },
+    missedBtnText: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.incorrect,
     },
 
     homeBtn: {

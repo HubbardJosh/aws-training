@@ -27,7 +27,7 @@ export type RootStackParamList = {
   Quiz: { domain: string; difficulty: string; count: number; service?: string };
   QuizResult: { sessionId: string };
   GuideDetail: { id: string };
-  MissedQuestions: undefined;
+  MissedQuestions: { source: "guide" | "quiz" };
 };
 
 export type TabParamList = {

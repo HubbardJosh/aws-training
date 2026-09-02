@@ -140,7 +140,9 @@ export default function GuideListScreen() {
         {missedCount > 0 && (
           <TouchableOpacity
             style={styles.missedBtn}
-            onPress={() => navigation.navigate("MissedQuestions")}
+            onPress={() =>
+              navigation.navigate("MissedQuestions", { source: "guide" })
+            }
             activeOpacity={0.8}
           >
             <Ionicons name="close-circle" size={15} color={colors.incorrect} />

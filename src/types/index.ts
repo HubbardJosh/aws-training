@@ -68,7 +68,8 @@ export interface UserProgress {
   lastStudied: string | null;
   guideProgress: Record<string, GuideProgress>;
   weakTopics: Record<string, WeakTopic>;
-  missedQuestions: Record<string, MissedQuestion>;
+  missedQuestions: Record<string, MissedQuestion>; // guide section/topic quiz misses
+  missedQuizQuestions: Record<string, MissedQuestion>; // main quiz screen misses
 }
 
 export interface DomainScore {

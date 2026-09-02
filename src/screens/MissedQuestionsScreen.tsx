@@ -8,21 +8,28 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { AbbreviatedText } from "../components/AbbreviatedText";
 import { fontSize, radius, spacing, ThemeColors } from "../utils/theme";
 import { useTheme } from "../context/ThemeContext";
 import { useCert } from "../context/CertContext";
 import {
   getMissedQuestions,
+  getMissedQuizQuestions,
   loadProgress,
   removeMissedQuestion,
+  removeMissedQuizQuestion,
   saveProgress,
 } from "../utils/storage";
 import { MissedQuestion, UserProgress } from "../types";
+import { RootStackParamList } from "../navigation";
+
+type RouteT = RouteProp<RootStackParamList, "MissedQuestions">;
 
 export default function MissedQuestionsScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteT>();
+  const { source } = route.params;
   const { certMeta } = useCert();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
@@ -38,16 +45,23 @@ export default function MissedQuestionsScreen() {
     loadProgress(certMeta.storageKey).then(setProgress);
   }, [certMeta.storageKey]);
 
-  const missed = progress ? getMissedQuestions(progress) : [];
+  const missed = progress
+    ? source === "quiz"
+      ? getMissedQuizQuestions(progress)
+      : getMissedQuestions(progress)
+    : [];
 
   const handleDismiss = useCallback(
     async (id: string) => {
       if (!progress) return;
-      const updated = removeMissedQuestion(progress, id);
+      const updated =
+        source === "quiz"
+          ? removeMissedQuizQuestion(progress, id)
+          : removeMissedQuestion(progress, id);
       setProgress(updated);
       await saveProgress(updated, certMeta.storageKey);
     },
-    [progress, certMeta.storageKey],
+    [progress, certMeta.storageKey, source],
   );
 
   const handleDismissCurrent = useCallback(async () => {
