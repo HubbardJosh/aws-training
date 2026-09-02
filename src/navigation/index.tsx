@@ -18,6 +18,7 @@ import QuizResultScreen from "../screens/QuizResultScreen";
 import ProgressScreen from "../screens/ProgressScreen";
 import GuideListScreen from "../screens/GuideListScreen";
 import GuideDetailScreen from "../screens/GuideDetailScreen";
+import MissedQuestionsScreen from "../screens/MissedQuestionsScreen";
 
 export type RootStackParamList = {
   CertSelect: undefined;
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   Quiz: { domain: string; difficulty: string; count: number; service?: string };
   QuizResult: { sessionId: string };
   GuideDetail: { id: string };
+  MissedQuestions: undefined;
 };
 
 export type TabParamList = {
@@ -114,6 +116,7 @@ function RootNavigator() {
       <Stack.Screen name="Quiz" component={QuizScreen} />
       <Stack.Screen name="QuizResult" component={QuizResultScreen} />
       <Stack.Screen name="GuideDetail" component={GuideDetailScreen} />
+      <Stack.Screen name="MissedQuestions" component={MissedQuestionsScreen} />
     </Stack.Navigator>
   );
 }

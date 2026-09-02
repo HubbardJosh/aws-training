@@ -47,6 +47,17 @@ export interface WeakTopic {
   needsReview: boolean;
 }
 
+export interface MissedQuestion {
+  id: string; // stable hash of question text
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  source: string; // service / guide name
+  missedAt: string; // ISO date of first miss
+  missCount: number;
+}
+
 export interface UserProgress {
   studiedCards: Record<string, "known" | "learning" | "unseen">;
   quizHistory: QuizAttempt[];
@@ -57,6 +68,7 @@ export interface UserProgress {
   lastStudied: string | null;
   guideProgress: Record<string, GuideProgress>;
   weakTopics: Record<string, WeakTopic>;
+  missedQuestions: Record<string, MissedQuestion>;
 }
 
 export interface DomainScore {

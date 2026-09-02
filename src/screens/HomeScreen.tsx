@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   spacing,
@@ -49,9 +49,11 @@ export default function HomeScreen() {
   const styles = makeStyles(colors);
   const DOMAIN_META = getDomainMeta(colors);
 
-  useEffect(() => {
-    loadProgress(certMeta.storageKey).then(setProgress);
-  }, [certMeta.storageKey]);
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress(certMeta.storageKey).then(setProgress);
+    }, [certMeta.storageKey]),
+  );
 
   const overallAccuracy = progress ? getOverallAccuracy(progress) : 0;
   const totalStudied = progress

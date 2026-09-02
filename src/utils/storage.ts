@@ -1,5 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { UserProgress, Domain, GuideProgress, WeakTopic } from "../types";
+import {
+  UserProgress,
+  Domain,
+  GuideProgress,
+  WeakTopic,
+  MissedQuestion,
+} from "../types";
 
 const STORAGE_KEY = "aws_training_progress_dva";
 
@@ -21,6 +27,7 @@ const defaultProgress: UserProgress = {
   lastStudied: null,
   guideProgress: {},
   weakTopics: {},
+  missedQuestions: {},
 };
 
 export async function loadProgress(
@@ -39,6 +46,7 @@ export async function loadProgress(
       },
       guideProgress: parsed.guideProgress ?? {},
       weakTopics: parsed.weakTopics ?? {},
+      missedQuestions: parsed.missedQuestions ?? {},
     };
   } catch {
     return defaultProgress;
@@ -272,4 +280,51 @@ export function getGuidesCompleted(progress: UserProgress): number {
 
 export function getGuidesViewed(progress: UserProgress): number {
   return Object.keys(progress.guideProgress).length;
+}
+
+/** Simple hash of a string to use as a stable question ID. */
+function hashString(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  }
+  return (h >>> 0).toString(36);
+}
+
+/** Record a guide quiz question as missed. Increments missCount if already present. */
+export function recordMissedQuestion(
+  progress: UserProgress,
+  question: Omit<MissedQuestion, "id" | "missedAt" | "missCount">,
+): UserProgress {
+  const id = hashString(question.question);
+  const existing = progress.missedQuestions[id];
+  return {
+    ...progress,
+    missedQuestions: {
+      ...progress.missedQuestions,
+      [id]: {
+        ...question,
+        id,
+        missedAt: existing?.missedAt ?? new Date().toISOString(),
+        missCount: (existing?.missCount ?? 0) + 1,
+      },
+    },
+  };
+}
+
+/** Remove a question from the missed list (user dismissed it). */
+export function removeMissedQuestion(
+  progress: UserProgress,
+  id: string,
+): UserProgress {
+  const updated = { ...progress.missedQuestions };
+  delete updated[id];
+  return { ...progress, missedQuestions: updated };
+}
+
+/** Return missed questions sorted by missCount descending. */
+export function getMissedQuestions(progress: UserProgress): MissedQuestion[] {
+  return Object.values(progress.missedQuestions).sort(
+    (a, b) => b.missCount - a.missCount,
+  );
 }

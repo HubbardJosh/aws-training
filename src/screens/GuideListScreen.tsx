@@ -19,7 +19,7 @@ import {
   ThemeColors,
 } from "../utils/theme";
 import { RootStackParamList } from "../navigation";
-import { loadProgress } from "../utils/storage";
+import { loadProgress, getMissedQuestions } from "../utils/storage";
 import { UserProgress } from "../types";
 import { useCert } from "../context/CertContext";
 import { useCertData } from "../context/useCertData";
@@ -46,6 +46,8 @@ export default function GuideListScreen() {
       loadProgress(certMeta.storageKey).then(setProgress);
     }, [certMeta.storageKey]),
   );
+
+  const missedCount = progress ? getMissedQuestions(progress).length : 0;
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -133,6 +135,26 @@ export default function GuideListScreen() {
             );
           })}
         </ScrollView>
+
+        {/* Missed questions button */}
+        {missedCount > 0 && (
+          <TouchableOpacity
+            style={styles.missedBtn}
+            onPress={() => navigation.navigate("MissedQuestions")}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close-circle" size={15} color={colors.incorrect} />
+            <Text style={styles.missedBtnText}>
+              Review {missedCount} missed question
+              {missedCount !== 1 ? "s" : ""}
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={colors.incorrect + "99"}
+            />
+          </TouchableOpacity>
+        )}
 
         {/* Results count */}
         <Text style={styles.resultCount}>
@@ -284,6 +306,25 @@ function makeStyles(colors: ThemeColors) {
       marginRight: spacing.xs,
     },
     chipText: { fontSize: fontSize.sm, fontWeight: "600" },
+
+    missedBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      backgroundColor: colors.incorrect + "12",
+      borderWidth: 1,
+      borderColor: colors.incorrect + "44",
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    missedBtnText: {
+      flex: 1,
+      fontSize: fontSize.sm,
+      fontWeight: "600",
+      color: colors.incorrect,
+    },
 
     resultCount: {
       fontSize: fontSize.xs,

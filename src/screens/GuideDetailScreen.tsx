@@ -32,6 +32,7 @@ import {
   touchGuide,
   markSectionRead,
   getGuideProgress,
+  recordMissedQuestion,
 } from "../utils/storage";
 import { UserProgress } from "../types";
 import { GuideQuizQuestion } from "../types/guide";
@@ -47,6 +48,7 @@ interface InlineQuizProps {
   accentColor: string;
   sectionBody: string;
   onComplete: () => void;
+  onMiss: (q: GuideQuizQuestion) => void;
   colors: ThemeColors;
   isDark: boolean;
 }
@@ -56,6 +58,7 @@ function InlineQuiz({
   accentColor,
   sectionBody,
   onComplete,
+  onMiss,
   colors,
   isDark,
 }: InlineQuizProps) {
@@ -108,7 +111,11 @@ function InlineQuiz({
 
   const handleCheck = () => {
     if (selected === null) return;
-    if (selected === q.correctIndex) setScore((s) => s + 1);
+    if (selected === q.correctIndex) {
+      setScore((s) => s + 1);
+    } else {
+      onMiss(q);
+    }
     setRevealed(true);
   };
 
@@ -305,6 +312,7 @@ interface TopicQuizProps {
   questions: GuideQuizQuestion[];
   accentColor: string;
   serviceName: string;
+  onMiss: (q: GuideQuizQuestion) => void;
   colors: ThemeColors;
 }
 
@@ -312,6 +320,7 @@ function TopicQuiz({
   questions,
   accentColor,
   serviceName,
+  onMiss,
   colors,
 }: TopicQuizProps) {
   const qStyles = makeQuizStyles(colors);
@@ -332,6 +341,7 @@ function TopicQuiz({
 
   const handleNext = () => {
     const correct = selected === q.correctIndex;
+    if (!correct) onMiss(q);
     const newAnswers = [...answers, correct];
 
     if (index + 1 >= questions.length) {
@@ -613,6 +623,23 @@ export default function GuideDetailScreen() {
     [guide],
   );
 
+  const handleMiss = useCallback(
+    async (q: GuideQuizQuestion) => {
+      if (!guide || !progressRef.current) return;
+      const updated = recordMissedQuestion(progressRef.current, {
+        question: q.question,
+        options: q.options,
+        correctIndex: q.correctIndex,
+        explanation: q.explanation,
+        source: guide.service,
+      });
+      progressRef.current = updated;
+      setProgress(updated);
+      await saveProgress(updated, certMeta.storageKey);
+    },
+    [guide],
+  );
+
   const styles = makeStyles(colors);
 
   if (!guide) {
@@ -765,6 +792,7 @@ export default function GuideDetailScreen() {
                           accentColor={meta.color}
                           sectionBody={section.body}
                           onComplete={() => handleSectionComplete(i)}
+                          onMiss={handleMiss}
                           colors={colors}
                           isDark={isDark}
                         />
@@ -787,6 +815,7 @@ export default function GuideDetailScreen() {
                   questions={guide.topicQuiz}
                   accentColor={meta.color}
                   serviceName={guide.service}
+                  onMiss={handleMiss}
                   colors={colors}
                 />
               </View>
