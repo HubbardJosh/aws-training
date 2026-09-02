@@ -35,10 +35,24 @@ export function setActiveCert(key: string) {
   activeCertKey = key;
 }
 
+function countUppercase(s: string): number {
+  return (s.match(/[A-Z]/g) ?? []).length;
+}
+
 function lookupAbbreviation(word: string): string | undefined {
   const map = registries[activeCertKey];
   if (!map) return undefined;
-  return map[word] ?? map[word.toUpperCase()] ?? undefined;
+  const uppercase = countUppercase(word) >= 2;
+  if (map[word] ?? (uppercase ? map[word.toUpperCase()] : undefined)) {
+    return map[word] ?? map[word.toUpperCase()];
+  }
+  // Handle simple plurals: "APIs" → look up "API"
+  if (word.endsWith("s")) {
+    const stem = word.slice(0, -1);
+    const stemUppercase = countUppercase(stem) >= 2;
+    return map[stem] ?? (stemUppercase ? map[stem.toUpperCase()] : undefined);
+  }
+  return undefined;
 }
 
 // ─── Token parser ─────────────────────────────────────────────────────────────

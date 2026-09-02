@@ -28,6 +28,8 @@ export const CLF_ABBREVIATIONS: Record<string, string> = {
   SG: "Security Group — stateful instance-level virtual firewall",
   CF: "CloudFront — global CDN with hundreds of edge locations",
   CDN: "Content Delivery Network — caches content close to end users worldwide",
+  OAC: "Origin Access Control — keeps S3 buckets private so only CloudFront can read from them",
+  TTL: "Time To Live — how long an object stays cached at the edge before CloudFront fetches a fresh copy",
   DNS: "Domain Name System — translates human-readable domain names to IP addresses",
   ACM: "AWS Certificate Manager — provision and manage SSL/TLS certificates for free",
   WAF: "Web Application Firewall — filters common web exploits from HTTP traffic",

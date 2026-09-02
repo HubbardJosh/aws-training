@@ -707,8 +707,8 @@ export default function GuideDetailScreen() {
       >
         {/* Intro always shown */}
         <View style={styles.introCard}>
-          <Text style={styles.tagline}>{guide.tagline}</Text>
-          <Text style={styles.intro}>{guide.intro}</Text>
+          <AbbreviatedText text={guide.tagline} style={styles.tagline} />
+          <AbbreviatedText text={guide.intro} style={styles.intro} />
         </View>
 
         {/* Content tab: accordion sections */}

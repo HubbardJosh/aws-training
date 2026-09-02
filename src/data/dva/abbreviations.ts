@@ -87,6 +87,7 @@ export const DVA_ABBREVIATIONS: Record<string, string> = {
     "AWS X-Ray — distributed tracing for analysing and debugging applications",
 
   // API & integration
+  API: "Application Programming Interface — contract for how software components communicate",
   APIGW:
     "API Gateway — fully managed service to create, publish, and secure APIs",
   REST: "Representational State Transfer — stateless API architecture using HTTP",
