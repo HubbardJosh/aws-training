@@ -43,7 +43,7 @@ function TabNavigator() {
   const { colors } = useTheme();
   return (
     <Tab.Navigator
-      initialRouteName="Guides"
+      initialRouteName="Home"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
