@@ -65,6 +65,10 @@ const CERT_GROUPS: CertGroup[] = [
         prev: "CLF-C02",
         next: "MLS-C01 / ANS-C01",
       },
+      {
+        meta: CERT_META["mls-c01"],
+        prev: "AIF-C01",
+      },
     ],
   },
 ];

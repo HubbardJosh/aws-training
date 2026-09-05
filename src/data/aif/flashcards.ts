@@ -2008,4 +2008,637 @@ export const flashcards: FlashCard[] = [
     ],
     tags: ["ml-fundamentals", "embeddings", "vector", "nlp", "rag"],
   },
+
+  // ── Amazon Bedrock (extended) ────────────────────────────────────────────────
+  {
+    id: "aif-bedrock-8",
+    service: "Amazon Bedrock",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is Amazon Bedrock Model Evaluation and when do you use it?",
+    answer:
+      "Model Evaluation lets you assess and compare foundation models on custom or built-in datasets using metrics like accuracy, robustness, and toxicity — without writing evaluation code. Use it to select the best model for your use case before committing to fine-tuning or production deployment.",
+    keyPoints: [
+      "Compare multiple FMs side-by-side with the same prompt dataset",
+      "Built-in metrics: accuracy, BERTScore, ROUGE, toxicity",
+      "Custom metrics via human review (A2I-powered)",
+      "Outputs evaluation reports in S3",
+    ],
+    tags: ["bedrock", "model-evaluation", "selection"],
+  },
+  {
+    id: "aif-bedrock-9",
+    service: "Amazon Bedrock",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "How does Amazon Bedrock Agents work and what problems does it solve?",
+    answer:
+      "Bedrock Agents orchestrate multi-step tasks by giving an FM access to tools (Lambda functions), knowledge bases, and memory. The agent autonomously decides which actions to take to fulfill a user request. This enables complex workflows like querying a database, calling an API, and summarizing results — all from a single natural-language prompt.",
+    keyPoints: [
+      "Agent = FM + action groups (Lambda) + knowledge base (RAG) + memory",
+      "Action groups define what APIs/functions the agent can call",
+      "Chain-of-thought reasoning drives step-by-step planning",
+      "Session memory allows multi-turn conversations with context",
+    ],
+    tags: ["bedrock", "agents", "orchestration", "agentic-ai"],
+  },
+  {
+    id: "aif-bedrock-10",
+    service: "Amazon Bedrock",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What are Amazon Bedrock Guardrails and what threats do they address?",
+    answer:
+      "Guardrails are configurable safety controls applied to both inputs and outputs of any Bedrock model. They address: harmful content (violence, hate speech), PII exposure, topic restrictions (deny list), grounding (hallucination detection vs. retrieved context), and word/phrase filtering. Guardrails work independently of the model and apply consistently across all FM providers.",
+    keyPoints: [
+      "Content filters: hate, insults, sexual, violence (strength 0–high)",
+      "Denied topics: block discussions of specific subjects",
+      "PII redaction: mask/anonymize sensitive data in prompts and responses",
+      "Grounding check: flag responses not supported by retrieved context",
+      "Applied at inference time — no model retraining needed",
+    ],
+    tags: ["bedrock", "guardrails", "safety", "pii", "content-filtering"],
+  },
+  {
+    id: "aif-bedrock-11",
+    service: "Amazon Bedrock",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "What is Bedrock Continued Pre-Training vs. Fine-Tuning?",
+    answer:
+      "Continued Pre-Training extends a base FM's training on your unlabeled domain data (e.g., proprietary documents) to adapt its knowledge without needing labeled examples. Fine-Tuning uses labeled prompt-completion pairs to adjust the model's behavior for specific tasks. Use continued pre-training for domain adaptation; use fine-tuning for task-specific output style or format.",
+    keyPoints: [
+      "Continued pre-training: unlabeled corpus, updates base model weights",
+      "Fine-tuning: labeled prompt/completion pairs, task-specific behavior",
+      "Both produce a customized private model copy stored in your account",
+      "Requires provisioned throughput to deploy the customized model",
+    ],
+    tags: ["bedrock", "fine-tuning", "continued-pre-training", "customization"],
+  },
+
+  // ── Generative AI (extended) ─────────────────────────────────────────────────
+  {
+    id: "aif-genai-8",
+    service: "Generative AI",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is prompt engineering and what are its core techniques?",
+    answer:
+      "Prompt engineering is the practice of designing inputs to guide an FM toward desired outputs without changing model weights. Core techniques include: zero-shot (no examples), few-shot (2-5 labeled examples), chain-of-thought (instruct the model to reason step-by-step), role prompting (assign a persona), and output formatting (instruct JSON/list output).",
+    keyPoints: [
+      "Zero-shot: task description only, no examples",
+      "Few-shot: 2–5 input/output examples in the prompt",
+      "Chain-of-thought: 'think step by step' unlocks reasoning",
+      "System prompt: sets persistent context/persona across turns",
+      "Output constraints: 'respond in JSON with keys X, Y, Z'",
+    ],
+    tags: ["genai", "prompt-engineering", "few-shot", "chain-of-thought"],
+  },
+  {
+    id: "aif-genai-9",
+    service: "Generative AI",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Retrieval-Augmented Generation (RAG) and how does it work?",
+    answer:
+      "RAG grounds FM responses in authoritative external data by: (1) embedding the user query into a vector, (2) retrieving semantically similar chunks from a vector database, (3) injecting the retrieved context into the prompt, and (4) asking the FM to answer using only that context. This reduces hallucinations and keeps responses current without retraining.",
+    keyPoints: [
+      "Solves: hallucination, knowledge cutoff, private data access",
+      "Components: embeddings model, vector DB, FM, orchestration layer",
+      "AWS implementation: Bedrock Knowledge Bases + OpenSearch/Aurora pgvector",
+      "Chunking strategy affects retrieval quality",
+    ],
+    tags: ["genai", "rag", "retrieval", "vector-database", "hallucination"],
+  },
+  {
+    id: "aif-genai-10",
+    service: "Generative AI",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "What are the key inference parameters and how do they affect FM output?",
+    answer:
+      "Temperature controls randomness (0 = deterministic, 1+ = creative). Top-P (nucleus sampling) limits token selection to the cumulative probability threshold. Top-K limits candidates to the K most likely tokens. Max tokens caps response length. Stop sequences terminate generation. Lower temperature + lower top-p = precise, predictable; higher = diverse, creative.",
+    keyPoints: [
+      "Temperature 0: always picks highest-probability token",
+      "Top-P 0.9: sample from tokens totaling 90% probability mass",
+      "Top-K 50: sample only from the 50 most probable next tokens",
+      "These parameters don't change model weights — only inference behavior",
+    ],
+    tags: ["genai", "temperature", "top-p", "top-k", "inference-parameters"],
+  },
+  {
+    id: "aif-genai-11",
+    service: "Generative AI",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is the difference between a foundation model, a fine-tuned model, and a custom model?",
+    answer:
+      "A foundation model (FM) is a large model pre-trained on broad data and usable across many tasks via prompting. A fine-tuned model is an FM further trained on task-specific labeled data to improve performance on a narrower use case. A custom model is trained from scratch on your data — rarely practical given cost/compute requirements.",
+    keyPoints: [
+      "FM: general purpose, use via API, no training needed",
+      "Fine-tuned: FM + supervised training on your labeled data",
+      "Custom: full training run from scratch — very expensive, rarely needed",
+      "Prompt engineering and RAG are preferred over fine-tuning when possible",
+    ],
+    tags: ["genai", "foundation-model", "fine-tuning", "custom-model"],
+  },
+  {
+    id: "aif-genai-12",
+    service: "Generative AI",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is multimodal AI and which AWS services support it?",
+    answer:
+      "Multimodal AI processes or generates multiple data types (text, images, audio, video) within a single model. On AWS: Amazon Bedrock offers multimodal FMs (Claude 3, Amazon Nova) that accept image + text inputs; Amazon Rekognition handles image/video analysis; Amazon Transcribe converts audio to text; Amazon Polly converts text to speech; Amazon Titan Multimodal Embeddings encodes images and text into a shared vector space.",
+    keyPoints: [
+      "Claude 3 / Nova: text + image inputs → text output",
+      "Stable Diffusion on Bedrock: text → image generation",
+      "Titan Multimodal Embeddings: cross-modal semantic search",
+      "Transcribe + Polly complete the audio loop",
+    ],
+    tags: ["genai", "multimodal", "bedrock", "claude", "nova"],
+  },
+
+  // ── Amazon SageMaker (extended) ──────────────────────────────────────────────
+  {
+    id: "aif-sagemaker-8",
+    service: "Amazon SageMaker",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is SageMaker Feature Store and why is it important for ML?",
+    answer:
+      "SageMaker Feature Store is a centralized repository for ML features — computed values derived from raw data. It provides an online store (low-latency real-time lookup) and an offline store (S3-backed for training). It solves training/serving skew (features computed differently at training vs. inference) and enables feature reuse across teams and models.",
+    keyPoints: [
+      "Online store: sub-millisecond feature retrieval for real-time inference",
+      "Offline store: S3 + Glue catalog for batch training queries",
+      "Feature groups: named collection of features with a record ID",
+      "Time-travel queries: retrieve feature values as of a point in time",
+      "Prevents training/serving skew by centralizing feature logic",
+    ],
+    tags: ["sagemaker", "feature-store", "mlops", "training-serving-skew"],
+  },
+  {
+    id: "aif-sagemaker-9",
+    service: "Amazon SageMaker",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is SageMaker Pipelines and how does it support MLOps?",
+    answer:
+      "SageMaker Pipelines is a CI/CD orchestration service for ML workflows. It defines a directed acyclic graph (DAG) of steps — preprocessing, training, evaluation, conditional branching, model registration — that can be triggered manually or automatically. Pipelines integrate with Model Registry for versioning and approval workflows, enabling reproducible, auditable ML deployments.",
+    keyPoints: [
+      "DAG steps: Processing, Training, Tuning, Transform, Condition, Register",
+      "Condition step: branch pipeline based on metrics (e.g., accuracy > 0.90)",
+      "Model Registry: version, approve, and deploy models from pipelines",
+      "Native integration with SageMaker Experiments for run tracking",
+      "Can trigger from EventBridge for scheduled or event-driven retraining",
+    ],
+    tags: ["sagemaker", "pipelines", "mlops", "cicd", "model-registry"],
+  },
+  {
+    id: "aif-sagemaker-10",
+    service: "Amazon SageMaker",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is SageMaker Clarify and what does it detect?",
+    answer:
+      "SageMaker Clarify analyzes data and models for bias and provides feature-level explainability using SHAP values. Pre-training bias metrics (class imbalance, label distribution) run on the dataset before training. Post-training metrics (disparate impact, equal opportunity difference) evaluate the trained model across demographic groups. It integrates with Model Monitor to detect bias drift in production.",
+    keyPoints: [
+      "Pre-training: Class Imbalance (CI), Difference in Positive Proportions (DPP)",
+      "Post-training: Disparate Impact (DI), Equal Opportunity Difference (EOD)",
+      "SHAP values: per-feature attribution for individual predictions",
+      "Works on tabular, NLP, and computer vision models",
+      "Produces bias/explainability reports in SageMaker Studio",
+    ],
+    tags: [
+      "sagemaker",
+      "clarify",
+      "bias",
+      "explainability",
+      "shap",
+      "fairness",
+    ],
+  },
+  {
+    id: "aif-sagemaker-11",
+    service: "Amazon SageMaker",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "What SageMaker inference options exist and when do you choose each?",
+    answer:
+      "Real-time endpoints: persistent, low-latency (<100 ms) for synchronous requests. Serverless inference: auto-scales to zero, good for intermittent traffic (cold start caveat). Asynchronous inference: queued processing for large payloads or long runtimes (audio, video). Batch Transform: offline bulk scoring of a full dataset without a persistent endpoint.",
+    keyPoints: [
+      "Real-time: always-on, lowest latency, highest cost",
+      "Serverless: cost-efficient for spiky/unpredictable traffic",
+      "Async: large inputs, accepts up to 1 GB payload, results in S3",
+      "Batch Transform: millions of records, no endpoint needed",
+    ],
+    tags: [
+      "sagemaker",
+      "inference",
+      "endpoints",
+      "batch-transform",
+      "serverless",
+    ],
+  },
+
+  // ── Responsible AI (extended) ────────────────────────────────────────────────
+  {
+    id: "aif-responsible-ai-7",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    question:
+      "What is AI transparency and how does it differ from explainability?",
+    answer:
+      "Transparency is the broader commitment to openly communicating how an AI system is built, what data trained it, its intended use, and its limitations — enabling informed trust. Explainability is a technical capability: providing per-prediction rationale (e.g., SHAP values, attention weights). Transparency is organizational/policy; explainability is technical. Both are required for responsible AI.",
+    keyPoints: [
+      "Transparency: model cards, data sheets, intended use documentation",
+      "Explainability: SHAP, LIME, attention visualization, feature importance",
+      "Black-box models can be transparent (disclosed limitations) but not explainable",
+      "Regulators often require both — especially in high-stakes decisions",
+    ],
+    tags: ["responsible-ai", "transparency", "explainability", "governance"],
+  },
+  {
+    id: "aif-responsible-ai-8",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    question:
+      "What is Amazon's approach to responsible AI and which pillars does it include?",
+    answer:
+      "Amazon's Responsible AI framework centers on: Fairness (equitable outcomes across groups), Explainability (understand model decisions), Privacy & Security (protect training data and model outputs), Safety (prevent harm), Controllability (humans remain in control), Veracity & Robustness (accurate and stable), Governance (policies, accountability), and Transparency (open communication). AWS embeds these in services like Clarify, Guardrails, A2I, and Macie.",
+    keyPoints: [
+      "8 pillars: fairness, explainability, privacy, safety, controllability, robustness, governance, transparency",
+      "SageMaker Clarify → fairness + explainability",
+      "Bedrock Guardrails → safety + controllability",
+      "Amazon A2I → human oversight loop (controllability)",
+      "Amazon Macie → PII/privacy protection",
+    ],
+    tags: ["responsible-ai", "aws-responsible-ai", "fairness", "governance"],
+  },
+  {
+    id: "aif-responsible-ai-9",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What types of bias can affect an ML model and at which stage do they appear?",
+    answer:
+      "Bias can appear at every stage: Data collection (sampling bias, historical bias, representation bias), Labeling (annotator bias, label noise), Model training (algorithmic bias from objective function), and Deployment (feedback loops amplifying existing bias). SageMaker Clarify measures pre-training data bias and post-training model bias. Ongoing monitoring catches bias drift as data distributions shift.",
+    keyPoints: [
+      "Sampling bias: training data doesn't represent the real population",
+      "Historical bias: past discrimination encoded in labels (e.g., hiring data)",
+      "Representation bias: minority groups underrepresented in training data",
+      "Feedback loop: biased predictions generate biased future training data",
+      "Pre-training metrics: Class Imbalance, DPL; post-training: Disparate Impact",
+    ],
+    tags: ["responsible-ai", "bias", "fairness", "clarify", "data-bias"],
+  },
+
+  // ── AI Security (extended) ───────────────────────────────────────────────────
+  {
+    id: "aif-ai-security-7",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    question:
+      "What is a prompt injection attack and how do you defend against it?",
+    answer:
+      "Prompt injection is when malicious content in user input or retrieved context overrides the system prompt instructions, causing the model to act outside intended boundaries. Defenses include: input validation (filter/escape special instructions), Bedrock Guardrails (topic and content filtering), privilege separation (least-privilege tool access), output validation, and treating all external content as untrusted.",
+    keyPoints: [
+      "Direct injection: attacker sends malicious instructions in user prompt",
+      "Indirect injection: malicious text in retrieved documents or web content",
+      "Bedrock Guardrails: filter topic violations before they reach the model",
+      "Least-privilege tools: agents should only have APIs they need",
+      "Never trust external retrieved content as authoritative instructions",
+    ],
+    tags: ["ai-security", "prompt-injection", "guardrails", "defense"],
+  },
+  {
+    id: "aif-ai-security-8",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    question: "What is data poisoning and how does it threaten ML models?",
+    answer:
+      "Data poisoning is an attack where adversarial samples are injected into training data to corrupt model behavior — either degrading overall accuracy or creating targeted backdoors (the model behaves normally except on specific trigger inputs). Defenses include: data provenance/auditing, anomaly detection on training data, robust training techniques, and access control on training pipelines.",
+    keyPoints: [
+      "Indiscriminate poisoning: reduces overall model accuracy",
+      "Backdoor/trojan: model behaves normally except on specific trigger",
+      "Supply chain risk: third-party datasets or pre-trained models",
+      "Mitigations: data validation, provenance tracking, adversarial training",
+      "SageMaker ML Lineage Tracking helps audit data sources",
+    ],
+    tags: ["ai-security", "data-poisoning", "adversarial-ml", "supply-chain"],
+  },
+  {
+    id: "aif-ai-security-9",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "hard",
+    question: "How do you protect training data and model artifacts in AWS?",
+    answer:
+      "Training data protection: store in S3 with server-side encryption (SSE-S3, SSE-KMS), enforce bucket policies + IAM least privilege, use Macie to detect PII. Model artifact protection: encrypt SageMaker training jobs and endpoints with KMS CMKs, enable VPC isolation for training/inference, use IAM roles with conditions. Audit with CloudTrail.",
+    keyPoints: [
+      "S3 SSE-KMS: encrypt training data with customer-managed keys",
+      "Amazon Macie: detect and alert on PII in S3 training data",
+      "SageMaker VPC mode: isolate training/inference from the internet",
+      "KMS CMK: encrypt model artifacts, endpoints, Feature Store",
+      "CloudTrail + CloudWatch: audit all model invocations and data access",
+    ],
+    tags: ["ai-security", "encryption", "kms", "macie", "vpc", "s3"],
+  },
+
+  // ── Amazon Comprehend (extended) ─────────────────────────────────────────────
+  {
+    id: "aif-comprehend-7",
+    service: "Amazon Comprehend",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Amazon Comprehend Medical and how does it differ from standard Comprehend?",
+    answer:
+      "Comprehend Medical is a specialized NLP service trained on clinical text. It extracts medical entities (medications, dosages, conditions, tests, procedures, anatomy) and relationships between them. It also detects Protected Health Information (PHI) for HIPAA compliance. Standard Comprehend handles general text; Comprehend Medical understands medical terminology, abbreviations, and clinical context.",
+    keyPoints: [
+      "Extracts: medication, dosage, route, frequency, condition, test, anatomy",
+      "ICD-10-CM and RxNorm ontology linking for structured coding",
+      "PHI detection: patient names, dates, locations, IDs — for de-identification",
+      "HIPAA eligible service",
+      "Does NOT make diagnoses — extracts structured info only",
+    ],
+    tags: ["comprehend", "medical", "nlp", "phi", "hipaa", "clinical"],
+  },
+
+  // ── Amazon Rekognition (extended) ────────────────────────────────────────────
+  {
+    id: "aif-rekognition-7",
+    service: "Amazon Rekognition",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Amazon Rekognition Custom Labels and when do you use it?",
+    answer:
+      "Rekognition Custom Labels lets you train a custom image or object detection model using your own labeled images — without ML expertise. It uses Rekognition's pre-trained features as a starting point and fine-tunes on your dataset (as few as 10 images). Use it when standard Rekognition labels don't cover your domain (e.g., detecting manufacturing defects, proprietary product types).",
+    keyPoints: [
+      "Minimum ~10 labeled images per class (more is better)",
+      "Uses transfer learning on top of Rekognition's existing features",
+      "Supports image classification and object detection (bounding boxes)",
+      "Hosted as a project version endpoint — pay per inference hour",
+      "Ground Truth can be used to label images at scale first",
+    ],
+    tags: [
+      "rekognition",
+      "custom-labels",
+      "computer-vision",
+      "transfer-learning",
+    ],
+  },
+
+  // ── Amazon Lex (extended) ────────────────────────────────────────────────────
+  {
+    id: "aif-lex-7",
+    service: "Amazon Lex",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "How does Amazon Lex handle conversation context and multi-turn dialogs?",
+    answer:
+      "Lex maintains session attributes (key-value pairs persisted across turns) and slot values (data collected for the current intent). Dialog management automatically prompts users for missing required slots, handles clarification, and supports confirmation prompts before fulfillment. For complex logic, Lambda hooks fire at each dialog turn to validate inputs, set conditional prompts, or change the active intent.",
+    keyPoints: [
+      "Session attributes: custom context passed across multiple turns",
+      "Slots: variables the intent needs (e.g., departure city, date)",
+      "Dialog codehook: Lambda validates each slot value in real time",
+      "Fulfillment codehook: Lambda executes business logic when all slots filled",
+      "Supports multi-intent conversations via context carryover",
+    ],
+    tags: ["lex", "dialog-management", "slots", "session", "lambda"],
+  },
+
+  // ── Amazon Kendra (extended) ─────────────────────────────────────────────────
+  {
+    id: "aif-kendra-7",
+    service: "Amazon Kendra",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does Amazon Kendra differ from traditional keyword search?",
+    answer:
+      "Traditional keyword search matches exact terms and ranks by term frequency. Kendra uses deep learning-based semantic search to understand natural language questions and return the exact passage that answers the question — not just documents containing the keywords. It understands synonyms, question intent, and context, reducing the need for users to know exact terminology.",
+    keyPoints: [
+      "Natural language queries: 'what is the refund policy?' not just 'refund'",
+      "Returns highlighted answer excerpts, not just document links",
+      "Document ranking uses ML relevance tuning (thumbs up/down feedback)",
+      "Tuning: mark results as relevant/not relevant to improve ranking",
+      "Connectors: S3, SharePoint, Confluence, Salesforce, databases",
+    ],
+    tags: ["kendra", "semantic-search", "nlp", "enterprise-search"],
+  },
+
+  // ── Amazon Forecast (extended) ───────────────────────────────────────────────
+  {
+    id: "aif-forecast-7",
+    service: "Amazon Forecast",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What input data does Amazon Forecast require and what optional data improves accuracy?",
+    answer:
+      "Required: Target Time Series (TTS) — the metric to forecast (e.g., sales units) with timestamps and item IDs. Optional: Related Time Series (RTS) — external variables that correlate with demand (promotions, holidays, weather). Item Metadata — static attributes (category, brand, color) that help generalize across similar items. More context data consistently improves forecast accuracy.",
+    keyPoints: [
+      "Target Time Series: item_id + timestamp + target_value (required)",
+      "Related Time Series: same timestamps as TTS, no future gaps allowed for historical; future values required for forecast horizon",
+      "Item metadata: improves cold-start accuracy for new items",
+      "Algorithms: DeepAR+, NPTS, ARIMA, ETS, CNN-QR, Autopredictor",
+      "Autopredictor: trains all algorithms + ensembles best performers",
+    ],
+    tags: ["forecast", "time-series", "demand-forecasting", "deepar"],
+  },
+
+  // ── Amazon Personalize (extended) ────────────────────────────────────────────
+  {
+    id: "aif-personalize-7",
+    service: "Amazon Personalize",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is the cold-start problem in recommendations and how does Amazon Personalize handle it?",
+    answer:
+      "The cold-start problem occurs when a new user or item has no interaction history, making it impossible to make personalized recommendations from collaborative filtering alone. Personalize addresses this via: item metadata (content-based features like genre, price), user metadata (demographics), and the User-Personalization recipe which blends collaborative and content-based signals, surfacing new items based on their attributes.",
+    keyPoints: [
+      "New user cold-start: use user metadata + popular items fallback",
+      "New item cold-start: use item metadata for content-based ranking",
+      "User-Personalization recipe: automatically handles exploration vs. exploitation",
+      "explorationWeight hyperparameter: controls how much new items are surfaced",
+      "Event tracking: real-time interactions update recommendations instantly",
+    ],
+    tags: [
+      "personalize",
+      "cold-start",
+      "recommendations",
+      "collaborative-filtering",
+    ],
+  },
+
+  // ── Amazon Textract (extended) ───────────────────────────────────────────────
+  {
+    id: "aif-textract-7",
+    service: "Amazon Textract",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What does Amazon Textract extract beyond raw text, and which APIs provide it?",
+    answer:
+      "Textract goes beyond raw OCR to extract structured data: Tables (rows/columns with cell relationships), Forms (key-value pairs like 'Patient Name: John'), Signatures, Queries (ask a specific question like 'What is the total amount?'), and Layout (headings, paragraphs, page structure). The AnalyzeDocument API handles forms/tables/queries; DetectDocumentText handles raw text; AnalyzeExpense is specialized for invoices/receipts.",
+    keyPoints: [
+      "DetectDocumentText: raw text extraction (OCR)",
+      "AnalyzeDocument: text + tables + forms + queries + layout",
+      "AnalyzeExpense: receipts and invoices — extracts vendor, total, line items",
+      "AnalyzeID: identity documents — driver's license, passport fields",
+      "Async APIs (StartDocumentAnalysis) for multi-page PDFs",
+    ],
+    tags: ["textract", "ocr", "document-processing", "forms", "tables"],
+  },
+
+  // ── Amazon Polly (extended) ──────────────────────────────────────────────────
+  {
+    id: "aif-polly-7",
+    service: "Amazon Polly",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is the difference between Amazon Polly's Standard and Neural TTS engines?",
+    answer:
+      "Standard TTS uses concatenative synthesis — stitching together pre-recorded phoneme units, resulting in robotic-sounding speech at lower cost. Neural TTS (NTTS) uses a neural network to produce more natural, human-like prosody, intonation, and expressiveness. NTTS supports Newscaster and Conversational styles for supported voices. NTTS costs more per character but sounds significantly more natural.",
+    keyPoints: [
+      "Standard: concatenative, lower cost, robotic quality",
+      "Neural: deep learning, natural prosody, higher cost",
+      "SSML: markup tags control pronunciation, rate, pitch, pauses for both engines",
+      "Newscaster style: authoritative, broadcast-quality tone",
+      "Conversational style: casual, friendly tone for chat applications",
+    ],
+    tags: ["polly", "tts", "neural-tts", "ssml", "text-to-speech"],
+  },
+
+  // ── Amazon Transcribe (extended) ─────────────────────────────────────────────
+  {
+    id: "aif-transcribe-7",
+    service: "Amazon Transcribe",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What are Amazon Transcribe custom vocabularies and custom language models?",
+    answer:
+      "Custom Vocabulary is a list of domain-specific words (product names, acronyms, technical terms) with optional pronunciation hints that improve recognition accuracy for those terms — quick to set up, no training data needed. Custom Language Model (CLM) is a fine-tuned acoustic/language model trained on your domain's text corpus — much higher accuracy improvement for consistently specialized content but requires training data and compute time.",
+    keyPoints: [
+      "Custom vocabulary: word list + SoundsLike + DisplayAs hints, instant",
+      "CLM: train on text corpus (e.g., call center transcripts), takes hours",
+      "Use custom vocabulary for ad-hoc domain terms",
+      "Use CLM when domain consistently has unique vocabulary patterns",
+      "Both can be combined — CLM + custom vocabulary on same transcription job",
+    ],
+    tags: ["transcribe", "custom-vocabulary", "custom-language-model", "asr"],
+  },
+
+  // ── Amazon Translate (extended) ──────────────────────────────────────────────
+  {
+    id: "aif-translate-7",
+    service: "Amazon Translate",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Amazon Translate Custom Terminology and when is it necessary?",
+    answer:
+      "Custom Terminology is a CSV/TMX file mapping source terms to required target translations — overriding the neural model's default choice. It's necessary when brand names, product names, or technical terms must be translated consistently and specifically (e.g., 'Amazon Rekognition' must not be translated to a local-language equivalent but kept as-is, or 'cloud' must always translate as 'nube' not 'computación en la nube').",
+    keyPoints: [
+      "CSV format: source term → target term (one per language pair)",
+      "TMX: Translation Memory eXchange format for multiple language pairs",
+      "Applied at inference time — no model retraining",
+      "Exact match override: model output is replaced for matched terms",
+      "Use case: product/brand names, regulated terminology, company-specific jargon",
+    ],
+    tags: ["translate", "custom-terminology", "localization", "nmt"],
+  },
+
+  // ── AWS Trainium / Inferentia (extended) ─────────────────────────────────────
+  {
+    id: "aif-trainium-7",
+    service: "AWS Trainium / Inferentia",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "When should you choose Inferentia over GPU instances for inference, and what are the trade-offs?",
+    answer:
+      "Choose Inferentia (ml.inf2 instances) when: running large transformer models (LLMs, diffusion models), need lowest-cost-per-token inference at scale, or require high throughput with consistent latency. GPU instances (ml.g5, ml.p4) offer more flexibility (any framework/model) and are better for training or models not compiled for Neuron SDK. Inferentia requires compiling models to the Neuron SDK — adds upfront effort but delivers significant cost savings at scale.",
+    keyPoints: [
+      "Inferentia2 (inf2): optimized for large LLMs, 50% lower cost than comparable GPU",
+      "Neuron SDK: compile PyTorch/TensorFlow models to run on Inferentia",
+      "Best for: LLMs, BERT, Stable Diffusion, image classification at high volume",
+      "GPU instances: flexible, no compilation, better for experimentation",
+      "Trainium (trn1): training only; Inferentia: inference only",
+    ],
+    tags: ["trainium", "inferentia", "neuron-sdk", "cost-optimization", "gpu"],
+  },
+
+  // ── Amazon Panorama (extended) ───────────────────────────────────────────────
+  {
+    id: "aif-panorama-7",
+    service: "AWS Panorama",
+    domain: "deployment",
+    difficulty: "medium",
+    question:
+      "How does AWS Panorama integrate with existing camera infrastructure?",
+    answer:
+      "Panorama adds AI vision to existing IP cameras without replacing them. The Panorama Appliance or embedded SDK connects to cameras via RTSP streams, runs computer vision models locally on the device (no video leaves the premises), and sends only structured metadata (detections, counts, coordinates) to AWS services. This preserves privacy, reduces bandwidth costs, and meets on-premise data residency requirements.",
+    keyPoints: [
+      "RTSP: connects to any existing IP camera — no hardware replacement",
+      "Edge processing: video never leaves the facility",
+      "Outputs: metadata only (JSON events) → sent to AWS IoT, S3, or Lambda",
+      "Models deployed via SageMaker/Panorama console — OTA updates",
+      "Use cases: safety compliance, inventory, quality inspection",
+    ],
+    tags: ["panorama", "edge-ai", "computer-vision", "iot", "rtsp"],
+  },
+
+  // ── Amazon Q (extended) ──────────────────────────────────────────────────────
+  {
+    id: "aif-amazon-q-8",
+    service: "Amazon Q",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is Amazon Q Apps and how does it differ from Amazon Q Business?",
+    answer:
+      "Amazon Q Business is the enterprise AI assistant that answers questions from connected data sources (SharePoint, Confluence, S3, databases). Amazon Q Apps is a feature within Q Business that lets business users (non-developers) build no-code generative AI applications by describing what they want in natural language — Q creates a shareable app with a UI that others in the organization can use directly.",
+    keyPoints: [
+      "Q Business: chat interface over enterprise data, question answering",
+      "Q Apps: no-code app builder on top of Q Business — drag-and-drop or describe the app",
+      "Apps are organization-scoped — accessible to permitted employees",
+      "Apps can chain prompts, collect user inputs, and display structured outputs",
+      "Governed by Q Business's IAM Identity Center access controls",
+    ],
+    tags: ["amazon-q", "q-apps", "q-business", "no-code", "enterprise-ai"],
+  },
+  {
+    id: "aif-amazon-q-9",
+    service: "Amazon Q",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is Amazon Q Developer's /transform feature?",
+    answer:
+      "Amazon Q Developer Transform automates large-scale code migrations. The most prominent use case is Java upgrade: it analyzes an existing Java 8/11 Maven project, automatically upgrades dependencies, rewrites incompatible code, and produces a diff for review — handling upgrades that would take a developer weeks. It also supports .NET upgrades and VMware workload modernization.",
+    keyPoints: [
+      "Java upgrade: Java 8/11 → Java 17/21, Maven dependencies auto-updated",
+      ".NET upgrade: .NET Framework → .NET 8",
+      "Runs in background, produces a summary and code diff for review",
+      "Developer reviews and accepts/rejects changes before merging",
+      "Reduces migration effort from weeks to hours for large codebases",
+    ],
+    tags: ["amazon-q", "q-developer", "code-transformation", "java-upgrade"],
+  },
 ];

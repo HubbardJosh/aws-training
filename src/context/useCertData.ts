@@ -8,6 +8,9 @@ import { quizQuestions as clfQuizQuestions } from "../data/clf/quizQuestions";
 import { allGuides as aifGuides } from "../data/aif/guides";
 import { flashcards as aifFlashcards } from "../data/aif/flashcards";
 import { quizQuestions as aifQuizQuestions } from "../data/aif/quizQuestions";
+import { allGuides as mlsGuides } from "../data/mls/guides";
+import { flashcards as mlsFlashcards } from "../data/mls/flashcards";
+import { quizQuestions as mlsQuizQuestions } from "../data/mls/quizQuestions";
 
 export function useCertData() {
   const { certId } = useCert();
@@ -24,6 +27,12 @@ export function useCertData() {
         guides: aifGuides,
         flashcards: aifFlashcards,
         quizQuestions: aifQuizQuestions,
+      };
+    case "mls-c01":
+      return {
+        guides: mlsGuides,
+        flashcards: mlsFlashcards,
+        quizQuestions: mlsQuizQuestions,
       };
     default:
       return {

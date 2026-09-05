@@ -5845,4 +5845,1743 @@ export const quizQuestions: QuizQuestion[] = [
       "cicd",
     ],
   },
+
+  // ── Lambda (additional) ────────────────────────────────────────────────────
+  {
+    id: "qq-220",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function processes messages from an SQS queue. Some messages fail processing but the rest succeed. How do you prevent successfully processed messages from going back to the queue while letting failed ones retry?",
+    options: [
+      "Throw an exception from the handler so Lambda retries the entire batch",
+      "Return a partial batch failure response using ReportBatchItemFailures, listing only the failed message IDs",
+      "Delete successful messages manually inside the handler before returning",
+      "Set the batch size to 1 so each message is processed independently",
+    ],
+    correctIndices: [1],
+    explanation:
+      "ReportBatchItemFailures allows your function to return a list of failed messageIds in the response body. Lambda will only retry the items in that list and delete the successful ones from the queue. Setting batch size to 1 works but is inefficient; manual deletion bypasses Lambda's SQS integration.",
+    tags: ["lambda", "sqs", "partial-batch-failure", "event-source-mapping"],
+  },
+  {
+    id: "qq-221",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question: "What is a Lambda function URL?",
+    options: [
+      "A custom domain name attached to an API Gateway stage that forwards to Lambda",
+      "A dedicated HTTPS endpoint assigned directly to a Lambda function, no API Gateway required",
+      "A presigned URL that grants time-limited access to invoke a Lambda function",
+      "An internal VPC endpoint used to invoke Lambda from within a private subnet",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Lambda function URLs provide a built-in HTTPS endpoint for your function without requiring API Gateway. They support IAM-based auth or no auth (public), and can be combined with CORS configuration for browser-based clients.",
+    tags: ["lambda", "function-url", "https"],
+  },
+  {
+    id: "qq-222",
+    service: "AWS Lambda",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Java-based Lambda function has a cold start latency of over 3 seconds, causing timeout issues in a synchronous API. Which feature reduces cold start time for Java functions specifically?",
+    options: [
+      "Provisioned Concurrency",
+      "Lambda SnapStart",
+      "Lambda Layers",
+      "Reserved Concurrency",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Lambda SnapStart (available for Java 11+ on Corretto runtime) takes a snapshot of the initialized execution environment and restores it on cold starts, reducing cold start latency by up to 90%. Provisioned Concurrency also eliminates cold starts but keeps instances warm at all times, incurring constant cost.",
+    tags: ["lambda", "snapstart", "cold-start", "java"],
+  },
+  {
+    id: "qq-223",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function needs to share a 50 MB ML model across multiple functions without packaging it into each deployment package. Which feature enables this?",
+    options: [
+      "Lambda destinations",
+      "Lambda Layers",
+      "Lambda container images",
+      "Lambda function URLs",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Lambda Layers let you package libraries, runtimes, or data files separately and attach them to multiple functions. Up to 5 layers can be attached per function, and their combined unzipped size can reach 250 MB. This avoids duplicating large dependencies across deployment packages.",
+    tags: ["lambda", "layers", "shared-code"],
+  },
+  {
+    id: "qq-224",
+    service: "AWS Lambda",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A Lambda function is configured with a destination for async invocations. The function fails after all retries. What does Lambda send to the on-failure destination?",
+    options: [
+      "The original event payload only",
+      "A JSON document containing the request context, the original event payload, and the error details",
+      "Only the error message and Lambda function ARN",
+      "Nothing — Lambda destinations only support on-success routing",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Lambda destinations receive a JSON document with the request context (function name, ARN, attempt count), the original event, and on-failure, the error details. This makes destinations more informative than DLQs, which only receive the original payload. Destinations work for asynchronous invocations only.",
+    tags: ["lambda", "destinations", "async", "failure-handling"],
+  },
+  {
+    id: "qq-225",
+    service: "AWS Lambda",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the maximum size of a Lambda container image deployment package?",
+    options: ["250 MB unzipped", "50 MB zipped", "10 GB", "1 GB"],
+    correctIndices: [2],
+    explanation:
+      "Lambda container images can be up to 10 GB in size, compared to the 250 MB unzipped limit for .zip deployments. Container images are stored in Amazon ECR and allow Lambda functions to use any language runtime or binary packaged in the container.",
+    tags: ["lambda", "container-image", "deployment", "ecr"],
+  },
+  {
+    id: "qq-226",
+    service: "AWS Lambda",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A CloudFront distribution serves a global e-commerce site. The team needs to inspect and rewrite HTTP request headers at the edge before they reach the origin. Which Lambda feature handles this with the lowest latency?",
+    options: [
+      "Lambda@Edge — runs at CloudFront edge locations and can modify request/response headers",
+      "Lambda function URLs with CloudFront — the function URL becomes the CloudFront origin",
+      "CloudFront Functions — runs at edge PoPs and handles header manipulation at sub-millisecond latency",
+      "Standard Lambda behind API Gateway — place API Gateway as the CloudFront origin",
+    ],
+    correctIndices: [2],
+    explanation:
+      "CloudFront Functions run at CloudFront Points of Presence (PoPs — more locations than edge nodes) with sub-millisecond execution, making them ideal for lightweight request/response manipulation like header rewrites and URL redirects. Lambda@Edge runs at a subset of edge locations with higher memory limits but more latency. For simple header manipulation, CloudFront Functions are the best fit.",
+    tags: ["lambda-edge", "cloudfront-functions", "cloudfront", "headers"],
+  },
+  {
+    id: "qq-227",
+    service: "AWS Lambda",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function intermittently fails with a TooManyRequestsException. What is the most likely cause and fix?",
+    options: [
+      "The function has exceeded its 15-minute timeout; increase the timeout limit",
+      "Concurrent executions are hitting the account or function concurrency limit; request a limit increase or use reserved concurrency",
+      "The function's memory is exhausted; increase memory allocation",
+      "The deployment package is too large; reduce dependencies",
+    ],
+    correctIndices: [1],
+    explanation:
+      "TooManyRequestsException (HTTP 429) from Lambda indicates throttling — the function or account has hit a concurrency limit. The default account limit is 1,000 concurrent executions per region. Solutions include requesting a service limit increase, using reserved concurrency to protect critical functions, or implementing exponential backoff in the caller.",
+    tags: ["lambda", "throttling", "concurrency", "troubleshooting"],
+  },
+
+  // ── DynamoDB (additional) ──────────────────────────────────────────────────
+  {
+    id: "qq-228",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question: "What does DynamoDB TTL (Time To Live) do, and what is its cost?",
+    options: [
+      "It moves items older than a threshold to S3 Glacier; charged per GB moved",
+      "It automatically deletes items when their TTL attribute's Unix timestamp has passed; there is no additional charge for TTL deletions",
+      "It archives items to DynamoDB Streams when they expire; charged per stream read",
+      "It sets a maximum age for the table itself; the table is deleted after the TTL expires",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DynamoDB TTL compares a designated numeric attribute (Unix epoch timestamp) to the current time and deletes expired items automatically, typically within 48 hours. TTL deletions are free — they do not consume write capacity units — making TTL the correct pattern for session expiry and ephemeral data management.",
+    tags: ["dynamodb", "ttl", "expiry", "cost"],
+  },
+  {
+    id: "qq-229",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A DynamoDB table stores orders. A Lambda function needs to trigger whenever a new order is created or updated. Which feature enables this?",
+    options: [
+      "DynamoDB Global Tables — replication events trigger Lambda",
+      "DynamoDB Streams — captures item-level changes as a stream; Lambda event source mapping polls it",
+      "DynamoDB DAX — caches writes and replays them to Lambda",
+      "DynamoDB Export to S3 — triggers S3 event notifications to Lambda",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DynamoDB Streams captures a time-ordered sequence of item-level changes (INSERT, MODIFY, REMOVE) in the table. A Lambda event source mapping polls the stream and invokes the function with a batch of change records. Stream records are retained for 24 hours.",
+    tags: ["dynamodb", "streams", "lambda", "change-data-capture"],
+  },
+  {
+    id: "qq-230",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A developer needs to increment a counter in a DynamoDB item atomically without reading the current value first. Which operation achieves this?",
+    options: [
+      "GetItem followed by PutItem with the incremented value",
+      "UpdateItem with an ADD action on a numeric attribute",
+      "TransactWriteItems with a ConditionCheck",
+      "BatchWriteItem with an overwrite expression",
+    ],
+    correctIndices: [1],
+    explanation:
+      "UpdateItem with the ADD action on a Number attribute atomically increments (or decrements with a negative value) the attribute without a read-modify-write cycle. This is the correct pattern for counters, view counts, and inventory decrement, and it avoids race conditions inherent in read-modify-write.",
+    tags: ["dynamodb", "update-item", "atomic", "counter"],
+  },
+  {
+    id: "qq-231",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A DynamoDB table frequently experiences ProvisionedThroughputExceededException on specific partition keys during peak events. What is the root cause and the recommended fix?",
+    options: [
+      "The table's total provisioned capacity is too low; increase RCUs and WCUs",
+      "Hot partitions — a small number of partition keys receive disproportionate traffic; redesign the partition key to distribute load more evenly or use write sharding",
+      "The GSI is not provisioned with enough capacity; increase GSI throughput",
+      "DAX is not enabled; add a DAX cluster to absorb the hot reads",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DynamoDB distributes data across partitions based on partition key. If a single partition key (or few keys) receives the majority of requests, that partition becomes 'hot' and throttles even if the table's total capacity is sufficient. Solutions include redesigning the key (e.g., adding a random suffix for write sharding), using on-demand capacity mode, or adding DAX for hot reads.",
+    tags: ["dynamodb", "hot-partition", "partition-key", "throttling"],
+  },
+  {
+    id: "qq-232",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question: "What is DynamoDB PartiQL and when would you use it?",
+    options: [
+      "A proprietary DynamoDB query language that replaces the SDK entirely",
+      "A SQL-compatible query language for DynamoDB that allows SELECT, INSERT, UPDATE, and DELETE using familiar SQL syntax",
+      "A cost-optimization feature that batches multiple queries into a single API call",
+      "A DynamoDB Streams processing language for filtering change events",
+    ],
+    correctIndices: [1],
+    explanation:
+      "PartiQL is a SQL-compatible query language supported by DynamoDB that allows developers familiar with SQL to interact with DynamoDB using SELECT, INSERT, UPDATE, and DELETE statements. It is especially useful for migrations from relational databases and ad-hoc data exploration via the AWS Console. It still obeys DynamoDB's key-based access model under the hood.",
+    tags: ["dynamodb", "partiql", "sql", "queries"],
+  },
+  {
+    id: "qq-233",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How do DynamoDB Global Tables provide multi-region high availability?",
+    options: [
+      "Global Tables replicate data to other regions asynchronously after a delay of up to 1 minute",
+      "Global Tables use multi-master active-active replication — writes to any region are propagated to all other replica regions with sub-second latency",
+      "Global Tables create a read-only replica in other regions; all writes must go to the primary region",
+      "Global Tables use S3 Cross-Region Replication to sync DynamoDB data between regions",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DynamoDB Global Tables provides multi-master active-active replication across regions. Applications can read and write to the local region, and changes are propagated to all replica regions with typically sub-second latency. Conflict resolution uses last-writer-wins based on timestamps.",
+    tags: ["dynamodb", "global-tables", "multi-region", "active-active"],
+  },
+  {
+    id: "qq-234",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A checkout service must deduct inventory and create an order record atomically — either both succeed or neither does. Which DynamoDB feature enables this?",
+    options: [
+      "BatchWriteItem — writes to multiple tables in parallel",
+      "TransactWriteItems — supports up to 100 write actions across multiple items and tables atomically",
+      "PutItem with a ConditionExpression — rolls back if the condition fails",
+      "DynamoDB Streams — captures the write and triggers a compensating transaction on failure",
+    ],
+    correctIndices: [1],
+    explanation:
+      "TransactWriteItems groups up to 100 Put, Update, Delete, and ConditionCheck operations across items and tables into an all-or-nothing transaction. If any action fails (e.g., a condition check), all actions are rolled back. This is the correct pattern for multi-item atomic operations like inventory deduction and order creation.",
+    tags: ["dynamodb", "transactions", "transact-write", "atomic"],
+  },
+  {
+    id: "qq-235",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "When should you use DynamoDB on-demand capacity mode instead of provisioned mode?",
+    options: [
+      "When you have a steady, predictable traffic pattern and want the lowest per-request cost",
+      "When traffic is unpredictable or spiky and you want to avoid throttling without managing capacity",
+      "When you need the lowest possible read latency for high-frequency queries",
+      "When you want to use DynamoDB Streams without additional configuration",
+    ],
+    correctIndices: [1],
+    explanation:
+      "On-demand mode automatically scales to handle any traffic level with no capacity planning, making it ideal for unpredictable, bursty, or new workloads. Provisioned mode is more cost-effective for predictable workloads where you can accurately forecast RCU/WCU needs and use auto-scaling.",
+    tags: ["dynamodb", "on-demand", "provisioned", "capacity"],
+  },
+
+  // ── API Gateway (additional) ───────────────────────────────────────────────
+  {
+    id: "qq-236",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A real-time chat application needs persistent bidirectional connections between clients and a backend Lambda function. Which API Gateway API type supports this?",
+    options: [
+      "REST API with long polling",
+      "HTTP API with server-sent events",
+      "WebSocket API",
+      "REST API with transfer-encoding chunked",
+    ],
+    correctIndices: [2],
+    explanation:
+      "API Gateway WebSocket APIs maintain persistent connections between clients and the backend, enabling bidirectional communication. The backend can push messages to connected clients using the @connections endpoint. This is the standard pattern for chat apps, live dashboards, and collaborative tools.",
+    tags: ["api-gateway", "websocket", "real-time", "bidirectional"],
+  },
+  {
+    id: "qq-237",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An API Gateway REST API needs to transform an incoming XML request body into JSON before forwarding it to a Lambda integration. Which feature enables this?",
+    options: [
+      "API Gateway request validators",
+      "API Gateway mapping templates using Velocity Template Language (VTL)",
+      "API Gateway usage plans",
+      "API Gateway resource policies",
+    ],
+    correctIndices: [1],
+    explanation:
+      "API Gateway mapping templates use the Velocity Template Language (VTL) to transform request and response payloads. You can transform XML to JSON, restructure fields, extract headers into the body, and vice versa — all without modifying the backend Lambda. This is exclusive to REST APIs; HTTP APIs do not support VTL mapping templates.",
+    tags: ["api-gateway", "mapping-template", "vtl", "transformation"],
+  },
+  {
+    id: "qq-238",
+    service: "Amazon API Gateway",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A company wants to limit individual API consumers to 1,000 requests per day and 100 requests per second. Which API Gateway feature implements this?",
+    options: [
+      "Resource policies — define IP-based throttling rules",
+      "Usage plans with API keys — set throttle (requests/second) and quota (requests/day) per key",
+      "Lambda authorizers — reject requests that exceed rate limits",
+      "AWS WAF rate-based rules attached to the API Gateway stage",
+    ],
+    correctIndices: [1],
+    explanation:
+      "API Gateway usage plans define throttle (rate and burst limits) and quota (daily/weekly/monthly request caps) for groups of API consumers identified by API keys. Each consumer gets an API key associated with a usage plan, enabling per-consumer rate limiting without custom logic in Lambda.",
+    tags: ["api-gateway", "usage-plans", "api-keys", "throttling"],
+  },
+  {
+    id: "qq-239",
+    service: "Amazon API Gateway",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "An API Gateway REST API needs to call a private REST service running in a VPC without exposing it to the internet. Which integration achieves this?",
+    options: [
+      "HTTP integration pointing to the ELB's public DNS name",
+      "Lambda proxy integration — Lambda calls the VPC service directly",
+      "VPC Link — connects API Gateway to a Network Load Balancer inside the VPC over a private connection",
+      "AWS integration using the VPC endpoint DNS name",
+    ],
+    correctIndices: [2],
+    explanation:
+      "VPC Link allows API Gateway to integrate with resources inside a VPC through a Network Load Balancer (for REST APIs) or Application Load Balancer (for HTTP APIs) without traversing the internet. This is the recommended pattern for exposing private microservices through a managed API layer.",
+    tags: ["api-gateway", "vpc-link", "private-integration", "nlb"],
+  },
+  {
+    id: "qq-240",
+    service: "Amazon API Gateway",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "API Gateway is returning HTTP 504 errors on some requests. What is the most likely cause?",
+    options: [
+      "The Lambda function exceeded its reserved concurrency limit and was throttled",
+      "The backend integration (Lambda or HTTP) did not respond within the 29-second API Gateway integration timeout",
+      "The API key associated with the request has exceeded its usage plan quota",
+      "The request payload exceeded the 10 MB API Gateway limit",
+    ],
+    correctIndices: [1],
+    explanation:
+      "HTTP 504 from API Gateway is a Gateway Timeout, meaning the backend integration did not respond within the 29-second maximum integration timeout. The fix is to reduce backend processing time, use asynchronous invocation patterns, or switch to SageMaker Async Inference / SQS for long-running operations. HTTP 429 indicates throttling; HTTP 403 indicates authorization failure.",
+    tags: ["api-gateway", "504", "timeout", "troubleshooting"],
+  },
+  {
+    id: "qq-241",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the key difference between API Gateway HTTP API and REST API?",
+    options: [
+      "HTTP APIs support WebSocket connections; REST APIs do not",
+      "HTTP APIs are cheaper and lower latency but have fewer features (no VTL mapping templates, no usage plans); REST APIs have full feature sets",
+      "REST APIs automatically scale to zero when unused; HTTP APIs require minimum instance counts",
+      "HTTP APIs only support Lambda integrations; REST APIs support any HTTP backend",
+    ],
+    correctIndices: [1],
+    explanation:
+      "HTTP APIs are optimized for cost (up to 70% cheaper) and latency with a simpler feature set. They lack REST API features like VTL mapping templates, request/response transformation, usage plans, and API keys. REST APIs are the choice when you need these advanced features; HTTP APIs suit simple Lambda proxy integrations.",
+    tags: ["api-gateway", "http-api", "rest-api", "comparison"],
+  },
+  {
+    id: "qq-242",
+    service: "Amazon API Gateway",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How does API Gateway stage-level caching work and what is its scope?",
+    options: [
+      "Caching is global — a cached response for one API key is served to all callers",
+      "Caching stores responses at the stage level for a configurable TTL (default 300s); cached responses are returned without invoking the backend, reducing latency and cost",
+      "Caching only applies to GET requests with query string parameters",
+      "Caching is managed by CloudFront automatically for all API Gateway stages",
+    ],
+    correctIndices: [1],
+    explanation:
+      "API Gateway stage caching stores backend responses for a configurable TTL (5 seconds to 1 hour, default 300 seconds). Subsequent identical requests are served from cache without invoking Lambda or the HTTP backend, reducing latency and cost. Cache can be invalidated per-request using the Cache-Control: max-age=0 header with appropriate IAM permissions.",
+    tags: ["api-gateway", "caching", "ttl", "performance"],
+  },
+  {
+    id: "qq-243",
+    service: "Amazon API Gateway",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A financial API requires mutual TLS (mTLS) so that only clients with a valid certificate can call the API. Which API Gateway feature enables client certificate verification?",
+    options: [
+      "Cognito User Pool authorizer with certificate claim",
+      "Lambda authorizer that reads the client certificate from the request headers",
+      "API Gateway mutual TLS (mTLS) authentication — provide a truststore of CA certificates",
+      "API Gateway resource policy that allows only specific certificate ARNs",
+    ],
+    correctIndices: [2],
+    explanation:
+      "API Gateway supports mutual TLS (mTLS) for REST and HTTP APIs. You upload a truststore (bundle of CA certificates in PEM format) to S3, and API Gateway validates client certificates against that truststore during the TLS handshake. Clients without a valid certificate are rejected before the request reaches your backend.",
+    tags: ["api-gateway", "mtls", "security", "certificates"],
+  },
+
+  // ── Security services (additional) ────────────────────────────────────────
+  {
+    id: "qq-244",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function needs to encrypt a 5 MB file before storing it in S3. Using KMS directly would fail. What is the correct approach?",
+    options: [
+      "Use the KMS Encrypt API — it supports any file size",
+      "Split the file into 4 KB chunks and call KMS Encrypt on each chunk",
+      "Use KMS GenerateDataKey to get a plaintext data key, encrypt the file locally with the data key, then store only the encrypted file and encrypted data key",
+      "Use SSE-S3 instead of KMS for files larger than 4 KB",
+    ],
+    correctIndices: [2],
+    explanation:
+      "KMS Encrypt is limited to 4 KB. For larger data, use envelope encryption: call GenerateDataKey to get a plaintext data key and its encrypted copy, encrypt the data locally using the plaintext key (discarding it after), and store the encrypted data alongside the encrypted data key. To decrypt, call KMS Decrypt on the encrypted data key to retrieve the plaintext key, then decrypt the data locally.",
+    tags: ["kms", "envelope-encryption", "data-key", "s3"],
+  },
+  {
+    id: "qq-245",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "What is the difference between a KMS key policy and an IAM policy for controlling access to a KMS key?",
+    options: [
+      "Key policies control access to the key itself; IAM policies alone are not sufficient — the key policy must explicitly grant the account or IAM principal access",
+      "IAM policies are the sole mechanism for KMS access; key policies are deprecated",
+      "Key policies apply to cross-account access only; IAM policies apply to same-account access",
+      "They are equivalent; either alone grants full access to the key",
+    ],
+    correctIndices: [0],
+    explanation:
+      "KMS key policies are resource-based policies attached directly to the key. Unlike most AWS services where IAM policies alone are sufficient, KMS requires the key policy to explicitly grant access (or grant the account root, enabling IAM delegation). IAM policies can further restrict access but cannot grant access beyond what the key policy allows.",
+    tags: ["kms", "key-policy", "iam", "access-control"],
+  },
+  {
+    id: "qq-246",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What happens when Secrets Manager automatically rotates a secret that is used by an RDS database?",
+    options: [
+      "Secrets Manager updates the secret value and immediately invalidates all existing connections using the old credentials",
+      "Secrets Manager uses a Lambda rotation function to update the password in both the secret store and the RDS database, ensuring zero application downtime",
+      "Secrets Manager rotates the secret but the application must manually retrieve the new value after rotation",
+      "Rotation is only supported for Secrets Manager-managed credentials, not user-defined database passwords",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Secrets Manager uses a Lambda rotation function (AWS provides managed ones for RDS, Redshift, and DocumentDB) that orchestrates a multi-step rotation: creates a new credential, tests it, updates the secret, and retires the old credential. The rotation is designed to be zero-downtime with a window where both old and new credentials are valid.",
+    tags: ["secrets-manager", "rotation", "rds", "lambda"],
+  },
+  {
+    id: "qq-247",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "When should you use AWS Secrets Manager instead of SSM Parameter Store SecureString?",
+    options: [
+      "When you need to store configuration parameters alongside secrets in a hierarchy",
+      "When you need automatic rotation, cross-account secret sharing, or per-secret fine-grained IAM policies",
+      "When you need to store values larger than 4 KB",
+      "When you want to avoid KMS charges for encryption",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Secrets Manager is purpose-built for secrets with features like automatic rotation (via Lambda), cross-account access, and per-secret resource-based policies. SSM Parameter Store SecureString uses KMS encryption and integrates with IAM but lacks native automatic rotation and costs less per secret. Use Secrets Manager when rotation or per-secret policies are required; use Parameter Store for configuration hierarchies and when cost is a concern.",
+    tags: ["secrets-manager", "parameter-store", "comparison", "rotation"],
+  },
+  {
+    id: "qq-248",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A mobile app authenticates users with Cognito User Pools. After sign-in, which token should the app use to call API Gateway with a Cognito authorizer?",
+    options: [
+      "The Refresh Token — it has the longest expiry and proves the user's session",
+      "The Access Token — it proves the user is authenticated and contains scope claims for authorization",
+      "The ID Token — it contains user identity claims and is the token API Gateway Cognito authorizers validate by default",
+      "A temporary IAM credential obtained by exchanging the ID token with STS",
+    ],
+    correctIndices: [2],
+    explanation:
+      "API Gateway Cognito User Pool authorizers validate the ID Token by default. The ID Token contains identity claims (sub, email, custom attributes). The Access Token is for authorizing access to Cognito APIs and OAuth-protected resources. The Refresh Token is used only to refresh the ID and Access tokens and should never be sent to APIs.",
+    tags: ["cognito", "user-pools", "id-token", "api-gateway"],
+  },
+  {
+    id: "qq-249",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A mobile app needs to let unauthenticated (guest) users access certain S3 resources with limited IAM permissions. Which Cognito feature enables this?",
+    options: [
+      "Cognito User Pool with a guest user group assigned an IAM role",
+      "Cognito Identity Pools with unauthenticated access enabled — assigns a restricted IAM role to guest sessions",
+      "Cognito User Pool Lambda triggers that generate temporary IAM credentials for guests",
+      "Cognito hosted UI with anonymous sign-in option",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Cognito Identity Pools (Federated Identities) support unauthenticated (guest) access. When enabled, guest users receive temporary AWS credentials from STS via an unauthenticated IAM role you define. This role should have minimal permissions — typically read-only access to specific S3 prefixes or other resources the guest experience requires.",
+    tags: ["cognito", "identity-pools", "unauthenticated", "iam-role"],
+  },
+  {
+    id: "qq-250",
+    service: "AWS STS",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function in Account A needs to access an S3 bucket in Account B. What is the correct approach using STS?",
+    options: [
+      "Store Account B's access keys as environment variables in the Account A Lambda function",
+      "Use STS AssumeRole — create a role in Account B that trusts Account A; the Lambda function calls sts:AssumeRole to get temporary credentials for Account B",
+      "Create an S3 bucket policy that grants the Account A Lambda ARN direct access; no STS needed",
+      "Use Cognito Identity Pools to federate credentials across accounts",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Cross-account access uses STS AssumeRole. A role in Account B has a trust policy allowing Account A's Lambda execution role to assume it, plus an S3 permissions policy. The Lambda calls sts:AssumeRole, receives temporary credentials, and uses them to access Account B's S3 bucket. Option C (bucket policy) also works without STS and is simpler for S3-only access.",
+    tags: ["sts", "assume-role", "cross-account", "lambda"],
+  },
+  {
+    id: "qq-251",
+    service: "AWS WAF",
+    domain: "security",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the difference between AWS Shield Standard and AWS Shield Advanced?",
+    options: [
+      "Shield Standard protects only EC2; Shield Advanced protects all AWS services",
+      "Shield Standard provides automatic DDoS protection for all AWS customers at no cost; Shield Advanced adds 24/7 DDoS response team access, cost protection, and advanced attack visibility for an additional fee",
+      "Shield Standard is for layer 3/4 attacks; Shield Advanced also protects against layer 7 application attacks",
+      "Shield Advanced is required to use AWS WAF; Shield Standard works without WAF",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AWS Shield Standard is automatic and free, protecting against common layer 3 and 4 DDoS attacks for all AWS customers. Shield Advanced is a paid service that adds the AWS Shield Response Team (SRT) for 24/7 expert assistance, near-real-time attack visibility, cost protection (credit for scaling costs during attacks), and enhanced protection for EC2, ELB, CloudFront, Route 53, and Global Accelerator.",
+    tags: ["shield", "ddos", "security", "waf"],
+  },
+  {
+    id: "qq-252",
+    service: "AWS WAF",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An API Gateway endpoint is being scraped by bots making excessive requests from different IP addresses. Which AWS service can automatically block traffic matching bot signatures?",
+    options: [
+      "AWS Shield Advanced with DDoS protection enabled on the API Gateway stage",
+      "AWS WAF with Bot Control managed rule group attached to a Web ACL on the API Gateway stage",
+      "Amazon GuardDuty with VPC Flow Log analysis",
+      "API Gateway usage plans with a low quota to reject excess requests",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AWS WAF Bot Control is a managed rule group that detects and blocks common bots, scrapers, and automated tools using signature-based detection. Attached to a Web ACL on API Gateway (or CloudFront, ALB, AppSync), it can block, count, or challenge bot traffic without requiring custom rules. GuardDuty detects threats but does not block traffic.",
+    tags: ["waf", "bot-control", "api-gateway", "security"],
+  },
+
+  // ── Deployment & CI/CD (additional) ────────────────────────────────────────
+  {
+    id: "qq-253",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A CodeDeploy deployment to EC2 instances needs to run a health check after the application starts before declaring the deployment successful. Which AppSpec hook handles this?",
+    options: [
+      "BeforeInstall — runs before the new application files are copied",
+      "AfterInstall — runs after files are copied but before the application starts",
+      "ValidateService — runs after ApplicationStart to verify the deployment succeeded",
+      "BeforeAllowTraffic — runs before the load balancer sends traffic to the instance",
+    ],
+    correctIndices: [2],
+    explanation:
+      "ValidateService is the last lifecycle hook in a CodeDeploy EC2/on-premises deployment. It runs after ApplicationStart and is designed for health checks and smoke tests. If ValidateService scripts fail, CodeDeploy marks the deployment as failed and can trigger automatic rollback.",
+    tags: ["codedeploy", "appspec", "lifecycle-hooks", "validate-service"],
+  },
+  {
+    id: "qq-254",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "Which CodeDeploy deployment configuration deploys to one instance at a time, ensuring at least n-1 instances remain in service during the deployment?",
+    options: [
+      "CodeDeployDefault.AllAtOnce",
+      "CodeDeployDefault.HalfAtATime",
+      "CodeDeployDefault.OneAtATime",
+      "CodeDeployDefault.Linear10PercentEvery1Minute",
+    ],
+    correctIndices: [2],
+    explanation:
+      "OneAtATime deploys to one instance at a time sequentially, minimizing risk but maximizing deployment duration. At most one instance is offline at any time, so the remaining instances continue serving traffic. HalfAtATime deploys to 50% simultaneously for faster deployments with moderate risk.",
+    tags: ["codedeploy", "deployment-config", "one-at-a-time", "rolling"],
+  },
+  {
+    id: "qq-255",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A CodeDeploy Blue/Green deployment to Lambda uses a Linear10PercentEvery1Minute configuration. A CloudWatch alarm fires 3 minutes after deployment starts. What happens?",
+    options: [
+      "The deployment pauses and waits for manual approval to continue",
+      "CodeDeploy automatically rolls back — shifts 100% traffic back to the original Lambda version and marks the deployment failed",
+      "The alarm notification is sent to SNS but the deployment continues",
+      "CodeDeploy stops shifting additional traffic but keeps the 30% already shifted",
+    ],
+    correctIndices: [1],
+    explanation:
+      "When a CloudWatch alarm is configured as a rollback trigger in CodeDeploy, the alarm firing causes an automatic rollback. For Lambda blue/green deployments, CodeDeploy immediately shifts 100% of traffic back to the original version and marks the deployment failed. This is the core value of alarm-based rollback — protecting production from bad deployments automatically.",
+    tags: ["codedeploy", "rollback", "alarm", "lambda", "blue-green"],
+  },
+  {
+    id: "qq-256",
+    service: "AWS CodeBuild",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "Which section of a CodeBuild buildspec.yml file defines the commands that compile source code and run unit tests?",
+    options: [
+      "install — installs build dependencies",
+      "pre_build — prepares the environment before the main build",
+      "build — the main build phase where compilation and test commands run",
+      "post_build — commands that run after the build, such as pushing Docker images",
+    ],
+    correctIndices: [2],
+    explanation:
+      "The buildspec.yml has four phases: install (runtime setup), pre_build (login, setup steps), build (compilation, tests — this is the main work phase), and post_build (push artifacts, notifications). If any phase fails, the build fails. Commands in later phases still run unless the build is terminated.",
+    tags: ["codebuild", "buildspec", "phases", "cicd"],
+  },
+  {
+    id: "qq-257",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A CodePipeline pipeline deploys to a production environment and requires a manager to approve the deployment before it proceeds. Which action type provides this?",
+    options: [
+      "AWS Lambda action that polls for approval",
+      "Manual Approval action — pauses the pipeline and sends an SNS notification; deployment resumes only after a human approves via console or API",
+      "CodeDeploy approval gate configured in the deployment group",
+      "CloudWatch Events rule that waits for a human-triggered event",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CodePipeline's Manual Approval action pauses pipeline execution and optionally sends an SNS notification with a review URL. An authorized user reviews the pending changes in the console or via the AWS CLI/SDK and approves or rejects. On approval, the pipeline continues; on rejection or timeout (default 7 days), the pipeline fails.",
+    tags: ["codepipeline", "manual-approval", "governance", "cicd"],
+  },
+  {
+    id: "qq-258",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How do you test a SAM Lambda function locally before deploying to AWS?",
+    options: [
+      "sam deploy --dry-run simulates deployment and runs function code locally",
+      "sam local invoke runs the function in a local Docker container with a provided event JSON",
+      "sam build --local compiles and runs the function on the local machine",
+      "sam validate runs the function against a local emulated AWS environment",
+    ],
+    correctIndices: [1],
+    explanation:
+      "sam local invoke runs your Lambda function in a Docker container locally, using the same runtime environment as Lambda. You provide a JSON event file and SAM invokes the handler, printing the response. sam local start-api provides a local HTTP server for API Gateway + Lambda testing. Both require Docker.",
+    tags: ["sam", "local-invoke", "local-testing", "docker"],
+  },
+  {
+    id: "qq-259",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question: "What are the three levels of CDK Constructs?",
+    options: [
+      "L1 (CloudFormation resources), L2 (opinionated higher-level abstractions), L3 (patterns combining multiple services)",
+      "L1 (basic resources), L2 (VPC and networking), L3 (application-level constructs)",
+      "L1 (TypeScript), L2 (Python), L3 (Java) — language-specific construct levels",
+      "L1 (dev), L2 (staging), L3 (production) — environment deployment stages",
+    ],
+    correctIndices: [0],
+    explanation:
+      "CDK Constructs have three levels: L1 (Cfn* classes — 1:1 mapping to CloudFormation resources, low-level), L2 (higher-level abstractions with sensible defaults like Bucket, Function, Table — most commonly used), and L3 (patterns combining multiple services like a serverless REST API or a pipeline, also called Solutions Constructs).",
+    tags: ["cdk", "constructs", "l1", "l2", "l3"],
+  },
+  {
+    id: "qq-260",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A developer wants to customize the Nginx configuration on Elastic Beanstalk EC2 instances. Which mechanism allows environment customization without modifying the platform?",
+    options: [
+      "Environment variables set in the Elastic Beanstalk console",
+      ".ebextensions configuration files included in the application bundle — YAML/JSON files that run commands and configure resources during instance provisioning",
+      "Elastic Beanstalk saved configurations stored in S3",
+      "AWS Systems Manager Run Command to apply configuration to running instances",
+    ],
+    correctIndices: [1],
+    explanation:
+      ".ebextensions are YAML or JSON configuration files placed in a .ebextensions/ directory in your application ZIP. They run during instance provisioning to install packages, run shell commands, configure files, and manage services. They are the primary mechanism for platform customization without forking the platform.",
+    tags: ["elastic-beanstalk", "ebextensions", "customization", "nginx"],
+  },
+  {
+    id: "qq-261",
+    service: "AWS Elastic Beanstalk",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "Which Elastic Beanstalk environment tier is designed for background workers that process tasks from an SQS queue?",
+    options: [
+      "Web Server tier — processes HTTP requests and can also poll SQS",
+      "Worker tier — polls an SQS queue automatically and delivers messages as HTTP POST to localhost",
+      "Batch tier — processes SQS messages in batches using EC2 Batch",
+      "Container tier — runs Docker containers that consume SQS messages",
+    ],
+    correctIndices: [1],
+    explanation:
+      "The Elastic Beanstalk Worker tier runs a daemon that automatically polls an SQS queue and delivers each message as an HTTP POST to localhost on the worker instance. Your application processes the request and returns 200 to acknowledge. This decouples background processing from the web tier without writing SQS polling code.",
+    tags: ["elastic-beanstalk", "worker-tier", "sqs", "background-jobs"],
+  },
+  {
+    id: "qq-262",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A CloudFormation stack update fails midway, leaving some resources updated and others at the old state. What does CloudFormation do by default?",
+    options: [
+      "It leaves the stack in the partial state and requires manual cleanup",
+      "It automatically rolls back all changes, restoring the stack to the last known good state",
+      "It marks the stack UPDATE_FAILED and waits for the next update to fix the issue",
+      "It sends an SNS notification and pauses; rollback requires manual trigger",
+    ],
+    correctIndices: [1],
+    explanation:
+      "By default, CloudFormation automatically rolls back a stack update if any resource update fails, restoring all changed resources to their previous state. This behavior is controlled by the --on-failure flag (ROLLBACK is default). You can disable automatic rollback with --disable-rollback for debugging, but resources will be left in a partial state.",
+    tags: ["cloudformation", "rollback", "update", "failure"],
+  },
+  {
+    id: "qq-263",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "How do CloudFormation nested stacks differ from cross-stack references?",
+    options: [
+      "Nested stacks are for multi-region deployments; cross-stack references are single-region",
+      "Nested stacks embed child stacks inside a parent stack (parent manages lifecycle); cross-stack references share outputs between independent stacks via Exports/ImportValue",
+      "Nested stacks require StackSets; cross-stack references work with individual stacks",
+      "Nested stacks are deprecated in favor of cross-stack references",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Nested stacks use AWS::CloudFormation::Stack resources to embed child stacks inside a parent; the parent manages the child's full lifecycle. Cross-stack references use Outputs with Export names and Fn::ImportValue to share values between independently managed stacks. Nested stacks are better for modular templates; cross-stack references are better for separate teams managing separate stacks.",
+    tags: ["cloudformation", "nested-stacks", "cross-stack", "outputs"],
+  },
+  {
+    id: "qq-264",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A CloudFormation stack needs to run a Lambda function during stack creation to perform a task not supported by CloudFormation natively (e.g., query an external API). Which resource type enables this?",
+    options: [
+      "AWS::Lambda::Function — Lambda functions are automatically invoked during stack creation",
+      "AWS::CloudFormation::CustomResource (or Custom::MyResource) — invokes a Lambda function or SNS topic during create, update, and delete",
+      "AWS::CloudFormation::Macro — transforms the template before deployment",
+      "AWS::Events::Rule — triggers Lambda via EventBridge during deployment",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudFormation Custom Resources send lifecycle events (Create, Update, Delete) to a Lambda function or SNS topic. The function performs custom logic and sends a success/failure response to CloudFormation's presigned S3 URL. This extends CloudFormation to manage any resource or external system, not just native AWS resources.",
+    tags: ["cloudformation", "custom-resource", "lambda", "extensibility"],
+  },
+
+  // ── Troubleshooting (additional) ───────────────────────────────────────────
+  {
+    id: "qq-265",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question: "What is the difference between X-Ray annotations and metadata?",
+    options: [
+      "Annotations are for string values only; metadata supports complex objects",
+      "Annotations are indexed and can be used in filter expressions to search traces; metadata is not indexed and is for debugging context only",
+      "Annotations appear in the X-Ray service map; metadata appears in trace segments",
+      "They are identical — annotations and metadata are interchangeable",
+    ],
+    correctIndices: [1],
+    explanation:
+      "X-Ray annotations are key-value pairs (string, number, or boolean) that are indexed and can be used in filter expressions to search and group traces (e.g., find all traces where userId=12345). Metadata is arbitrary structured data (objects, arrays) attached to segments for debugging, but it is not indexed and cannot be used in filter expressions.",
+    tags: ["xray", "annotations", "metadata", "filter-expressions"],
+  },
+  {
+    id: "qq-266",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "X-Ray is capturing 100% of traces from a high-traffic Lambda function, causing excessive cost. How do you reduce the volume of traces without losing visibility?",
+    options: [
+      "Disable X-Ray on the Lambda function and use CloudWatch Logs instead",
+      "Configure a sampling rule to capture a fixed rate or reservoir of traces and sample only a percentage of the remainder",
+      "Switch from active tracing to passive tracing in the Lambda configuration",
+      "Use X-Ray Groups to filter which traces are stored",
+    ],
+    correctIndices: [1],
+    explanation:
+      "X-Ray sampling rules control what percentage of requests are traced. The default rule traces 5% of requests beyond the first 1 per second (reservoir). You can create custom rules targeting specific services, URLs, or HTTP methods with different reservoir and fixed-rate values, balancing visibility against cost.",
+    tags: ["xray", "sampling", "cost", "rules"],
+  },
+  {
+    id: "qq-267",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function publishes custom business metrics (e.g., orders processed). What is the most efficient way to publish high-cardinality custom metrics to CloudWatch?",
+    options: [
+      "Call PutMetricData after every Lambda invocation with individual metric values",
+      "Use the CloudWatch Embedded Metric Format (EMF) — log structured JSON to CloudWatch Logs; CloudWatch automatically extracts and publishes the metrics",
+      "Use CloudWatch Synthetics canaries to simulate the business transactions",
+      "Write metrics to DynamoDB and use a scheduled Lambda to batch-publish to CloudWatch",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudWatch Embedded Metric Format (EMF) allows Lambda functions to publish custom metrics by including structured JSON in log output using the AWS EMF library. CloudWatch Logs extracts metric values asynchronously — no additional PutMetricData API calls needed. This is the recommended approach for high-volume metric publishing from Lambda since it does not add latency to the function execution.",
+    tags: ["cloudwatch", "emf", "custom-metrics", "lambda"],
+  },
+  {
+    id: "qq-268",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A team wants to identify the top 10 users causing the most DynamoDB read throttling events. Which CloudWatch feature can surface this from DynamoDB request logs?",
+    options: [
+      "CloudWatch Alarms with SNS notifications per throttled request",
+      "CloudWatch Contributor Insights — analyzes log entries to identify top contributors to high-cardinality metrics",
+      "CloudWatch Logs Insights — query log groups to aggregate throttling by userId",
+      "CloudWatch Metric Math to combine DynamoDB throttle metrics by user dimension",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudWatch Contributor Insights analyzes CloudWatch Logs in real time to identify top contributors to operational problems. For DynamoDB, it provides built-in rules to surface the most throttled keys, most accessed items, and busiest callers. It is purpose-built for this type of top-N analysis without writing custom queries.",
+    tags: ["cloudwatch", "contributor-insights", "dynamodb", "troubleshooting"],
+  },
+  {
+    id: "qq-269",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "Using CloudWatch Logs Insights, which query finds the 10 Lambda invocations with the longest duration in the last hour?",
+    options: [
+      "SELECT MAX(duration) FROM lambda-logs GROUP BY requestId LIMIT 10",
+      "filter @type = 'REPORT' | parse @message /Duration: (?<duration>[\\d.]+)/ | sort duration desc | limit 10",
+      "stats max(duration) by requestId | sort max_duration desc | head 10",
+      "metrics duration p99 by requestId | sort desc | limit 10",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudWatch Logs Insights uses its own query language. For Lambda, REPORT log lines contain duration. The query filters for REPORT lines, parses the duration value from the message, sorts descending, and limits to 10. The `stats`, `filter`, `parse`, `sort`, and `limit` commands are all valid Logs Insights commands.",
+    tags: ["cloudwatch", "logs-insights", "lambda", "query"],
+  },
+  {
+    id: "qq-270",
+    service: "Amazon SQS",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An SQS message is being processed but the Lambda function takes longer than the visibility timeout. What happens?",
+    options: [
+      "Lambda automatically extends the visibility timeout as needed",
+      "The message becomes visible again in the queue and another consumer picks it up, causing duplicate processing",
+      "SQS deletes the message after the visibility timeout expires regardless of processing status",
+      "Lambda pauses execution until visibility timeout is extended manually",
+    ],
+    correctIndices: [1],
+    explanation:
+      "When the visibility timeout expires while a message is being processed, SQS makes the message visible again. Another consumer (or the same one) will pick it up, causing duplicate processing. Solutions: extend the visibility timeout programmatically using ChangeMessageVisibility, increase the default timeout to exceed max processing time, or design for idempotency.",
+    tags: [
+      "sqs",
+      "visibility-timeout",
+      "duplicate-processing",
+      "troubleshooting",
+    ],
+  },
+  {
+    id: "qq-271",
+    service: "Amazon DynamoDB",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A DynamoDB table is being throttled even though CloudWatch shows consumed capacity is well below the provisioned capacity. What is the most likely cause?",
+    options: [
+      "The table's auto-scaling policy has not yet responded to the traffic increase",
+      "Uneven data distribution across partitions — a hot partition is exceeding its per-partition throughput limit even though the table total is under-utilized",
+      "The table is in on-demand mode and cannot handle more than 40,000 RCUs",
+      "CloudWatch metrics for DynamoDB have a 5-minute delay; actual consumption is higher",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DynamoDB distributes traffic across partitions, each with its own throughput limit (approximately 3,000 RCUs and 1,000 WCUs). If a small number of partition keys receive disproportionate traffic (hot partition), those partitions throttle even when the table's total consumed capacity is far below provisioned capacity. The fix is partition key redesign or using DAX for hot reads.",
+    tags: ["dynamodb", "hot-partition", "throttling", "troubleshooting"],
+  },
+  {
+    id: "qq-272",
+    service: "AWS Lambda",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Lambda function runs out of memory during execution. How does Lambda report this error?",
+    options: [
+      "The function returns a null response with an out-of-memory flag in the response header",
+      "Lambda terminates the execution environment and logs 'Runtime exited with error: signal: killed' or a similar message in CloudWatch Logs",
+      "Lambda automatically increases memory allocation and retries the invocation",
+      "The function returns HTTP 503 to the caller",
+    ],
+    correctIndices: [1],
+    explanation:
+      "When Lambda runs out of memory, the runtime is killed by the OS. Lambda logs 'Runtime exited with error: signal: killed' (or similar, depending on runtime) in CloudWatch Logs and the function returns an error. To diagnose, check the Max Memory Used in REPORT log lines. If it matches the configured limit, increase memory. Lambda does not auto-scale memory — you set it at configuration time.",
+    tags: ["lambda", "memory", "oom", "troubleshooting"],
+  },
+  {
+    id: "qq-273",
+    service: "Amazon API Gateway",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An API Gateway endpoint returns HTTP 403 Forbidden for all requests even though the Lambda function works correctly when invoked directly. What is the most likely cause?",
+    options: [
+      "The Lambda function's reserved concurrency is set to 0",
+      "API Gateway does not have permission to invoke the Lambda function — the Lambda resource-based policy does not allow apigateway.amazonaws.com as a principal",
+      "The API Gateway stage is not deployed — changes are not yet published",
+      "The Lambda function's timeout is shorter than the API Gateway integration timeout",
+    ],
+    correctIndices: [1],
+    explanation:
+      "API Gateway invokes Lambda via a resource-based policy on the Lambda function. If the policy does not grant apigateway.amazonaws.com permission to invoke the function (or grants it for the wrong API ARN), requests fail with 403. The console typically adds this permission automatically, but CLI/CDK/SAM deployments may miss it. Check and add the permission with aws lambda add-permission.",
+    tags: [
+      "api-gateway",
+      "lambda",
+      "403",
+      "resource-policy",
+      "troubleshooting",
+    ],
+  },
+
+  // ── Messaging & Events (additional) ────────────────────────────────────────
+  {
+    id: "qq-274",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A payment processing system needs messages processed exactly once in the exact order they are received. Which SQS queue type guarantees this?",
+    options: [
+      "Standard Queue with a Lambda consumer that de-duplicates using DynamoDB",
+      "FIFO Queue with content-based deduplication enabled",
+      "Standard Queue with FIFO ordering enabled at the consumer",
+      "Dead-letter Queue that re-queues messages in order",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SQS FIFO queues guarantee exactly-once processing (using deduplication IDs or content-based deduplication) and strict ordering within a message group. Standard queues offer at-least-once delivery and best-effort ordering. FIFO queues have a throughput limit (3,000 messages/second with batching) that is sufficient for payment processing.",
+    tags: ["sqs", "fifo", "exactly-once", "ordering"],
+  },
+  {
+    id: "qq-275",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the difference between SQS short polling and long polling?",
+    options: [
+      "Short polling returns immediately even if the queue is empty; long polling waits up to 20 seconds for a message to arrive, reducing empty responses and cost",
+      "Short polling retrieves 10 messages per call; long polling retrieves up to 10,000",
+      "Long polling is for FIFO queues only; short polling works with standard queues",
+      "Short polling has lower latency for high-traffic queues; long polling is for low-traffic queues with SLA requirements",
+    ],
+    correctIndices: [0],
+    explanation:
+      "SQS short polling returns immediately even when the queue has no messages, causing empty responses that still cost money. Long polling (ReceiveMessageWaitTimeSeconds 1–20) holds the connection until a message arrives or the timeout elapses, eliminating most empty responses and reducing cost. Long polling is almost always preferred.",
+    tags: ["sqs", "long-polling", "short-polling", "cost"],
+  },
+  {
+    id: "qq-276",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An SNS topic has multiple SQS queue subscriptions. How can you ensure only queues subscribed to orders for the 'electronics' category receive those messages?",
+    options: [
+      "Create a separate SNS topic per category",
+      "Use SNS message filtering — add filter policies to each subscription so queues only receive messages matching their attribute filters",
+      "Use SNS FIFO topics to route messages to the correct queue by message group ID",
+      "Use Lambda to inspect each message and forward it to the appropriate queue",
+    ],
+    correctIndices: [1],
+    explanation:
+      'SNS message filtering allows each subscription to define a filter policy using message attributes. Only messages whose attributes match the filter policy are delivered to that subscription. For example, a subscription with filter {category: ["electronics"]} only receives messages with the electronics attribute, eliminating the need for a topic per category or a routing Lambda.',
+    tags: ["sns", "message-filtering", "filter-policy", "subscriptions"],
+  },
+  {
+    id: "qq-277",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is an SNS FIFO topic and what ordering guarantee does it provide?",
+    options: [
+      "SNS FIFO topics guarantee messages are delivered to all subscribers in the exact order published, with deduplication across subscriptions",
+      "SNS FIFO topics deliver messages to a single SQS FIFO queue in order; fan-out to multiple subscribers is not supported",
+      "SNS FIFO topics are ordered within message groups, similar to SQS FIFO — messages with the same MessageGroupId are delivered in order; only SQS FIFO queues can subscribe",
+      "SNS FIFO topics are the same as standard SNS topics but with best-effort ordering",
+    ],
+    correctIndices: [2],
+    explanation:
+      "SNS FIFO topics provide strict ordering within a MessageGroupId, exactly-once delivery, and deduplication — mirroring SQS FIFO semantics. Only Amazon SQS FIFO queues can subscribe to SNS FIFO topics (not HTTP endpoints, Lambda, or email). The combination of SNS FIFO + SQS FIFO enables ordered fan-out to multiple consumers.",
+    tags: ["sns", "fifo", "ordering", "message-group"],
+  },
+  {
+    id: "qq-278",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "An application in Account A needs to receive events published to an EventBridge event bus in Account B. How is cross-account event routing configured?",
+    options: [
+      "Create an EventBridge rule in Account A that subscribes to Account B's default event bus",
+      "In Account B, create an EventBridge rule with a target of Account A's event bus; add a resource-based policy to Account A's bus allowing Account B to put events",
+      "Use EventBridge API Destinations to POST events to an Account A API Gateway endpoint",
+      "Enable EventBridge event archiving in Account B and restore events in Account A",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Cross-account EventBridge routing requires: (1) a rule in the source account (Account B) with the target set to the destination account's event bus ARN, and (2) a resource-based policy on the destination bus (Account A) that allows the source account to PutEvents. This is the standard cross-account fan-out pattern.",
+    tags: ["eventbridge", "cross-account", "event-bus", "resource-policy"],
+  },
+  {
+    id: "qq-279",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the EventBridge Schema Registry and how does it help developers?",
+    options: [
+      "It validates event payloads against JSON Schema before they are routed to targets",
+      "It discovers event schemas from traffic on event buses and generates typed code bindings for TypeScript, Python, Java, and Go",
+      "It stores event archives with their schemas for replay and compliance purposes",
+      "It is a managed OpenAPI registry that documents EventBridge API endpoints",
+    ],
+    correctIndices: [1],
+    explanation:
+      "The EventBridge Schema Registry automatically discovers the schema of events flowing through event buses and generates downloadable code bindings in multiple languages. Developers can download type-safe event classes/interfaces for their language, eliminating manual JSON parsing and reducing type errors in event-driven applications.",
+    tags: [
+      "eventbridge",
+      "schema-registry",
+      "code-bindings",
+      "developer-experience",
+    ],
+  },
+  {
+    id: "qq-280",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A Kinesis Data Stream has 5 shards and 3 consumer applications, each reading at near the 2 MB/s per-shard limit. Adding a fourth consumer causes the existing consumers to be throttled. Which feature resolves this without adding shards?",
+    options: [
+      "Increase the shard count to 10 to double read throughput",
+      "Enable Kinesis Enhanced Fan-Out — each registered consumer gets a dedicated 2 MB/s pipe per shard, independent of other consumers",
+      "Use Kinesis Data Firehose to buffer reads and reduce consumer pressure",
+      "Switch consumers to SQS which has higher read throughput",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Standard shard reads share the 2 MB/s limit across all consumers using GetRecords. Enhanced Fan-Out (EFO) uses HTTP/2 push delivery and gives each registered consumer a dedicated 2 MB/s per shard — not shared with other consumers. With 5 shards and EFO, each consumer gets 10 MB/s total, regardless of how many consumers are registered.",
+    tags: ["kinesis", "enhanced-fan-out", "efo", "throughput"],
+  },
+  {
+    id: "qq-281",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "When would you choose Amazon MSK (Managed Streaming for Apache Kafka) over Kinesis Data Streams?",
+    options: [
+      "When you need the lowest per-message cost and simplest setup",
+      "When you need Kafka-compatible APIs, existing Kafka producer/consumer code, or Kafka ecosystem tools (Kafka Connect, Kafka Streams, KSQL)",
+      "When you need sub-second latency for real-time fraud detection",
+      "When you want serverless auto-scaling without managing partitions",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Choose MSK when you need Apache Kafka compatibility — existing Kafka clients, Kafka Connect for data integration, Kafka Streams for stream processing, or KSQL. Kinesis is the AWS-native choice with simpler management, native AWS integrations (Lambda, Firehose, Analytics), and no Kafka expertise required. MSK has a higher operational overhead and is ideal for Kafka migrations or organizations with existing Kafka expertise.",
+    tags: ["kinesis", "msk", "kafka", "comparison"],
+  },
+
+  // ── Caching & Databases (additional) ──────────────────────────────────────
+  {
+    id: "qq-282",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the key difference between ElastiCache Redis cluster mode enabled and cluster mode disabled?",
+    options: [
+      "Cluster mode enabled uses Redis 5.x; cluster mode disabled uses Redis 6.x",
+      "Cluster mode enabled shards data across multiple node groups (horizontal scaling); cluster mode disabled has a single primary with replicas (vertical scaling only)",
+      "Cluster mode enabled is for read-heavy workloads; disabled is for write-heavy workloads",
+      "Cluster mode enabled requires VPC; cluster mode disabled can be public-facing",
+    ],
+    correctIndices: [1],
+    explanation:
+      "ElastiCache Redis cluster mode enabled (cluster mode: yes) partitions data across up to 500 node groups, enabling horizontal scaling for datasets exceeding a single node's memory. Cluster mode disabled has one primary node and up to 5 replicas — read scaling but no data sharding. Use cluster mode enabled for large datasets; disabled for simpler setups requiring strong read scaling.",
+    tags: ["elasticache", "redis", "cluster-mode", "sharding"],
+  },
+  {
+    id: "qq-283",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "easy",
+    type: "single",
+    question: "When should you choose ElastiCache Memcached over Redis?",
+    options: [
+      "When you need persistence, pub/sub, sorted sets, or high availability with automatic failover",
+      "When you need simple object caching with multi-threaded performance and can live without persistence, replication, or advanced data structures",
+      "When you need to cache DynamoDB queries with single-digit millisecond reads",
+      "When you need geospatial indexing or Lua scripting in the cache",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Memcached is a simple, multi-threaded caching engine optimized for raw throughput with basic key-value caching. It does not support persistence, replication, pub/sub, or advanced data structures. Redis supports all of these. Choose Memcached only when simplicity and multi-threaded performance are priorities and you don't need Redis's advanced features.",
+    tags: ["elasticache", "memcached", "redis", "comparison"],
+  },
+  {
+    id: "qq-284",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is RDS Proxy and what problem does it solve for Lambda functions?",
+    options: [
+      "RDS Proxy caches query results to reduce database load",
+      "RDS Proxy pools and shares database connections — prevents Lambda from exhausting the database's max_connections limit when function concurrency spikes",
+      "RDS Proxy encrypts traffic between Lambda and RDS using TLS",
+      "RDS Proxy provides a read replica endpoint that automatically routes read queries",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Lambda functions can scale to thousands of concurrent executions, each potentially opening a new database connection. RDS has a max_connections limit (often a few hundred) that Lambda can quickly exhaust. RDS Proxy maintains a pool of database connections and multiplexes Lambda invocations over them, dramatically reducing connection pressure. It also supports IAM authentication and Secrets Manager for credential management.",
+    tags: ["rds", "rds-proxy", "lambda", "connection-pooling"],
+  },
+  {
+    id: "qq-285",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the key difference between RDS Read Replicas and Multi-AZ deployments?",
+    options: [
+      "Read Replicas are for disaster recovery; Multi-AZ is for read scaling",
+      "Read Replicas scale read throughput using asynchronous replication; Multi-AZ provides high availability with synchronous replication and automatic failover — not for read scaling",
+      "Multi-AZ creates replicas in multiple regions; Read Replicas are single-region only",
+      "They are equivalent — Multi-AZ read replicas combine both capabilities",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Read Replicas use asynchronous replication and are designed to scale read throughput — applications explicitly direct read queries to replica endpoints. Multi-AZ uses synchronous replication to a standby instance in another AZ for automatic failover during primary failure — it is a HA mechanism, not a read-scaling mechanism (the standby is not queryable). Aurora Multi-AZ is an exception — Aurora replicas serve reads.",
+    tags: ["rds", "read-replica", "multi-az", "high-availability"],
+  },
+  {
+    id: "qq-286",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "An Aurora cluster has a writer endpoint and multiple reader endpoints. A developer needs to route all writes to the writer and distribute reads across all replicas automatically. How should the application connect?",
+    options: [
+      "Connect to the cluster endpoint for writes; connect to individual replica endpoints in round-robin for reads",
+      "Use the Aurora cluster endpoint for writes; use the Aurora reader endpoint for reads — it automatically load-balances across all available replicas",
+      "Use separate connection strings for each replica instance; the application manages load balancing",
+      "Use RDS Proxy with read/write splitting — it routes writes to the writer and reads to replicas",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Aurora provides two managed endpoints: the cluster endpoint routes connections to the current writer instance and automatically updates after failover. The reader endpoint load-balances read connections across all Aurora replicas. Applications should use these endpoints rather than instance-specific endpoints to avoid connection string updates during failover or replica changes.",
+    tags: ["aurora", "cluster-endpoint", "reader-endpoint", "load-balancing"],
+  },
+  {
+    id: "qq-287",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question: "What is Aurora Serverless v2 and when is it most appropriate?",
+    options: [
+      "Aurora Serverless v2 is a fully serverless database that scales to zero when idle, charging only for storage",
+      "Aurora Serverless v2 automatically scales Aurora capacity in fine-grained increments based on actual load, with near-instant scaling — ideal for variable or unpredictable workloads",
+      "Aurora Serverless v2 is an Aurora read replica that scales independently of the writer",
+      "Aurora Serverless v2 replaces Lambda for database-side business logic",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Aurora Serverless v2 scales database capacity up and down in increments as small as 0.5 Aurora Capacity Units (ACUs), responding to load changes in milliseconds. Unlike v1, it does not scale to zero but supports Multi-AZ and read replicas. It is ideal for dev/test environments, SaaS applications with variable tenant loads, and production systems with unpredictable traffic patterns.",
+    tags: ["aurora", "serverless-v2", "auto-scaling", "variable-load"],
+  },
+
+  // ── Step Functions (additional) ────────────────────────────────────────────
+  {
+    id: "qq-288",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the key difference between Step Functions Standard and Express workflows?",
+    options: [
+      "Standard workflows are for synchronous tasks; Express workflows are for asynchronous tasks",
+      "Standard workflows have exactly-once execution semantics, up to 1 year duration, and per-state-transition pricing; Express workflows have at-least-once semantics, up to 5 minutes, and per-execution pricing",
+      "Standard workflows support parallel states; Express workflows only support sequential states",
+      "Express workflows can invoke Lambda; Standard workflows only invoke other Step Functions",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Standard workflows offer exactly-once execution with execution history, ideal for long-running business processes (up to 1 year) — priced per state transition. Express workflows offer at-least-once semantics with a 5-minute maximum duration and per-execution/duration pricing — ideal for high-volume, short-duration workloads like IoT data ingestion or event processing.",
+    tags: ["step-functions", "standard", "express", "comparison"],
+  },
+  {
+    id: "qq-289",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A Step Functions state machine calls an external API that occasionally returns transient errors. How do you implement automatic retry with exponential backoff?",
+    options: [
+      "Wrap the Task state in a Lambda function that implements retry logic",
+      "Add a Retry field to the Task state with ErrorEquals, MaxAttempts, IntervalSeconds, and BackoffRate",
+      "Add a Catch field that routes failures to a Wait state before retrying",
+      "Use Step Functions Express workflow which retries automatically",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Step Functions Task states support a Retry field that specifies retry behavior per error type. ErrorEquals lists the error codes to catch, MaxAttempts sets the retry count, IntervalSeconds sets the initial delay, and BackoffRate multiplies the interval on each attempt (exponential backoff). This is managed by the state machine — no retry code in Lambda needed.",
+    tags: ["step-functions", "retry", "exponential-backoff", "task-state"],
+  },
+  {
+    id: "qq-290",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A workflow needs to process each item in a list in parallel. Which Step Functions state type enables this?",
+    options: [
+      "Parallel state — runs multiple static branches simultaneously",
+      "Map state — iterates over an array and runs the same steps for each item in parallel",
+      "Task state with Lambda concurrency set to the array size",
+      "Choice state with branches per array item",
+    ],
+    correctIndices: [1],
+    explanation:
+      "The Map state iterates over an input array and runs the same set of steps for each item concurrently (up to MaxConcurrency). A Parallel state runs a fixed set of predefined branches simultaneously — not dynamic per array item. Map is the correct state for processing variable-length lists like batch order processing or parallel file transformations.",
+    tags: ["step-functions", "map-state", "parallel", "iteration"],
+  },
+  {
+    id: "qq-291",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A Step Functions workflow initiates a job in an external system and needs to wait for a callback when the job completes (which could take hours). Which integration pattern enables this?",
+    options: [
+      "Use a Wait state with a fixed delay of several hours",
+      "Implement a polling loop — Task state calls Lambda to check job status, Choice state routes to Wait state if not done, loops until complete",
+      "Use the .waitForTaskToken integration pattern — include a task token in the job request; the workflow pauses until the token is returned via SendTaskSuccess",
+      "Use Step Functions Express workflow with a 5-hour timeout",
+    ],
+    correctIndices: [2],
+    explanation:
+      "The waitForTaskToken integration pattern is designed for exactly this: Step Functions generates a unique task token, embeds it in the message sent to the external system (SQS, Lambda, ECS, etc.), and pauses the state. When the external job completes, it calls SendTaskSuccess (or SendTaskFailure) with the token, resuming the workflow. This eliminates polling and handles indefinite waits efficiently.",
+    tags: ["step-functions", "wait-for-task-token", "callback", "async"],
+  },
+  {
+    id: "qq-292",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the advantage of using Step Functions SDK integrations over invoking Lambda functions for every step?",
+    options: [
+      "SDK integrations are faster because they bypass IAM authorization",
+      "SDK integrations call AWS service APIs directly from the state machine — no Lambda wrapper needed, reducing cost and latency for simple service calls",
+      "SDK integrations support longer timeouts than Lambda invocations",
+      "SDK integrations automatically retry failed API calls without Retry configuration",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Step Functions Optimized Integrations (and SDK integrations) allow state machines to call AWS service APIs — DynamoDB PutItem, SQS SendMessage, SNS Publish, ECS RunTask, and 200+ others — directly without a Lambda wrapper. This eliminates the overhead of Lambda cold starts, invocation costs, and boilerplate code for simple pass-through operations.",
+    tags: ["step-functions", "sdk-integration", "direct-integration", "cost"],
+  },
+  {
+    id: "qq-293",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "When would you use Step Functions Express Workflows with Kinesis or SQS as the trigger instead of Standard Workflows?",
+    options: [
+      "When executions must be idempotent and need exactly-once guarantees",
+      "When processing high-volume, short-duration events (thousands per second) where at-least-once semantics are acceptable and per-execution cost is lower than per-state-transition cost",
+      "When workflows need to run longer than 5 minutes",
+      "When execution history must be stored for audit compliance",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Express Workflows at high volumes cost significantly less than Standard Workflows because they charge per execution duration rather than per state transition. Combined with Kinesis or SQS as the event source, they are ideal for real-time event processing pipelines processing thousands of short events per second — scenarios where Standard Workflows would incur per-state-transition costs that add up quickly.",
+    tags: ["step-functions", "express", "kinesis", "high-volume", "cost"],
+  },
+
+  // ── Amplify / AppSync / CDK / SAM (guide expansions via quiz) ─────────────
+  {
+    id: "qq-294",
+    service: "AWS Amplify",
+    domain: "deployment",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is AWS Amplify Hosting and what type of applications does it support?",
+    options: [
+      "Amplify Hosting is an EC2-based web server for traditional server-rendered applications",
+      "Amplify Hosting is a fully managed CI/CD and hosting service for static sites and server-side rendered (SSR) applications — supporting Next.js, Nuxt, React, Vue, and more",
+      "Amplify Hosting is a CDN built on top of S3 that requires manual CloudFront configuration",
+      "Amplify Hosting is only for mobile applications built with the Amplify mobile SDK",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amplify Hosting provides a Git-based CI/CD pipeline that builds and deploys web apps — static sites, SPAs, and SSR apps (including Next.js with edge rendering). On every git push, Amplify builds the app and deploys to a globally available CDN. It supports branch-based deployments, preview deployments per pull request, and custom domain configuration.",
+    tags: ["amplify", "hosting", "cicd", "ssr"],
+  },
+  {
+    id: "qq-295",
+    service: "AWS AppSync",
+    domain: "development",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A React application needs to receive real-time data updates when backend data changes, without polling. Which AppSync feature enables this?",
+    options: [
+      "AppSync Mutations with client-side polling every second",
+      "AppSync Subscriptions — clients connect via WebSocket and receive push updates when matching mutations occur",
+      "AppSync Queries with cache invalidation on mutation",
+      "AppSync Pipeline Resolvers that push updates to connected clients",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AppSync Subscriptions use WebSocket connections (MQTT over WebSocket) to push real-time updates to clients. When a Mutation modifies data, AppSync automatically notifies all clients subscribed to that mutation. This is the standard pattern for collaborative apps, live dashboards, and chat applications built on GraphQL.",
+    tags: ["appsync", "subscriptions", "real-time", "websocket"],
+  },
+  {
+    id: "qq-296",
+    service: "AWS CDK",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "What is a CDK Pipeline (cdk-pipelines) and why is it preferred over a manually configured CodePipeline?",
+    options: [
+      "CDK Pipelines is a visual drag-and-drop interface for building CodePipeline pipelines",
+      "CDK Pipelines is a self-mutating pipeline — it updates itself when the pipeline definition changes, automatically adds stages for cross-account/region deployments, and manages CDK synth and deploy steps natively",
+      "CDK Pipelines uses SAM under the hood and requires a SAM template",
+      "CDK Pipelines is a testing framework for validating CDK stacks before deployment",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CDK Pipelines (cdk-pipelines) creates a CodePipeline that is self-mutating — when you push changes to the pipeline definition in CDK code, the pipeline updates itself before deploying application stacks. It handles CDK synth, asset publishing, and cross-account/region deployments natively. This eliminates the bootstrapping problem of manually managing a pipeline that also deploys itself.",
+    tags: ["cdk", "cdk-pipelines", "self-mutating", "cicd"],
+  },
+  {
+    id: "qq-297",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What are SAM policy templates and how do they simplify Lambda permissions?",
+    options: [
+      "SAM policy templates are IAM managed policies pre-created by AWS for Lambda",
+      "SAM policy templates are shorthand policy definitions in the SAM template that expand into full IAM policies — e.g., DynamoDBCrudPolicy generates read/write/delete permissions for a specific table",
+      "SAM policy templates define deployment rollback policies for Lambda functions",
+      "SAM policy templates are CloudFormation stack policies that restrict who can update the SAM template",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SAM policy templates are pre-built IAM policy shortcuts for common Lambda permission patterns. For example, `DynamoDBCrudPolicy: {TableName: !Ref MyTable}` expands into the full set of DynamoDB CRUD permissions scoped to that specific table. This eliminates verbose IAM policy writing for common patterns and enforces least-privilege automatically.",
+    tags: ["sam", "policy-templates", "iam", "least-privilege"],
+  },
+  {
+    id: "qq-298",
+    service: "Amazon VPC",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is an AWS VPC Endpoint and what security benefit does it provide?",
+    options: [
+      "A VPC Endpoint is a NAT Gateway specifically for AWS service traffic",
+      "A VPC Endpoint allows private connectivity between resources in a VPC and AWS services without the traffic leaving the AWS network or requiring an internet gateway",
+      "A VPC Endpoint is a firewall rule that blocks all non-AWS traffic from the VPC",
+      "A VPC Endpoint creates a VPN tunnel between a VPC and an AWS service",
+    ],
+    correctIndices: [1],
+    explanation:
+      "VPC Endpoints route traffic to AWS services (S3, DynamoDB, SQS, etc.) through the AWS private network without requiring an internet gateway, NAT gateway, or VPN. Gateway endpoints are free (for S3 and DynamoDB); Interface endpoints use AWS PrivateLink and have hourly and data processing charges. They are essential for VPCs with strict egress controls and for keeping sensitive data off the public internet.",
+    tags: ["vpc", "vpc-endpoint", "privatelink", "security"],
+  },
+  {
+    id: "qq-299",
+    service: "Amazon RDS",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is RDS Blue/Green Deployments and what database change does it simplify?",
+    options: [
+      "RDS Blue/Green uses Route 53 weighted routing to shift traffic between two RDS instances",
+      "RDS Blue/Green creates a synchronized green environment (copy of production) for testing schema changes or engine upgrades, then allows a switchover with minimal downtime",
+      "RDS Blue/Green is a backup strategy that maintains two independent copies of the database",
+      "RDS Blue/Green is an Aurora-only feature for multi-region active-active replication",
+    ],
+    correctIndices: [1],
+    explanation:
+      "RDS Blue/Green Deployments create a staging (green) environment that is a replica of production (blue), synchronized via logical replication. You can apply and validate schema changes, engine upgrades, or parameter changes on green without impacting production. The switchover (blue→green) takes under a minute with minimal downtime. Supported for MySQL, MariaDB, and Aurora MySQL.",
+    tags: ["rds", "blue-green", "schema-migration", "upgrades"],
+  },
+  {
+    id: "qq-300",
+    service: "AWS Systems Manager",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the difference between SSM Parameter Store Standard and Advanced tiers?",
+    options: [
+      "Standard supports strings only; Advanced supports SecureString encryption with KMS",
+      "Standard parameters are free and up to 4 KB; Advanced parameters support up to 8 KB, parameter policies (TTL, expiration notifications), and cost per parameter per month",
+      "Standard tier is for EC2 parameters; Advanced tier is for Lambda environment variables",
+      "Advanced tier enables cross-region parameter replication; Standard tier is single-region",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SSM Parameter Store Standard parameters are free (up to 10,000 parameters per account) with a 4 KB value limit. Advanced parameters support up to 8 KB values, parameter policies for automated TTL enforcement and expiration notifications, and higher throughput — at a small per-parameter monthly cost. Both support SecureString encryption with KMS.",
+    tags: ["ssm", "parameter-store", "standard", "advanced"],
+  },
+  {
+    id: "qq-301",
+    service: "Amazon CloudFront",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A CloudFront distribution serves private S3 content. How do you ensure only CloudFront (not the public internet) can access the S3 bucket?",
+    options: [
+      "Enable S3 Transfer Acceleration — it restricts access to CloudFront edge nodes only",
+      "Use an Origin Access Control (OAC) — CloudFront signs requests to S3 with a special identity; the S3 bucket policy allows only that OAC identity",
+      "Block public access on the S3 bucket and configure CloudFront with the bucket's HTTPS endpoint",
+      "Enable S3 Server-Side Encryption — only CloudFront can decrypt the objects",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Origin Access Control (OAC) is the modern replacement for Origin Access Identity (OAI). CloudFront uses OAC to sign requests to S3 with AWS Signature Version 4. The S3 bucket policy allows s3:GetObject only for the specific OAC identity. This ensures all direct S3 requests are blocked and all content is served exclusively through CloudFront.",
+    tags: ["cloudfront", "oac", "s3", "private-content"],
+  },
+  {
+    id: "qq-302",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is a CloudFormation stack policy and how does it protect production resources?",
+    options: [
+      "A stack policy defines which IAM principals can create or delete the CloudFormation stack",
+      "A stack policy is a JSON document that defines which stack resources are protected from updates or replacement during stack updates",
+      "A stack policy defines the rollback behavior when a stack update fails",
+      "A stack policy specifies the AWS region where the stack can be deployed",
+    ],
+    correctIndices: [1],
+    explanation:
+      "A CloudFormation stack policy is a resource-level access policy that prevents specific resources from being accidentally updated or replaced during a stack update. For example, you can deny Update actions on an RDS database resource to prevent accidental deletion. Stack policies are set on the stack and must be explicitly overridden to update protected resources.",
+    tags: ["cloudformation", "stack-policy", "protection", "production"],
+  },
+  {
+    id: "qq-303",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "easy",
+    type: "single",
+    question: "What is an X-Ray segment and how does it relate to subsegments?",
+    options: [
+      "A segment represents a single Lambda invocation; subsegments are retries of that invocation",
+      "A segment is the top-level unit of work for a single service (e.g., one Lambda invocation or one EC2 request); subsegments represent downstream calls (DynamoDB, S3, HTTP) made during that segment",
+      "Segments are generated by AWS services; subsegments are generated only by custom SDK instrumentation",
+      "A segment spans the entire request across all services; subsegments are per-service contributions",
+    ],
+    correctIndices: [1],
+    explanation:
+      "An X-Ray segment represents the work done by a single service (e.g., one Lambda function invocation). Subsegments represent downstream calls made during that work — DynamoDB queries, S3 puts, HTTP calls to external APIs, or custom blocks of code. Segments are connected via a trace ID to form the complete distributed trace visible in the X-Ray service map.",
+    tags: ["xray", "segments", "subsegments", "distributed-tracing"],
+  },
+  {
+    id: "qq-304",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A team wants to monitor their website uptime and validate that the login page returns HTTP 200 with the correct page title every 5 minutes. Which CloudWatch feature enables this?",
+    options: [
+      "CloudWatch Contributor Insights — analyzes log traffic for the login endpoint",
+      "CloudWatch Synthetics — runs canary scripts that simulate user behavior and report availability and latency",
+      "CloudWatch Metric Alarms on the ALB HTTP 200 response count metric",
+      "CloudWatch Application Insights — automatically detects application health issues",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudWatch Synthetics runs canary scripts (Node.js or Python) on a schedule that simulate user interactions — loading pages, clicking links, validating content, and calling APIs. Results include screenshots, HTTP response codes, and latency metrics. This is the standard AWS service for synthetic monitoring of endpoints without real user traffic.",
+    tags: ["cloudwatch", "synthetics", "canary", "uptime-monitoring"],
+  },
+  {
+    id: "qq-305",
+    service: "Amazon ECS",
+    domain: "deployment",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the difference between an ECS task role and an ECS task execution role?",
+    options: [
+      "The task role grants permissions to the ECS service to manage tasks; the execution role grants the container application permissions to call AWS APIs",
+      "The task execution role allows ECS to pull container images from ECR and write logs to CloudWatch; the task role grants permissions to the application code running inside the container",
+      "They are the same role — ECS uses one role for all task permissions",
+      "The task execution role is for EC2 launch type; the task role is for Fargate launch type",
+    ],
+    correctIndices: [1],
+    explanation:
+      "The task execution role is assumed by the ECS agent (not your application) to perform infrastructure operations: pulling images from ECR, retrieving secrets from Secrets Manager or Parameter Store, and writing logs to CloudWatch. The task role is assumed by your application code running inside the container and grants it permissions to call AWS services (DynamoDB, S3, SQS, etc.).",
+    tags: ["ecs", "task-role", "execution-role", "iam"],
+  },
+  {
+    id: "qq-306",
+    service: "Amazon Cognito",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is a Cognito User Pool Lambda trigger and give an example use case?",
+    options: [
+      "A trigger that Lambda uses to invoke a Cognito User Pool on authentication events",
+      "A Lambda function invoked at specific points in the Cognito authentication flow — e.g., a Pre Token Generation trigger that adds custom claims to JWTs before they are returned to the client",
+      "A Lambda function that replaces the Cognito hosted UI with a custom authentication screen",
+      "A CloudWatch Events trigger that fires when Cognito User Pool users are deleted",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Cognito User Pool Lambda triggers are Lambda functions invoked at hooks in the authentication lifecycle — Pre Sign-up (validate or auto-confirm users), Post Confirmation (send welcome emails), Pre Token Generation (customize JWT claims), Custom Authentication (implement custom auth challenges). They allow extending Cognito's behavior without replacing it.",
+    tags: ["cognito", "lambda-triggers", "user-pools", "customization"],
+  },
+  {
+    id: "qq-307",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A team wants to use their own HSM hardware for key material while still using KMS APIs for key management. Which KMS key store type enables this?",
+    options: [
+      "AWS managed keys — AWS handles the HSM for you automatically",
+      "Customer managed keys (CMKs) with imported key material",
+      "Custom key stores backed by AWS CloudHSM — key material never leaves the HSM cluster; KMS API calls are routed to the CloudHSM cluster",
+      "External key stores (XKS) — key material is generated and stored in an external HSM outside AWS",
+    ],
+    correctIndices: [2],
+    explanation:
+      "KMS Custom Key Stores backed by AWS CloudHSM keep key material exclusively in a customer-managed CloudHSM cluster. KMS API operations are proxied to the HSM for cryptographic operations. This meets compliance requirements where key material must never leave a customer-controlled HSM. External Key Stores (XKS) go further — key material stays in a non-AWS HSM on-premises.",
+    tags: ["kms", "custom-key-store", "cloudhsm", "compliance"],
+  },
+  {
+    id: "qq-308",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is CloudWatch metric math and how does it extend basic metrics?",
+    options: [
+      "Metric math automatically applies ML anomaly detection to all CloudWatch metrics",
+      "Metric math lets you create new time series by applying mathematical expressions across multiple existing metrics — e.g., computing error rate as errors / requests * 100",
+      "Metric math is a CloudWatch Logs feature that computes statistics from log metric filters",
+      "Metric math rounds metric values to the nearest integer for cleaner dashboards",
+    ],
+    correctIndices: [1],
+    explanation:
+      "CloudWatch metric math allows combining multiple metrics with arithmetic operations, functions (SUM, AVG, RATE, FILL), and comparisons to derive new virtual metrics for dashboards and alarms. For example, you can compute error rate (errors/requests × 100), p99 latency from raw measurements, or aggregate metrics across multiple Lambda function versions — all without storing additional metrics.",
+    tags: ["cloudwatch", "metric-math", "expressions", "dashboards"],
+  },
+  {
+    id: "qq-309",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "hard",
+    type: "multi",
+    question:
+      "Which TWO CloudFormation features help ensure production infrastructure cannot be accidentally deleted?",
+    options: [
+      "Stack termination protection — prevents the stack itself from being deleted via console or CLI",
+      "DeletionPolicy: Retain on individual resources — retains the resource even if the stack is deleted",
+      "CloudFormation StackSets — cross-account deployment prevents single-account deletion",
+      "Stack drift detection — alerts when resources differ from the template",
+      "Change sets — preview changes before applying them",
+    ],
+    correctIndices: [0, 1],
+    explanation:
+      "Enabling termination protection on a stack prevents accidental stack deletion — you must explicitly disable it before deleting. DeletionPolicy: Retain on individual resources (RDS, S3, DynamoDB) preserves them even if the stack is deleted, preventing data loss. Together they provide defense in depth: the stack resists deletion, and even if deleted, critical resources survive.",
+    tags: [
+      "cloudformation",
+      "termination-protection",
+      "deletion-policy",
+      "protection",
+    ],
+  },
 ];

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { setActiveCert } from "../components/AbbreviatedText";
 
-export type CertificationId = "dva-c02" | "clf-c02" | "aif-c01";
+export type CertificationId = "dva-c02" | "clf-c02" | "aif-c01" | "mls-c01";
 
 export interface CertMeta {
   id: CertificationId;
@@ -40,6 +40,15 @@ export const CERT_META: Record<CertificationId, CertMeta> = {
     icon: "hardware-chip",
     color: "#7B61FF",
     storageKey: "aws_training_progress_aif",
+  },
+  "mls-c01": {
+    id: "mls-c01",
+    name: "MLS-C01",
+    fullName: "AWS Certified Machine Learning Specialty",
+    examInfo: "65 questions · 180 min · Passing score: 750/1000",
+    icon: "analytics",
+    color: "#00A86B",
+    storageKey: "aws_training_progress_mls",
   },
 };
 

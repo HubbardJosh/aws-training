@@ -122,6 +122,18 @@ export const DOMAIN_META: Record<
     weight: "18%",
     icon: "build",
   },
+  services: {
+    label: "Services",
+    color: darkColors.accent,
+    weight: "",
+    icon: "cloud",
+  },
+  fundamentals: {
+    label: "Fundamentals",
+    color: darkColors.primary,
+    weight: "",
+    icon: "school",
+  },
 };
 
 export function getDomainMeta(
@@ -154,6 +166,18 @@ export function getDomainMeta(
       color: colors.troubleshooting,
       weight: "18%",
       icon: "build",
+    },
+    services: {
+      label: "Services",
+      color: colors.accent,
+      weight: "",
+      icon: "cloud",
+    },
+    fundamentals: {
+      label: "Fundamentals",
+      color: colors.primary,
+      weight: "",
+      icon: "school",
     },
   };
 }

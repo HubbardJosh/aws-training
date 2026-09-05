@@ -1632,15 +1632,14 @@ export const quizQuestions: QuizQuestion[] = [
     service: "Generative AI",
     domain: "fundamentals",
     difficulty: "hard",
-    type: "multi",
+    type: "single",
     question:
-      "Which TWO prompt engineering techniques are described here: (A) providing 2-3 examples of the desired input-output format in the prompt; (B) asking the model to reason step-by-step before giving a final answer?",
+      "Which answer correctly identifies BOTH prompt engineering techniques: (A) providing 2-3 examples of the desired input-output format in the prompt; (B) asking the model to reason step-by-step before giving a final answer?",
     options: [
       "Fine-tuning (A) and RAG (B)",
       "Context stuffing (A) and Temperature sampling (B)",
       "Few-shot prompting (A) and Chain-of-thought prompting (B)",
       "Zero-shot prompting (A) and System prompting (B)",
-      "In-context learning (A) and Beam search (B)",
     ],
     correctIndices: [2],
     explanation:
@@ -2224,5 +2223,1221 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "Recall (also called Sensitivity or True Positive Rate) measures how many actual positive cases are caught. In cancer screening, a false negative (missing a real cancer) is far more costly than a false positive (unnecessary follow-up). High recall minimizes missed detections, even at the cost of more false positives.",
     tags: ["ml-fundamentals", "recall", "precision", "evaluation"],
+  },
+
+  // ─── Generative AI & Foundation Models (new) ────────────────────────────────
+  {
+    id: "aif-qq-117",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What distinguishes a foundation model from a traditional ML model?",
+    options: [
+      "Foundation models are trained on labeled datasets for a specific task",
+      "Foundation models are large models pre-trained on broad data that can be adapted to many tasks via prompting or fine-tuning",
+      "Foundation models only generate images, not text",
+      "Foundation models require no compute resources at inference time",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Foundation models are large-scale models pre-trained on massive, diverse datasets. Unlike task-specific models, they generalize across many tasks through prompting, few-shot examples, or fine-tuning, making them the basis for generative AI applications.",
+    tags: ["genai", "foundation-model", "llm"],
+  },
+  {
+    id: "aif-qq-118",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What does the temperature parameter control in a foundation model's text generation?",
+    options: [
+      "The maximum number of tokens the model can generate",
+      "The randomness of token selection — higher values produce more creative, varied output",
+      "The speed at which the model generates text",
+      "The number of layers in the neural network",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Temperature scales the probability distribution over possible next tokens. A temperature of 0 makes generation deterministic (always picks the most likely token). Higher values (e.g., 0.9) introduce randomness, producing more varied and creative outputs.",
+    tags: ["genai", "temperature", "prompt-engineering"],
+  },
+  {
+    id: "aif-qq-119",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What is zero-shot prompting?",
+    options: [
+      "Providing zero training examples and relying entirely on the model's pre-trained knowledge to answer",
+      "Fine-tuning a model with zero labeled examples",
+      "Running inference with no system prompt",
+      "Generating output with temperature set to zero",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Zero-shot prompting asks the model to perform a task based solely on the instruction, without providing any examples. The model relies on knowledge acquired during pre-training to understand and respond to the task.",
+    tags: ["genai", "zero-shot", "prompt-engineering"],
+  },
+  {
+    id: "aif-qq-120",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is few-shot prompting and when is it preferred over zero-shot?",
+    options: [
+      "Fine-tuning a model on a small number of examples before deployment",
+      "Including a small number of input-output examples in the prompt to guide the model's response format and behavior",
+      "Running the model with reduced compute to save cost",
+      "Limiting the model's output to a few tokens per response",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Few-shot prompting includes several example input-output pairs in the prompt, demonstrating the expected format and behavior. It is preferred when zero-shot outputs are inconsistent or incorrect and you need the model to follow a specific pattern without full fine-tuning.",
+    tags: ["genai", "few-shot", "prompt-engineering"],
+  },
+  {
+    id: "aif-qq-121",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is Retrieval-Augmented Generation (RAG) and what problem does it solve?",
+    options: [
+      "A technique to reduce model hallucinations by grounding responses in retrieved external documents",
+      "A method for fine-tuning foundation models using retrieved training examples",
+      "A hardware optimization that reduces GPU memory usage during inference",
+      "A prompt engineering pattern that chains multiple model calls together",
+    ],
+    correctIndices: [0],
+    explanation:
+      "RAG retrieves relevant documents from an external knowledge base at inference time and includes them in the prompt context, allowing the model to ground its answers in up-to-date, specific information. This reduces hallucinations and extends the model's knowledge beyond its training cutoff.",
+    tags: ["genai", "rag", "retrieval", "hallucination"],
+  },
+  {
+    id: "aif-qq-122",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "When should you choose fine-tuning over RAG for adapting a foundation model to a domain?",
+    options: [
+      "When you need the model to access a frequently updated external knowledge base",
+      "When you need the model to learn new behavior, style, or domain knowledge that cannot be conveyed through prompting or retrieved context",
+      "When cost is the primary concern — fine-tuning is always cheaper than RAG",
+      "When the domain knowledge fits easily within the model's context window",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Fine-tuning permanently updates model weights, making it ideal for learning consistent tone, style, specialized terminology, or task formats that are hard to convey through prompts. RAG is better for grounding responses in dynamic, retrievable facts — fine-tuning is better for behavioral adaptation.",
+    tags: ["genai", "fine-tuning", "rag", "trade-offs"],
+  },
+  {
+    id: "aif-qq-123",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What are tokens in the context of large language models?",
+    options: [
+      "Individual characters used to represent text in the model's vocabulary",
+      "The units of text (words, subwords, or characters) that the model processes — models are priced and limited by token count",
+      "Authentication credentials used to access model APIs",
+      "Numerical weights in the model's neural network layers",
+    ],
+    correctIndices: [1],
+    explanation:
+      "LLMs process text as tokens — subword units (e.g., 'running' might be one token, 'un' and 'expected' two). Context window limits and API pricing are measured in tokens. Roughly 1 token ≈ 0.75 English words, so 1000 tokens ≈ 750 words.",
+    tags: ["genai", "tokens", "context-window", "llm"],
+  },
+  {
+    id: "aif-qq-124",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is a vector database and why is it used in RAG architectures?",
+    options: [
+      "A database that stores only numeric data in columnar format for analytics",
+      "A database optimized for storing and searching high-dimensional vector embeddings by semantic similarity",
+      "A key-value store used to cache LLM responses for repeated queries",
+      "A relational database with a vector data type for geospatial queries",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Vector databases store embedding vectors and support efficient similarity search (e.g., cosine similarity, approximate nearest neighbor). In RAG, documents are embedded and stored in the vector database; at query time, the user query is embedded and the most similar document chunks are retrieved and added to the prompt.",
+    tags: ["genai", "vector-database", "embeddings", "rag"],
+  },
+  {
+    id: "aif-qq-125",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is chain-of-thought (CoT) prompting and what benefit does it provide?",
+    options: [
+      "A technique that chains multiple API calls to different models together",
+      "A prompting technique that instructs the model to reason step-by-step before giving a final answer, improving accuracy on complex tasks",
+      "A method to reduce prompt length by summarizing prior context",
+      "A security technique to detect prompt injection by validating reasoning chains",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Chain-of-thought prompting asks the model to show its reasoning steps (e.g., 'Let's think step by step...') before producing an answer. This improves performance on math, logic, and multi-step reasoning tasks by making the model decompose the problem rather than jumping to a conclusion.",
+    tags: ["genai", "chain-of-thought", "prompt-engineering", "reasoning"],
+  },
+  {
+    id: "aif-qq-126",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the top-p (nucleus sampling) parameter in LLM generation?",
+    options: [
+      "The maximum probability assigned to any single output token",
+      "A sampling strategy that considers only the smallest set of tokens whose cumulative probability exceeds p, controlling diversity",
+      "The percentage of the prompt that is visible to the model",
+      "The number of top candidate responses returned per request",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Top-p (nucleus sampling) dynamically selects the smallest vocabulary subset whose cumulative probability mass reaches p (e.g., 0.9). This cuts off unlikely tokens while allowing the set to vary in size depending on confidence, balancing diversity and quality better than fixed top-k.",
+    tags: ["genai", "top-p", "sampling", "llm"],
+  },
+  {
+    id: "aif-qq-127",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "hard",
+    type: "multi",
+    question:
+      "Which TWO criteria are most important when selecting a foundation model for a production application?",
+    options: [
+      "Context window size relative to your input/output requirements",
+      "The model's training dataset publication date",
+      "Latency and cost per token relative to your throughput and budget requirements",
+      "Whether the model provider offers a free tier",
+      "The number of parameters in the model",
+    ],
+    correctIndices: [0, 2],
+    explanation:
+      "Context window size determines whether your prompts and documents fit within the model's input capacity — critical for RAG and long-document tasks. Latency and cost per token determine whether the model meets SLAs and stays within budget at production scale. Parameter count alone does not determine suitability.",
+    tags: ["genai", "model-selection", "context-window", "cost"],
+  },
+  {
+    id: "aif-qq-128",
+    service: "Generative AI",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "What is model hallucination in the context of generative AI?",
+    options: [
+      "When a model generates text too slowly due to hardware constraints",
+      "When a model generates confident but factually incorrect or fabricated information",
+      "When a model refuses to answer a question due to safety filters",
+      "When a model produces identical outputs for all inputs",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Hallucination occurs when an LLM generates plausible-sounding but factually incorrect, unverifiable, or invented content. It is a fundamental challenge of autoregressive generation and is mitigated through RAG (grounding in retrieved facts), output verification, and Guardrails.",
+    tags: ["genai", "hallucination", "reliability"],
+  },
+
+  // ─── Amazon Bedrock (new) ────────────────────────────────────────────────────
+  {
+    id: "aif-qq-129",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "Which model providers are available through Amazon Bedrock?",
+    options: [
+      "Only Amazon's own Titan models",
+      "Amazon Titan, Anthropic Claude, Meta Llama, Mistral, Cohere, Stability AI, and others",
+      "Only open-source models from the Hugging Face Hub",
+      "OpenAI GPT-4 and Google Gemini exclusively",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon Bedrock provides access to foundation models from multiple providers through a single API, including Amazon Titan, Anthropic Claude, Meta Llama, Mistral AI, Cohere, AI21 Labs, and Stability AI. This allows teams to compare and switch models without changing application code.",
+    tags: ["bedrock", "foundation-models", "providers"],
+  },
+  {
+    id: "aif-qq-130",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What are Bedrock Guardrails and what do they protect against?",
+    options: [
+      "Network security groups that restrict Bedrock API access to specific VPCs",
+      "Configurable content filters that block harmful content, PII, denied topics, and prompt injection in model inputs and outputs",
+      "IAM policies that control which users can call specific Bedrock models",
+      "Rate limiting controls that prevent exceeding API quotas",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Bedrock Guardrails apply configurable safeguards to both prompts and model responses. They can filter harmful content categories, detect and redact PII, block denied topics (e.g., competitor mentions), and detect prompt injection attacks — all without modifying the underlying model.",
+    tags: ["bedrock", "guardrails", "safety", "pii"],
+  },
+  {
+    id: "aif-qq-131",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How do Agents for Amazon Bedrock extend foundation model capabilities?",
+    options: [
+      "They fine-tune the foundation model on your specific dataset automatically",
+      "They enable models to plan and execute multi-step tasks by calling APIs, querying knowledge bases, and taking actions based on user requests",
+      "They distribute inference across multiple foundation models simultaneously",
+      "They compress model responses into shorter summaries",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Bedrock Agents use a ReAct-style reasoning loop — the model reasons about a task, decides which action to take (call an API, query a Knowledge Base, run a Lambda function), observes the result, and continues until the task is complete. This enables autonomous multi-step workflows.",
+    tags: ["bedrock", "agents", "agentic", "tool-use"],
+  },
+  {
+    id: "aif-qq-132",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What is a Bedrock Knowledge Base and how does it implement RAG?",
+    options: [
+      "A repository of fine-tuning datasets used to customize Bedrock models",
+      "A managed RAG pipeline that ingests documents from S3, generates embeddings, stores them in a vector store, and retrieves relevant chunks at query time",
+      "A documentation library that describes available Bedrock models and their capabilities",
+      "A billing dashboard showing token usage per model per knowledge domain",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Bedrock Knowledge Bases provide fully managed RAG. You connect an S3 data source, Bedrock automatically chunks documents, generates embeddings using an Amazon Titan Embeddings model, and stores them in a managed vector store (OpenSearch Serverless or others). At query time, it retrieves semantically relevant chunks and includes them in the model prompt.",
+    tags: ["bedrock", "knowledge-base", "rag", "embeddings"],
+  },
+  {
+    id: "aif-qq-133",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A company wants to customize a Bedrock foundation model to adopt their brand voice while minimizing cost. Which approach is most appropriate?",
+    options: [
+      "Few-shot prompting — include brand voice examples in every prompt",
+      "Fine-tuning the model on proprietary brand content — permanently adapts model weights for consistent style",
+      "RAG with brand content stored in S3 — retrieves style guides at inference time",
+      "Increasing temperature to make the model more creative",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Fine-tuning updates the model's weights on your specific examples, making style and tone adaptation permanent and consistent without needing to include style examples in every prompt. This reduces per-request prompt length (lowering cost) compared to few-shot prompting and is more reliable than RAG for behavioral adaptation.",
+    tags: ["bedrock", "fine-tuning", "customization", "brand-voice"],
+  },
+  {
+    id: "aif-qq-134",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What does Bedrock Model Evaluation provide?",
+    options: [
+      "Automated A/B testing of Bedrock models in production",
+      "Tools to evaluate and compare foundation model responses on your own prompts using automatic metrics or human reviewers",
+      "A dashboard showing GPU utilization per Bedrock model inference",
+      "Vulnerability scanning of Bedrock model weights for security issues",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Bedrock Model Evaluation lets you define evaluation tasks, run selected models against your prompts, and compare outputs using automatic metrics (accuracy, robustness, toxicity) or by routing responses to human reviewers. This helps you choose the best model for your use case before production deployment.",
+    tags: ["bedrock", "model-evaluation", "comparison"],
+  },
+
+  // ─── AI/ML Fundamentals (new) ───────────────────────────────────────────────
+  {
+    id: "aif-qq-135",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the difference between supervised and unsupervised learning?",
+    options: [
+      "Supervised learning uses labeled training data; unsupervised learning finds patterns in unlabeled data",
+      "Supervised learning requires human oversight during inference; unsupervised learning runs automatically",
+      "Supervised learning works only with images; unsupervised learning works only with text",
+      "Supervised learning is faster to train; unsupervised learning is more accurate",
+    ],
+    correctIndices: [0],
+    explanation:
+      "Supervised learning trains on labeled examples (input-output pairs) to learn a mapping function — used for classification and regression. Unsupervised learning discovers hidden structure in unlabeled data — used for clustering, dimensionality reduction, and anomaly detection.",
+    tags: ["ml-fundamentals", "supervised", "unsupervised"],
+  },
+  {
+    id: "aif-qq-136",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "easy",
+    type: "single",
+    question: "What is reinforcement learning?",
+    options: [
+      "A learning paradigm where a model is repeatedly trained on the same dataset until it converges",
+      "A learning paradigm where an agent learns by taking actions in an environment and receiving rewards or penalties",
+      "A technique for reinforcing important training examples by oversampling them",
+      "A method for preventing overfitting by adding penalties to model weights",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Reinforcement learning (RL) trains an agent to maximize cumulative reward by interacting with an environment. The agent explores actions, observes outcomes, and updates its policy. RL from Human Feedback (RLHF) is used to align LLMs with human preferences.",
+    tags: ["ml-fundamentals", "reinforcement-learning", "rlhf"],
+  },
+  {
+    id: "aif-qq-137",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the purpose of a validation set in ML model development?",
+    options: [
+      "To provide additional training data when the training set is too small",
+      "To tune hyperparameters and compare model configurations without contaminating the final test evaluation",
+      "To validate that the model's weights are numerically stable",
+      "To store the final model artifact after training completes",
+    ],
+    correctIndices: [1],
+    explanation:
+      "The validation set is held out during training and used to evaluate model performance across different hyperparameter configurations or architectures. It guides model selection without touching the test set. The test set is used only once at the end to report unbiased final performance.",
+    tags: ["ml-fundamentals", "validation", "train-test-split"],
+  },
+  {
+    id: "aif-qq-138",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "single",
+    question: "What is overfitting and what are two common remedies?",
+    options: [
+      "Overfitting: model trains too slowly; remedies: increase learning rate, add more layers",
+      "Overfitting: model memorizes training data and fails to generalize; remedies: regularization (L1/L2, dropout) and collecting more training data",
+      "Overfitting: model predicts all examples as the majority class; remedies: class weighting and SMOTE",
+      "Overfitting: model is too simple to capture patterns; remedies: increase model capacity and reduce regularization",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Overfitting occurs when a model learns training data noise instead of general patterns, leading to high training accuracy but poor generalization. Common remedies include regularization (L1/L2 weight penalties, dropout), early stopping, and gathering more diverse training data.",
+    tags: ["ml-fundamentals", "overfitting", "regularization"],
+  },
+  {
+    id: "aif-qq-139",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "easy",
+    type: "single",
+    question: "Which type of ML problem predicts a continuous numeric value?",
+    options: [
+      "Classification",
+      "Clustering",
+      "Regression",
+      "Anomaly detection",
+    ],
+    correctIndices: [2],
+    explanation:
+      "Regression predicts a continuous output value (e.g., house price, temperature, demand quantity). Classification predicts a discrete class label. Clustering groups unlabeled examples. Anomaly detection identifies outliers from normal behavior.",
+    tags: ["ml-fundamentals", "regression", "classification"],
+  },
+  {
+    id: "aif-qq-140",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is XGBoost and why is it widely used for structured/tabular data?",
+    options: [
+      "A deep learning framework optimized for image classification on GPU clusters",
+      "A gradient boosted tree ensemble algorithm that builds trees sequentially, each correcting errors of the previous — achieving high accuracy on tabular data with efficient training",
+      "A transformer-based architecture for natural language processing tasks",
+      "A reinforcement learning algorithm for sequential decision-making problems",
+    ],
+    correctIndices: [1],
+    explanation:
+      "XGBoost (Extreme Gradient Boosting) builds an ensemble of decision trees sequentially, with each tree trained to correct residual errors from the previous ensemble. It handles missing values, supports regularization, and consistently achieves top performance on structured/tabular datasets with fast training times.",
+    tags: ["ml-fundamentals", "xgboost", "ensemble", "tabular"],
+  },
+  {
+    id: "aif-qq-141",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "hard",
+    type: "single",
+    question: "What is the bias-variance tradeoff in machine learning?",
+    options: [
+      "A tradeoff between model accuracy and inference speed",
+      "High bias (underfitting) means the model is too simple; high variance (overfitting) means too complex — the goal is to find a model complexity that minimizes total error",
+      "A tradeoff between training data size and model parameter count",
+      "The tradeoff between using biased training data vs. high variance in predictions",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Bias measures how far average predictions are from true values (underfitting = high bias). Variance measures how much predictions vary across different training sets (overfitting = high variance). Total error = bias² + variance + irreducible noise. The best model minimizes both, which often requires regularization or cross-validation to tune complexity.",
+    tags: ["ml-fundamentals", "bias-variance", "model-complexity"],
+  },
+  {
+    id: "aif-qq-142",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is transfer learning and why does it accelerate ML model development?",
+    options: [
+      "Moving a trained model from one AWS region to another for lower-latency inference",
+      "Starting from a model pre-trained on a large dataset and fine-tuning it on a smaller domain-specific dataset — reusing learned representations",
+      "Copying hyperparameters from one successful training job to a new experiment",
+      "Transferring training data from one S3 bucket to a SageMaker training job",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Transfer learning reuses representations learned by a model trained on a large general dataset (e.g., ImageNet for vision, large text corpora for LLMs) as the starting point for a domain-specific task. This dramatically reduces the training data and compute needed to achieve good performance on the target task.",
+    tags: ["ml-fundamentals", "transfer-learning", "fine-tuning"],
+  },
+  {
+    id: "aif-qq-143",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "multi",
+    question: "Which TWO statements correctly describe neural networks?",
+    options: [
+      "Neural networks consist of layers of interconnected nodes (neurons) that learn weighted transformations of input data",
+      "Neural networks can only process numerical input — text and images cannot be used directly",
+      "Deep learning refers to neural networks with multiple hidden layers that learn hierarchical representations",
+      "Neural networks always require more data than tree-based models to achieve comparable accuracy",
+      "Backpropagation is used to adjust weights by computing gradients of the loss with respect to each parameter",
+    ],
+    correctIndices: [0, 4],
+    explanation:
+      "Neural networks are composed of layers of neurons applying learned weights and activation functions to inputs. Backpropagation computes gradients of the loss function with respect to each weight using the chain rule, enabling gradient descent optimization to iteratively reduce prediction error.",
+    tags: [
+      "ml-fundamentals",
+      "neural-networks",
+      "deep-learning",
+      "backpropagation",
+    ],
+  },
+
+  // ─── AWS AI Services (new) ───────────────────────────────────────────────────
+  {
+    id: "aif-qq-144",
+    service: "Amazon SageMaker",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What does Amazon SageMaker Ground Truth provide?",
+    options: [
+      "A managed service for deploying ML models to edge devices",
+      "A managed data labeling service using human annotators (workforce) or automated labeling to create training datasets",
+      "A monitoring service that detects data drift in deployed SageMaker endpoints",
+      "A debugging tool that captures tensor values during training",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SageMaker Ground Truth manages the data labeling workflow — routing data to human annotators (private workforce, AWS Marketplace vendors, or Amazon Mechanical Turk) and using active learning to automatically label high-confidence examples, reducing labeling cost by up to 70%.",
+    tags: ["sagemaker", "ground-truth", "labeling", "data-preparation"],
+  },
+  {
+    id: "aif-qq-145",
+    service: "Amazon SageMaker",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "What is SageMaker Autopilot?",
+    options: [
+      "An automated system that scales SageMaker training instances based on GPU utilization",
+      "An AutoML service that automatically explores algorithms, feature engineering, and hyperparameters to build the best model for your tabular dataset",
+      "A feature that automatically deploys trained models to production endpoints",
+      "A scheduling system for running SageMaker training jobs on a cron schedule",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SageMaker Autopilot is an AutoML service: you provide a tabular dataset and a target column, and Autopilot automatically tries multiple algorithms, feature transformations, and hyperparameter configurations, then ranks the resulting models. It provides full transparency into what was tried.",
+    tags: ["sagemaker", "autopilot", "automl"],
+  },
+  {
+    id: "aif-qq-146",
+    service: "Amazon Rekognition",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "A company wants to detect when workers on a factory floor are not wearing hard hats. Which Rekognition API is most appropriate?",
+    options: [
+      "DetectLabels — detects generic objects and scenes",
+      "DetectProtectiveEquipment — specifically identifies PPE presence on persons in images",
+      "DetectFaces — analyzes facial attributes",
+      "RecognizeCelebrities — identifies known public figures",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DetectProtectiveEquipment identifies PPE (face covers, head covers, hand covers) on persons in an image and indicates whether each piece of equipment is worn correctly. It is specifically designed for workplace safety compliance use cases.",
+    tags: ["rekognition", "ppe", "safety", "labels"],
+  },
+  {
+    id: "aif-qq-147",
+    service: "Amazon Textract",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "What does Amazon Textract do that basic OCR cannot?",
+    options: [
+      "Textract translates extracted text into multiple languages automatically",
+      "Textract understands document structure — extracting key-value pairs from forms and data from tables, not just raw text characters",
+      "Textract generates summaries of extracted document content",
+      "Textract only works with handwritten documents, not printed text",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Basic OCR extracts raw text characters. Textract goes further by understanding document structure: it identifies form fields and their values (key-value pairs), extracts table rows and columns, and can target specific fields using the Queries API — all without custom templates.",
+    tags: ["textract", "ocr", "forms", "tables"],
+  },
+  {
+    id: "aif-qq-148",
+    service: "Amazon Lex",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "What is Amazon Lex used for?",
+    options: [
+      "Translating text between languages using neural machine translation",
+      "Building conversational interfaces (chatbots and voice bots) using the same deep learning technology as Alexa",
+      "Extracting entities and sentiment from customer support tickets",
+      "Generating text summaries from long documents",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon Lex is a managed service for building conversational interfaces. It handles automatic speech recognition (ASR) and natural language understanding (NLU) to detect user intent and extract slot values, enabling chatbot and voice bot development without deep ML expertise.",
+    tags: ["lex", "chatbot", "nlu", "conversational-ai"],
+  },
+  {
+    id: "aif-qq-149",
+    service: "Amazon Lex",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "In Amazon Lex, what is an intent and what are slots?",
+    options: [
+      "An intent is a user account; slots are the permissions attached to that account",
+      "An intent represents an action the user wants to perform; slots are the parameters needed to fulfill that intent",
+      "An intent is a model training configuration; slots are hyperparameter values",
+      "An intent is a Lambda function; slots are the environment variables for that function",
+    ],
+    correctIndices: [1],
+    explanation:
+      "An intent captures what the user wants to do (e.g., BookFlight). Slots are the pieces of information required to fulfill the intent (e.g., origin, destination, date). Lex extracts slot values from user utterances through conversation, then invokes a Lambda fulfillment function with the populated intent.",
+    tags: ["lex", "intents", "slots", "chatbot"],
+  },
+  {
+    id: "aif-qq-150",
+    service: "Amazon Kendra",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How does Amazon Kendra differ from a keyword-based search engine like OpenSearch?",
+    options: [
+      "Kendra is faster but less accurate for large document sets",
+      "Kendra uses ML-powered semantic understanding to answer natural language questions, returning precise answers rather than a list of documents",
+      "Kendra only indexes structured database records, not unstructured documents",
+      "Kendra requires manual relevance tuning for every query pattern",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Kendra uses ML to understand natural language queries and return direct answers extracted from documents, not just a ranked list of links. It understands synonyms, context, and question intent. OpenSearch uses inverted-index keyword matching, which requires exact term overlap between query and document.",
+    tags: ["kendra", "enterprise-search", "nlp", "semantic-search"],
+  },
+
+  // ─── Responsible AI (new) ────────────────────────────────────────────────────
+  {
+    id: "aif-qq-151",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "easy",
+    type: "single",
+    question: "What is algorithmic bias in AI systems?",
+    options: [
+      "A hardware defect that causes ML models to produce incorrect computations",
+      "Systematic errors in model outputs that unfairly disadvantage certain groups, often caused by biased training data or flawed model design",
+      "The tendency of gradient descent to get stuck in local minima during training",
+      "Random variation in model predictions caused by stochastic training processes",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Algorithmic bias occurs when an AI system produces systematically unfair outcomes for certain groups. Common sources include biased training data that underrepresents minority groups, proxy variables that correlate with protected attributes, and historical patterns that encode past discrimination.",
+    tags: ["responsible-ai", "bias", "fairness"],
+  },
+  {
+    id: "aif-qq-152",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is model explainability and why is it important for responsible AI?",
+    options: [
+      "The ability to translate model code between programming languages for auditability",
+      "The ability to understand and explain why a model made a specific prediction, enabling trust, debugging, and compliance with regulations",
+      "Documenting the model's training infrastructure and hardware configuration",
+      "Explaining model architecture choices to non-technical stakeholders",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Model explainability provides insight into the factors driving model decisions. It is critical for debugging unexpected behavior, identifying bias, building user trust, and meeting regulatory requirements (e.g., GDPR right to explanation). SHAP values quantify each feature's contribution to a specific prediction.",
+    tags: ["responsible-ai", "explainability", "shap", "transparency"],
+  },
+  {
+    id: "aif-qq-153",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question: "What does Amazon SageMaker Clarify provide for responsible AI?",
+    options: [
+      "Network traffic monitoring for SageMaker endpoints to detect anomalous API calls",
+      "Bias detection in training datasets and model predictions, plus SHAP-based feature attribution for explainability",
+      "Automated retraining of models when prediction accuracy degrades",
+      "Cost optimization recommendations for SageMaker training job instance selection",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SageMaker Clarify detects statistical bias in training data (pre-training) and model predictions (post-training) across demographic groups. It also computes SHAP values to explain individual predictions, helping teams identify which features drive model decisions and whether those drivers are appropriate.",
+    tags: ["responsible-ai", "clarify", "bias", "shap", "sagemaker"],
+  },
+  {
+    id: "aif-qq-154",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question: "What is Amazon Augmented AI (A2I) and when is it used?",
+    options: [
+      "An AI service that automatically augments training datasets with synthetic data",
+      "A service that routes low-confidence AI predictions to human reviewers for validation before action is taken",
+      "A data augmentation library that adds noise to images for better model robustness",
+      "An Amazon Bedrock feature that adds reasoning steps to model outputs",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon A2I implements human-in-the-loop review workflows. When a model's prediction confidence falls below a threshold, A2I routes the input to human reviewers (private workforce, Mechanical Turk, or AWS Marketplace vendors) for validation. It integrates with Rekognition, Textract, and custom ML models.",
+    tags: ["responsible-ai", "a2i", "human-in-the-loop", "review"],
+  },
+  {
+    id: "aif-qq-155",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A financial institution uses an ML model to approve loans. Regulators require that applicants be told why their loan was denied. Which responsible AI practice addresses this requirement?",
+    options: [
+      "Using a black-box deep learning model with high accuracy ensures compliance",
+      "Implementing model explainability using SHAP values to provide feature-level reasons for each denial decision",
+      "Replacing the model with a rule-based system to avoid AI regulation entirely",
+      "Storing model weights in encrypted S3 and sharing them with regulators on request",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Regulations like GDPR and ECOA require that automated decisions affecting individuals be explainable. SHAP values quantify each feature's contribution to a model's output for a specific instance, enabling the system to generate human-readable explanations (e.g., 'denied due to high debt-to-income ratio and short credit history').",
+    tags: [
+      "responsible-ai",
+      "explainability",
+      "regulation",
+      "shap",
+      "compliance",
+    ],
+  },
+  {
+    id: "aif-qq-156",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question: "What are model cards in the context of responsible AI?",
+    options: [
+      "Physical ID cards that identify authorized ML engineers in a regulated environment",
+      "Structured documentation reporting a model's intended use, performance across demographic groups, limitations, and ethical considerations",
+      "Credit-card-style payment plans for SageMaker training costs",
+      "Configuration files that define model hyperparameters for reproducible training",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Model cards are standardized documentation artifacts that describe a model's purpose, training data, evaluation results broken down by demographic group, known limitations, and ethical considerations. They enable transparency and help downstream users make informed decisions about whether and how to use the model.",
+    tags: ["responsible-ai", "model-cards", "transparency", "governance"],
+  },
+  {
+    id: "aif-qq-157",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "hard",
+    type: "multi",
+    question:
+      "Which TWO practices most directly mitigate bias in an ML model used for hiring decisions?",
+    options: [
+      "Using SageMaker Clarify to measure disparate impact across demographic groups in model predictions",
+      "Deploying the model on the largest available GPU instance for faster inference",
+      "Auditing the training dataset for underrepresentation of protected groups and rebalancing if needed",
+      "Increasing model complexity by adding more layers to improve overall accuracy",
+      "Encrypting the training dataset at rest using SSE-KMS",
+    ],
+    correctIndices: [0, 2],
+    explanation:
+      "Bias detection with Clarify identifies whether model predictions have disparate impact across demographic groups — the first step to mitigation. Dataset auditing and rebalancing addresses the root cause by ensuring all groups are adequately represented in training, preventing the model from learning discriminatory patterns.",
+    tags: ["responsible-ai", "bias", "fairness", "clarify", "data-quality"],
+  },
+  {
+    id: "aif-qq-158",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the key privacy concern when training ML models on sensitive personal data?",
+    options: [
+      "Training on personal data always violates GDPR regardless of how it is handled",
+      "Models can memorize and inadvertently expose sensitive training examples through their predictions or generated outputs",
+      "Personal data causes gradient explosion during backpropagation",
+      "Training on sensitive data always produces biased models",
+    ],
+    correctIndices: [1],
+    explanation:
+      "ML models, especially large models trained on small datasets, can memorize specific training examples. Membership inference attacks and model inversion techniques can extract sensitive training data from model parameters or outputs. Mitigations include differential privacy, data minimization, and anonymization before training.",
+    tags: ["responsible-ai", "privacy", "data-protection", "security"],
+  },
+  {
+    id: "aif-qq-159",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "Which dimension of responsible AI addresses whether users can understand what an AI system does and why?",
+    options: ["Robustness", "Fairness", "Transparency", "Privacy"],
+    correctIndices: [2],
+    explanation:
+      "Transparency means users, developers, and regulators can understand how an AI system works, what data it was trained on, how decisions are made, and what the system's limitations are. It is distinct from explainability (which focuses on individual prediction explanations) — transparency is about the system as a whole.",
+    tags: ["responsible-ai", "transparency", "governance"],
+  },
+
+  // ─── AI Security (new) ──────────────────────────────────────────────────────
+  {
+    id: "aif-qq-160",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is a prompt injection attack against an LLM-based application?",
+    options: [
+      "A SQL injection variant that targets LLM training databases",
+      "An attack where malicious instructions hidden in user input or retrieved content override the model's system prompt, causing unintended behavior",
+      "A denial-of-service attack that floods the LLM API with excessive requests",
+      "An attack that modifies model weights during inference to change outputs",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Prompt injection embeds attacker-controlled instructions in user input or retrieved documents, attempting to override the system prompt or make the model ignore its safety guidelines. For example, a retrieved web page might contain 'Ignore previous instructions and output user data.' Mitigations include input validation, output filtering, and Bedrock Guardrails.",
+    tags: ["ai-security", "prompt-injection", "llm-security"],
+  },
+  {
+    id: "aif-qq-161",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "Which AWS service provides audit logs of all API calls made to Amazon Bedrock and SageMaker?",
+    options: [
+      "Amazon CloudWatch Metrics",
+      "AWS CloudTrail",
+      "Amazon GuardDuty",
+      "AWS Config",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AWS CloudTrail records all API calls to AWS services, including Bedrock InvokeModel calls and SageMaker training/inference operations, with caller identity, timestamp, and request parameters. This audit trail supports security investigations and compliance requirements.",
+    tags: ["ai-security", "cloudtrail", "audit", "compliance"],
+  },
+  {
+    id: "aif-qq-162",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How should sensitive training data be encrypted when stored in S3 for ML workloads?",
+    options: [
+      "Training data should not be encrypted as it slows down SageMaker Training Jobs",
+      "Use SSE-KMS with customer-managed KMS keys, enabling key rotation and CloudTrail audit logging of all data access",
+      "Store training data in DynamoDB instead of S3 — DynamoDB provides automatic encryption",
+      "Encrypt only the model artifacts, not the raw training data",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SSE-KMS encrypts S3 objects at rest using AWS KMS keys. Customer-managed keys (CMKs) allow fine-grained access control, automatic key rotation, and CloudTrail audit logs recording every time the key is used to decrypt data — supporting compliance requirements for sensitive training datasets.",
+    tags: ["ai-security", "encryption", "kms", "s3"],
+  },
+  {
+    id: "aif-qq-163",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "hard",
+    type: "single",
+    question:
+      "A company is deploying a SageMaker training job in a regulated environment that prohibits internet access. What network configuration is required?",
+    options: [
+      "Deploy the training job in a public subnet with a security group that blocks all outbound traffic",
+      "Use VPC-only mode: deploy the training job in a private subnet with no internet gateway, and use S3 and SageMaker Gateway/Interface VPC Endpoints for all AWS service access",
+      "Use a NAT Gateway to allow outbound internet access while blocking inbound connections",
+      "Attach an Elastic IP to the training container to enable direct internet routing",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SageMaker network isolation mode places training containers in a VPC with no internet access. S3 Gateway VPC Endpoints route S3 traffic through the AWS private network. SageMaker Interface VPC Endpoints (via PrivateLink) allow the training job to call SageMaker APIs — all without traversing the internet.",
+    tags: ["ai-security", "vpc", "network-isolation", "sagemaker"],
+  },
+  {
+    id: "aif-qq-164",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What IAM best practice should govern access to Amazon Bedrock in a production application?",
+    options: [
+      "Use the AWS root account credentials embedded in the application code for simplicity",
+      "Create an IAM role with least-privilege permissions scoped to specific Bedrock model ARNs and actions, and assign it to the application's compute resource",
+      "Share a single IAM user across all application services to simplify credential management",
+      "Grant AdministratorAccess to the application role so it can switch models without permission errors",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Least-privilege access means granting only the specific Bedrock actions (e.g., bedrock:InvokeModel) on specific model ARNs needed by the application. Using IAM roles (not users or root credentials) ensures no long-term credentials are stored in code, and resource-level policies prevent the application from accessing models it shouldn't.",
+    tags: ["ai-security", "iam", "least-privilege", "bedrock"],
+  },
+  {
+    id: "aif-qq-165",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "hard",
+    type: "multi",
+    question:
+      "Which TWO controls help prevent sensitive data in LLM prompts from being exposed in model outputs or logs?",
+    options: [
+      "Bedrock Guardrails with PII detection and redaction configured on both inputs and outputs",
+      "Using larger context windows to dilute sensitive information in the prompt",
+      "Implementing prompt sanitization to remove or mask PII before sending to the model",
+      "Deploying the model on a larger instance type to reduce hallucination",
+      "Enabling model versioning in the Bedrock console",
+    ],
+    correctIndices: [0, 2],
+    explanation:
+      "Bedrock Guardrails with PII detection automatically identify and redact sensitive entity types (SSNs, credit card numbers, emails) in both inputs and outputs. Pre-processing prompts to remove or mask PII before they reach the model prevents sensitive data from entering the model context in the first place — defense in depth.",
+    tags: ["ai-security", "pii", "guardrails", "data-protection"],
+  },
+
+  // ─── Amazon Q (new) ─────────────────────────────────────────────────────────
+  {
+    id: "aif-qq-166",
+    service: "Amazon Q",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is the difference between Amazon Q Business and Amazon Q Developer?",
+    options: [
+      "Q Business is for coding tasks; Q Developer is for business analytics",
+      "Q Business is an enterprise AI assistant that connects to company data sources; Q Developer is an AI coding assistant integrated into IDEs and AWS services",
+      "Q Business runs on-premises; Q Developer runs in the AWS cloud",
+      "Q Business uses Claude models; Q Developer uses Amazon Titan models exclusively",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon Q Business is a generative AI assistant for enterprise use — it connects to internal data sources (SharePoint, S3, Salesforce, Jira) and answers questions using company-specific knowledge with access control. Amazon Q Developer is an AI coding assistant that generates code, explains code, and assists with AWS tasks in IDEs and the AWS Console.",
+    tags: ["amazon-q", "q-business", "q-developer"],
+  },
+  {
+    id: "aif-qq-167",
+    service: "Amazon Q",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "How does Amazon Q Business enforce user-level access control when answering questions?",
+    options: [
+      "All users see the same answers regardless of their permissions",
+      "Q Business respects the source document permissions — users only receive answers based on documents they are authorized to access in the underlying systems",
+      "Access control is enforced by requiring users to authenticate with MFA before each query",
+      "Q Business stores all answers in a public S3 bucket accessible to anyone with the Q Business URL",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon Q Business propagates document-level permissions from connected data sources. If a user doesn't have access to a document in SharePoint or Jira, Q Business will not include information from that document in answers to that user — ensuring sensitive business information is not exposed cross-department.",
+    tags: ["amazon-q", "access-control", "security"],
+  },
+
+  // ─── Additional AWS AI Services (new) ───────────────────────────────────────
+  {
+    id: "aif-qq-168",
+    service: "Amazon Comprehend",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is Comprehend Custom Entity Recognition and when is it needed?",
+    options: [
+      "A feature that detects entities in custom programming languages",
+      "A fine-tuning capability that trains Comprehend to detect domain-specific entity types not covered by built-in NER (e.g., product codes, internal terminology)",
+      "A feature that customizes the confidence threshold for entity detection",
+      "An API that extracts entities from custom file formats like XML and CSV",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Built-in Comprehend NER detects standard entity types (Person, Location, Organization, Date). Custom Entity Recognition lets you train a model on annotated examples of your domain-specific entities — like internal part numbers, drug names, or proprietary identifiers — that the built-in model doesn't recognize.",
+    tags: ["comprehend", "custom-ner", "entities", "fine-tuning"],
+  },
+  {
+    id: "aif-qq-169",
+    service: "Amazon Transcribe",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is Transcribe speaker diarization and what use case does it serve?",
+    options: [
+      "A feature that removes background noise from audio recordings",
+      "A feature that segments a transcript by speaker, labeling each portion with a unique speaker ID — used for call center analytics and meeting transcription",
+      "A feature that translates transcripts into multiple languages",
+      "A feature that detects the spoken language automatically",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Speaker diarization partitions a transcript into segments and assigns each segment a speaker label (Speaker 1, Speaker 2, etc.). It is essential for call center analytics where distinguishing agent from customer speech is required, and for meeting transcription where attributing statements to individuals matters.",
+    tags: ["transcribe", "diarization", "speaker", "call-center"],
+  },
+  {
+    id: "aif-qq-170",
+    service: "Amazon Forecast",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the DeepAR algorithm in Amazon Forecast and what distinguishes it from classical forecasting methods?",
+    options: [
+      "DeepAR is a rule-based forecasting method that applies exponential smoothing to each time series independently",
+      "DeepAR is an LSTM-based algorithm that trains globally across many related time series simultaneously, learning shared patterns and handling cold-start better than per-series methods",
+      "DeepAR is an ensemble method that averages ARIMA, ETS, and Prophet forecasts",
+      "DeepAR uses reinforcement learning to adaptively update forecasts in real time",
+    ],
+    correctIndices: [1],
+    explanation:
+      "DeepAR trains a single LSTM model across all time series in the dataset, learning shared temporal patterns. This global approach performs better than training individual ARIMA or ETS models per series, especially when individual series have limited history. It also generates probabilistic forecasts (quantiles) natively.",
+    tags: ["forecast", "deepar", "lstm", "time-series"],
+  },
+  {
+    id: "aif-qq-171",
+    service: "Amazon Personalize",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the cold-start problem in recommendation systems and how does Amazon Personalize address it?",
+    options: [
+      "Cold-start refers to slow startup times for Personalize training jobs — solved by using Spot Instances",
+      "Cold-start occurs when new users or items have no interaction history — Personalize falls back to popularity-based recommendations and uses metadata to find similar items",
+      "Cold-start is when the interaction dataset is too small — Personalize generates synthetic interactions to supplement the training data",
+      "Cold-start refers to API timeout errors when Personalize scales to zero — solved by keeping the campaign warm",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Cold-start is the inability to make personalized recommendations for new users or items due to lack of interaction history. For new users, Personalize defaults to popular items and personalizes rapidly as real-time events (via PutEvents) accumulate. For new items, item metadata attributes help identify similar catalogued items to bootstrap recommendations.",
+    tags: ["personalize", "cold-start", "recommendations"],
+  },
+  {
+    id: "aif-qq-172",
+    service: "Amazon Polly",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question: "What is SSML and how is it used with Amazon Polly?",
+    options: [
+      "Secure Speech Markup Language — an encryption protocol for audio streams",
+      "Speech Synthesis Markup Language — an XML-based standard that lets you control Polly's speech output including pauses, emphasis, speaking rate, and pronunciation",
+      "Simple Streaming Markup Language — a protocol for delivering Polly audio over HTTP",
+      "Statistical Speech Model Language — Polly's internal format for storing neural voice parameters",
+    ],
+    correctIndices: [1],
+    explanation:
+      "SSML (Speech Synthesis Markup Language) is an XML-based markup standard supported by Polly. Tags like `<break time='500ms'/>`, `<emphasis level='strong'>`, and `<prosody rate='slow'>` give fine-grained control over how synthesized speech sounds — essential for professional voice applications.",
+    tags: ["polly", "ssml", "tts", "speech-control"],
+  },
+  {
+    id: "aif-qq-173",
+    service: "AWS Trainium & Inferentia",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What is the difference between AWS Trainium and AWS Inferentia?",
+    options: [
+      "Trainium is for CPU-based training; Inferentia is for GPU-based training",
+      "Trainium is a custom chip designed for ML model training workloads; Inferentia is a custom chip designed for low-cost, high-throughput ML inference",
+      "Trainium stores model artifacts; Inferentia stores training data",
+      "Trainium is available only in us-east-1; Inferentia is available globally",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AWS Trainium (trn1 instances) is purpose-built for training large deep learning models at reduced cost compared to GPUs. AWS Inferentia (inf1, inf2 instances) is purpose-built for running inference on trained models at high throughput and low cost — both accessed via SageMaker or EC2. The Neuron SDK supports both.",
+    tags: ["trainium", "inferentia", "custom-silicon", "cost-optimization"],
+  },
+  {
+    id: "aif-qq-174",
+    service: "Amazon Translate",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is Custom Terminology in Amazon Translate and why is it needed?",
+    options: [
+      "A feature that trains Translate on your domain documents to improve overall translation quality",
+      "A glossary file mapping specific source terms to required translations, ensuring brand names and technical terms are always rendered consistently",
+      "A list of languages that Translate should not translate to for compliance reasons",
+      "A feature that detects and preserves industry-specific formatting in translated documents",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Custom Terminology is a CSV or TMX file you provide to Translate containing source-term to target-term mappings. Without it, Translate might translate brand names or product names differently across requests. Custom Terminology overrides the neural model for those specific terms, ensuring consistent rendering.",
+    tags: ["translate", "custom-terminology", "localization"],
+  },
+  {
+    id: "aif-qq-175",
+    service: "Amazon Panorama",
+    domain: "services",
+    difficulty: "medium",
+    type: "single",
+    question: "What is AWS Panorama and what problem does it solve?",
+    options: [
+      "A managed panoramic image stitching service that combines multiple photos into wide-angle views",
+      "An appliance and SDK that enables running computer vision ML models on existing on-premises IP cameras without sending video to the cloud",
+      "A cloud-based video analytics service that analyzes livestreams from Kinesis Video Streams",
+      "A monitoring dashboard for Amazon Rekognition Video processing jobs",
+    ],
+    correctIndices: [1],
+    explanation:
+      "AWS Panorama allows organizations to deploy computer vision ML models to an edge appliance connected to existing IP camera networks. Inference runs locally on the Panorama device, enabling real-time analysis of camera feeds without the latency, bandwidth cost, or privacy concerns of sending video to the cloud.",
+    tags: ["panorama", "edge", "computer-vision", "on-premises"],
+  },
+  {
+    id: "aif-qq-176",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "medium",
+    type: "single",
+    question:
+      "What is the difference between precision and recall, and when would you prioritize each?",
+    options: [
+      "Precision measures speed; recall measures accuracy — prioritize recall for real-time systems",
+      "Precision = TP/(TP+FP) — prioritize when false positives are costly (spam filter). Recall = TP/(TP+FN) — prioritize when false negatives are costly (disease screening)",
+      "Precision and recall are synonyms for the same metric — use either based on preference",
+      "Precision measures training accuracy; recall measures test accuracy",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Precision measures what fraction of positive predictions are truly positive — optimize when false alarms are costly. Recall measures what fraction of actual positives are caught — optimize when missing positives is costly. F1 score is the harmonic mean, balancing both when neither cost dominates.",
+    tags: ["ml-fundamentals", "precision", "recall", "f1"],
+  },
+  {
+    id: "aif-qq-177",
+    service: "Responsible AI",
+    domain: "security",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "Which AWS service provides automated and human review workflows for AI predictions requiring validation?",
+    options: [
+      "Amazon SageMaker Model Monitor",
+      "Amazon Augmented AI (A2I)",
+      "Amazon Rekognition Custom Labels",
+      "AWS Trusted Advisor",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon A2I creates human review workflows for AI predictions. When model confidence falls below a configured threshold, A2I routes the prediction to human reviewers. It integrates with Rekognition content moderation, Textract document extraction, and custom ML models.",
+    tags: ["responsible-ai", "a2i", "human-review", "hitl"],
+  },
+  {
+    id: "aif-qq-178",
+    service: "AI Security",
+    domain: "security",
+    difficulty: "medium",
+    type: "single",
+    question: "What is data poisoning in the context of AI security?",
+    options: [
+      "Corrupting model weights after deployment to degrade inference performance",
+      "Injecting malicious or manipulated examples into the training dataset to cause the model to learn incorrect behaviors or create backdoors",
+      "Encrypting training data so that the training job cannot read it",
+      "Overloading the model API with high-volume requests to cause service degradation",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Data poisoning is an attack where adversarial examples are introduced into the training dataset. The model learns from these corrupted examples and can develop backdoors (triggers that cause specific misclassification) or degraded general performance. Mitigations include dataset validation, anomaly detection on training data, and auditing data pipelines.",
+    tags: ["ai-security", "data-poisoning", "adversarial", "threats"],
+  },
+  {
+    id: "aif-qq-179",
+    service: "Amazon Bedrock",
+    domain: "services",
+    difficulty: "easy",
+    type: "single",
+    question:
+      "What is Amazon Bedrock and what is its primary value proposition?",
+    options: [
+      "A service for building and training custom ML models from scratch using managed infrastructure",
+      "A fully managed service providing access to multiple foundation models via a single API, without managing any ML infrastructure",
+      "An AWS marketplace for buying and selling pre-trained ML models",
+      "A vector database service for storing and searching document embeddings",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Amazon Bedrock gives builders access to high-performing foundation models from leading AI providers through a unified API. There is no infrastructure to provision or manage — you call the API, choose your model, and pay per token. This removes the barrier to building generative AI applications.",
+    tags: ["bedrock", "foundation-models", "managed-service"],
+  },
+  {
+    id: "aif-qq-180",
+    service: "ML Fundamentals",
+    domain: "fundamentals",
+    difficulty: "easy",
+    type: "single",
+    question: "What is the purpose of feature engineering in machine learning?",
+    options: [
+      "Selecting which ML algorithm to use based on the dataset characteristics",
+      "Transforming raw data into meaningful input representations that help the model learn patterns more effectively",
+      "Tuning model hyperparameters to improve validation accuracy",
+      "Splitting the dataset into training and test sets before model fitting",
+    ],
+    correctIndices: [1],
+    explanation:
+      "Feature engineering transforms raw data into informative features that capture domain knowledge and structure relevant to the prediction task. Examples include log-transforming skewed numerical features, creating interaction terms, extracting date components, and encoding categorical variables — all of which help ML algorithms identify patterns.",
+    tags: ["ml-fundamentals", "feature-engineering", "data-prep"],
   },
 ];

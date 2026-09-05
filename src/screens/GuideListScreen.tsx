@@ -27,9 +27,6 @@ import { useTheme } from "../context/ThemeContext";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const DOMAINS = ["all", "development", "security", "deployment"] as const;
-type DomainFilter = (typeof DOMAINS)[number];
-
 export default function GuideListScreen() {
   const navigation = useNavigation<Nav>();
   const { certMeta } = useCert();
@@ -38,8 +35,14 @@ export default function GuideListScreen() {
   const styles = makeStyles(colors);
   const DOMAIN_META = getDomainMeta(colors);
   const [search, setSearch] = useState("");
-  const [domain, setDomain] = useState<DomainFilter>("all");
+  const [domain, setDomain] = useState("all");
   const [progress, setProgress] = useState<UserProgress | null>(null);
+
+  const availableDomains = useMemo(() => {
+    const seen = new Set<string>();
+    allGuides.forEach((g) => seen.add(g.domain));
+    return ["all", ...Array.from(seen).sort()];
+  }, [allGuides]);
 
   useFocusEffect(
     useCallback(() => {
@@ -108,7 +111,7 @@ export default function GuideListScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.filterRow}
         >
-          {DOMAINS.map((d) => {
+          {availableDomains.map((d) => {
             const meta = d === "all" ? null : DOMAIN_META[d];
             const color = meta ? meta.color : colors.primary;
             const label = meta ? meta.label : "All";

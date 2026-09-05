@@ -3185,4 +3185,823 @@ export const flashcards: FlashCard[] = [
     ],
     tags: ["sqs", "lambda", "event-source-mapping", "batch-processing"],
   },
+
+  // ─── ADVANCED LAMBDA ────────────────────────────────────────────────────────
+  {
+    id: "fc-lambda-adv-001",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is Lambda SnapStart and which runtimes support it?",
+    answer:
+      "SnapStart takes a snapshot of the initialized execution environment and caches it for reuse, eliminating cold-start initialization time. Supported on Java 11+ managed runtimes (Corretto). On restore, the runtime calls beforeCheckpoint / afterRestore lifecycle hooks so you can refresh connections or randomness.",
+    keyPoints: [
+      "Only supported on Java managed runtimes (not custom runtimes)",
+      "Snapshot taken at publish time, not invocation time",
+      "afterRestore hook lets you re-initialize random values, DB connections",
+      "Reduces Java cold-start latency by ~90%",
+    ],
+    tags: ["lambda", "snapstart", "cold-start", "java"],
+  },
+  {
+    id: "fc-lambda-adv-002",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "hard",
+    question: "How do Lambda function URLs differ from API Gateway?",
+    answer:
+      "Lambda function URLs provide a dedicated HTTPS endpoint directly on a function without API Gateway. They support IAM auth or no-auth (NONE). Useful for simple webhooks, single-function APIs. No request/response transformation, throttling plans, caching, or WAF integration — for those you need API Gateway.",
+    keyPoints: [
+      "Auth modes: AWS_IAM (SigV4) or NONE (public)",
+      "CORS can be configured on the URL itself",
+      "No API keys, usage plans, or custom domains (without Route 53 CNAME)",
+      "Good for webhooks; API Gateway better for complex APIs",
+    ],
+    tags: ["lambda", "function-urls", "api-gateway", "https"],
+  },
+  {
+    id: "fc-lambda-adv-003",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is Lambda Destinations and how does it differ from DLQ?",
+    answer:
+      "Lambda Destinations route async invocation results (success or failure) to SQS, SNS, EventBridge, or another Lambda. DLQ only captures failures. Destinations carry the full event plus response/error metadata. Use Destinations for both success and failure routing; DLQ for simple failure capture only.",
+    keyPoints: [
+      "Destinations work for async invocations only",
+      "Can route successes (OnSuccess) and failures (OnFailure) separately",
+      "DLQ captures raw failed event; Destination carries richer context",
+      "EventBridge destination enables complex routing rules",
+    ],
+    tags: ["lambda", "destinations", "dlq", "async", "failure-handling"],
+  },
+  {
+    id: "fc-lambda-adv-004",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "Explain Lambda concurrency: reserved, provisioned, and burst limits.",
+    answer:
+      "Account-level default is 1,000 concurrent executions (soft limit). Reserved Concurrency: sets a hard cap for one function, guaranteeing that capacity. Provisioned Concurrency: pre-warms N environments to eliminate cold starts. Burst limit: initial surge handled at 500–3,000 depending on region, then scales by 500/minute.",
+    keyPoints: [
+      "Reserved concurrency = max for that function AND reserves from account pool",
+      "Provisioned concurrency billed per GB-second even when idle",
+      "Throttling returns HTTP 429 (synchronous) or queues then drops (async)",
+      "Unreserved concurrency shared across all functions not reserving",
+    ],
+    tags: ["lambda", "concurrency", "reserved", "provisioned", "throttling"],
+  },
+  {
+    id: "fc-lambda-adv-005",
+    service: "AWS Lambda",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What environment variables are automatically available in Lambda?",
+    answer:
+      "AWS_REGION, AWS_LAMBDA_FUNCTION_NAME, AWS_LAMBDA_FUNCTION_VERSION, AWS_LAMBDA_LOG_GROUP_NAME, AWS_LAMBDA_LOG_STREAM_NAME, _HANDLER, LAMBDA_TASK_ROOT, LAMBDA_RUNTIME_DIR, AWS_ACCESS_KEY_ID/SECRET_ACCESS_KEY/SESSION_TOKEN (from execution role), TZ.",
+    keyPoints: [
+      "Never hard-code credentials; use env vars injected from execution role",
+      "Custom env vars encrypted with KMS (CMK optionally)",
+      "_HANDLER format: file.method (e.g., index.handler)",
+      "LAMBDA_TASK_ROOT points to your deployment package root",
+    ],
+    tags: ["lambda", "environment-variables", "configuration"],
+  },
+
+  // ─── ADVANCED DYNAMODB ──────────────────────────────────────────────────────
+  {
+    id: "fc-dynamo-adv-001",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "hard",
+    question: "What are DynamoDB sparse indexes and why are they useful?",
+    answer:
+      "A sparse index only includes items that have the index's key attribute. Items without that attribute are omitted. This is useful for filtering rare attributes efficiently — e.g., an index on 'isOpen' only includes open orders, making queries over a small subset cheap.",
+    keyPoints: [
+      "Item only appears in GSI if the GSI partition key attribute exists on item",
+      "Dramatically reduces index size for optional/rare attributes",
+      "Common pattern: status attribute only written for non-terminal states",
+      "Combine with TTL for expiring sparse index entries automatically",
+    ],
+    tags: ["dynamodb", "gsi", "sparse-index", "query-optimization"],
+  },
+  {
+    id: "fc-dynamo-adv-002",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is DynamoDB's optimistic locking pattern?",
+    answer:
+      "Store a version attribute on each item. Read the item, note the version. On update, use a ConditionExpression that checks version = :expected. If another writer changed the item, the condition fails (ConditionalCheckFailedException) and you retry. This prevents last-writer-wins data loss without pessimistic locking.",
+    keyPoints: [
+      "Use attribute_exists and version check in ConditionExpression",
+      "ConditionalCheckFailedException signals a conflict — retry from fresh read",
+      "AWS SDK's DynamoDBMapper supports @DynamoDBVersionAttribute automatically",
+      "No table-level locking; each item versioned independently",
+    ],
+    tags: [
+      "dynamodb",
+      "optimistic-locking",
+      "condition-expression",
+      "concurrency",
+    ],
+  },
+  {
+    id: "fc-dynamo-adv-003",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "Explain DynamoDB Streams and the typical fan-out pattern with Lambda.",
+    answer:
+      "Streams capture item-level changes (INSERT, MODIFY, REMOVE) in near-real-time as a 24-hour ordered log. Lambda polls the stream via event source mapping. Each shard has one concurrent Lambda invocation. Fan-out: Lambda publishes to SNS, which notifies multiple downstream services.",
+    keyPoints: [
+      "Stream view types: KEYS_ONLY, NEW_IMAGE, OLD_IMAGE, NEW_AND_OLD_IMAGES",
+      "Shards match table partition count; one Lambda per shard",
+      "At-least-once delivery; design downstream for idempotency",
+      "Streams + Lambda is the pattern for cross-region replication (Global Tables)",
+    ],
+    tags: ["dynamodb", "streams", "lambda", "fan-out", "event-driven"],
+  },
+  {
+    id: "fc-dynamo-adv-004",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is single-table design in DynamoDB?",
+    answer:
+      "Storing multiple entity types in one table using generic PK/SK names (e.g., PK, SK) and a hierarchical key convention (e.g., USER#123, ORDER#456). GSIs provide alternate access patterns. Reduces table overhead and enables joining related data in a single query using Query on the partition key.",
+    keyPoints: [
+      "Generic PK/SK (string) hold entity-specific prefixed values",
+      "Overloaded attributes: same attribute name, different meaning per entity",
+      "GSI inversion pattern: swap PK/SK in GSI for reverse lookups",
+      "Requires upfront access pattern design — hard to change later",
+    ],
+    tags: ["dynamodb", "single-table-design", "data-modeling", "gsi"],
+  },
+  {
+    id: "fc-dynamo-adv-005",
+    service: "Amazon DynamoDB",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "How does DynamoDB TTL work and what are its consistency guarantees?",
+    answer:
+      "TTL is an epoch timestamp attribute you designate. DynamoDB periodically scans and deletes expired items, typically within 48 hours of expiry. Deletion is free (no WCU consumed). Expired but not yet deleted items may still appear in reads and queries — filter them client-side if needed.",
+    keyPoints: [
+      "TTL attribute must be a Number type (epoch seconds)",
+      "No WCU cost for TTL deletions",
+      "Deletions appear in Streams (can trigger Lambda for cleanup)",
+      "Up to 48h delay — not a precise timer; filter expired items in app code",
+    ],
+    tags: ["dynamodb", "ttl", "expiration", "cost-optimization"],
+  },
+
+  // ─── ADVANCED API GATEWAY ───────────────────────────────────────────────────
+  {
+    id: "fc-apigw-adv-001",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "What is API Gateway request/response mapping and when do you need it?",
+    answer:
+      "Mapping templates (Apache Velocity) transform request bodies before sending to integration and response bodies before returning to client. Needed when: integration expects different format than client sends, stripping/adding headers, routing based on body content. Not needed with Lambda proxy integration (Lambda receives raw event).",
+    keyPoints: [
+      "Lambda proxy: raw HTTP event passed to Lambda, Lambda returns {statusCode, headers, body}",
+      "Lambda non-proxy: mapping templates transform request/response",
+      "Velocity Template Language (VTL) is used for mappings",
+      "Can map query params, headers, path params into integration request",
+    ],
+    tags: ["api-gateway", "mapping-templates", "vtl", "lambda-proxy"],
+  },
+  {
+    id: "fc-apigw-adv-002",
+    service: "Amazon API Gateway",
+    domain: "development",
+    difficulty: "medium",
+    question: "Explain API Gateway stage variables and their use cases.",
+    answer:
+      "Stage variables are key-value pairs defined per stage (dev, prod). They can parameterize Lambda aliases, HTTP endpoint URLs, and mapping templates. Example: lambdaAlias = ${stageVariables.env} routes dev stage to Lambda:dev alias and prod stage to Lambda:prod alias, enabling blue/green without redeployment.",
+    keyPoints: [
+      "Referenced in integration URI as ${stageVariables.varName}",
+      "Common use: point each stage at different Lambda alias or backend URL",
+      "Stage variables != environment variables — they're API Gateway-side",
+      "Lambda resource policy must allow the stage to invoke the aliased function",
+    ],
+    tags: ["api-gateway", "stage-variables", "deployment", "blue-green"],
+  },
+  {
+    id: "fc-apigw-adv-003",
+    service: "Amazon API Gateway",
+    domain: "security",
+    difficulty: "hard",
+    question: "Compare API Gateway authorizer types: Lambda, Cognito, and IAM.",
+    answer:
+      "IAM auth: caller signs request with SigV4; good for service-to-service. Cognito User Pool: validates JWT from Cognito; good for user-facing apps. Lambda authorizer (token or request): custom logic, returns IAM policy; good for OAuth tokens, API keys from third-party IdPs. Results cacheable by policy.",
+    keyPoints: [
+      "Lambda authorizer returns: principalId + IAM policy document",
+      "Cognito authorizer validates token signature and expiry",
+      "IAM auth requires the caller to have explicit API Gateway execute-api permissions",
+      "Lambda authorizer cache TTL: 0–3600s; reduces Lambda invocations",
+    ],
+    tags: [
+      "api-gateway",
+      "authorizer",
+      "cognito",
+      "lambda-authorizer",
+      "iam",
+      "security",
+    ],
+  },
+
+  // ─── ADVANCED SECURITY ──────────────────────────────────────────────────────
+  {
+    id: "fc-security-adv-001",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "hard",
+    question: "What is envelope encryption and how does it apply to KMS?",
+    answer:
+      "Envelope encryption: generate a data key (DEK) using KMS GenerateDataKey. Encrypt data with the DEK locally (AES-256). Store the encrypted DEK alongside the ciphertext. To decrypt: call KMS Decrypt to recover the DEK, then decrypt data locally. KMS never sees the plaintext data.",
+    keyPoints: [
+      "GenerateDataKey returns plaintext DEK + encrypted DEK",
+      "Delete plaintext DEK from memory after encrypting data",
+      "KMS only decrypts the DEK on Decrypt call — data stays local",
+      "Enables encrypting data larger than 4 KB KMS limit",
+    ],
+    tags: ["kms", "envelope-encryption", "data-key", "encryption"],
+  },
+  {
+    id: "fc-security-adv-002",
+    service: "AWS KMS",
+    domain: "security",
+    difficulty: "medium",
+    question: "What are KMS key policies and how do they interact with IAM?",
+    answer:
+      "KMS key policies are resource-based policies attached to CMKs. Unlike other AWS services, IAM alone is not sufficient — the key policy must explicitly grant access. The default key policy grants the root account full control, allowing IAM policies to then delegate. Without key policy access, no IAM policy works.",
+    keyPoints: [
+      "Key policy is the primary access control for KMS CMKs",
+      "Default policy: grants root account full access (enables IAM delegation)",
+      "Cross-account: grant the external account in key policy, then IAM in that account",
+      "Key grants provide temporary delegated use without policy changes",
+    ],
+    tags: ["kms", "key-policy", "iam", "access-control"],
+  },
+  {
+    id: "fc-security-adv-003",
+    service: "AWS IAM",
+    domain: "security",
+    difficulty: "hard",
+    question: "What is IAM Permission Boundary and what problem does it solve?",
+    answer:
+      "A permission boundary is a managed policy attached to a principal that sets the maximum permissions. Effective permissions = intersection of identity policy and boundary. Used to delegate IAM user/role creation to developers without letting them escalate privileges beyond the boundary.",
+    keyPoints: [
+      "Boundary doesn't grant permissions — it caps them",
+      "Effective permissions: identity-based policy AND boundary AND resource policy",
+      "Common pattern: allow devs to create roles, but only with the boundary attached",
+      "SCPs (Service Control Policies) work similarly at org level",
+    ],
+    tags: ["iam", "permission-boundary", "least-privilege", "delegation"],
+  },
+  {
+    id: "fc-security-adv-004",
+    service: "AWS Cognito",
+    domain: "security",
+    difficulty: "hard",
+    question:
+      "What is Cognito Identity Pool and how does it differ from User Pool?",
+    answer:
+      "User Pool: directory of users with sign-up/sign-in, JWT tokens. Identity Pool: exchanges credentials (from User Pool or external IdP) for temporary AWS credentials via STS AssumeRoleWithWebIdentity. Identity Pool grants AWS resource access; User Pool handles authentication.",
+    keyPoints: [
+      "User Pool → JWT (ID, access, refresh tokens)",
+      "Identity Pool → AWS credentials (IAM role assumption)",
+      "Unauthenticated identities: Identity Pool can grant limited guest access",
+      "Enhanced flow: User Pool JWT → Identity Pool → AWS creds in one step",
+    ],
+    tags: ["cognito", "user-pool", "identity-pool", "sts", "authentication"],
+  },
+  {
+    id: "fc-security-adv-005",
+    service: "AWS Secrets Manager",
+    domain: "security",
+    difficulty: "medium",
+    question: "How does Secrets Manager automatic rotation work?",
+    answer:
+      "You configure a rotation schedule and a Lambda rotation function. Secrets Manager invokes the Lambda with four steps: createSecret (new version), setSecret (update in service), testSecret (verify), finishSecret (mark AWSCURRENT). Previous version becomes AWSPREVIOUS for rollback.",
+    keyPoints: [
+      "Rotation Lambda handles all 4 steps; AWS provides templates for RDS, Redshift",
+      "AWSCURRENT = active, AWSPREVIOUS = prior (rollback), AWSPENDING = being rotated",
+      "Applications should always read current secret — caching stale version is a risk",
+      "Parameter Store has manual rotation only (no built-in rotation Lambda)",
+    ],
+    tags: ["secrets-manager", "rotation", "lambda", "security"],
+  },
+
+  // ─── STEP FUNCTIONS ─────────────────────────────────────────────────────────
+  {
+    id: "fc-sfn-001",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What are the two Step Functions workflow types and key differences?",
+    answer:
+      "Standard: durable, exactly-once execution, up to 1 year, audit history in console, billed per state transition. Express: high-throughput, at-least-once, up to 5 minutes, logs to CloudWatch, billed per execution-duration. Express is cheaper for many short, high-volume workflows.",
+    keyPoints: [
+      "Standard: long-running, auditable, exactly-once — use for critical workflows",
+      "Express: IoT ingestion, streaming, high-volume short tasks",
+      "Standard stores full execution history (viewable in console)",
+      "Express must use CloudWatch Logs for execution visibility",
+    ],
+    tags: ["step-functions", "standard", "express", "workflow"],
+  },
+  {
+    id: "fc-sfn-002",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "hard",
+    question: "Explain Step Functions error handling: Catch and Retry.",
+    answer:
+      "Retry: retries on specified error names with exponential backoff (IntervalSeconds, MaxAttempts, BackoffRate). Catch: transitions to a fallback state on error if retries exhausted. ErrorEquals: list of error names (States.ALL as wildcard). ResultPath controls where error info is merged into input.",
+    keyPoints: [
+      "Retry evaluated before Catch",
+      "States.ALL catches any error",
+      "ResultPath: null discards error; $.error injects error into state input",
+      "Common errors: States.Timeout, Lambda.ServiceException, States.TaskFailed",
+    ],
+    tags: ["step-functions", "error-handling", "retry", "catch"],
+  },
+  {
+    id: "fc-sfn-003",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "medium",
+    question: "What are Step Functions Map, Parallel, and Wait states?",
+    answer:
+      "Map: iterates over array items, running a sub-workflow for each (inline or distributed mode). Parallel: runs multiple branches concurrently, waits for all to complete. Wait: pauses execution for N seconds or until timestamp. All results are merged back into the execution state.",
+    keyPoints: [
+      "Map Distributed mode: up to 10M items, each item runs as separate child execution",
+      "Parallel branches each receive the same input; outputs are combined as array",
+      "Wait + callback pattern (heartbeat token) for human approval steps",
+      "Map inline: up to 40 concurrent; distributed: up to 10,000 concurrent",
+    ],
+    tags: ["step-functions", "map", "parallel", "wait", "state-types"],
+  },
+  {
+    id: "fc-sfn-004",
+    service: "AWS Step Functions",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is the Step Functions .waitForTaskToken callback pattern?",
+    answer:
+      "Send a task token to an external system (SQS, HTTP endpoint) with the task token. Execution pauses. External system calls SendTaskSuccess/SendTaskFailure with the token when done. Enables human approval flows, third-party integrations, or any process that completes outside AWS.",
+    keyPoints: [
+      "Task token embedded in message via $$.Task.Token context",
+      "Execution waits up to 1 year (Standard) or task heartbeat timeout",
+      "Must call SendTaskSuccess or SendTaskFailure to unblock",
+      "HeartbeatSeconds: timeout if token not acknowledged within N seconds",
+    ],
+    tags: ["step-functions", "wait-for-task-token", "callback", "integration"],
+  },
+
+  // ─── X-RAY & OBSERVABILITY ──────────────────────────────────────────────────
+  {
+    id: "fc-xray-001",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What is X-Ray sampling and how do you control it?",
+    answer:
+      "Sampling determines which requests are traced. Default rule: 1 request/second + 5% of additional requests. Custom rules (rate, reservoir, fixed rate) defined in X-Ray console or via API. Sampling reduces cost and noise while maintaining statistical visibility. Can be overridden per service.",
+    keyPoints: [
+      "Reservoir: guaranteed N traces/second regardless of traffic volume",
+      "Rate: percentage of requests beyond reservoir",
+      "Groups: filter traces by expression for targeted sampling rules",
+      "SDK uses sampling rules fetched from X-Ray service (not hardcoded)",
+    ],
+    tags: ["x-ray", "sampling", "tracing", "observability"],
+  },
+  {
+    id: "fc-xray-002",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question: "How do X-Ray segments, subsegments, and annotations differ?",
+    answer:
+      "Segment: top-level unit of work representing one request through one service. Subsegment: child unit within a segment (downstream call, SQL query, custom block). Annotations: key-value pairs indexed for filtering in console. Metadata: key-value pairs NOT indexed, for debugging detail only.",
+    keyPoints: [
+      "Annotations: indexed → use for filtering/grouping traces",
+      "Metadata: not indexed → detailed data (large objects, arrays)",
+      "Segment = one service; subsegments = work within that service",
+      "putAnnotation / putMetadata SDK methods add custom data",
+    ],
+    tags: ["x-ray", "segments", "subsegments", "annotations", "metadata"],
+  },
+  {
+    id: "fc-xray-003",
+    service: "AWS X-Ray",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "How does X-Ray integrate with Lambda?",
+    answer:
+      "Enable Active Tracing in Lambda configuration. Lambda creates a segment for each invocation automatically. The X-Ray SDK creates subsegments for downstream calls (AWS SDK, HTTP). Lambda passes trace context via X-Amzn-Trace-Id header for distributed tracing across services.",
+    keyPoints: [
+      "Lambda execution role needs xray:PutTraceSegments and xray:PutTelemetryRecords",
+      "Passive tracing: Lambda samples; Active: Lambda traces every request",
+      "SDK must be included in deployment package or layer",
+      "Cold start shows as Initialization subsegment in trace",
+    ],
+    tags: ["x-ray", "lambda", "active-tracing", "integration"],
+  },
+
+  // ─── ELASTICACHE ────────────────────────────────────────────────────────────
+  {
+    id: "fc-cache-001",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "medium",
+    question: "What are the two ElastiCache engines and when to choose each?",
+    answer:
+      "Redis: persistent (snapshots + AOF), pub/sub, sorted sets, geospatial, Lua scripting, cluster mode for horizontal scaling, replication. Memcached: simpler key-value, multi-threaded, horizontal scaling via sharding, no persistence. Redis is preferred for most use cases; Memcached for pure horizontal scaling with simple objects.",
+    keyPoints: [
+      "Redis supports complex data types (lists, sets, hashes, sorted sets)",
+      "Memcached is multi-threaded — better CPU utilization on large nodes",
+      "Redis Cluster: up to 500 shards, each with replica",
+      "Use Redis for session store (persistence + replication)",
+    ],
+    tags: ["elasticache", "redis", "memcached", "caching"],
+  },
+  {
+    id: "fc-cache-002",
+    service: "Amazon ElastiCache",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "Compare cache-aside, write-through, and write-behind caching strategies.",
+    answer:
+      "Cache-aside (lazy loading): app checks cache first, on miss reads DB and populates cache. Write-through: write to cache and DB synchronously on every write. Write-behind (write-back): write to cache, asynchronously persist to DB. Cache-aside has stale data risk; write-through has write latency; write-behind risks data loss on cache failure.",
+    keyPoints: [
+      "Cache-aside: good for read-heavy; risk = cold start on cache miss",
+      "Write-through: always fresh cache; downside = extra writes for rarely-read data",
+      "Write-behind: fast writes; risk = cache failure before async flush",
+      "Add TTL to cache-aside to avoid stale indefinitely",
+    ],
+    tags: ["elasticache", "caching-strategies", "cache-aside", "write-through"],
+  },
+
+  // ─── CI/CD ADVANCED ─────────────────────────────────────────────────────────
+  {
+    id: "fc-cicd-adv-001",
+    service: "AWS CodeDeploy",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "What CodeDeploy lifecycle hooks are available for EC2/on-premises and Lambda deployments?",
+    answer:
+      "EC2/on-prem hooks (in order): ApplicationStop → DownloadBundle → BeforeInstall → Install → AfterInstall → ApplicationStart → ValidateService. Lambda hooks: BeforeAllowTraffic (run tests before shift) → AfterAllowTraffic (monitor after shift). ECS hooks: BeforeInstall → AfterInstall → AfterAllowTestTraffic → BeforeAllowTraffic → AfterAllowTraffic.",
+    keyPoints: [
+      "ValidateService: last chance to fail deployment and trigger rollback",
+      "BeforeAllowTraffic on Lambda: smoke test before shifting traffic",
+      "Scripts run as root on EC2; specify runas in appspec to change user",
+      "Hook script exit code 0 = success; non-zero = fail and rollback",
+    ],
+    tags: ["codedeploy", "lifecycle-hooks", "appspec", "deployment"],
+  },
+  {
+    id: "fc-cicd-adv-002",
+    service: "AWS CodePipeline",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "How do CodePipeline approvals work and what triggers them?",
+    answer:
+      "Manual approval actions pause the pipeline. An SNS notification is sent to approvers. Approvers review and approve/reject in the console or via CLI. On approval, pipeline continues; on rejection or timeout (7 days), pipeline fails. Common placement: between staging and production deployment stages.",
+    keyPoints: [
+      "Approval action sends SNS notification with approval URL",
+      "Timeout: 7 days — pipeline fails if not approved",
+      "Can include a review URL and comments",
+      "Use IAM permissions to control who can approve",
+    ],
+    tags: ["codepipeline", "manual-approval", "deployment", "governance"],
+  },
+  {
+    id: "fc-cicd-adv-003",
+    service: "AWS CodeBuild",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What is a CodeBuild buildspec and what are its main phases?",
+    answer:
+      "buildspec.yml defines build commands. Phases: install (install tools/runtimes), pre_build (prep — login to ECR, etc.), build (compile, test), post_build (package, push). artifacts section specifies output files. reports section defines test result files for Test Reports feature.",
+    keyPoints: [
+      "buildspec.yml at repo root by default; can specify alternate location",
+      "Each phase can have commands and finally (runs regardless of failure)",
+      "environment_variables: override in project or via Parameter Store/Secrets Manager",
+      "cache: local cache or S3 bucket reduces build time for dependencies",
+    ],
+    tags: ["codebuild", "buildspec", "phases", "ci"],
+  },
+  {
+    id: "fc-cicd-adv-004",
+    service: "AWS SAM",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "What does SAM transform to CloudFormation and what resources does it add?",
+    answer:
+      "SAM template uses Transform: AWS::Serverless-2016-10-31. SAM resources (AWS::Serverless::Function, ::Api, ::SimpleTable, ::StateMachine, ::HttpApi) transform to CloudFormation resources. SAM adds execution roles, log groups, API Gateway deployments/stages, and event source mappings automatically.",
+    keyPoints: [
+      "AWS::Serverless::Function → Lambda function + IAM role + optional event sources",
+      "AWS::Serverless::Api → API Gateway REST API with Swagger/OpenAPI",
+      "sam build packages; sam deploy uploads to S3 and runs CloudFormation",
+      "sam local invoke/start-api uses Docker for local Lambda emulation",
+    ],
+    tags: ["sam", "cloudformation", "transform", "serverless"],
+  },
+
+  // ─── CLOUDFORMATION ADVANCED ────────────────────────────────────────────────
+  {
+    id: "fc-cfn-adv-001",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "hard",
+    question: "What are CloudFormation Change Sets and when must you use them?",
+    answer:
+      "A Change Set previews the changes CloudFormation will make (add, modify, replace, delete) before executing. Always use for: resources that require replacement (physical ID changes), production stacks, and when reviewing potential data loss (DeletionPolicy matters). Replacement = delete old resource + create new.",
+    keyPoints: [
+      "REPLACEMENT resources are destructive — old deleted, new created",
+      "DeletionPolicy: Retain or Snapshot on RDS/S3 to preserve data",
+      "Execute-change-set applies changes; don't execute blindly",
+      "Drift detection: compares actual vs template state (separate from change sets)",
+    ],
+    tags: ["cloudformation", "change-sets", "replacement", "infrastructure"],
+  },
+  {
+    id: "fc-cfn-adv-002",
+    service: "AWS CloudFormation",
+    domain: "deployment",
+    difficulty: "medium",
+    question: "What are CloudFormation custom resources and how do they work?",
+    answer:
+      "Custom resources (AWS::CloudFormation::CustomResource or Custom::*) invoke a Lambda or SNS endpoint on Create, Update, Delete. Lambda returns {Status: SUCCESS/FAILED, PhysicalResourceId, Data: {...}}. Used for: resources CloudFormation doesn't support natively, account setup, third-party APIs.",
+    keyPoints: [
+      "ServiceToken: ARN of Lambda or SNS topic",
+      "Lambda must send response to pre-signed S3 URL in the event",
+      "On Delete, must succeed or stack deletion hangs",
+      "Outputs from Data field accessible via !GetAtt ResourceId.OutputKey",
+    ],
+    tags: ["cloudformation", "custom-resources", "lambda", "infrastructure"],
+  },
+
+  // ─── KINESIS ADVANCED ───────────────────────────────────────────────────────
+  {
+    id: "fc-kinesis-adv-001",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "What is Kinesis Enhanced Fan-Out and how does it improve throughput?",
+    answer:
+      "Standard GetRecords polling: 2 MB/s shared across all consumers per shard, up to 5 reads/second. Enhanced Fan-Out (EFO): each registered consumer gets a dedicated 2 MB/s push (SubscribeToShard), and data is pushed via HTTP/2. Allows many consumers without throughput competition.",
+    keyPoints: [
+      "EFO: registerStreamConsumer → subscribe-to-shard → HTTP/2 push",
+      "Lambda with EFO: enable 'Enhanced fan-out' in event source mapping",
+      "EFO has additional cost per consumer-shard-hour",
+      "Standard polling: all consumers share 2 MB/s; EFO: 2 MB/s each",
+    ],
+    tags: ["kinesis", "enhanced-fan-out", "consumers", "throughput"],
+  },
+  {
+    id: "fc-kinesis-adv-002",
+    service: "Amazon Kinesis",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "How does Kinesis partition key affect shard distribution and hot shards?",
+    answer:
+      "Partition key is hashed to assign records to shards. All records with the same partition key always go to the same shard (ordered). High-cardinality partition keys distribute load evenly. Low-cardinality or a single key causes hot shards (one shard overloaded). Fix: use UUID or composite keys.",
+    keyPoints: [
+      "Hot shard: one shard receiving most/all traffic — throughput bottleneck",
+      "Solution: randomize or increase cardinality of partition key",
+      "Shard splitting increases capacity; merging decreases (with data retention)",
+      "Each shard: 1,000 records/s or 1 MB/s write; 2 MB/s read",
+    ],
+    tags: ["kinesis", "partition-key", "hot-shard", "sharding"],
+  },
+
+  // ─── SNS ADVANCED ───────────────────────────────────────────────────────────
+  {
+    id: "fc-sns-001",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is SNS message filtering and how does it reduce downstream processing?",
+    answer:
+      "Subscription filter policies (JSON) match message attributes. Only messages matching the filter are delivered to that subscription. Allows one topic to fan out to multiple subscribers, each receiving only relevant messages, without filtering logic in each subscriber.",
+    keyPoints: [
+      "Filter policy on subscription, not on the topic",
+      "Match on string (exact, prefix, suffix), number (range, =), array contains",
+      "Up to 5 filter policy attributes per subscription",
+      "Messages without matching attributes not delivered to that subscription",
+    ],
+    tags: ["sns", "message-filtering", "subscription", "fan-out"],
+  },
+  {
+    id: "fc-sns-002",
+    service: "Amazon SNS",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is SNS FIFO and how does it differ from standard SNS?",
+    answer:
+      "SNS FIFO preserves message ordering per message group and delivers exactly-once (deduplication via content hash or explicit deduplication ID). Only SQS FIFO can subscribe to SNS FIFO. Standard SNS: best-effort ordering, at-least-once, up to 12.5M messages/sec. FIFO: 300 messages/sec (3,000 with batching).",
+    keyPoints: [
+      "FIFO SNS requires FIFO SQS as subscriber",
+      "MessageGroupId controls ordering within a group",
+      "MessageDeduplicationId prevents duplicate processing (5-min window)",
+      "Much lower throughput — only use when ordering/deduplication required",
+    ],
+    tags: ["sns", "fifo", "ordering", "exactly-once"],
+  },
+
+  // ─── EVENTBRIDGE ────────────────────────────────────────────────────────────
+  {
+    id: "fc-eb-001",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "medium",
+    question: "What is EventBridge Pipes and how does it differ from rules?",
+    answer:
+      "Pipes connect a source (SQS, Kinesis, DynamoDB Streams) to a target with optional filtering and enrichment (Lambda, Step Functions) in a point-to-point pattern. Rules match events on the bus and fan out to multiple targets. Pipes are for one-to-one transformations; rules for one-to-many routing.",
+    keyPoints: [
+      "Pipes: source → filter → enrich → target (linear pipeline)",
+      "Rules: event pattern matches → up to 5 targets per rule",
+      "Pipes handle batching and windowing natively",
+      "Use Pipes to reduce boilerplate polling/enrichment Lambda code",
+    ],
+    tags: ["eventbridge", "pipes", "rules", "event-driven"],
+  },
+  {
+    id: "fc-eb-002",
+    service: "Amazon EventBridge",
+    domain: "development",
+    difficulty: "hard",
+    question: "How do EventBridge Schema Registry and schema discovery work?",
+    answer:
+      "Schema discovery automatically detects and registers event schemas from events on a bus. The Schema Registry stores these schemas as OpenAPI or JSONSchema. Code bindings (SDK generation) create type-safe event classes in Java, Python, TypeScript. Enables IDEs to autocomplete event fields.",
+    keyPoints: [
+      "Enable discovery on any event bus; 50-event/second limit",
+      "AWS event schema registry: pre-built schemas for all AWS service events",
+      "Custom schemas: version-controlled, searchable",
+      "Download code bindings from registry for type-safe event handling",
+    ],
+    tags: [
+      "eventbridge",
+      "schema-registry",
+      "schema-discovery",
+      "code-bindings",
+    ],
+  },
+
+  // ─── CLOUDWATCH ADVANCED ────────────────────────────────────────────────────
+  {
+    id: "fc-cw-adv-001",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "medium",
+    question: "What is a CloudWatch Composite Alarm?",
+    answer:
+      "A Composite Alarm combines multiple alarms using AND/OR/NOT logic into a single ALARM/OK state. Useful for reducing alarm noise: only alert if CPU is high AND error rate is high. Does not re-evaluate metric data — only combines existing alarm states.",
+    keyPoints: [
+      "Reduces notification noise (avoid false positives)",
+      "References other alarms (including other composite alarms)",
+      "Only supports ALARM/OK; no INSUFFICIENT_DATA state propagation",
+      "Can trigger SNS, SSM Incident Manager on state change",
+    ],
+    tags: ["cloudwatch", "composite-alarm", "alarm", "monitoring"],
+  },
+  {
+    id: "fc-cw-adv-002",
+    service: "Amazon CloudWatch",
+    domain: "troubleshooting",
+    difficulty: "hard",
+    question: "How do CloudWatch Metric Streams differ from GetMetricData?",
+    answer:
+      "GetMetricData: pull-based API, up to 10s lag, 500 metrics/request, billed per API call. Metric Streams: push-based continuous streaming to Kinesis Firehose (then S3, Redshift, third-party), sub-minute latency, higher volume at lower cost. Use Streams for real-time analytics or external observability platforms.",
+    keyPoints: [
+      "Metric Streams use Kinesis Firehose as intermediary",
+      "Output format: JSON or OpenTelemetry 0.7",
+      "Filter by namespace or metric name to reduce cost",
+      "Ideal for: Datadog, Splunk, Grafana integration without polling",
+    ],
+    tags: ["cloudwatch", "metric-streams", "kinesis-firehose", "observability"],
+  },
+
+  // ─── ADVANCED MESSAGING ─────────────────────────────────────────────────────
+  {
+    id: "fc-sqs-adv-001",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "hard",
+    question:
+      "How does SQS FIFO exactly-once processing work with deduplication?",
+    answer:
+      "FIFO queues deduplicate using MessageDeduplicationId (explicit or content-based SHA-256 hash). If you send duplicate message IDs within 5 minutes, the second is silently dropped. MessageGroupId governs ordering — messages in same group delivered in order, one at a time. Different groups processed in parallel.",
+    keyPoints: [
+      "Content-based deduplication: SHA-256 of message body (enable on queue)",
+      "Explicit deduplication ID takes precedence over content-based",
+      "5-minute deduplication window",
+      "MessageGroupId=same: strict ordering; different groups: parallelism",
+    ],
+    tags: ["sqs", "fifo", "deduplication", "exactly-once", "ordering"],
+  },
+  {
+    id: "fc-sqs-adv-002",
+    service: "Amazon SQS",
+    domain: "development",
+    difficulty: "medium",
+    question:
+      "What is SQS long polling and how does it differ from short polling?",
+    answer:
+      "Short polling: SQS queries a subset of servers immediately; may return empty even if messages exist. Long polling: ReceiveMessage with WaitTimeSeconds (1–20s) waits for a message to arrive before responding. Long polling reduces empty responses, lowers cost, and decreases latency for sparse queues.",
+    keyPoints: [
+      "Set WaitTimeSeconds > 0 to enable long polling",
+      "Can also configure ReceiveMessageWaitTimeSeconds at queue level",
+      "Max wait: 20 seconds",
+      "Short polling queries partial server subset — can miss messages",
+    ],
+    tags: ["sqs", "long-polling", "short-polling", "cost-optimization"],
+  },
+
+  // ─── ADVANCED RDS / AURORA ──────────────────────────────────────────────────
+  {
+    id: "fc-rds-adv-001",
+    service: "Amazon RDS",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is RDS Proxy and when should you use it?",
+    answer:
+      "RDS Proxy is a fully managed database proxy that pools and shares database connections. It reduces connection overhead for serverless applications (Lambda) that open many short-lived connections. Automatic failover: Proxy routes to new primary in <30 seconds without app changes. Also supports IAM authentication for RDS.",
+    keyPoints: [
+      "Lambda + RDS without Proxy: connection pool exhaustion under load",
+      "Proxy maintains persistent connections to RDS; multiplexes application connections",
+      "Failover: Proxy handles failover transparently; apps reconnect to Proxy endpoint",
+      "Supports IAM auth token for temporary credentials (no password in code)",
+    ],
+    tags: ["rds", "rds-proxy", "lambda", "connection-pooling", "failover"],
+  },
+
+  // ─── ADVANCED S3 ────────────────────────────────────────────────────────────
+  {
+    id: "fc-s3-adv-001",
+    service: "Amazon S3",
+    domain: "development",
+    difficulty: "hard",
+    question: "What is S3 Object Lambda and what problem does it solve?",
+    answer:
+      "S3 Object Lambda intercepts GetObject requests, invokes your Lambda to transform the data, and returns the transformed result to the caller. Solves: returning personalized data, redacting PII, converting formats (CSV→JSON), watermarking, all without storing multiple copies or modifying the app.",
+    keyPoints: [
+      "Requires an S3 Access Point and an Object Lambda Access Point",
+      "Lambda receives presigned URL to fetch original object",
+      "Caller uses Object Lambda Access Point ARN/URL, not bucket URL",
+      "Only for GetObject; HeadObject gets unmodified metadata",
+    ],
+    tags: ["s3", "object-lambda", "data-transformation", "access-point"],
+  },
+  {
+    id: "fc-s3-adv-002",
+    service: "Amazon S3",
+    domain: "development",
+    difficulty: "medium",
+    question: "How does S3 Transfer Acceleration work?",
+    answer:
+      "Transfer Acceleration routes uploads through CloudFront edge locations over the AWS backbone network to the bucket. Useful for uploads from geographically distant clients. Uses a distinct endpoint: bucket.s3-accelerate.amazonaws.com. Additional per-GB cost; only beneficial when uploads are >500 MB or cross-continent.",
+    keyPoints: [
+      "Uses CloudFront edge network — not CDN caching, just fast path",
+      "Must be enabled per bucket",
+      "Only for uploads (PutObject, multipart upload)",
+      "Compare speed with S3 Transfer Acceleration Speed Comparison tool",
+    ],
+    tags: ["s3", "transfer-acceleration", "cloudfront", "performance"],
+  },
+
+  // ─── ADVANCED ECR / ECS ─────────────────────────────────────────────────────
+  {
+    id: "fc-ecs-adv-001",
+    service: "Amazon ECS",
+    domain: "deployment",
+    difficulty: "hard",
+    question:
+      "How does ECS rolling update deployment work and what controls it?",
+    answer:
+      "Rolling update replaces old task set with new one gradually. Controlled by minimumHealthyPercent (floor on running tasks) and maximumPercent (ceiling — allows N% over desired count). ECS drains old tasks from load balancer, starts new, waits for health check. Rollback: update service to previous task definition.",
+    keyPoints: [
+      "minimumHealthyPercent: 0 = all tasks replaced at once (fast, risky)",
+      "maximumPercent: 200 = can run 2x desired while rolling",
+      "Load balancer health check determines when old task draining completes",
+      "ECS Blue/Green: CodeDeploy manages traffic shift between task sets",
+    ],
+    tags: ["ecs", "rolling-update", "deployment", "minimum-healthy-percent"],
+  },
 ];
