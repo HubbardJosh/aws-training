@@ -1212,9 +1212,9 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "ConditionExpression with attribute_not_exists(pk) on PutItem causes the operation to fail with ConditionalCheckFailedException if an item with that partition key already exists. This is an atomic check-and-write — no race condition. FilterExpression is only for Query and Scan — not PutItem. TransactGetItems + PutItem would require two operations with potential race conditions. BatchWriteItem does not check for existing items — it overwrites.",
     optionExplanations: [
-      "Incorrect. ConditionExpression with attribute_not_exists(pk) on a PutItem call makes the operation fail atomically with ConditionalCheckFailedException if an item with that partition key already exists — preventing overwrites without a separate read.",
-      "Correct. FilterExpression is used only with Query and Scan operations to filter results after items are retrieved — it cannot be used with PutItem to conditionally prevent writes.",
       "Incorrect. TransactGetItems retrieves items for reading; combining it with PutItem in separate calls creates a time-of-check to time-of-use (TOCTOU) race condition — the ConditionExpression approach is the atomic alternative.",
+      "Correct. ConditionExpression with attribute_not_exists(pk) on a PutItem call makes the operation fail atomically with ConditionalCheckFailedException if an item with that partition key already exists — preventing overwrites without a separate read.",
+      "Incorrect. FilterExpression is used only with Query and Scan operations to filter results after items are retrieved — it cannot be used with PutItem to conditionally prevent writes.",
       "Incorrect. BatchWriteItem does not check for existing items before writing — it unconditionally overwrites any existing item with the same primary key, which is the opposite of the desired behavior.",
     ],
     tags: ["dynamodb", "conditional-write", "putitem", "attribute-not-exists"],
@@ -1231,10 +1231,10 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       "DynamoDB has a maximum item size of 400 KB, including attribute names and values. For items larger than 400 KB, store the large data in S3 and store the S3 object key in DynamoDB. This is a common pattern for documents, images, or large JSON payloads.",
     optionExplanations: [
-      "Incorrect. DynamoDB enforces a maximum item size of 400 KB, including all attribute names and their values. Items exceeding this limit must be redesigned — typically by storing large payloads in S3 and keeping only the S3 object reference in DynamoDB.",
-      "Incorrect. 1 MB exceeds the DynamoDB item size limit — attempts to write items larger than 400 KB will fail with a ValidationException.",
-      "Correct. 64 KB is well below the actual 400 KB limit — items can be up to 400 KB in total size.",
-      "Incorrect. 16 MB is the maximum document size for MongoDB — DynamoDB's limit is 400 KB, which is far smaller.",
+      "Incorrect. 1 MB exceeds the DynamoDB item size limit — attempts to write items larger than 400 KB will fail with a ValidationException. The correct maximum is 400 KB.",
+      "Incorrect. 16 MB is the maximum document size for MongoDB — DynamoDB's item size limit is 400 KB, which is far smaller.",
+      "Correct. DynamoDB enforces a maximum item size of 400 KB, including all attribute names and their values. Items exceeding this limit must be redesigned — typically by storing large payloads in S3 and keeping only the S3 object reference in DynamoDB.",
+      "Incorrect. 64 KB is well below the actual 400 KB limit — items can be up to 400 KB in total size, so this value is not the maximum.",
     ],
     tags: ["dynamodb", "limits", "item-size"],
   },
