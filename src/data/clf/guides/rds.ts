@@ -13,7 +13,7 @@ export const rdsGuide: ServiceGuide = {
       heading: "What Is Amazon RDS?",
       body: `Amazon RDS is a **managed database service** that handles the undifferentiated heavy lifting of running a relational database: provisioning hardware, installing database software, taking backups, applying patches, and monitoring health. You choose a database engine and instance size, and RDS handles the rest.
 
-RDS supports six popular database engines: **Amazon Aurora** (MySQL- and PostgreSQL-compatible, AWS-built), **MySQL**, **PostgreSQL**, **MariaDB**, **Oracle Database**, and **Microsoft SQL Server**. For the Cloud Practitioner exam, knowing these engines exist is sufficient — you do not need to know their internal differences deeply.
+RDS supports seven popular database engines: **Amazon Aurora** (MySQL- and PostgreSQL-compatible, AWS-built), **MySQL**, **PostgreSQL**, **MariaDB**, **Oracle Database**, **Microsoft SQL Server**, and **IBM Db2**. For the Cloud Practitioner exam, knowing these engines exist is sufficient — you do not need to know their internal differences deeply.
 
 The key benefit of RDS over running your own database on EC2 is that AWS manages the operational burden. You still control the schema, queries, and application logic, but AWS handles the infrastructure layer.`,
       quiz: [
@@ -23,7 +23,7 @@ The key benefit of RDS over running your own database on EC2 is that AWS manages
           options: ["MongoDB", "Redis", "PostgreSQL", "Cassandra"],
           correctIndex: 2,
           explanation:
-            "Amazon RDS supports six engines: Amazon Aurora, MySQL, PostgreSQL, MariaDB, Oracle Database, and Microsoft SQL Server. MongoDB, Redis, and Cassandra are NoSQL databases not supported by RDS (though AWS offers other services for those, like DocumentDB and ElastiCache).",
+            "Amazon RDS supports seven engines: Amazon Aurora, MySQL, PostgreSQL, MariaDB, Oracle Database, Microsoft SQL Server, and IBM Db2. MongoDB, Redis, and Cassandra are NoSQL databases not supported by RDS (though AWS offers other services for those, like DocumentDB and ElastiCache).",
         },
         {
           question:
@@ -253,7 +253,7 @@ For the Cloud Practitioner exam, remember that Aurora is AWS's premium managed r
 
   keyFacts: [
     "RDS is a managed relational database service — AWS handles patching, backups, and hardware",
-    "Supported engines: Aurora, MySQL, PostgreSQL, MariaDB, Oracle, SQL Server",
+    "Supported engines: Aurora, MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, IBM Db2",
     "Multi-AZ creates a synchronous standby in another AZ for high availability and automatic failover",
     "Multi-AZ is for availability, NOT read scaling — standby does not serve reads",
     "Read Replicas use asynchronous replication and serve read-only traffic",

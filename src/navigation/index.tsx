@@ -19,6 +19,7 @@ import ProgressScreen from "../screens/ProgressScreen";
 import GuideListScreen from "../screens/GuideListScreen";
 import GuideDetailScreen from "../screens/GuideDetailScreen";
 import MissedQuestionsScreen from "../screens/MissedQuestionsScreen";
+import SourcesScreen from "../screens/SourcesScreen";
 
 export type RootStackParamList = {
   CertSelect: undefined;
@@ -28,6 +29,7 @@ export type RootStackParamList = {
   QuizResult: { sessionId: string };
   GuideDetail: { id: string };
   MissedQuestions: { source: "guide" | "quiz" };
+  Sources: undefined;
 };
 
 export type TabParamList = {
@@ -117,6 +119,7 @@ function RootNavigator() {
       <Stack.Screen name="QuizResult" component={QuizResultScreen} />
       <Stack.Screen name="GuideDetail" component={GuideDetailScreen} />
       <Stack.Screen name="MissedQuestions" component={MissedQuestionsScreen} />
+      <Stack.Screen name="Sources" component={SourcesScreen} />
     </Stack.Navigator>
   );
 }

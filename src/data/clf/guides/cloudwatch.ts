@@ -116,7 +116,7 @@ Common alarm patterns include: CPU exceeding 90% for 5 consecutive minutes trigg
       heading: "CloudWatch Logs",
       body: `**CloudWatch Logs** is a service for collecting, storing, monitoring, and analyzing log data from your applications and infrastructure. It centralizes logs from all your AWS resources into one place.
 
-Logs are organized into **Log Groups** (typically one per application or service) and **Log Streams** (typically one per resource instance, like one stream per EC2 instance). Log data is retained for a configurable period from 1 day to 10 years.
+Logs are organized into **Log Groups** (typically one per application or service) and **Log Streams** (typically one per resource instance, like one stream per EC2 instance). Log data is retained for a configurable period from 1 day to 10 years, or set to never expire.
 
 The **CloudWatch Logs Agent** and **CloudWatch Unified Agent** run on EC2 instances to ship logs (application logs, system logs) to CloudWatch. Lambda automatically writes to CloudWatch Logs without any configuration.
 
@@ -275,7 +275,7 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
     "EC2 does NOT report memory usage by default — requires CloudWatch Agent",
     "Alarms monitor metrics and trigger actions: SNS, EC2 actions, Auto Scaling",
     "Alarms have three states: OK, ALARM, INSUFFICIENT_DATA",
-    "CloudWatch Logs centralizes logs with configurable 1-day to 10-year retention",
+    "CloudWatch Logs centralizes logs with configurable retention: 1 day to 10 years, or indefinitely (Never Expire)",
     "Log Insights enables SQL-like queries across log groups",
     "Metric Filters extract metrics from log data (e.g., count ERROR log lines)",
     "Dashboards provide multi-metric, cross-region visibility in one view",
@@ -342,16 +342,16 @@ For the Cloud Practitioner exam, the key CloudWatch concepts are: metrics for pe
     },
     {
       question:
-        "What is the maximum retention period for logs stored in Amazon CloudWatch Logs?",
+        "What is the configurable retention range for logs stored in Amazon CloudWatch Logs?",
       options: [
-        "Indefinitely (never expires)",
-        "30 days",
-        "1 year",
-        "10 years",
+        "1 day to 30 days",
+        "1 day to 1 year",
+        "1 day to 10 years (or indefinitely with no expiration policy set)",
+        "Always indefinite — CloudWatch Logs never deletes data",
       ],
-      correctIndex: 3,
+      correctIndex: 2,
       explanation:
-        "CloudWatch Logs supports configurable retention periods from 1 day to 10 years. You set the retention policy on each Log Group. Without a retention policy, logs are kept indefinitely but you pay for ongoing storage.",
+        "CloudWatch Logs retention can be configured from 1 day up to 10 years, or set to 'Never Expire' (indefinite). You set the retention policy on each Log Group. Without any retention policy, logs are kept indefinitely and you pay for ongoing storage.",
     },
     {
       question:

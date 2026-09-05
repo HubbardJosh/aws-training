@@ -253,7 +253,7 @@ For the Cloud Practitioner exam, the key concepts are: Regions are geographic ar
   ],
 
   keyFacts: [
-    "AWS has 30+ regions globally, each a separate geographic area with independent infrastructure",
+    "AWS has 36+ regions globally, each a separate geographic area with independent infrastructure",
     "Each region has multiple Availability Zones (typically 3), each physically separate data centers",
     "AZs are connected by high-speed private fiber within a region",
     "Spreading across multiple AZs is the baseline for high availability",

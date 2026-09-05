@@ -355,12 +355,12 @@ export const quizQuestions: QuizQuestion[] = [
     options: [
       "MongoDB and Cassandra",
       "Only Amazon Aurora",
-      "MySQL, PostgreSQL, Oracle, SQL Server, and MariaDB",
+      "MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Amazon Aurora, and IBM Db2",
       "MySQL and DynamoDB only",
     ],
     correctIndices: [2],
     explanation:
-      "Amazon RDS supports multiple database engines: MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server, Amazon Aurora, and IBM Db2. DynamoDB is a separate NoSQL service. MongoDB and Cassandra are not supported by RDS (though DocumentDB is compatible with MongoDB).",
+      "Amazon RDS supports seven database engines: MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server, Amazon Aurora, and IBM Db2. DynamoDB is a separate NoSQL service. MongoDB and Cassandra are not supported by RDS (though DocumentDB is compatible with MongoDB).",
     tags: ["rds", "database-engines", "managed"],
   },
   {

@@ -296,6 +296,21 @@ export default function HomeScreen() {
           </View>
         ))}
 
+        {/* Sources link */}
+        <TouchableOpacity
+          style={styles.sourcesBtn}
+          onPress={() => navigation.navigate("Sources")}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="document-text-outline"
+            size={15}
+            color={colors.textMuted}
+          />
+          <Text style={styles.sourcesBtnText}>View sources & references</Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+        </TouchableOpacity>
+
         <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
@@ -530,6 +545,19 @@ function makeStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       color: colors.textSecondary,
       lineHeight: 20,
+    },
+
+    sourcesBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      justifyContent: "center",
+      paddingVertical: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    sourcesBtnText: {
+      fontSize: fontSize.sm,
+      color: colors.textMuted,
     },
   });
 }

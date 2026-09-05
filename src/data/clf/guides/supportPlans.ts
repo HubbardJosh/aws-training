@@ -6,7 +6,7 @@ export const supportPlansGuide: ServiceGuide = {
   domain: "troubleshooting",
   tagline: "Choose the right level of AWS support for your needs",
   intro:
-    "AWS offers four support plans — Basic, Developer, Business, and Enterprise — each providing progressively broader access to technical support, Trusted Advisor checks, and proactive guidance to help you run workloads successfully on AWS.",
+    "AWS offers five support plans — Basic, Developer, Business, Enterprise On-Ramp, and Enterprise — each providing progressively broader access to technical support, Trusted Advisor checks, and proactive guidance to help you run workloads successfully on AWS.",
 
   sections: [
     {
@@ -15,7 +15,7 @@ export const supportPlansGuide: ServiceGuide = {
 
 All AWS accounts include **Basic Support** automatically at no cost. As your AWS usage matures and your workloads become more critical, upgrading to a paid plan provides access to faster response times, more Trusted Advisor checks, and dedicated technical account management.
 
-The four plans are: **Basic** (free), **Developer** (monthly fee, starting ~$29/month or 3% of monthly usage), **Business** (monthly fee, starting ~$100/month or 10% of usage), and **Enterprise** (monthly fee, starting $15,000/month or a percentage of usage). For the Cloud Practitioner exam, you need to know the key features and differentiators of each plan.`,
+The five plans are: **Basic** (free), **Developer** (monthly fee, starting ~$29/month or 3% of monthly usage), **Business** (monthly fee, starting ~$100/month or 10% of usage), **Enterprise On-Ramp** (monthly fee, starting ~$5,500/month or 10% of usage), and **Enterprise** (monthly fee, starting $15,000/month or a percentage of usage). For the Cloud Practitioner exam, you need to know the key features and differentiators of each plan.`,
       quiz: [
         {
           question:
@@ -23,12 +23,12 @@ The four plans are: **Basic** (free), **Developer** (monthly fee, starting ~$29/
           options: [
             "Three tiers; Developer is included free",
             "Four tiers; Basic Support is included free with every AWS account",
-            "Five tiers; Starter Support is included free",
+            "Five tiers; Basic Support is included free with every AWS account",
             "Four tiers; Developer Support is free for the first 12 months",
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation:
-            "AWS offers four support plan tiers: Basic, Developer, Business, and Enterprise. Basic Support is included free with every AWS account and provides documentation, community forums, and seven core Trusted Advisor checks.",
+            "AWS offers five support plan tiers: Basic, Developer, Business, Enterprise On-Ramp, and Enterprise. Basic Support is included free with every AWS account and provides documentation, community forums, and seven core Trusted Advisor checks.",
         },
       ],
     },
@@ -72,7 +72,7 @@ Basic Support does not include access to **AWS technical support engineers** for
     },
     {
       heading: "Developer and Business Support",
-      body: `**Developer Support** is intended for development and testing environments. It adds the ability to open **technical support cases** via email, with response times of **12 business hours** for general guidance and **24 business hours** for system impairment. One person in your account can contact support.
+      body: `**Developer Support** is intended for development and testing environments. It adds the ability to open **technical support cases** via email, with response times of **24 business hours** for general guidance and **12 business hours** for system impairment. One person in your account can contact support.
 
 **Business Support** is AWS's recommended plan for production workloads. It adds:
 - **24/7 phone, email, and chat access** to Cloud Support Engineers
@@ -203,9 +203,9 @@ Only **Business and Enterprise Support** provide access to all Trusted Advisor c
   ],
 
   keyFacts: [
-    "Four support tiers: Basic (free), Developer, Business, Enterprise",
+    "Five support tiers: Basic (free), Developer, Business, Enterprise On-Ramp, Enterprise",
     "Basic: documentation, community forums, 7 core Trusted Advisor checks, no technical support cases",
-    "Developer: email support, 12–24 business hour response, 1 contact",
+    "Developer: email support, 24 business hours for general guidance, 12 business hours for system impairment, 1 contact",
     "Business: 24/7 phone/email/chat, 1-hour response for production down, full Trusted Advisor",
     "Enterprise: 15-minute response for critical, dedicated Technical Account Manager (TAM)",
     "Enterprise On-Ramp: between Business and Enterprise, 30-minute critical response, pool of TAMs",
