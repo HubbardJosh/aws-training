@@ -537,6 +537,51 @@ export const SOURCES: CertSources[] = [
         ],
       },
       {
+        title: "Amazon Personalize – Developer Guide",
+        url: "https://docs.aws.amazon.com/personalize/latest/dg/what-is-personalize.html",
+        topics: [
+          "Recipes and recommendation algorithms",
+          "Interaction data and cold-start handling",
+          "Real-time and batch recommendations",
+        ],
+      },
+      {
+        title: "Amazon Translate – Developer Guide",
+        url: "https://docs.aws.amazon.com/translate/latest/dg/what-is.html",
+        topics: [
+          "Neural machine translation (NMT)",
+          "Custom Terminology for brand names",
+          "Real-time vs. batch translation",
+        ],
+      },
+      {
+        title: "Amazon Textract – Developer Guide",
+        url: "https://docs.aws.amazon.com/textract/latest/dg/what-is.html",
+        topics: [
+          "Form and table extraction",
+          "Queries API for targeted field extraction",
+          "Async jobs with S3 and SNS",
+        ],
+      },
+      {
+        title: "Amazon Forecast – Developer Guide",
+        url: "https://docs.aws.amazon.com/forecast/latest/dg/what-is-forecast.html",
+        topics: [
+          "Time-series forecasting and DeepAR+ algorithm",
+          "Related time series and item metadata",
+          "AWS Weather Index integration",
+        ],
+      },
+      {
+        title: "AWS Panorama – Developer Guide",
+        url: "https://docs.aws.amazon.com/panorama/latest/dev/panorama-welcome.html",
+        topics: [
+          "Edge computer vision on existing camera networks",
+          "Panorama appliance and SDK",
+          "Deploying models from SageMaker to the edge",
+        ],
+      },
+      {
         title: "AWS Trainium and Inferentia – Overview",
         url: "https://aws.amazon.com/machine-learning/trainium/",
         topics: [
